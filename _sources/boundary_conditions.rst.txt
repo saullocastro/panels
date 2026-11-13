@@ -66,20 +66,28 @@ removed for `u(z)` to vanish at every `z`; the rotation at the reference
 surface, `\theta_x` of Eq. :eq:`tsdt-offset-theta`, is then zero for any
 offset. The meaning of the default flags is described in :class:`.Shell`.
 
-The function ``set_edge`` of the tests sets the simply supported (with the
-normal displacement free), clamped and free edges of the three plate models
-in this way:
+The three supports used to compare the theories, an edge of constant `x`
+being simply supported with the normal displacement free (S), clamped (C)
+or free (F), therefore remove, with all the other flags of the edge equal
+to ``1``:
 
-.. literalinclude:: ../../tests/tests_shell/test_fsdt_tsdt_plates.py
-    :pyobject: set_edge
+========== ================================ ==================================================== =================
+model      S                                C                                                    F
+========== ================================ ==================================================== =================
+CLPT       ``x1v``, ``x1w``                 ``x1u``, ``x1v``, ``x1w``, ``x1wr``                  none
+FSDT       ``x1v``, ``x1w``, ``x1phiy``     ``x1u``, ``x1v``, ``x1w``, ``x1phix``, ``x1phiy``    none
+TSDT       ``x1v``, ``x1w``, ``x1phiy``     ``x1u``, ``x1v``, ``x1w``, ``x1phix``, ``x1phiy``,   none
+                                            ``x1wr``
+========== ================================ ==================================================== =================
 
-and the natural frequencies of thin isotropic square plates with
-combinations of these edges agree with the reference values of Leissa
-(1973) given in the test, for the three models:
-
-.. literalinclude:: ../../tests/tests_shell/test_fsdt_tsdt_plates.py
-    :pyobject: test_frequency_thin_isotropic_plate_leissa
-
+and, on an edge of constant `y`, the same with `u` and `\phi_x` the
+tangential displacement and rotation. With them the shear deformation
+theories recover the classical plate theory for thin plates: the natural
+frequency parameters `\omega a^2 \sqrt{\rho h/D}`, `D = E h^3/(12 (1 -
+\nu^2))`, of isotropic square plates with `h/a = 0.001` and the edges SSSS,
+SCSC, SCSS, SCSF, SSSF and SFSF agree for the three models with the
+classical solutions tabulated by Leissa [leissa1973Plates]_ to their five
+significant digits.
 For these thin plates the slope `w_{,x}` of a TSDT clamped edge changes the
 frequencies by less than `1.2 \times 10^{-5}`, e.g. 28.95027 with the slope
 free and 28.95059 with ``x1wr = 0`` for the plate ``'SCSC'``, against 28.951
@@ -105,11 +113,11 @@ to the load factor (``cte=False``). They are imposed by the
 :class:`.MultiDomain` that contains the shell, also an assembly of one shell
 without connections, with ``pd_method``:
 
-- ``'null-space'``: exactly, as linear constraints eliminated together with
-  the connections, the solution being `\boldsymbol{c} = \boldsymbol{Z}\boldsymbol{c}_r + \boldsymbol{c}_{p0} +
+- ``'null-space'``, the default: exactly, as linear constraints eliminated
+  together with the connections, the solution being `\boldsymbol{c} = \boldsymbol{Z}\boldsymbol{c}_r + \boldsymbol{c}_{p0} +
   \lambda \boldsymbol{c}_{p1}`, with the reactions of :meth:`.MultiDomain.reaction_pd`
   and :meth:`.MultiDomain.reaction_resultant`, see :ref:`null_space_pd`;
-- ``'penalty'``, the default: with springs between the structure and the
+- ``'penalty'``: with springs between the structure and the
   support, whose stiffness the user adds to the stiffness matrix, e.g. with
   :func:`.fkCpd`, and whose forces enter the external force vector,
   :meth:`.MultiDomain.calc_fext`.
@@ -122,14 +130,33 @@ The in-plane displacements `u` and `v` are prescribed at the reference
 surface, `z = 0`, or at the thickness coordinate given by the keyword ``z``
 of these methods, with the same ``z`` given to the penalty kernels.
 
-The example below prescribes a uniform end shortening of a simply supported
-plate with the null-space method, and verifies that it gives the same
-critical state as the equivalent applied load:
+Displacement control and load control are equivalent when the prescribed
+displacement produces the same membrane state as the load. A plate of
+length `a` and thickness `h`, isotropic, with `u = 0` along `x = 0`, `u =
+-\delta` along `x = a`, `v = 0` at one corner and the lateral edges free
+in-plane, has the uniform membrane state
 
-.. literalinclude:: ../../tests/multidomain/test_null_space_pd.py
-    :pyobject: test_linear_buckling_plate_end_shortening_equals_load
+.. math::
+    :label: bc-end-shortening
 
-More examples are given in :ref:`ex_prescribed_displacements`.
+    u = -\delta \frac{x}{a}, \qquad v = \nu \delta \frac{y}{a}, \qquad
+    N_{xx} = -\frac{E h \delta}{a}
+
+that of the line load `N_{xx}` of :meth:`.Shell.add_distr_load_fixed_x`
+along `x = a` with `u` free there. A flat plate buckles out of plane, its
+modes having zero in-plane components, so that the critical end-shortening
+`\delta_{cr}` of :meth:`.MultiDomain.linear_buckling`, prescribed with
+``cte=False``, and the critical load of the equivalent `N_{xx}` satisfy
+Eq. :eq:`bc-end-shortening`.
+For a cylinder, whose modes couple the membrane and bending displacements,
+they differ, see :ref:`null_space_pd`. As the loads, see :ref:`loads`, the
+prescribed values are split into a constant and an incremented part,
+`\bar{\boldsymbol{d}}_0 + \lambda \bar{\boldsymbol{d}}_1`, Eq. :eq:`ns-pd`: a constant
+end-shortening `\delta_0` along one edge and an incremented one `\lambda
+\delta_1` along the other reach the critical state at `\delta_0 + \lambda
+\delta_1 = \delta_{cr}`, whereas a constant and an incremented prescription
+of the same component along the same line contradict each other, the
+constraints holding for every `\lambda`, and raise an error.
 
 
 .. _boundary_conditions_face_clamp:
@@ -137,7 +164,7 @@ More examples are given in :ref:`ex_prescribed_displacements`.
 Face-clamped edges
 ------------------
 
-In tests, an edge is clamped by restraining the displacements of the bottom
+An edge can be clamped by restraining the displacements of the bottom
 and top faces of the laminate, `z = d \mp h/2`, the section being free to
 deform in between. This face clamp, `u = v = 0` at both faces and `w = 0`,
 is prescribed with the keyword ``z`` of :meth:`.Shell.add_distr_pd_fixed_x`
@@ -166,4 +193,4 @@ which no combination of flags can express. Along the edge `w = 0` gives
 `w_{,y} = 0`, and the two faces then give `v = \phi_y = 0`. The edge is
 softer than the planar clamp and stiffer than the simple support, and,
 being defined by the physical faces, it does not depend on the reference
-surface. See the example :ref:`ex_face_clamp`.
+surface.

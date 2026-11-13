@@ -1,0 +1,4062 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970) &#8212; panels 0.16.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../_static/documentation_options.js?v=7de89ed4"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/pagano1970_plates';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)" href="varadan1991_cylinders.html" />
+    <link rel="prev" title="Stiffened panel bays" href="ex_stiffpanelbay.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.16.0" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.16.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Cross-ply-and-sandwich-plates-under-a-sinusoidal-pressure:-Pagano-(1970)">
+<h1>Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)<a class="headerlink" href="#Cross-ply-and-sandwich-plates-under-a-sinusoidal-pressure:-Pagano-(1970)" title="Link to this heading">#</a></h1>
+<ol class="upperalpha simple" start="14">
+<li><ol class="upperalpha simple" start="10">
+<li><p>Pagano, <em>Exact solutions for rectangular bidirectional composites and sandwich plates</em>, Journal of Composite Materials 4 (1970) 20-34, <a class="reference external" href="https://doi.org/10.1177/002199837000400102">https://doi.org/10.1177/002199837000400102</a>.</p></li>
+</ol>
+</li>
+</ol>
+<p>Simply supported (“pinned”) rectangular plates of orthotropic layers under the bidirectional sinusoidal pressure <span class="math notranslate nohighlight">\(q = q_0 \sin(\pi x/a) \sin(\pi y/b)\)</span> on the top face, <span class="math notranslate nohighlight">\(S = a/h\)</span> = 2, 4, 10, 20, 50 and 100:</p>
+<ul class="simple">
+<li><p>case (2), square <span class="math notranslate nohighlight">\([0/90/0]\)</span> plate with layers of equal thickness (Table 1), and case (3), the same laminate with <span class="math notranslate nohighlight">\(b = 3a\)</span> (Table 2), of the material of Eq. (38): <span class="math notranslate nohighlight">\(E_L = 25 \times 10^6\)</span>, <span class="math notranslate nohighlight">\(E_T = 10^6\)</span>, <span class="math notranslate nohighlight">\(G_{LT} = 0.5 \times 10^6\)</span>, <span class="math notranslate nohighlight">\(G_{TT} = 0.2 \times 10^6\)</span> psi, <span class="math notranslate nohighlight">\(\nu_{LT} = \nu_{TT} = 0.25\)</span>, 0 deg along <span class="math notranslate nohighlight">\(x\)</span>;</p></li>
+<li><p>the square sandwich of Table 3: faces of thickness <span class="math notranslate nohighlight">\(h/10\)</span> of the material of Eq. (38) with the fibres along <span class="math notranslate nohighlight">\(x\)</span>, and the core of Eq. (40), <span class="math notranslate nohighlight">\(E_x = E_y = 0.04 \times 10^6\)</span>, <span class="math notranslate nohighlight">\(E_z = 0.5 \times 10^6\)</span>, <span class="math notranslate nohighlight">\(G_{xz} = G_{yz} = 0.06 \times 10^6\)</span>, <span class="math notranslate nohighlight">\(G_{xy} = 0.016 \times 10^6\)</span> psi, <span class="math notranslate nohighlight">\(\nu_{xy} = \nu_{xz} = \nu_{yz} = 0.25\)</span> (Pagano’s <span class="math notranslate nohighlight">\(\nu_{zx} = \nu_{zy} = 0.25\)</span>);</p></li>
+<li><p>reference: the exact 3D elasticity solution, with the normalizations of Eq. (39), <span class="math notranslate nohighlight">\(\bar{w} = 100 E_T w(a/2, b/2, 0)/(q_0 h S^4)\)</span>, <span class="math notranslate nohighlight">\(\bar\tau_{xz} = \tau_{xz}(0, b/2, 0)/(q_0 S)\)</span>, <span class="math notranslate nohighlight">\(\bar\tau_{yz} = \tau_{yz}(a/2, 0, 0)/(q_0 S)\)</span>.</p></li>
+</ul>
+<p>Pagano’s tables give the stresses and, for case (3) only, the deflection; the deflections of the square plates are computed with the exact solution, <code class="docutils literal notranslate"><span class="pre">pagano1970.py</span></code>, which reproduces all the printed values.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%matplotlib inline
+import os
+
+import numpy as np
+import matplotlib.pyplot as plt
+from IPython.display import Markdown, display
+from composites import laminated_plate
+
+import scf_validation_utils as su
+from scf_validation_utils import pct, markdown_table
+from pagano1970 import Pagano1970, PAGANO_CORE, E_T, normalized, orthotropic_C, ply_C
+
+# True runs panels again, otherwise the results saved in RESULTS are loaded
+RERUN = True
+RESULTS = 'results'
+</pre></div>
+</div>
+</div>
+<section id="The-exact-solution">
+<h2>The exact solution<a class="headerlink" href="#The-exact-solution" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">pagano1970.py</span></code> writes Pagano’s displacement field, <span class="math notranslate nohighlight">\(u = U(z) \cos px \sin qy\)</span>, <span class="math notranslate nohighlight">\(v = V(z) \sin px \cos qy\)</span>, <span class="math notranslate nohighlight">\(w = W(z) \sin px \sin qy\)</span>, with <span class="math notranslate nohighlight">\(p = \pi/a\)</span> and <span class="math notranslate nohighlight">\(q = \pi/b\)</span>, as the first-order system <span class="math notranslate nohighlight">\(X' = A X\)</span> of the amplitudes <span class="math notranslate nohighlight">\(X = \{U, V, W, T_{xz}, T_{yz}, S_z\}\)</span> of the displacements and of the transverse stresses, integrated exactly with the matrix exponential of each layer. The continuity at the interfaces and the traction conditions of the faces are
+then satisfied exactly, also for the isotropic layers of Pagano’s Eqs. (32)-(34).</p>
+<p>The solution reproduces all the values of Tables 1-3 of the paper within one unit of the last printed digit; two values, <span class="math notranslate nohighlight">\(\bar\sigma_x\)</span> = .590 of Table 1 at <span class="math notranslate nohighlight">\(S = 10\)</span> (0.5906) and <span class="math notranslate nohighlight">\(\bar\sigma_y\)</span> = .0700 of Table 3 at <span class="math notranslate nohighlight">\(S = 20\)</span> (0.07007), differ by slightly more than half a unit, all the others rounding correctly. Normalized stresses <span class="math notranslate nohighlight">\(\bar\sigma_x = \sigma_x/(q_0 S^2)\)</span>, <span class="math notranslate nohighlight">\(\bar\sigma_y = \sigma_y/(q_0 S^2)\)</span>, <span class="math notranslate nohighlight">\(\bar\tau_{xy} = \tau_{xy}/(q_0 S^2)\)</span>, at
+<span class="math notranslate nohighlight">\(z/h\)</span> = 1/2 or 0 as indicated; the column “units” gives the largest difference in units of the last printed digit.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from decimal import Decimal
+
+
+def units(value, printed):
+    return abs(value - float(printed))/10.**Decimal(printed).as_tuple().exponent
+
+
+def three_ply(S, b_a):
+    h = 1./S
+    return Pagano1970(1., b_a, [ply_C(0), ply_C(90), ply_C(0)], [h/3]*3)
+
+
+def sandwich(S):
+    h = 1./S
+    return Pagano1970(1., 1., [ply_C(0), orthotropic_C(**PAGANO_CORE), ply_C(0)], [h/10, 0.8*h, h/10])
+
+
+tables = []
+for title, data, names in (
+        ('Table 1, square [0/90/0]', su.PAGANO_TABLE_1,
+         ['$\\bar\\sigma_x(a/2, b/2, 1/2)$', '$\\bar\\tau_{xz}(0, b/2, 0)$', '$\\bar\\tau_{yz}(a/2, 0, 0)$']),
+        ('Table 2, [0/90/0], b = 3a', su.PAGANO_TABLE_2,
+         ['$\\bar\\sigma_x(a/2, b/2, 1/2)$', '$\\bar\\tau_{xz}(0, b/2, 0)$', '$\\bar\\tau_{yz}(a/2, 0, 0)$', '$\\bar{w}(a/2, b/2, 0)$']),
+        ('Table 3, square sandwich', su.PAGANO_TABLE_3,
+         ['$\\bar\\sigma_x(a/2, b/2, 1/2)$', '$|\\bar\\sigma_y(a/2, b/2, 1/2)|$', '$\\bar\\tau_{xz}(0, b/2, 0)$',
+          '$\\bar\\tau_{yz}(a/2, 0, 0)$', '$|\\bar\\tau_{xy}(0, 0, 1/2)|$'])):
+    rows = []
+    worst = 0.
+    for S, printed in data.items():
+        if 'Table 1' in title:
+            sol = three_ply(S, 1.)
+        elif 'Table 2' in title:
+            sol = three_ply(S, 3.)
+        else:
+            sol = sandwich(S)
+        wbar, st = normalized(sol, S)
+        a, b = sol.a, sol.b
+        top, txz, tyz, corner = st(a/2, b/2, 0.5), st(0, b/2, 0), st(a/2, 0, 0), st(0, 0, 0.5)
+        if 'Table 3' in title:
+            values = [top[0], abs(top[1]), txz[2], tyz[3], abs(corner[4])]
+        else:
+            values = [top[0], txz[2], tyz[3]] + ([wbar(a/2, b/2)] if 'Table 2' in title else [])
+        u = max(units(v, p) for v, p in zip(values, printed))
+        worst = max(worst, u)
+        rows.append([S] + ['%s / %.5f' % (p, v) for p, v in zip(printed, values)] + ['%.2f' % u])
+    display(Markdown('**%s**: printed / `pagano1970.py`' % title))
+    display(Markdown(markdown_table(['$S$'] + names + ['units'], rows)))
+    tables.append(worst)
+print('largest difference to the printed values: %.2f units of the last digit' % max(tables))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>Table 1, square [0/90/0]</strong>: printed / <code class="docutils literal notranslate"><span class="pre">pagano1970.py</span></code></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(S\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\bar\sigma_x(a/2, b/2, 1/2)\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\bar\tau_{xz}(0, b/2, 0)\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\bar\tau_{yz}(a/2, 0, 0)\)</span></p></th>
+<th class="head"><p>units</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>.801 / 0.80084</p></td>
+<td><p>.256 / 0.25590</p></td>
+<td><p>.2172 / 0.21718</p></td>
+<td><p>0.19</p></td>
+</tr>
+<tr class="row-odd"><td><p>10</p></td>
+<td><p>.590 / 0.59059</p></td>
+<td><p>.357 / 0.35731</p></td>
+<td><p>.1228 / 0.12275</p></td>
+<td><p>0.59</p></td>
+</tr>
+<tr class="row-even"><td><p>20</p></td>
+<td><p>.552 / 0.55239</p></td>
+<td><p>.385 / 0.38460</p></td>
+<td><p>.0938 / 0.09377</p></td>
+<td><p>0.40</p></td>
+</tr>
+<tr class="row-odd"><td><p>50</p></td>
+<td><p>.541 / 0.54092</p></td>
+<td><p>.393 / 0.39338</p></td>
+<td><p>.0842 / 0.08424</p></td>
+<td><p>0.40</p></td>
+</tr>
+<tr class="row-even"><td><p>100</p></td>
+<td><p>.539 / 0.53926</p></td>
+<td><p>.395 / 0.39469</p></td>
+<td><p>.0828 / 0.08282</p></td>
+<td><p>0.31</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>Table 2, [0/90/0], b = 3a</strong>: printed / <code class="docutils literal notranslate"><span class="pre">pagano1970.py</span></code></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(S\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\bar\sigma_x(a/2, b/2, 1/2)\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\bar\tau_{xz}(0, b/2, 0)\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\bar\tau_{yz}(a/2, 0, 0)\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\bar{w}(a/2, b/2, 0)\)</span></p></th>
+<th class="head"><p>units</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>2.13 / 2.13308</p></td>
+<td><p>.257 / 0.25709</p></td>
+<td><p>.0668 / 0.06678</p></td>
+<td><p>8.17 / 8.16585</p></td>
+<td><p>0.41</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>1.14 / 1.14430</p></td>
+<td><p>.351 / 0.35108</p></td>
+<td><p>.0334 / 0.03336</p></td>
+<td><p>2.82 / 2.82113</p></td>
+<td><p>0.43</p></td>
+</tr>
+<tr class="row-even"><td><p>10</p></td>
+<td><p>.726 / 0.72598</p></td>
+<td><p>.420 / 0.42014</p></td>
+<td><p>.0152 / 0.01524</p></td>
+<td><p>.919 / 0.91891</p></td>
+<td><p>0.37</p></td>
+</tr>
+<tr class="row-odd"><td><p>20</p></td>
+<td><p>.650 / 0.64998</p></td>
+<td><p>.434 / 0.43441</p></td>
+<td><p>.0119 / 0.01194</p></td>
+<td><p>.610 / 0.60954</p></td>
+<td><p>0.46</p></td>
+</tr>
+<tr class="row-even"><td><p>50</p></td>
+<td><p>.628 / 0.62759</p></td>
+<td><p>.439 / 0.43869</p></td>
+<td><p>.0110 / 0.01098</p></td>
+<td><p>.520 / 0.52048</p></td>
+<td><p>0.48</p></td>
+</tr>
+<tr class="row-odd"><td><p>100</p></td>
+<td><p>.624 / 0.62435</p></td>
+<td><p>.439 / 0.43932</p></td>
+<td><p>.0108 / 0.01084</p></td>
+<td><p>.508 / 0.50766</p></td>
+<td><p>0.36</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>Table 3, square sandwich</strong>: printed / <code class="docutils literal notranslate"><span class="pre">pagano1970.py</span></code></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(S\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\bar\sigma_x(a/2, b/2, 1/2)\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(|\bar\sigma_y(a/2, b/2, 1/2)|\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\bar\tau_{xz}(0, b/2, 0)\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\bar\tau_{yz}(a/2, 0, 0)\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(|\bar\tau_{xy}(0, 0, 1/2)|\)</span></p></th>
+<th class="head"><p>units</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>3.278 / 3.27808</p></td>
+<td><p>.4517 / 0.45173</p></td>
+<td><p>.185 / 0.18480</p></td>
+<td><p>.1399 / 0.13986</p></td>
+<td><p>.2403 / 0.24028</p></td>
+<td><p>0.41</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>1.556 / 1.55585</p></td>
+<td><p>.2595 / 0.25949</p></td>
+<td><p>.239 / 0.23867</p></td>
+<td><p>.1072 / 0.10719</p></td>
+<td><p>.1437 / 0.14366</p></td>
+<td><p>0.40</p></td>
+</tr>
+<tr class="row-even"><td><p>10</p></td>
+<td><p>1.153 / 1.15312</p></td>
+<td><p>.1104 / 0.11044</p></td>
+<td><p>.300 / 0.29978</p></td>
+<td><p>.0527 / 0.05269</p></td>
+<td><p>.0707 / 0.07067</p></td>
+<td><p>0.42</p></td>
+</tr>
+<tr class="row-odd"><td><p>20</p></td>
+<td><p>1.110 / 1.10977</p></td>
+<td><p>.0700 / 0.07007</p></td>
+<td><p>.317 / 0.31736</p></td>
+<td><p>.0361 / 0.03607</p></td>
+<td><p>.0511 / 0.05101</p></td>
+<td><p>0.93</p></td>
+</tr>
+<tr class="row-even"><td><p>50</p></td>
+<td><p>1.099 / 1.09898</p></td>
+<td><p>.0569 / 0.05692</p></td>
+<td><p>.323 / 0.32313</p></td>
+<td><p>.0306 / 0.03057</p></td>
+<td><p>.0446 / 0.04461</p></td>
+<td><p>0.34</p></td>
+</tr>
+<tr class="row-odd"><td><p>100</p></td>
+<td><p>1.098 / 1.09750</p></td>
+<td><p>.0550 / 0.05496</p></td>
+<td><p>.324 / 0.32400</p></td>
+<td><p>.0297 / 0.02974</p></td>
+<td><p>.0437 / 0.04366</p></td>
+<td><p>0.50</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+largest difference to the printed values: 0.93 units of the last digit
+</pre></div></div>
+</div>
+</section>
+<section id="panels-model">
+<h2>panels model<a class="headerlink" href="#panels-model" title="Link to this heading">#</a></h2>
+<p>The plates are modelled by <code class="docutils literal notranslate"><span class="pre">su.make_shell</span></code>, a <code class="docutils literal notranslate"><span class="pre">panels.shell.Shell</span></code> with the Donnell plate models <code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, <code class="docutils literal notranslate"><span class="pre">plate_fsdt_donnell</span></code> and <code class="docutils literal notranslate"><span class="pre">plate_tsdt_donnell</span></code>, <span class="math notranslate nohighlight">\(14 \times 14\)</span> terms, and the hard simple support (SS-1) on the four edges, <code class="docutils literal notranslate"><span class="pre">bcs='SSSS'</span></code>: <span class="math notranslate nohighlight">\(w = 0\)</span> and the tangential displacement and rotation zero, the normal displacement free, which are Pagano’s edge conditions <span class="math notranslate nohighlight">\(\sigma_x = v = w = 0\)</span> at <span class="math notranslate nohighlight">\(x = 0, a\)</span> and <span class="math notranslate nohighlight">\(\sigma_y = u = w = 0\)</span> at
+<span class="math notranslate nohighlight">\(y = 0, b\)</span>. The load is the sinusoidal pressure, a callable passed to <code class="docutils literal notranslate"><span class="pre">Shell.add_pressure_load</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">s</span><span class="o">.</span><span class="n">add_pressure_load</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">q0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="o">/</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">y</span><span class="o">/</span><span class="n">b</span><span class="p">))</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">solve</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">(),</span> <span class="n">s</span><span class="o">.</span><span class="n">calc_fext</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>The equivalent single-layer models apply the load at the mid-surface. They are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">CLPT</span></code>: classical laminated plate theory;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FSDT-&lt;ID&gt;</span></code>: first-order theory with the transverse shear stiffness given by <code class="docutils literal notranslate"><span class="pre">Shell.fsdt_shear_correction</span></code>: <code class="docutils literal notranslate"><span class="pre">K1</span></code>, <span class="math notranslate nohighlight">\(\kappa = 1\)</span> (<code class="docutils literal notranslate"><span class="pre">None</span></code>); <code class="docutils literal notranslate"><span class="pre">K56</span></code>, <span class="math notranslate nohighlight">\(\kappa = 5/6\)</span> (the float <code class="docutils literal notranslate"><span class="pre">5/6</span></code> multiplying <span class="math notranslate nohighlight">\(\bar{A}_{ts}\)</span>); <code class="docutils literal notranslate"><span class="pre">VLA</span></code>, <code class="docutils literal notranslate"><span class="pre">'vlachoutsis'</span></code>; <code class="docutils literal notranslate"><span class="pre">ROH</span></code>, <code class="docutils literal notranslate"><span class="pre">'rohwer'</span></code>, the default of panels; <code class="docutils literal notranslate"><span class="pre">BB</span></code>, <code class="docutils literal notranslate"><span class="pre">'birman_bert'</span></code>; <code class="docutils literal notranslate"><span class="pre">TSF</span></code>, <code class="docutils literal notranslate"><span class="pre">'thickness_shear'</span></code>, the factors that reproduce the first thickness-shear frequencies, which need the densities of the plies: <span class="math notranslate nohighlight">\(\rho = 1\)</span> for the
+<span class="math notranslate nohighlight">\([0/90/0]\)</span> plates and <span class="math notranslate nohighlight">\(\rho_f/\rho_c = 1600/80\)</span> for the sandwich, a typical ratio, since Pagano gives none;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TSDT</span></code>: third-order theory of Reddy, without shear correction.</p></li>
+</ul>
+<p>The transverse shear stresses of the FSDT are recovered from its shear forces with the equilibrium distribution of Rohwer (1988), <code class="docutils literal notranslate"><span class="pre">Laminate.calc_transverse_shear_stress(z,</span> <span class="pre">Qy,</span> <span class="pre">Qx)</span></code> of <code class="docutils literal notranslate"><span class="pre">composites</span></code>, at the points of Pagano’s tables, <span class="math notranslate nohighlight">\(\tau_{xz}(0, b/2, 0)\)</span> and <span class="math notranslate nohighlight">\(\tau_{yz}(a/2, 0, 0)\)</span>, with the shear forces <code class="docutils literal notranslate"><span class="pre">Qx</span></code>, <code class="docutils literal notranslate"><span class="pre">Qy</span></code> of <code class="docutils literal notranslate"><span class="pre">Shell.stress</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>PLY = (25e6, 1e6, 0.25, 0.5e6, 0.5e6, 0.2e6)  # Eq. (38), (E11, E22, nu12, G12, G13, G23), psi
+CORE = tuple(PAGANO_CORE[k] for k in ('E1', 'E2', 'nu12', 'G12', 'G13', 'G23'))  # Eq. (40)
+SLENDERNESS = [2, 4, 10, 20, 50, 100]
+SCFS = ['K1', 'K56', 'VLA', 'ROH', 'BB', 'TSF']
+CASES = {'square': 1., 'b = 3a': 3., 'sandwich': 1.}  # case: b/a
+M = 14
+Q0 = 1.
+
+
+def laminate(case, h):
+    r'''(stack, plyts, laminaprops, rhos) of panels and the 3D stiffnesses of the layers, bottom to top'''
+    if case == 'sandwich':
+        return ([0, 0, 0], [h/10, 0.8*h, h/10], [PLY, CORE, PLY], [1600., 80., 1600.],
+                [ply_C(0), orthotropic_C(**PAGANO_CORE), ply_C(0)])
+    return [0, 90, 0], [h/3]*3, [PLY]*3, [1.]*3, [ply_C(0), ply_C(90), ply_C(0)]
+
+
+def recovered_stresses(s, c, lam):
+    r'''tau_xz(0, b/2, 0) and tau_yz(a/2, 0, 0) from the FSDT shear forces, equilibrium distribution,
+    and the shear forces Qx(0, b/2) and Qy(a/2, 0)'''
+    # Shell.stress returns its fields dictionary, overwritten by the next call: copy the values at once
+    _, f = s.stress(c, xs=np.array([0.]), ys=np.array([s.b/2]))
+    Q1 = float(f['Qy'][0]), float(f['Qx'][0])
+    _, f = s.stress(c, xs=np.array([s.a/2]), ys=np.array([0.]))
+    Q2 = float(f['Qy'][0]), float(f['Qx'][0])
+    return (lam.calc_transverse_shear_stress(0., *Q1)[1], lam.calc_transverse_shear_stress(0., *Q2)[0],
+            Q1[1], Q2[0])
+
+
+def shear_forces_3d(sol):
+    r'''Qx(0, b/2) and Qy(a/2, 0) of the 3D solution, Gauss-Legendre integration in each layer'''
+    xi, wi = np.polynomial.legendre.leggauss(12)
+    Qx = Qy = 0.
+    for za, zb in zip(sol.zi[:-1], sol.zi[1:]):
+        for x_, w_ in zip(xi, wi):
+            z = (za + zb)/2 + x_*(zb - za)/2
+            Qx += w_*(zb - za)/2*sol.stresses(0., sol.b/2, z)[4]
+            Qy += w_*(zb - za)/2*sol.stresses(sol.a/2, 0., z)[3]
+    return Qx, Qy
+
+
+def compute():
+    res = {}
+    for case, b_a in CASES.items():
+        for S in SLENDERNESS:
+            a, b, h = 1., b_a, 1./S
+            stack, plyts, lps, rhos, Cs = laminate(case, h)
+            sol = Pagano1970(a, b, Cs, plyts, q0=Q0)
+            wbar3d, st = normalized(sol, S)
+            Qx, Qy = shear_forces_3d(sol)
+            out = {'3D': dict(wbar=wbar3d(a/2, b/2), txz=st(0, b/2, 0)[2], tyz=st(a/2, 0, 0)[3], Qx=Qx, Qy=Qy)}
+            lam = laminated_plate(stack, plyts=plyts, laminaprops=lps, rhos=rhos)
+            for label, theory, scf in su.models(SCFS, stack, plyts, lps, rhos):
+                s = su.make_shell(theory, a, b, stack, plyts, lps, rhos, scf=scf, bcs='SSSS', m=M, n=M)
+                s.add_pressure_load(lambda x, y: Q0*np.sin(np.pi*x/a)*np.sin(np.pi*y/b))
+                c = su.static_linear(s)
+                out[label] = dict(wbar=100*E_T*su.center(s, c)/(Q0*h*S**4))
+                if theory == 'fsdt':
+                    k13, k23 = su.kappas(scf, stack, plyts, lps, rhos)
+                    txz, tyz, Qx, Qy = recovered_stresses(s, c, lam)
+                    out[label].update(kappa13=k13, kappa23=k23, txz=txz/(Q0*S), tyz=tyz/(Q0*S), Qx=Qx, Qy=Qy)
+            res['%s S%d' % (case, S)] = out
+    return res
+
+
+res = su.run_or_load(os.path.join(RESULTS, 'pagano1970_plates.json'), compute, rerun=RERUN)
+MODELS = ['CLPT'] + ['FSDT-' + k for k in SCFS] + ['TSDT']
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+computed in 32 s, saved to results/pagano1970_plates.json
+</pre></div></div>
+</div>
+<section id="Shear-correction-factors">
+<h3>Shear correction factors<a class="headerlink" href="#Shear-correction-factors" title="Link to this heading">#</a></h3>
+<p><span class="math notranslate nohighlight">\(\kappa_{13} = A_{55}/\bar{A}_{55}\)</span> (<span class="math notranslate nohighlight">\(xz\)</span>) and <span class="math notranslate nohighlight">\(\kappa_{23} = A_{44}/\bar{A}_{44}\)</span> (<span class="math notranslate nohighlight">\(yz\)</span>) of each correction, as reported by <code class="docutils literal notranslate"><span class="pre">composites</span></code>; they depend on the laminate only, not on <span class="math notranslate nohighlight">\(S\)</span>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rows = []
+for case in CASES:
+    r = res['%s S10' % case]
+    rows.append([case] + ['%.4f / %.4f' % (r['FSDT-' + k]['kappa13'], r['FSDT-' + k]['kappa23']) for k in SCFS])
+display(Markdown(markdown_table(['laminate'] + ['%s, %s' % (k, su.SCF_NAMES[k]) for k in SCFS], rows)))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>laminate</p></th>
+<th class="head"><p>K1, <span class="math notranslate nohighlight">\(\kappa = 1\)</span></p></th>
+<th class="head"><p>K56, <span class="math notranslate nohighlight">\(\kappa = 5/6\)</span></p></th>
+<th class="head"><p>VLA, Vlachoutsis (1992)</p></th>
+<th class="head"><p>ROH, Rohwer (1988)</p></th>
+<th class="head"><p>BB, Birman and Bert (2002)</p></th>
+<th class="head"><p>TSF, thickness-shear frequency</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>square</p></td>
+<td><p>1.0000 / 1.0000</p></td>
+<td><p>0.8333 / 0.8333</p></td>
+<td><p>0.5828 / 0.8028</p></td>
+<td><p>0.5828 / 0.8024</p></td>
+<td><p>0.7381 / 1.1806</p></td>
+<td><p>0.5302 / 0.8469</p></td>
+</tr>
+<tr class="row-odd"><td><p>b = 3a</p></td>
+<td><p>1.0000 / 1.0000</p></td>
+<td><p>0.8333 / 0.8333</p></td>
+<td><p>0.5828 / 0.8028</p></td>
+<td><p>0.5828 / 0.8024</p></td>
+<td><p>0.7381 / 1.1806</p></td>
+<td><p>0.5302 / 0.8469</p></td>
+</tr>
+<tr class="row-even"><td><p>sandwich</p></td>
+<td><p>1.0000 / 1.0000</p></td>
+<td><p>0.8333 / 0.8333</p></td>
+<td><p>0.4094 / 0.6720</p></td>
+<td><p>0.4094 / 0.6720</p></td>
+<td><p>0.4509 / 0.7386</p></td>
+<td><p>0.4028 / 0.6687</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="Central-deflection">
+<h2>Central deflection<a class="headerlink" href="#Central-deflection" title="Link to this heading">#</a></h2>
+<p><span class="math notranslate nohighlight">\(\bar{w} = 100 E_T w(a/2, b/2, 0)/(q_0 h S^4)\)</span>, with the difference to the 3D solution in parentheses.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for case in CASES:
+    rows = []
+    for S in SLENDERNESS:
+        r = res['%s S%d' % (case, S)]
+        ref = r['3D']['wbar']
+        rows.append([S, '%.4f' % ref] + ['%.4f (%+.1f%%)' % (r[m]['wbar'], pct(r[m]['wbar'], ref)) for m in MODELS])
+    display(Markdown('**%s**' % ('sandwich, Table 3' if case == 'sandwich' else '[0/90/0], %s' % case)))
+    display(Markdown(markdown_table(['$S$', '3D'] + MODELS, rows)))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>[0/90/0], square</strong></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(S\)</span></p></th>
+<th class="head"><p>3D</p></th>
+<th class="head"><p>CLPT</p></th>
+<th class="head"><p>FSDT-K1</p></th>
+<th class="head"><p>FSDT-K56</p></th>
+<th class="head"><p>FSDT-VLA</p></th>
+<th class="head"><p>FSDT-ROH</p></th>
+<th class="head"><p>FSDT-BB</p></th>
+<th class="head"><p>FSDT-TSF</p></th>
+<th class="head"><p>TSDT</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>5.0954</p></td>
+<td><p>0.4312 (-91.5%)</p></td>
+<td><p>4.4836 (-12.0%)</p></td>
+<td><p>5.2293 (+2.6%)</p></td>
+<td><p>6.5199 (+28.0%)</p></td>
+<td><p>6.5205 (+28.0%)</p></td>
+<td><p>5.1565 (+1.2%)</p></td>
+<td><p>6.7583 (+32.6%)</p></td>
+<td><p>5.1286 (+0.7%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>2.0059</p></td>
+<td><p>0.4312 (-78.5%)</p></td>
+<td><p>1.5681 (-21.8%)</p></td>
+<td><p>1.7758 (-11.5%)</p></td>
+<td><p>2.2160 (+10.5%)</p></td>
+<td><p>2.2160 (+10.5%)</p></td>
+<td><p>1.8570 (-7.4%)</p></td>
+<td><p>2.3323 (+16.3%)</p></td>
+<td><p>1.9218 (-4.2%)</p></td>
+</tr>
+<tr class="row-even"><td><p>10</p></td>
+<td><p>0.7530</p></td>
+<td><p>0.4312 (-42.7%)</p></td>
+<td><p>0.6306 (-16.3%)</p></td>
+<td><p>0.6693 (-11.1%)</p></td>
+<td><p>0.7637 (+1.4%)</p></td>
+<td><p>0.7637 (+1.4%)</p></td>
+<td><p>0.6952 (-7.7%)</p></td>
+<td><p>0.7934 (+5.4%)</p></td>
+<td><p>0.7125 (-5.4%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>20</p></td>
+<td><p>0.5164</p></td>
+<td><p>0.4312 (-16.5%)</p></td>
+<td><p>0.4821 (-6.6%)</p></td>
+<td><p>0.4921 (-4.7%)</p></td>
+<td><p>0.5174 (+0.2%)</p></td>
+<td><p>0.5174 (+0.2%)</p></td>
+<td><p>0.4993 (-3.3%)</p></td>
+<td><p>0.5256 (+1.8%)</p></td>
+<td><p>0.5041 (-2.4%)</p></td>
+</tr>
+<tr class="row-even"><td><p>50</p></td>
+<td><p>0.4451</p></td>
+<td><p>0.4312 (-3.1%)</p></td>
+<td><p>0.4394 (-1.3%)</p></td>
+<td><p>0.4411 (-0.9%)</p></td>
+<td><p>0.4452 (+0.0%)</p></td>
+<td><p>0.4452 (+0.0%)</p></td>
+<td><p>0.4422 (-0.6%)</p></td>
+<td><p>0.4465 (+0.3%)</p></td>
+<td><p>0.4430 (-0.5%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>100</p></td>
+<td><p>0.4347</p></td>
+<td><p>0.4312 (-0.8%)</p></td>
+<td><p>0.4333 (-0.3%)</p></td>
+<td><p>0.4337 (-0.2%)</p></td>
+<td><p>0.4347 (+0.0%)</p></td>
+<td><p>0.4347 (+0.0%)</p></td>
+<td><p>0.4340 (-0.2%)</p></td>
+<td><p>0.4351 (+0.1%)</p></td>
+<td><p>0.4342 (-0.1%)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>[0/90/0], b = 3a</strong></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(S\)</span></p></th>
+<th class="head"><p>3D</p></th>
+<th class="head"><p>CLPT</p></th>
+<th class="head"><p>FSDT-K1</p></th>
+<th class="head"><p>FSDT-K56</p></th>
+<th class="head"><p>FSDT-VLA</p></th>
+<th class="head"><p>FSDT-ROH</p></th>
+<th class="head"><p>FSDT-BB</p></th>
+<th class="head"><p>FSDT-TSF</p></th>
+<th class="head"><p>TSDT</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>8.1659</p></td>
+<td><p>0.5034 (-93.8%)</p></td>
+<td><p>6.6164 (-19.0%)</p></td>
+<td><p>7.8184 (-4.3%)</p></td>
+<td><p>10.8382 (+32.7%)</p></td>
+<td><p>10.8377 (+32.7%)</p></td>
+<td><p>8.6889 (+6.4%)</p></td>
+<td><p>11.8045 (+44.6%)</p></td>
+<td><p>7.8944 (-3.3%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>2.8211</p></td>
+<td><p>0.5034 (-82.2%)</p></td>
+<td><p>2.0547 (-27.2%)</p></td>
+<td><p>2.3626 (-16.3%)</p></td>
+<td><p>3.1501 (+11.7%)</p></td>
+<td><p>3.1499 (+11.7%)</p></td>
+<td><p>2.5974 (-7.9%)</p></td>
+<td><p>3.4076 (+20.8%)</p></td>
+<td><p>2.6411 (-6.4%)</p></td>
+</tr>
+<tr class="row-even"><td><p>10</p></td>
+<td><p>0.9189</p></td>
+<td><p>0.5034 (-45.2%)</p></td>
+<td><p>0.7531 (-18.0%)</p></td>
+<td><p>0.8030 (-12.6%)</p></td>
+<td><p>0.9314 (+1.4%)</p></td>
+<td><p>0.9314 (+1.4%)</p></td>
+<td><p>0.8415 (-8.4%)</p></td>
+<td><p>0.9737 (+6.0%)</p></td>
+<td><p>0.8622 (-6.2%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>20</p></td>
+<td><p>0.6095</p></td>
+<td><p>0.5034 (-17.4%)</p></td>
+<td><p>0.5659 (-7.2%)</p></td>
+<td><p>0.5784 (-5.1%)</p></td>
+<td><p>0.6106 (+0.2%)</p></td>
+<td><p>0.6106 (+0.2%)</p></td>
+<td><p>0.5880 (-3.5%)</p></td>
+<td><p>0.6212 (+1.9%)</p></td>
+<td><p>0.5937 (-2.6%)</p></td>
+</tr>
+<tr class="row-even"><td><p>50</p></td>
+<td><p>0.5205</p></td>
+<td><p>0.5034 (-3.3%)</p></td>
+<td><p>0.5134 (-1.4%)</p></td>
+<td><p>0.5154 (-1.0%)</p></td>
+<td><p>0.5205 (+0.0%)</p></td>
+<td><p>0.5205 (+0.0%)</p></td>
+<td><p>0.5169 (-0.7%)</p></td>
+<td><p>0.5222 (+0.3%)</p></td>
+<td><p>0.5179 (-0.5%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>100</p></td>
+<td><p>0.5077</p></td>
+<td><p>0.5034 (-0.8%)</p></td>
+<td><p>0.5059 (-0.4%)</p></td>
+<td><p>0.5064 (-0.3%)</p></td>
+<td><p>0.5077 (+0.0%)</p></td>
+<td><p>0.5077 (+0.0%)</p></td>
+<td><p>0.5068 (-0.2%)</p></td>
+<td><p>0.5081 (+0.1%)</p></td>
+<td><p>0.5070 (-0.1%)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>sandwich, Table 3</strong></p>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(S\)</span></p></th>
+<th class="head"><p>3D</p></th>
+<th class="head"><p>CLPT</p></th>
+<th class="head"><p>FSDT-K1</p></th>
+<th class="head"><p>FSDT-K56</p></th>
+<th class="head"><p>FSDT-VLA</p></th>
+<th class="head"><p>FSDT-ROH</p></th>
+<th class="head"><p>FSDT-BB</p></th>
+<th class="head"><p>FSDT-TSF</p></th>
+<th class="head"><p>TSDT</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>22.1029</p></td>
+<td><p>0.8782 (-96.0%)</p></td>
+<td><p>12.7259 (-42.4%)</p></td>
+<td><p>14.9283 (-32.5%)</p></td>
+<td><p>24.6055 (+11.3%)</p></td>
+<td><p>24.6052 (+11.3%)</p></td>
+<td><p>22.6260 (+2.4%)</p></td>
+<td><p>24.8707 (+12.5%)</p></td>
+<td><p>21.3360 (-3.5%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>7.5962</p></td>
+<td><p>0.8782 (-88.4%)</p></td>
+<td><p>4.1614 (-45.2%)</p></td>
+<td><p>4.7666 (-37.3%)</p></td>
+<td><p>7.8412 (+3.2%)</p></td>
+<td><p>7.8411 (+3.2%)</p></td>
+<td><p>7.2807 (-4.2%)</p></td>
+<td><p>7.9285 (+4.4%)</p></td>
+<td><p>7.0873 (-6.7%)</p></td>
+</tr>
+<tr class="row-even"><td><p>10</p></td>
+<td><p>2.2004</p></td>
+<td><p>0.8782 (-60.1%)</p></td>
+<td><p>1.4493 (-34.1%)</p></td>
+<td><p>1.5604 (-29.1%)</p></td>
+<td><p>2.2109 (+0.5%)</p></td>
+<td><p>2.2109 (+0.5%)</p></td>
+<td><p>2.0947 (-4.8%)</p></td>
+<td><p>2.2309 (+1.4%)</p></td>
+<td><p>2.0629 (-6.2%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>20</p></td>
+<td><p>1.2264</p></td>
+<td><p>0.8782 (-28.4%)</p></td>
+<td><p>1.0236 (-16.5%)</p></td>
+<td><p>1.0524 (-14.2%)</p></td>
+<td><p>1.2274 (+0.1%)</p></td>
+<td><p>1.2274 (+0.1%)</p></td>
+<td><p>1.1958 (-2.5%)</p></td>
+<td><p>1.2330 (+0.5%)</p></td>
+<td><p>1.1876 (-3.2%)</p></td>
+</tr>
+<tr class="row-even"><td><p>50</p></td>
+<td><p>0.9348</p></td>
+<td><p>0.8782 (-6.1%)</p></td>
+<td><p>0.9016 (-3.6%)</p></td>
+<td><p>0.9063 (-3.1%)</p></td>
+<td><p>0.9349 (+0.0%)</p></td>
+<td><p>0.9349 (+0.0%)</p></td>
+<td><p>0.9297 (-0.5%)</p></td>
+<td><p>0.9358 (+0.1%)</p></td>
+<td><p>0.9284 (-0.7%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>100</p></td>
+<td><p>0.8924</p></td>
+<td><p>0.8782 (-1.6%)</p></td>
+<td><p>0.8840 (-0.9%)</p></td>
+<td><p>0.8852 (-0.8%)</p></td>
+<td><p>0.8924 (+0.0%)</p></td>
+<td><p>0.8924 (+0.0%)</p></td>
+<td><p>0.8911 (-0.1%)</p></td>
+<td><p>0.8926 (+0.0%)</p></td>
+<td><p>0.8908 (-0.2%)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Case (3), <span class="math notranslate nohighlight">\(b = 3a\)</span>, is the only case with a printed deflection: panels against the values of Table 2.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rows = []
+for S, printed in su.PAGANO_TABLE_2.items():
+    r = res['b = 3a S%d' % S]
+    rows.append([S, printed[3], '%.4f' % r['3D']['wbar']]
+                + ['%.3f (%+.1f%%)' % (r[m]['wbar'], pct(r[m]['wbar'], float(printed[3])))
+                   for m in ('CLPT', 'FSDT-K56', 'FSDT-ROH', 'TSDT')])
+display(Markdown(markdown_table(['$S$', 'Table 2', '`pagano1970.py`', 'CLPT', 'FSDT-K56', 'FSDT-ROH', 'TSDT'], rows)))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(S\)</span></p></th>
+<th class="head"><p>Table 2</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">pagano1970.py</span></code></p></th>
+<th class="head"><p>CLPT</p></th>
+<th class="head"><p>FSDT-K56</p></th>
+<th class="head"><p>FSDT-ROH</p></th>
+<th class="head"><p>TSDT</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>8.17</p></td>
+<td><p>8.1659</p></td>
+<td><p>0.503 (-93.8%)</p></td>
+<td><p>7.818 (-4.3%)</p></td>
+<td><p>10.838 (+32.7%)</p></td>
+<td><p>7.894 (-3.4%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>2.82</p></td>
+<td><p>2.8211</p></td>
+<td><p>0.503 (-82.1%)</p></td>
+<td><p>2.363 (-16.2%)</p></td>
+<td><p>3.150 (+11.7%)</p></td>
+<td><p>2.641 (-6.3%)</p></td>
+</tr>
+<tr class="row-even"><td><p>10</p></td>
+<td><p>.919</p></td>
+<td><p>0.9189</p></td>
+<td><p>0.503 (-45.2%)</p></td>
+<td><p>0.803 (-12.6%)</p></td>
+<td><p>0.931 (+1.3%)</p></td>
+<td><p>0.862 (-6.2%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>20</p></td>
+<td><p>.610</p></td>
+<td><p>0.6095</p></td>
+<td><p>0.503 (-17.5%)</p></td>
+<td><p>0.578 (-5.2%)</p></td>
+<td><p>0.611 (+0.1%)</p></td>
+<td><p>0.594 (-2.7%)</p></td>
+</tr>
+<tr class="row-even"><td><p>50</p></td>
+<td><p>.520</p></td>
+<td><p>0.5205</p></td>
+<td><p>0.503 (-3.2%)</p></td>
+<td><p>0.515 (-0.9%)</p></td>
+<td><p>0.521 (+0.1%)</p></td>
+<td><p>0.518 (-0.4%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>100</p></td>
+<td><p>.508</p></td>
+<td><p>0.5077</p></td>
+<td><p>0.503 (-0.9%)</p></td>
+<td><p>0.506 (-0.3%)</p></td>
+<td><p>0.508 (-0.1%)</p></td>
+<td><p>0.507 (-0.2%)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<section id="Summary-of-the-differences-to-3D">
+<h3>Summary of the differences to 3D<a class="headerlink" href="#Summary-of-the-differences-to-3D" title="Link to this heading">#</a></h3>
+<p>Statistics of the differences of the central deflection to the 3D solution, in percent, for the thick and moderately thick plates, <span class="math notranslate nohighlight">\(S \le 10\)</span>, and for all <span class="math notranslate nohighlight">\(S\)</span>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for case in CASES:
+    for label, Ss in (('S &lt;= 10', [2, 4, 10]), ('all S', SLENDERNESS)):
+        cols = {m: [pct(res['%s S%d' % (case, S)][m]['wbar'], res['%s S%d' % (case, S)]['3D']['wbar']) for S in Ss]
+                for m in MODELS}
+        display(Markdown('**%s, %s**' % (case, label)))
+        display(Markdown(su.stats_table(cols)))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>square, S &lt;= 10</strong></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>model</p></th>
+<th class="head"><p>max abs. diff. (%)</p></th>
+<th class="head"><p>mean abs. diff. (%)</p></th>
+<th class="head"><p>range (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CLPT</p></td>
+<td><p>91.5</p></td>
+<td><p>70.9</p></td>
+<td><p>-91.5 to -42.7</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-K1</p></td>
+<td><p>21.8</p></td>
+<td><p>16.7</p></td>
+<td><p>-21.8 to -12.0</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-K56</p></td>
+<td><p>11.5</p></td>
+<td><p>8.4</p></td>
+<td><p>-11.5 to +2.6</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-VLA</p></td>
+<td><p>28.0</p></td>
+<td><p>13.3</p></td>
+<td><p>+1.4 to +28.0</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-ROH</p></td>
+<td><p>28.0</p></td>
+<td><p>13.3</p></td>
+<td><p>+1.4 to +28.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-BB</p></td>
+<td><p>7.7</p></td>
+<td><p>5.4</p></td>
+<td><p>-7.7 to +1.2</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-TSF</p></td>
+<td><p>32.6</p></td>
+<td><p>18.1</p></td>
+<td><p>+5.4 to +32.6</p></td>
+</tr>
+<tr class="row-odd"><td><p>TSDT</p></td>
+<td><p>5.4</p></td>
+<td><p>3.4</p></td>
+<td><p>-5.4 to +0.7</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>square, all S</strong></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>model</p></th>
+<th class="head"><p>max abs. diff. (%)</p></th>
+<th class="head"><p>mean abs. diff. (%)</p></th>
+<th class="head"><p>range (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CLPT</p></td>
+<td><p>91.5</p></td>
+<td><p>38.9</p></td>
+<td><p>-91.5 to -0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-K1</p></td>
+<td><p>21.8</p></td>
+<td><p>9.7</p></td>
+<td><p>-21.8 to -0.3</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-K56</p></td>
+<td><p>11.5</p></td>
+<td><p>5.2</p></td>
+<td><p>-11.5 to +2.6</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-VLA</p></td>
+<td><p>28.0</p></td>
+<td><p>6.7</p></td>
+<td><p>+0.0 to +28.0</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-ROH</p></td>
+<td><p>28.0</p></td>
+<td><p>6.7</p></td>
+<td><p>+0.0 to +28.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-BB</p></td>
+<td><p>7.7</p></td>
+<td><p>3.4</p></td>
+<td><p>-7.7 to +1.2</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-TSF</p></td>
+<td><p>32.6</p></td>
+<td><p>9.4</p></td>
+<td><p>+0.1 to +32.6</p></td>
+</tr>
+<tr class="row-odd"><td><p>TSDT</p></td>
+<td><p>5.4</p></td>
+<td><p>2.2</p></td>
+<td><p>-5.4 to +0.7</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>b = 3a, S &lt;= 10</strong></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>model</p></th>
+<th class="head"><p>max abs. diff. (%)</p></th>
+<th class="head"><p>mean abs. diff. (%)</p></th>
+<th class="head"><p>range (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CLPT</p></td>
+<td><p>93.8</p></td>
+<td><p>73.7</p></td>
+<td><p>-93.8 to -45.2</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-K1</p></td>
+<td><p>27.2</p></td>
+<td><p>21.4</p></td>
+<td><p>-27.2 to -18.0</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-K56</p></td>
+<td><p>16.3</p></td>
+<td><p>11.0</p></td>
+<td><p>-16.3 to -4.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-VLA</p></td>
+<td><p>32.7</p></td>
+<td><p>15.2</p></td>
+<td><p>+1.4 to +32.7</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-ROH</p></td>
+<td><p>32.7</p></td>
+<td><p>15.2</p></td>
+<td><p>+1.4 to +32.7</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-BB</p></td>
+<td><p>8.4</p></td>
+<td><p>7.6</p></td>
+<td><p>-8.4 to +6.4</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-TSF</p></td>
+<td><p>44.6</p></td>
+<td><p>23.8</p></td>
+<td><p>+6.0 to +44.6</p></td>
+</tr>
+<tr class="row-odd"><td><p>TSDT</p></td>
+<td><p>6.4</p></td>
+<td><p>5.3</p></td>
+<td><p>-6.4 to -3.3</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>b = 3a, all S</strong></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>model</p></th>
+<th class="head"><p>max abs. diff. (%)</p></th>
+<th class="head"><p>mean abs. diff. (%)</p></th>
+<th class="head"><p>range (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CLPT</p></td>
+<td><p>93.8</p></td>
+<td><p>40.5</p></td>
+<td><p>-93.8 to -0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-K1</p></td>
+<td><p>27.2</p></td>
+<td><p>12.2</p></td>
+<td><p>-27.2 to -0.4</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-K56</p></td>
+<td><p>16.3</p></td>
+<td><p>6.6</p></td>
+<td><p>-16.3 to -0.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-VLA</p></td>
+<td><p>32.7</p></td>
+<td><p>7.7</p></td>
+<td><p>+0.0 to +32.7</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-ROH</p></td>
+<td><p>32.7</p></td>
+<td><p>7.7</p></td>
+<td><p>+0.0 to +32.7</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-BB</p></td>
+<td><p>8.4</p></td>
+<td><p>4.5</p></td>
+<td><p>-8.4 to +6.4</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-TSF</p></td>
+<td><p>44.6</p></td>
+<td><p>12.3</p></td>
+<td><p>+0.1 to +44.6</p></td>
+</tr>
+<tr class="row-odd"><td><p>TSDT</p></td>
+<td><p>6.4</p></td>
+<td><p>3.2</p></td>
+<td><p>-6.4 to -0.1</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>sandwich, S &lt;= 10</strong></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>model</p></th>
+<th class="head"><p>max abs. diff. (%)</p></th>
+<th class="head"><p>mean abs. diff. (%)</p></th>
+<th class="head"><p>range (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CLPT</p></td>
+<td><p>96.0</p></td>
+<td><p>81.5</p></td>
+<td><p>-96.0 to -60.1</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-K1</p></td>
+<td><p>45.2</p></td>
+<td><p>40.6</p></td>
+<td><p>-45.2 to -34.1</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-K56</p></td>
+<td><p>37.3</p></td>
+<td><p>32.9</p></td>
+<td><p>-37.3 to -29.1</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-VLA</p></td>
+<td><p>11.3</p></td>
+<td><p>5.0</p></td>
+<td><p>+0.5 to +11.3</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-ROH</p></td>
+<td><p>11.3</p></td>
+<td><p>5.0</p></td>
+<td><p>+0.5 to +11.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-BB</p></td>
+<td><p>4.8</p></td>
+<td><p>3.8</p></td>
+<td><p>-4.8 to +2.4</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-TSF</p></td>
+<td><p>12.5</p></td>
+<td><p>6.1</p></td>
+<td><p>+1.4 to +12.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>TSDT</p></td>
+<td><p>6.7</p></td>
+<td><p>5.5</p></td>
+<td><p>-6.7 to -3.5</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>sandwich, all S</strong></p>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>model</p></th>
+<th class="head"><p>max abs. diff. (%)</p></th>
+<th class="head"><p>mean abs. diff. (%)</p></th>
+<th class="head"><p>range (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CLPT</p></td>
+<td><p>96.0</p></td>
+<td><p>46.8</p></td>
+<td><p>-96.0 to -1.6</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-K1</p></td>
+<td><p>45.2</p></td>
+<td><p>23.8</p></td>
+<td><p>-45.2 to -0.9</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-K56</p></td>
+<td><p>37.3</p></td>
+<td><p>19.5</p></td>
+<td><p>-37.3 to -0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-VLA</p></td>
+<td><p>11.3</p></td>
+<td><p>2.5</p></td>
+<td><p>+0.0 to +11.3</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-ROH</p></td>
+<td><p>11.3</p></td>
+<td><p>2.5</p></td>
+<td><p>+0.0 to +11.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-BB</p></td>
+<td><p>4.8</p></td>
+<td><p>2.4</p></td>
+<td><p>-4.8 to +2.4</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-TSF</p></td>
+<td><p>12.5</p></td>
+<td><p>3.2</p></td>
+<td><p>+0.0 to +12.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>TSDT</p></td>
+<td><p>6.7</p></td>
+<td><p>3.4</p></td>
+<td><p>-6.7 to -0.2</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>styles = {'CLPT': dict(color='0.55', ls=':'), 'FSDT-K1': dict(color='tab:brown', ls='--', marker='v'),
+          'FSDT-K56': dict(color='tab:red', marker='s'), 'FSDT-VLA': dict(color='tab:blue', marker='o'),
+          'FSDT-ROH': dict(color='tab:cyan', ls='--', marker='+', ms=9), 'FSDT-BB': dict(color='tab:green', marker='^'),
+          'FSDT-TSF': dict(color='tab:purple', ls='-.', marker='d'), 'TSDT': dict(color='k', marker='.')}
+fig, axes = plt.subplots(1, 3, figsize=(13, 4), sharey=True)
+for ax, case in zip(axes, CASES):
+    for m in MODELS:
+        e = [pct(res['%s S%d' % (case, S)][m]['wbar'], res['%s S%d' % (case, S)]['3D']['wbar']) for S in SLENDERNESS]
+        ax.plot(SLENDERNESS, e, label=m, **styles[m])
+    ax.axhline(0, color='k', lw=0.8)
+    ax.set_xscale('log')
+    ax.set_xticks(SLENDERNESS)
+    ax.set_xticklabels(SLENDERNESS)
+    ax.xaxis.set_minor_formatter(plt.NullFormatter())
+    ax.set_ylim(-60, 50)
+    ax.set_xlabel('$S = a/h$')
+    ax.set_title('sandwich' if case == 'sandwich' else '[0/90/0], %s' % case)
+    ax.grid(alpha=0.3)
+axes[0].set_ylabel('$\\bar{w}/\\bar{w}_{3D} - 1$ (%)')
+axes[-1].legend(fontsize=8)
+plt.tight_layout()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_pagano1970_plates_14_0.png" src="../_images/notebooks_pagano1970_plates_14_0.png" />
+</div>
+</div>
+<p>The CLPT, <span class="math notranslate nohighlight">\(-92\%\)</span> to <span class="math notranslate nohighlight">\(-96\%\)</span> for <span class="math notranslate nohighlight">\(S = 2\)</span>, is cut by the vertical limits of the figure.</p>
+</section>
+</section>
+<section id="Transverse-shear-stresses">
+<h2>Transverse shear stresses<a class="headerlink" href="#Transverse-shear-stresses" title="Link to this heading">#</a></h2>
+<p><span class="math notranslate nohighlight">\(\bar\tau_{xz}(0, b/2, 0)\)</span> and <span class="math notranslate nohighlight">\(\bar\tau_{yz}(a/2, 0, 0)\)</span> recovered from the shear forces of each FSDT with the equilibrium distribution of Rohwer, against the 3D solution (Tables 1-3 print them to three or four digits). The shear forces at the edges come from the Ritz solution of each correction, hence the differences among the corrections.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for comp, name in (('txz', '$\\bar\\tau_{xz}(0, b/2, 0)$'), ('tyz', '$\\bar\\tau_{yz}(a/2, 0, 0)$')):
+    for case in CASES:
+        rows = []
+        for S in SLENDERNESS:
+            r = res['%s S%d' % (case, S)]
+            ref = r['3D'][comp]
+            rows.append([S, '%.4f' % ref] + ['%.4f (%+.1f%%)' % (r['FSDT-' + k][comp], pct(r['FSDT-' + k][comp], ref))
+                                              for k in SCFS])
+        display(Markdown('**%s, %s**' % (name, 'sandwich' if case == 'sandwich' else '[0/90/0], %s' % case)))
+        display(Markdown(markdown_table(['$S$', '3D'] + ['FSDT-' + k for k in SCFS], rows)))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>:math:`bartau_{xz}(0, b/2, 0)`, [0/90/0], square</strong></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(S\)</span></p></th>
+<th class="head"><p>3D</p></th>
+<th class="head"><p>FSDT-K1</p></th>
+<th class="head"><p>FSDT-K56</p></th>
+<th class="head"><p>FSDT-VLA</p></th>
+<th class="head"><p>FSDT-ROH</p></th>
+<th class="head"><p>FSDT-BB</p></th>
+<th class="head"><p>FSDT-TSF</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>0.1640</p></td>
+<td><p>0.2934 (+79.0%)</p></td>
+<td><p>0.2884 (+75.9%)</p></td>
+<td><p>0.2562 (+56.2%)</p></td>
+<td><p>0.2562 (+56.3%)</p></td>
+<td><p>0.2543 (+55.1%)</p></td>
+<td><p>0.2426 (+48.0%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>0.2559</p></td>
+<td><p>0.3400 (+32.8%)</p></td>
+<td><p>0.3338 (+30.4%)</p></td>
+<td><p>0.3107 (+21.4%)</p></td>
+<td><p>0.3107 (+21.4%)</p></td>
+<td><p>0.3174 (+24.1%)</p></td>
+<td><p>0.3019 (+18.0%)</p></td>
+</tr>
+<tr class="row-even"><td><p>10</p></td>
+<td><p>0.3573</p></td>
+<td><p>0.3809 (+6.6%)</p></td>
+<td><p>0.3787 (+6.0%)</p></td>
+<td><p>0.3716 (+4.0%)</p></td>
+<td><p>0.3716 (+4.0%)</p></td>
+<td><p>0.3753 (+5.0%)</p></td>
+<td><p>0.3691 (+3.3%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>20</p></td>
+<td><p>0.3846</p></td>
+<td><p>0.3902 (+1.4%)</p></td>
+<td><p>0.3895 (+1.3%)</p></td>
+<td><p>0.3875 (+0.8%)</p></td>
+<td><p>0.3875 (+0.8%)</p></td>
+<td><p>0.3886 (+1.0%)</p></td>
+<td><p>0.3868 (+0.6%)</p></td>
+</tr>
+<tr class="row-even"><td><p>50</p></td>
+<td><p>0.3934</p></td>
+<td><p>0.3930 (-0.1%)</p></td>
+<td><p>0.3929 (-0.1%)</p></td>
+<td><p>0.3925 (-0.2%)</p></td>
+<td><p>0.3925 (-0.2%)</p></td>
+<td><p>0.3927 (-0.2%)</p></td>
+<td><p>0.3924 (-0.2%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>100</p></td>
+<td><p>0.3947</p></td>
+<td><p>0.3934 (-0.3%)</p></td>
+<td><p>0.3934 (-0.3%)</p></td>
+<td><p>0.3933 (-0.4%)</p></td>
+<td><p>0.3933 (-0.4%)</p></td>
+<td><p>0.3933 (-0.3%)</p></td>
+<td><p>0.3933 (-0.4%)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>:math:`bartau_{xz}(0, b/2, 0)`, [0/90/0], b = 3a</strong></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(S\)</span></p></th>
+<th class="head"><p>3D</p></th>
+<th class="head"><p>FSDT-K1</p></th>
+<th class="head"><p>FSDT-K56</p></th>
+<th class="head"><p>FSDT-VLA</p></th>
+<th class="head"><p>FSDT-ROH</p></th>
+<th class="head"><p>FSDT-BB</p></th>
+<th class="head"><p>FSDT-TSF</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>0.2571</p></td>
+<td><p>0.4286 (+66.7%)</p></td>
+<td><p>0.4273 (+66.2%)</p></td>
+<td><p>0.4222 (+64.2%)</p></td>
+<td><p>0.4222 (+64.2%)</p></td>
+<td><p>0.4238 (+64.8%)</p></td>
+<td><p>0.4201 (+63.4%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>0.3511</p></td>
+<td><p>0.4357 (+24.1%)</p></td>
+<td><p>0.4351 (+23.9%)</p></td>
+<td><p>0.4332 (+23.4%)</p></td>
+<td><p>0.4332 (+23.4%)</p></td>
+<td><p>0.4342 (+23.7%)</p></td>
+<td><p>0.4325 (+23.2%)</p></td>
+</tr>
+<tr class="row-even"><td><p>10</p></td>
+<td><p>0.4201</p></td>
+<td><p>0.4386 (+4.4%)</p></td>
+<td><p>0.4385 (+4.4%)</p></td>
+<td><p>0.4382 (+4.3%)</p></td>
+<td><p>0.4382 (+4.3%)</p></td>
+<td><p>0.4384 (+4.3%)</p></td>
+<td><p>0.4381 (+4.3%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>20</p></td>
+<td><p>0.4344</p></td>
+<td><p>0.4391 (+1.1%)</p></td>
+<td><p>0.4391 (+1.1%)</p></td>
+<td><p>0.4390 (+1.1%)</p></td>
+<td><p>0.4390 (+1.1%)</p></td>
+<td><p>0.4391 (+1.1%)</p></td>
+<td><p>0.4390 (+1.0%)</p></td>
+</tr>
+<tr class="row-even"><td><p>50</p></td>
+<td><p>0.4387</p></td>
+<td><p>0.4393 (+0.1%)</p></td>
+<td><p>0.4392 (+0.1%)</p></td>
+<td><p>0.4392 (+0.1%)</p></td>
+<td><p>0.4392 (+0.1%)</p></td>
+<td><p>0.4392 (+0.1%)</p></td>
+<td><p>0.4392 (+0.1%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>100</p></td>
+<td><p>0.4393</p></td>
+<td><p>0.4393 (-0.0%)</p></td>
+<td><p>0.4393 (-0.0%)</p></td>
+<td><p>0.4393 (-0.0%)</p></td>
+<td><p>0.4393 (-0.0%)</p></td>
+<td><p>0.4393 (-0.0%)</p></td>
+<td><p>0.4393 (-0.0%)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>:math:`bartau_{xz}(0, b/2, 0)`, sandwich</strong></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(S\)</span></p></th>
+<th class="head"><p>3D</p></th>
+<th class="head"><p>FSDT-K1</p></th>
+<th class="head"><p>FSDT-K56</p></th>
+<th class="head"><p>FSDT-VLA</p></th>
+<th class="head"><p>FSDT-ROH</p></th>
+<th class="head"><p>FSDT-BB</p></th>
+<th class="head"><p>FSDT-TSF</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>0.1848</p></td>
+<td><p>0.2505 (+35.6%)</p></td>
+<td><p>0.2469 (+33.6%)</p></td>
+<td><p>0.2044 (+10.6%)</p></td>
+<td><p>0.2044 (+10.6%)</p></td>
+<td><p>0.2067 (+11.8%)</p></td>
+<td><p>0.2034 (+10.1%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>0.2387</p></td>
+<td><p>0.2844 (+19.2%)</p></td>
+<td><p>0.2799 (+17.3%)</p></td>
+<td><p>0.2461 (+3.1%)</p></td>
+<td><p>0.2461 (+3.1%)</p></td>
+<td><p>0.2496 (+4.6%)</p></td>
+<td><p>0.2452 (+2.7%)</p></td>
+</tr>
+<tr class="row-even"><td><p>10</p></td>
+<td><p>0.2998</p></td>
+<td><p>0.3146 (+4.9%)</p></td>
+<td><p>0.3129 (+4.4%)</p></td>
+<td><p>0.3013 (+0.5%)</p></td>
+<td><p>0.3013 (+0.5%)</p></td>
+<td><p>0.3031 (+1.1%)</p></td>
+<td><p>0.3009 (+0.4%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>20</p></td>
+<td><p>0.3174</p></td>
+<td><p>0.3214 (+1.3%)</p></td>
+<td><p>0.3209 (+1.1%)</p></td>
+<td><p>0.3175 (+0.0%)</p></td>
+<td><p>0.3175 (+0.0%)</p></td>
+<td><p>0.3181 (+0.2%)</p></td>
+<td><p>0.3174 (+0.0%)</p></td>
+</tr>
+<tr class="row-even"><td><p>50</p></td>
+<td><p>0.3231</p></td>
+<td><p>0.3235 (+0.1%)</p></td>
+<td><p>0.3234 (+0.1%)</p></td>
+<td><p>0.3228 (-0.1%)</p></td>
+<td><p>0.3228 (-0.1%)</p></td>
+<td><p>0.3229 (-0.1%)</p></td>
+<td><p>0.3228 (-0.1%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>100</p></td>
+<td><p>0.3240</p></td>
+<td><p>0.3238 (-0.1%)</p></td>
+<td><p>0.3238 (-0.1%)</p></td>
+<td><p>0.3236 (-0.1%)</p></td>
+<td><p>0.3236 (-0.1%)</p></td>
+<td><p>0.3237 (-0.1%)</p></td>
+<td><p>0.3236 (-0.1%)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>:math:`bartau_{yz}(a/2, 0, 0)`, [0/90/0], square</strong></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(S\)</span></p></th>
+<th class="head"><p>3D</p></th>
+<th class="head"><p>FSDT-K1</p></th>
+<th class="head"><p>FSDT-K56</p></th>
+<th class="head"><p>FSDT-VLA</p></th>
+<th class="head"><p>FSDT-ROH</p></th>
+<th class="head"><p>FSDT-BB</p></th>
+<th class="head"><p>FSDT-TSF</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>0.2591</p></td>
+<td><p>0.3120 (+20.4%)</p></td>
+<td><p>0.3226 (+24.5%)</p></td>
+<td><p>0.3902 (+50.6%)</p></td>
+<td><p>0.3901 (+50.6%)</p></td>
+<td><p>0.3941 (+52.1%)</p></td>
+<td><p>0.4186 (+61.5%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>0.2172</p></td>
+<td><p>0.2145 (-1.3%)</p></td>
+<td><p>0.2274 (+4.7%)</p></td>
+<td><p>0.2758 (+27.0%)</p></td>
+<td><p>0.2758 (+27.0%)</p></td>
+<td><p>0.2617 (+20.5%)</p></td>
+<td><p>0.2943 (+35.5%)</p></td>
+</tr>
+<tr class="row-even"><td><p>10</p></td>
+<td><p>0.1228</p></td>
+<td><p>0.1285 (+4.7%)</p></td>
+<td><p>0.1332 (+8.5%)</p></td>
+<td><p>0.1480 (+20.6%)</p></td>
+<td><p>0.1480 (+20.6%)</p></td>
+<td><p>0.1403 (+14.3%)</p></td>
+<td><p>0.1534 (+25.0%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>20</p></td>
+<td><p>0.0938</p></td>
+<td><p>0.1092 (+16.4%)</p></td>
+<td><p>0.1105 (+17.9%)</p></td>
+<td><p>0.1148 (+22.4%)</p></td>
+<td><p>0.1148 (+22.4%)</p></td>
+<td><p>0.1124 (+19.8%)</p></td>
+<td><p>0.1163 (+24.0%)</p></td>
+</tr>
+<tr class="row-even"><td><p>50</p></td>
+<td><p>0.0842</p></td>
+<td><p>0.1032 (+22.6%)</p></td>
+<td><p>0.1035 (+22.8%)</p></td>
+<td><p>0.1042 (+23.7%)</p></td>
+<td><p>0.1042 (+23.7%)</p></td>
+<td><p>0.1038 (+23.2%)</p></td>
+<td><p>0.1044 (+24.0%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>100</p></td>
+<td><p>0.0828</p></td>
+<td><p>0.1024 (+23.6%)</p></td>
+<td><p>0.1024 (+23.7%)</p></td>
+<td><p>0.1026 (+23.9%)</p></td>
+<td><p>0.1026 (+23.9%)</p></td>
+<td><p>0.1025 (+23.8%)</p></td>
+<td><p>0.1027 (+24.0%)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>:math:`bartau_{yz}(a/2, 0, 0)`, [0/90/0], b = 3a</strong></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(S\)</span></p></th>
+<th class="head"><p>3D</p></th>
+<th class="head"><p>FSDT-K1</p></th>
+<th class="head"><p>FSDT-K56</p></th>
+<th class="head"><p>FSDT-VLA</p></th>
+<th class="head"><p>FSDT-ROH</p></th>
+<th class="head"><p>FSDT-BB</p></th>
+<th class="head"><p>FSDT-TSF</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>0.0668</p></td>
+<td><p>0.0854 (+27.9%)</p></td>
+<td><p>0.0936 (+40.2%)</p></td>
+<td><p>0.1257 (+88.2%)</p></td>
+<td><p>0.1257 (+88.2%)</p></td>
+<td><p>0.1159 (+73.6%)</p></td>
+<td><p>0.1391 (+108.3%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>0.0334</p></td>
+<td><p>0.0410 (+22.8%)</p></td>
+<td><p>0.0449 (+34.5%)</p></td>
+<td><p>0.0568 (+70.1%)</p></td>
+<td><p>0.0568 (+70.1%)</p></td>
+<td><p>0.0504 (+51.0%)</p></td>
+<td><p>0.0611 (+83.2%)</p></td>
+</tr>
+<tr class="row-even"><td><p>10</p></td>
+<td><p>0.0152</p></td>
+<td><p>0.0224 (+47.3%)</p></td>
+<td><p>0.0232 (+52.4%)</p></td>
+<td><p>0.0254 (+66.8%)</p></td>
+<td><p>0.0254 (+66.8%)</p></td>
+<td><p>0.0240 (+57.8%)</p></td>
+<td><p>0.0262 (+71.8%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>20</p></td>
+<td><p>0.0119</p></td>
+<td><p>0.0195 (+63.0%)</p></td>
+<td><p>0.0197 (+64.7%)</p></td>
+<td><p>0.0202 (+69.4%)</p></td>
+<td><p>0.0202 (+69.4%)</p></td>
+<td><p>0.0199 (+66.4%)</p></td>
+<td><p>0.0204 (+71.0%)</p></td>
+</tr>
+<tr class="row-even"><td><p>50</p></td>
+<td><p>0.0110</p></td>
+<td><p>0.0186 (+69.6%)</p></td>
+<td><p>0.0187 (+69.9%)</p></td>
+<td><p>0.0187 (+70.8%)</p></td>
+<td><p>0.0187 (+70.8%)</p></td>
+<td><p>0.0187 (+70.2%)</p></td>
+<td><p>0.0188 (+71.0%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>100</p></td>
+<td><p>0.0108</p></td>
+<td><p>0.0185 (+70.7%)</p></td>
+<td><p>0.0185 (+70.8%)</p></td>
+<td><p>0.0185 (+71.0%)</p></td>
+<td><p>0.0185 (+71.0%)</p></td>
+<td><p>0.0185 (+70.9%)</p></td>
+<td><p>0.0185 (+71.1%)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>:math:`bartau_{yz}(a/2, 0, 0)`, sandwich</strong></p>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(S\)</span></p></th>
+<th class="head"><p>3D</p></th>
+<th class="head"><p>FSDT-K1</p></th>
+<th class="head"><p>FSDT-K56</p></th>
+<th class="head"><p>FSDT-VLA</p></th>
+<th class="head"><p>FSDT-ROH</p></th>
+<th class="head"><p>FSDT-BB</p></th>
+<th class="head"><p>FSDT-TSF</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>0.1399</p></td>
+<td><p>0.1050 (-24.9%)</p></td>
+<td><p>0.1088 (-22.2%)</p></td>
+<td><p>0.1525 (+9.0%)</p></td>
+<td><p>0.1525 (+9.0%)</p></td>
+<td><p>0.1501 (+7.4%)</p></td>
+<td><p>0.1535 (+9.8%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>0.1072</p></td>
+<td><p>0.0702 (-34.5%)</p></td>
+<td><p>0.0748 (-30.2%)</p></td>
+<td><p>0.1096 (+2.2%)</p></td>
+<td><p>0.1096 (+2.2%)</p></td>
+<td><p>0.1059 (-1.2%)</p></td>
+<td><p>0.1105 (+3.1%)</p></td>
+</tr>
+<tr class="row-even"><td><p>10</p></td>
+<td><p>0.0527</p></td>
+<td><p>0.0392 (-25.7%)</p></td>
+<td><p>0.0409 (-22.4%)</p></td>
+<td><p>0.0528 (+0.2%)</p></td>
+<td><p>0.0528 (+0.2%)</p></td>
+<td><p>0.0510 (-3.3%)</p></td>
+<td><p>0.0532 (+0.9%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>20</p></td>
+<td><p>0.0361</p></td>
+<td><p>0.0321 (-10.9%)</p></td>
+<td><p>0.0326 (-9.5%)</p></td>
+<td><p>0.0361 (+0.2%)</p></td>
+<td><p>0.0361 (+0.2%)</p></td>
+<td><p>0.0356 (-1.4%)</p></td>
+<td><p>0.0363 (+0.5%)</p></td>
+</tr>
+<tr class="row-even"><td><p>50</p></td>
+<td><p>0.0306</p></td>
+<td><p>0.0300 (-1.9%)</p></td>
+<td><p>0.0301 (-1.7%)</p></td>
+<td><p>0.0307 (+0.3%)</p></td>
+<td><p>0.0307 (+0.3%)</p></td>
+<td><p>0.0306 (-0.0%)</p></td>
+<td><p>0.0307 (+0.3%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>100</p></td>
+<td><p>0.0297</p></td>
+<td><p>0.0297 (-0.3%)</p></td>
+<td><p>0.0297 (-0.2%)</p></td>
+<td><p>0.0298 (+0.3%)</p></td>
+<td><p>0.0298 (+0.3%)</p></td>
+<td><p>0.0298 (+0.2%)</p></td>
+<td><p>0.0298 (+0.3%)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for case in CASES:
+    for comp in ('txz', 'tyz'):
+        cols = {'FSDT-' + k: [pct(res['%s S%d' % (case, S)]['FSDT-' + k][comp], res['%s S%d' % (case, S)]['3D'][comp])
+                              for S in SLENDERNESS if S &gt;= 4] for k in SCFS}
+        display(Markdown('**%s, %s, $S \\ge 4$**' % (case, comp)))
+        display(Markdown(su.stats_table(cols)))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>square, txz, :math:`S ge 4`</strong></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>model</p></th>
+<th class="head"><p>max abs. diff. (%)</p></th>
+<th class="head"><p>mean abs. diff. (%)</p></th>
+<th class="head"><p>range (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>FSDT-K1</p></td>
+<td><p>32.8</p></td>
+<td><p>8.3</p></td>
+<td><p>-0.3 to +32.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-K56</p></td>
+<td><p>30.4</p></td>
+<td><p>7.6</p></td>
+<td><p>-0.3 to +30.4</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-VLA</p></td>
+<td><p>21.4</p></td>
+<td><p>5.3</p></td>
+<td><p>-0.4 to +21.4</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-ROH</p></td>
+<td><p>21.4</p></td>
+<td><p>5.4</p></td>
+<td><p>-0.4 to +21.4</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-BB</p></td>
+<td><p>24.1</p></td>
+<td><p>6.1</p></td>
+<td><p>-0.3 to +24.1</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-TSF</p></td>
+<td><p>18.0</p></td>
+<td><p>4.5</p></td>
+<td><p>-0.4 to +18.0</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>square, tyz, :math:`S ge 4`</strong></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>model</p></th>
+<th class="head"><p>max abs. diff. (%)</p></th>
+<th class="head"><p>mean abs. diff. (%)</p></th>
+<th class="head"><p>range (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>FSDT-K1</p></td>
+<td><p>23.6</p></td>
+<td><p>13.7</p></td>
+<td><p>-1.3 to +23.6</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-K56</p></td>
+<td><p>23.7</p></td>
+<td><p>15.5</p></td>
+<td><p>+4.7 to +23.7</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-VLA</p></td>
+<td><p>27.0</p></td>
+<td><p>23.5</p></td>
+<td><p>+20.6 to +27.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-ROH</p></td>
+<td><p>27.0</p></td>
+<td><p>23.5</p></td>
+<td><p>+20.6 to +27.0</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-BB</p></td>
+<td><p>23.8</p></td>
+<td><p>20.3</p></td>
+<td><p>+14.3 to +23.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-TSF</p></td>
+<td><p>35.5</p></td>
+<td><p>26.5</p></td>
+<td><p>+24.0 to +35.5</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>b = 3a, txz, :math:`S ge 4`</strong></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>model</p></th>
+<th class="head"><p>max abs. diff. (%)</p></th>
+<th class="head"><p>mean abs. diff. (%)</p></th>
+<th class="head"><p>range (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>FSDT-K1</p></td>
+<td><p>24.1</p></td>
+<td><p>5.9</p></td>
+<td><p>-0.0 to +24.1</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-K56</p></td>
+<td><p>23.9</p></td>
+<td><p>5.9</p></td>
+<td><p>-0.0 to +23.9</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-VLA</p></td>
+<td><p>23.4</p></td>
+<td><p>5.8</p></td>
+<td><p>-0.0 to +23.4</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-ROH</p></td>
+<td><p>23.4</p></td>
+<td><p>5.8</p></td>
+<td><p>-0.0 to +23.4</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-BB</p></td>
+<td><p>23.7</p></td>
+<td><p>5.8</p></td>
+<td><p>-0.0 to +23.7</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-TSF</p></td>
+<td><p>23.2</p></td>
+<td><p>5.7</p></td>
+<td><p>-0.0 to +23.2</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>b = 3a, tyz, :math:`S ge 4`</strong></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>model</p></th>
+<th class="head"><p>max abs. diff. (%)</p></th>
+<th class="head"><p>mean abs. diff. (%)</p></th>
+<th class="head"><p>range (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>FSDT-K1</p></td>
+<td><p>70.7</p></td>
+<td><p>54.7</p></td>
+<td><p>+22.8 to +70.7</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-K56</p></td>
+<td><p>70.8</p></td>
+<td><p>58.5</p></td>
+<td><p>+34.5 to +70.8</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-VLA</p></td>
+<td><p>71.0</p></td>
+<td><p>69.6</p></td>
+<td><p>+66.8 to +71.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-ROH</p></td>
+<td><p>71.0</p></td>
+<td><p>69.6</p></td>
+<td><p>+66.8 to +71.0</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-BB</p></td>
+<td><p>70.9</p></td>
+<td><p>63.3</p></td>
+<td><p>+51.0 to +70.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-TSF</p></td>
+<td><p>83.2</p></td>
+<td><p>73.6</p></td>
+<td><p>+71.0 to +83.2</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>sandwich, txz, :math:`S ge 4`</strong></p>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>model</p></th>
+<th class="head"><p>max abs. diff. (%)</p></th>
+<th class="head"><p>mean abs. diff. (%)</p></th>
+<th class="head"><p>range (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>FSDT-K1</p></td>
+<td><p>19.2</p></td>
+<td><p>5.1</p></td>
+<td><p>-0.1 to +19.2</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-K56</p></td>
+<td><p>17.3</p></td>
+<td><p>4.6</p></td>
+<td><p>-0.1 to +17.3</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-VLA</p></td>
+<td><p>3.1</p></td>
+<td><p>0.8</p></td>
+<td><p>-0.1 to +3.1</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-ROH</p></td>
+<td><p>3.1</p></td>
+<td><p>0.8</p></td>
+<td><p>-0.1 to +3.1</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-BB</p></td>
+<td><p>4.6</p></td>
+<td><p>1.2</p></td>
+<td><p>-0.1 to +4.6</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-TSF</p></td>
+<td><p>2.7</p></td>
+<td><p>0.7</p></td>
+<td><p>-0.1 to +2.7</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>sandwich, tyz, :math:`S ge 4`</strong></p>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>model</p></th>
+<th class="head"><p>max abs. diff. (%)</p></th>
+<th class="head"><p>mean abs. diff. (%)</p></th>
+<th class="head"><p>range (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>FSDT-K1</p></td>
+<td><p>34.5</p></td>
+<td><p>14.7</p></td>
+<td><p>-34.5 to -0.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-K56</p></td>
+<td><p>30.2</p></td>
+<td><p>12.8</p></td>
+<td><p>-30.2 to -0.2</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-VLA</p></td>
+<td><p>2.2</p></td>
+<td><p>0.7</p></td>
+<td><p>+0.2 to +2.2</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-ROH</p></td>
+<td><p>2.2</p></td>
+<td><p>0.7</p></td>
+<td><p>+0.2 to +2.2</p></td>
+</tr>
+<tr class="row-even"><td><p>FSDT-BB</p></td>
+<td><p>3.3</p></td>
+<td><p>1.2</p></td>
+<td><p>-3.3 to +0.2</p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT-TSF</p></td>
+<td><p>3.1</p></td>
+<td><p>1.0</p></td>
+<td><p>+0.3 to +3.1</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The recovered <span class="math notranslate nohighlight">\(\tau_{yz}(a/2, 0, 0)\)</span> of the <span class="math notranslate nohighlight">\([0/90/0]\)</span> plates remains 24% (square) and 71% (<span class="math notranslate nohighlight">\(b = 3a\)</span>) above the 3D value in the thin limit, where all corrections agree. The shear forces of the FSDT are not the cause: the next table compares the shear forces of <code class="docutils literal notranslate"><span class="pre">FSDT-ROH</span></code>, <span class="math notranslate nohighlight">\(Q_x(0, b/2)\)</span> and <span class="math notranslate nohighlight">\(Q_y(a/2, 0)\)</span>, with the resultants of the 3D stresses, and the mid-plane stress per unit shear force, <span class="math notranslate nohighlight">\(\tau(0) h/Q\)</span>, of the 3D solution with that of the equilibrium
+distribution, which does not depend on <span class="math notranslate nohighlight">\(S\)</span>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rows = []
+for case in CASES:
+    stack, plyts, lps = laminate(case, 1.)[:3]
+    lam = laminated_plate(stack, plyts=plyts, laminaprops=lps)
+    eq_xz = lam.calc_transverse_shear_stress(0., 0., 1.)[1]
+    eq_yz = lam.calc_transverse_shear_stress(0., 1., 0.)[0]
+    for S in (4, 10, 100):
+        r = res['%s S%d' % (case, S)]
+        d, f = r['3D'], r['FSDT-ROH']
+        # tau h/Q = (tau/(q0 S)) (q0 S h)/Q, with a = 1 and h = 1/S
+        rows.append([case, S, '%+.2f%%' % pct(f['Qx'], d['Qx']), '%+.2f%%' % pct(f['Qy'], d['Qy']),
+                     '%.3f / %.3f' % (d['txz']/d['Qx'], eq_xz), '%.3f / %.3f' % (d['tyz']/d['Qy'], eq_yz)])
+display(Markdown(markdown_table(['laminate', '$S$', '$Q_x$, FSDT-ROH vs 3D', '$Q_y$, FSDT-ROH vs 3D',
+                                 '$\\tau_{xz}(0) h/Q_x$: 3D / equilibrium', '$\\tau_{yz}(0) h/Q_y$: 3D / equilibrium'], rows)))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>laminate</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(S\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(Q_x\)</span>, FSDT-ROH vs 3D</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(Q_y\)</span>, FSDT-ROH vs 3D</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\tau_{xz}(0) h/Q_x\)</span>: 3D / equilibrium</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\tau_{yz}(0) h/Q_y\)</span>: 3D / equilibrium</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>square</p></td>
+<td><p>4</p></td>
+<td><p>-1.37%</p></td>
+<td><p>+3.39%</p></td>
+<td><p>1.128 / 1.389</p></td>
+<td><p>2.373 / 2.914</p></td>
+</tr>
+<tr class="row-odd"><td><p>square</p></td>
+<td><p>10</p></td>
+<td><p>+0.09%</p></td>
+<td><p>-0.48%</p></td>
+<td><p>1.337 / 1.389</p></td>
+<td><p>2.405 / 2.914</p></td>
+</tr>
+<tr class="row-even"><td><p>square</p></td>
+<td><p>100</p></td>
+<td><p>+0.00%</p></td>
+<td><p>-0.02%</p></td>
+<td><p>1.394 / 1.389</p></td>
+<td><p>2.351 / 2.914</p></td>
+</tr>
+<tr class="row-odd"><td><p>b = 3a</p></td>
+<td><p>4</p></td>
+<td><p>-0.04%</p></td>
+<td><p>+1.95%</p></td>
+<td><p>1.125 / 1.389</p></td>
+<td><p>1.746 / 2.914</p></td>
+</tr>
+<tr class="row-even"><td><p>b = 3a</p></td>
+<td><p>10</p></td>
+<td><p>+0.01%</p></td>
+<td><p>-1.53%</p></td>
+<td><p>1.332 / 1.389</p></td>
+<td><p>1.720 / 2.914</p></td>
+</tr>
+<tr class="row-odd"><td><p>b = 3a</p></td>
+<td><p>100</p></td>
+<td><p>+0.00%</p></td>
+<td><p>-0.03%</p></td>
+<td><p>1.389 / 1.389</p></td>
+<td><p>1.704 / 2.914</p></td>
+</tr>
+<tr class="row-even"><td><p>sandwich</p></td>
+<td><p>4</p></td>
+<td><p>-0.52%</p></td>
+<td><p>+1.22%</p></td>
+<td><p>1.069 / 1.108</p></td>
+<td><p>1.128 / 1.139</p></td>
+</tr>
+<tr class="row-odd"><td><p>sandwich</p></td>
+<td><p>10</p></td>
+<td><p>+0.04%</p></td>
+<td><p>-0.24%</p></td>
+<td><p>1.103 / 1.108</p></td>
+<td><p>1.134 / 1.139</p></td>
+</tr>
+<tr class="row-even"><td><p>sandwich</p></td>
+<td><p>100</p></td>
+<td><p>+0.00%</p></td>
+<td><p>-0.01%</p></td>
+<td><p>1.109 / 1.108</p></td>
+<td><p>1.136 / 1.139</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<section id="Through-thickness-distributions">
+<h3>Through-thickness distributions<a class="headerlink" href="#Through-thickness-distributions" title="Link to this heading">#</a></h3>
+<p>The shapes of the transverse shear stresses through the thickness at <span class="math notranslate nohighlight">\(S = 10\)</span>, all scaled to the shear force <span class="math notranslate nohighlight">\(Q\)</span> of the 3D solution, <span class="math notranslate nohighlight">\(\tau h/Q\)</span>: the 3D solution; the equilibrium distribution of Rohwer (1988), <code class="docutils literal notranslate"><span class="pre">calc_transverse_shear_stress</span></code>, which underlies the static shear correction of <code class="docutils literal notranslate"><span class="pre">'rohwer'</span></code> and is used above for the recovery; the piecewise constant distribution of the FSDT, <span class="math notranslate nohighlight">\(C_{s}^{(k)}\gamma\)</span>; and that of the TSDT, <span class="math notranslate nohighlight">\(C_{s}^{(k)}(1 - 4z^2/h^2)\gamma\)</span>. They
+are computed here directly, without panels.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>S = 10
+a = b = 1.
+h = a/S
+fig, axes = plt.subplots(1, 4, figsize=(13, 4.2), sharey=True)
+for i, case in enumerate(('square', 'sandwich')):
+    stack, plyts, lps, rhos, Cs = laminate(case, h)
+    sol = Pagano1970(a, b, Cs, plyts)
+    lam = laminated_plate(stack, plyts=plyts, laminaprops=lps, shear_correction='rohwer')
+    zi = -h/2 + np.concatenate(([0.], np.cumsum(plyts)))
+    z = np.concatenate([np.linspace(zi[k], zi[k+1], 60) for k in range(len(plyts))])
+    layer = np.minimum(np.searchsorted(zi, z, side='right') - 1, len(plyts) - 1)
+    for j, (comp, x, y) in enumerate((('xz', 0., b/2), ('yz', a/2, 0.))):
+        ax = axes[2*i + j]
+        idx = 4 if comp == 'xz' else 3
+        t3d = np.array([sol.stresses(x, y, zz)[idx] for zz in z])
+        Q = np.trapezoid(t3d, z)
+        if comp == 'xz':
+            teq = np.array([lam.calc_transverse_shear_stress(zz, 0., Q)[1] for zz in z])
+        else:
+            teq = np.array([lam.calc_transverse_shear_stress(zz, Q, 0.)[0] for zz in z])
+        G = np.array([Cs[k][4, 4] if comp == 'xz' else Cs[k][3, 3] for k in layer])
+        fsdt = G*Q/np.trapezoid(G, z)
+        shape = G*(1 - 4*z**2/h**2)
+        tsdt = shape*Q/np.trapezoid(shape, z)
+        ax.plot(t3d*h/Q, z/h, 'k-', lw=2, label='3D (Pagano)')
+        ax.plot(teq*h/Q, z/h, color='tab:blue', ls='--', label='equilibrium (Rohwer)')
+        ax.plot(fsdt*h/Q, z/h, color='tab:red', label='FSDT, $C_s^{(k)}\\gamma$')
+        ax.plot(tsdt*h/Q, z/h, color='0.4', ls=':', label='TSDT')
+        for zz in zi[1:-1]:
+            ax.axhline(zz/h, color='0.7', lw=0.5)
+        tex = '\\tau_{xz}' if comp == 'xz' else '\\tau_{yz}'
+        ax.set_title('%s, $%s$, S = %d' % ('[0/90/0]' if case == 'square' else 'sandwich', tex, S))
+        ax.set_xlabel('$%s h/Q$' % tex)
+        print('%-8s %s: max |equilibrium - 3D| = %.3f Q/h, max 3D = %.3f Q/h'
+              % (case, comp, np.abs(teq - t3d).max()*h/Q, t3d.max()*h/Q))
+axes[0].set_ylabel('$z/h$')
+axes[0].set_ylim(-0.5, 0.5)
+axes[-1].legend(fontsize=8, loc='lower right')
+plt.tight_layout()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+square   xz: max |equilibrium - 3D| = 0.061 Q/h, max 3D = 1.337 Q/h
+square   yz: max |equilibrium - 3D| = 0.509 Q/h, max 3D = 2.405 Q/h
+sandwich xz: max |equilibrium - 3D| = 0.043 Q/h, max 3D = 1.103 Q/h
+sandwich yz: max |equilibrium - 3D| = 0.014 Q/h, max 3D = 1.134 Q/h
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_pagano1970_plates_21_1.png" src="../_images/notebooks_pagano1970_plates_21_1.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="Discussion">
+<h2>Discussion<a class="headerlink" href="#Discussion" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Exact solution.</strong> <code class="docutils literal notranslate"><span class="pre">pagano1970.py</span></code> reproduces every value of Tables 1-3 of Pagano (1970) within 0.93 units of the last printed digit, which validates the 3D reference, including the deflections of the square plates and of the sandwich that the paper does not print.</p></li>
+<li><p><strong>Thin limit.</strong> For <span class="math notranslate nohighlight">\(S \ge 50\)</span> all models but the CLPT are within 1.4% of the 3D deflection for the <span class="math notranslate nohighlight">\([0/90/0]\)</span> plates and 3.6% for the sandwich; <code class="docutils literal notranslate"><span class="pre">FSDT-ROH</span></code> and <code class="docutils literal notranslate"><span class="pre">FSDT-VLA</span></code> are the closest, within 0.05%. At <span class="math notranslate nohighlight">\(S = 20\)</span> they are within 0.2% for the three laminates, against <span class="math notranslate nohighlight">\(-4.7\%\)</span> to <span class="math notranslate nohighlight">\(-5.1\%\)</span> of <code class="docutils literal notranslate"><span class="pre">FSDT-K56</span></code> for the <span class="math notranslate nohighlight">\([0/90/0]\)</span> plates and <span class="math notranslate nohighlight">\(-14.2\%\)</span> for the sandwich.</p></li>
+<li><p><strong>Static corrections.</strong> <code class="docutils literal notranslate"><span class="pre">'rohwer'</span></code> and <code class="docutils literal notranslate"><span class="pre">'vlachoutsis'</span></code> give the same factors (<span class="math notranslate nohighlight">\(\kappa_{13}, \kappa_{23}\)</span> = 0.5828, 0.802 for <span class="math notranslate nohighlight">\([0/90/0]\)</span>, 0.4094, 0.6720 for the sandwich) and deflections within 0.01%. They are the best FSDT for <span class="math notranslate nohighlight">\(S \ge 10\)</span>: +1.4% at <span class="math notranslate nohighlight">\(S = 10\)</span> for both <span class="math notranslate nohighlight">\([0/90/0]\)</span> plates and +0.5% for the sandwich. For the thick plates they overestimate the deflection, +10.5% to +11.7% at <span class="math notranslate nohighlight">\(S = 4\)</span> and +28% to +33% at <span class="math notranslate nohighlight">\(S = 2\)</span> for <span class="math notranslate nohighlight">\([0/90/0]\)</span>, +3.2%
+and +11.3% for the sandwich, since the transverse normal strain and the warping of the thick plates are outside the FSDT.</p></li>
+<li><p><strong>Constant factors.</strong> <span class="math notranslate nohighlight">\(\kappa = 5/6\)</span> is <span class="math notranslate nohighlight">\(-11.1\%\)</span> (<span class="math notranslate nohighlight">\(S = 10\)</span>) to <span class="math notranslate nohighlight">\(-11.5\%\)</span> (<span class="math notranslate nohighlight">\(S = 4\)</span>) off for the square <span class="math notranslate nohighlight">\([0/90/0]\)</span> plate and <span class="math notranslate nohighlight">\(-12.6\%\)</span> to <span class="math notranslate nohighlight">\(-16.3\%\)</span> for <span class="math notranslate nohighlight">\(b = 3a\)</span>; for the sandwich, whose shear stiffness <span class="math notranslate nohighlight">\(\bar{A}_{ts}\)</span> is dominated by the faces, it is <span class="math notranslate nohighlight">\(-29\%\)</span> to <span class="math notranslate nohighlight">\(-37\%\)</span> off for <span class="math notranslate nohighlight">\(S \le 10\)</span> and still <span class="math notranslate nohighlight">\(-14\%\)</span> at <span class="math notranslate nohighlight">\(S = 20\)</span>. <span class="math notranslate nohighlight">\(\kappa = 1\)</span> is worse in all cases. Its value <span class="math notranslate nohighlight">\(+2.6\%\)</span> at <span class="math notranslate nohighlight">\(S = 2\)</span> for
+the square plate is a compensation of errors.</p></li>
+<li><p><strong>Other corrections.</strong> <code class="docutils literal notranslate"><span class="pre">'birman_bert'</span></code> (<span class="math notranslate nohighlight">\(\kappa_{23} = 1.18\)</span> for <span class="math notranslate nohighlight">\([0/90/0]\)</span>) is within <span class="math notranslate nohighlight">\(-7.7\%\)</span> to <span class="math notranslate nohighlight">\(+1.2\%\)</span> (square), <span class="math notranslate nohighlight">\(-8.4\%\)</span> to <span class="math notranslate nohighlight">\(+6.4\%\)</span> (<span class="math notranslate nohighlight">\(b = 3a\)</span>) and <span class="math notranslate nohighlight">\(-4.8\%\)</span> to <span class="math notranslate nohighlight">\(+2.4\%\)</span> (sandwich) for <span class="math notranslate nohighlight">\(S \le 10\)</span>, the smallest maximum error of the FSDT for the thick plates, but it is <span class="math notranslate nohighlight">\(-3.3\%\)</span> to <span class="math notranslate nohighlight">\(-3.5\%\)</span> off at <span class="math notranslate nohighlight">\(S = 20\)</span> for <span class="math notranslate nohighlight">\([0/90/0]\)</span> where the static corrections are exact. <code class="docutils literal notranslate"><span class="pre">'thickness_shear'</span></code> is the most flexible:
+<span class="math notranslate nohighlight">\(+5.4\%\)</span> to <span class="math notranslate nohighlight">\(+6.0\%\)</span> at <span class="math notranslate nohighlight">\(S = 10\)</span> for <span class="math notranslate nohighlight">\([0/90/0]\)</span> and +1.4% for the sandwich.</p></li>
+<li><p><strong>TSDT.</strong> The third-order theory, with its single parabola through the thickness, is within <span class="math notranslate nohighlight">\(-6.7\%\)</span> to <span class="math notranslate nohighlight">\(+0.7\%\)</span> for all <span class="math notranslate nohighlight">\(S\)</span>, but it does not converge to the 3D solution as fast as the static corrections: <span class="math notranslate nohighlight">\(-5.4\%\)</span> to <span class="math notranslate nohighlight">\(-6.2\%\)</span> at <span class="math notranslate nohighlight">\(S = 10\)</span> and <span class="math notranslate nohighlight">\(-2.4\%\)</span> to <span class="math notranslate nohighlight">\(-3.2\%\)</span> at <span class="math notranslate nohighlight">\(S = 20\)</span>.</p></li>
+<li><p><strong>Transverse shear stresses.</strong> The recovery with the equilibrium distribution of Rohwer from the FSDT shear forces gives <span class="math notranslate nohighlight">\(\tau_{xz}(0, b/2, 0)\)</span> within 1.1% of 3D for <span class="math notranslate nohighlight">\(S \ge 20\)</span> and within +4.0% (square), +4.3% (<span class="math notranslate nohighlight">\(b = 3a\)</span>) and +0.5% (sandwich) at <span class="math notranslate nohighlight">\(S = 10\)</span> with <code class="docutils literal notranslate"><span class="pre">FSDT-ROH</span></code>; for <span class="math notranslate nohighlight">\(S \le 4\)</span> the 3D distribution is no longer the one of the cylindrical bending, <span class="math notranslate nohighlight">\(+21\%\)</span> to <span class="math notranslate nohighlight">\(+64\%\)</span> at <span class="math notranslate nohighlight">\(S = 2\)</span>-4 for <span class="math notranslate nohighlight">\([0/90/0]\)</span>. For the sandwich, <code class="docutils literal notranslate"><span class="pre">FSDT-ROH</span></code> recovers
+both shear stresses within 0.5% for <span class="math notranslate nohighlight">\(S \ge 10\)</span> and 3.1% at <span class="math notranslate nohighlight">\(S = 4\)</span>; <span class="math notranslate nohighlight">\(\kappa = 1\)</span> and <span class="math notranslate nohighlight">\(5/6\)</span> give <span class="math notranslate nohighlight">\(\tau_{yz}\)</span> 22% to 35% too low for <span class="math notranslate nohighlight">\(S \le 10\)</span>. For <span class="math notranslate nohighlight">\([0/90/0]\)</span>, <span class="math notranslate nohighlight">\(\tau_{yz}(a/2, 0, 0)\)</span> remains 24% (square) and 71% (<span class="math notranslate nohighlight">\(b = 3a\)</span>) too high even in the thin limit, for all corrections, although the shear force <span class="math notranslate nohighlight">\(Q_y\)</span> of the FSDT agrees with the 3D resultant within 0.03% at <span class="math notranslate nohighlight">\(S = 100\)</span>: the 3D distribution of <span class="math notranslate nohighlight">\(\tau_{yz}\)</span>, with the stiff
+90 deg ply in the middle, is not the one of the cylindrical bending assumed by the equilibrium approach (<span class="math notranslate nohighlight">\(\tau_{yz}(0) h/Q_y\)</span> = 2.35 and 1.70 in 3D against 2.91), because of the twisting moment and of the bending in the other direction.</p></li>
+<li><p><strong>Through-thickness shapes.</strong> At <span class="math notranslate nohighlight">\(S = 10\)</span> the equilibrium distribution follows the 3D one within 0.06 <span class="math notranslate nohighlight">\(Q/h\)</span> for <span class="math notranslate nohighlight">\(\tau_{xz}\)</span> of <span class="math notranslate nohighlight">\([0/90/0]\)</span> and within 0.04 and 0.01 <span class="math notranslate nohighlight">\(Q/h\)</span> for the sandwich, while the piecewise constant stress <span class="math notranslate nohighlight">\(C_s^{(k)}\gamma\)</span> of the FSDT and the shape of the TSDT are far from it, in particular in the core of the sandwich, where the TSDT shape has a parabolic variation that the 3D solution does not show.</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="ex_stiffpanelbay.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Stiffened panel bays</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="varadan1991_cylinders.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#The-exact-solution">The exact solution</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#panels-model">panels model</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Shear-correction-factors">Shear correction factors</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Central-deflection">Central deflection</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Summary-of-the-differences-to-3D">Summary of the differences to 3D</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Transverse-shear-stresses">Transverse shear stresses</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Through-thickness-distributions">Through-thickness distributions</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Discussion">Discussion</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/notebooks/pagano1970_plates.nblink.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

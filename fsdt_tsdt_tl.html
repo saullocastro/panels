@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Total-Lagrangian shear deformable models &#8212; panels 0.16.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="_static/documentation_options.js?v=7de89ed4"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'fsdt_tsdt_tl';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Annular-sector plates" href="annular_clpt.html" />
+    <link rel="prev" title="Shear deformable models with Green-Lagrange membrane strains" href="fsdt_tsdt_gl.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.16.0" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.16.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Total-Lagrangian shear deformable models</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="total-lagrangian-shear-deformable-models">
+<span id="fsdt-tsdt-tl"></span><h1>Total-Lagrangian shear deformable models<a class="headerlink" href="#total-lagrangian-shear-deformable-models" title="Link to this heading">#</a></h1>
+<p>The models <code class="docutils literal notranslate"><span class="pre">'plate_fsdt_tl'</span></code> and <code class="docutils literal notranslate"><span class="pre">'cylshell_fsdt_tl'</span></code> keep the complete
+Green-Lagrange membrane strains of <code class="docutils literal notranslate"><span class="pre">'plate_fsdt_gl'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">'cylshell_fsdt_gl'</span></code> (see <a class="reference internal" href="fsdt_tsdt_gl.html#fsdt-tsdt-gl"><span class="std std-ref">Shear deformable models with Green-Lagrange membrane strains</span></a>) and measure the bending
+and transverse shear strains with a director that rotates with the
+deformation, as <code class="docutils literal notranslate"><span class="pre">'plate_clpt_tl'</span></code> and <code class="docutils literal notranslate"><span class="pre">'cylshell_clpt_tl'</span></code> measure the
+curvatures with the deformed normal. The degrees of freedom of a term are
+those of the first-order shear deformation theory (FSDT), <span class="math notranslate nohighlight">\(u, v, w,
+\phi_x, \phi_y\)</span>. The models <code class="docutils literal notranslate"><span class="pre">'plate_tsdt_tl'</span></code> and <code class="docutils literal notranslate"><span class="pre">'cylshell_tsdt_tl'</span></code>
+extend them to the third-order shear deformation theory (TSDT) of Reddy
+<a class="reference internal" href="ref.html#reddy1984higherorder" id="id1"><span>[reddy1984HigherOrder]</span></a>, <a class="reference internal" href="ref.html#reddy1985shells" id="id2"><span>[reddy1985Shells]</span></a>, with the same degrees of
+freedom, see <a class="reference internal" href="#tsdt-tl"><span class="std std-ref">Third-order shear deformation theory</span></a>.</p>
+<section id="moderate-rotation-kinematics">
+<h2>Moderate rotation kinematics<a class="headerlink" href="#moderate-rotation-kinematics" title="Link to this heading">#</a></h2>
+<p>The displacement field is that of the moderate rotation theory of Schmidt
+and Reddy <a class="reference internal" href="ref.html#schmidt1988refined" id="id3"><span>[schmidt1988Refined]</span></a>, Eq. (16), and Palmerio, Reddy and Schmidt
+<a class="reference internal" href="ref.html#palmerio1990moderate" id="id4"><span>[palmerio1990Moderate]</span></a>, Eq. (16), linear through the thickness:</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{u}(z) = \mathbf{u}^{(0)} + z \, \mathbf{u}^{(1)}\]</div>
+<p>with the mid-surface displacements <span class="math notranslate nohighlight">\(\mathbf{u}^{(0)} = (u, v, w)\)</span> and the
+components <span class="math notranslate nohighlight">\(u^{(1)}_\alpha\)</span> and <span class="math notranslate nohighlight">\(u^{(1)}_3\)</span> of the change of the normal.
+Strains of order <span class="math notranslate nohighlight">\(\epsilon^2\)</span>, rotations of the normal of order <span class="math notranslate nohighlight">\(\epsilon\)</span>
+and rotations about the normal of order <span class="math notranslate nohighlight">\(\epsilon^2\)</span>
+(<a class="reference internal" href="ref.html#palmerio1990moderate" id="id5"><span>[palmerio1990Moderate]</span></a>, Eqs. (9) and (18)) lead to strains of the
+Green-Lagrange tensor kept to <span class="math notranslate nohighlight">\(O(\epsilon^3)\)</span>, Eq. (20) of
+<a class="reference internal" href="ref.html#palmerio1990moderate" id="id6"><span>[palmerio1990Moderate]</span></a>, among which the transverse normal strain</p>
+<div class="math notranslate nohighlight">
+\[E^{(0)}_{33} = u^{(1)}_3 + \frac{1}{2} u^{(1)}_\lambda u^{(1)\lambda}\]</div>
+<p>The theory of <a class="reference internal" href="ref.html#schmidt1988refined" id="id7"><span>[schmidt1988Refined]</span></a> keeps <span class="math notranslate nohighlight">\(u^{(1)}_3\)</span> as an unknown and
+does not assume that the normal is inextensible (p. 613 there). The models
+of panels set <span class="math notranslate nohighlight">\(E^{(0)}_{33} = 0\)</span>, so that <span class="math notranslate nohighlight">\(u^{(1)}_3 = -(\psi_x^2 +
+\psi_y^2)/2\)</span>, with <span class="math notranslate nohighlight">\(\psi_\alpha = u^{(1)}_\alpha\)</span>, and the deformed position
+of the point at <span class="math notranslate nohighlight">\(z\)</span> is <span class="math notranslate nohighlight">\(\mathbf{X} + z \mathbf{d}\)</span>, with the second-order
+director</p>
+<div class="math notranslate nohighlight" id="equation-fsdt-tl-director">
+<span class="eqno">(1)<a class="headerlink" href="#equation-fsdt-tl-director" title="Link to this equation">#</a></span>\[\mathbf{d} = \psi_x \mathbf{e}_x + \psi_y \mathbf{e}_y + \left(1 -
+\frac{1}{2}(\psi_x^2 + \psi_y^2)\right) \mathbf{e}_z, \qquad
+|\mathbf{d}|^2 = 1 + \frac{1}{4}(\psi_x^2 + \psi_y^2)^2\]</div>
+<p>in the local basis of the mid-surface, <span class="math notranslate nohighlight">\(\mathbf{e}_{y,y} =
+-\mathbf{e}_z/r\)</span>, <span class="math notranslate nohighlight">\(\mathbf{e}_{z,y} = \mathbf{e}_y/r\)</span> for the cylinder and
+<span class="math notranslate nohighlight">\(1/r = 0\)</span> for the plate.</p>
+<p>The components <span class="math notranslate nohighlight">\(\psi_\alpha\)</span> follow from the linear part of the transverse
+shear strain of <a class="reference internal" href="ref.html#palmerio1990moderate" id="id8"><span>[palmerio1990Moderate]</span></a>, Eq. (20), <span class="math notranslate nohighlight">\(2 E^{(0)}_{\alpha 3} =
+\Phi^{(0)}_{\alpha 3} + u^{(1)}_\alpha + \ldots\)</span>, with
+<span class="math notranslate nohighlight">\(\Phi^{(0)}_{\alpha 3} = u_{3,\alpha} + b^\lambda_\alpha u_\lambda\)</span>, Eq.
+(15c). For the cylinder, <span class="math notranslate nohighlight">\(b^y_y = -1/r\)</span> with <span class="math notranslate nohighlight">\(w\)</span> positive outwards, so
+<span class="math notranslate nohighlight">\(\Phi^{(0)}_{y3} = w_{,y} - v/r\)</span>, and the transverse shear strain of the FSDT
+with the Sanders-Koiter kinematics, <span class="math notranslate nohighlight">\(\gamma_{yz} = \phi_y + w_{,y}\)</span>, gives</p>
+<div class="math notranslate nohighlight">
+\[\psi_x = \phi_x, \qquad \psi_y = \phi_y + \frac{v}{r}\]</div>
+<p>the rotation of the normal of <code class="docutils literal notranslate"><span class="pre">'cylshell_fsdt_sanders'</span></code>, whose
+tangential displacement through the thickness is <span class="math notranslate nohighlight">\((1 + z/r) v + z \phi_y\)</span>.
+For the plate, <span class="math notranslate nohighlight">\(\psi_\alpha = \phi_\alpha\)</span>. With <span class="math notranslate nohighlight">\(\psi_y = \phi_y\)</span> the
+cylinder would not keep a rigid rotation about its axis free of strain,
+where <span class="math notranslate nohighlight">\(\phi_y = 0\)</span> and <span class="math notranslate nohighlight">\(v/r\)</span> is the rotation.</p>
+</section>
+<section id="strains">
+<h2>Strains<a class="headerlink" href="#strains" title="Link to this heading">#</a></h2>
+<p>With the tangent vectors of the deformed mid-surface in the local basis,</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{X}_{,x} = (1 + u_{,x}, \; v_{,x}, \; w_{,x}) \qquad
+\mathbf{X}_{,y} = (u_{,y}, \; 1 + v_{,y} + w/r, \; w_{,y} - v/r)\]</div>
+<p>and the derivatives of the director <span class="math notranslate nohighlight">\(\mathbf{d}_{,x} = (\psi_{x,x},
+\psi_{y,x}, \psi_{z,x})\)</span>, <span class="math notranslate nohighlight">\(\mathbf{d}_{,y} = (\psi_{x,y}, \psi_{y,y} +
+\psi_z/r, \psi_{z,y} - \psi_y/r)\)</span>, <span class="math notranslate nohighlight">\(\psi_z = 1 - (\psi_x^2 + \psi_y^2)/2\)</span>,
+the strains are</p>
+<div class="math notranslate nohighlight" id="equation-fsdt-tl-strains">
+<span class="eqno">(2)<a class="headerlink" href="#equation-fsdt-tl-strains" title="Link to this equation">#</a></span>\[ \begin{align}\begin{aligned}\varepsilon_{xx} = \tfrac{1}{2}(\mathbf{X}_{,x} \cdot \mathbf{X}_{,x} - 1)
+\qquad \varepsilon_{yy} = \tfrac{1}{2}(\mathbf{X}_{,y} \cdot
+\mathbf{X}_{,y} - 1) \qquad \gamma_{xy} = \mathbf{X}_{,x} \cdot
+\mathbf{X}_{,y}\\\kappa_{xx} = \mathbf{X}_{,x} \cdot \mathbf{d}_{,x} \qquad
+\kappa_{yy} = \mathbf{X}_{,y} \cdot \mathbf{d}_{,y} - \frac{1}{r} -
+\frac{\varepsilon_{yy}}{r} \qquad
+\kappa_{xy} = \mathbf{X}_{,x} \cdot \mathbf{d}_{,y} + \mathbf{X}_{,y}
+\cdot \mathbf{d}_{,x} - \frac{\gamma_{xy}}{2 r}\\\gamma_{yz} = \mathbf{X}_{,y} \cdot \mathbf{d} \qquad
+\gamma_{xz} = \mathbf{X}_{,x} \cdot \mathbf{d}\end{aligned}\end{align} \]</div>
+<p>cubic polynomials of the derivatives of the displacements and rotations.
+Without the terms <span class="math notranslate nohighlight">\(-\varepsilon_{yy}/r\)</span> and <span class="math notranslate nohighlight">\(-\gamma_{xy}/(2r)\)</span> these are
+the coefficients of <span class="math notranslate nohighlight">\(z^0\)</span> and <span class="math notranslate nohighlight">\(z\)</span> of the Green-Lagrange strains of the
+field <span class="math notranslate nohighlight">\(\mathbf{X} + z \mathbf{d}\)</span>, with the reference vectors
+<span class="math notranslate nohighlight">\(\mathbf{e}_x\)</span> and <span class="math notranslate nohighlight">\((1 + z/r) \mathbf{e}_y\)</span>, and the transverse components
+at the mid-surface. The two terms, Koiter’s modification of the changes of
+curvature <a class="reference internal" href="ref.html#vanderheijden2008koiter" id="id9"><span>[vanderheijden2008Koiter]</span></a>, p. 202, also used by
+<code class="docutils literal notranslate"><span class="pre">'cylshell_clpt_tl'</span></code> (see <a class="reference internal" href="cylshell_clpt_tl.html#cylshell-clpt-tl"><span class="std std-ref">Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells</span></a>), make the linear part
+exactly that of <code class="docutils literal notranslate"><span class="pre">'cylshell_fsdt_sanders'</span></code>, as follows.</p>
+</section>
+<section id="linear-part">
+<h2>Linear part<a class="headerlink" href="#linear-part" title="Link to this heading">#</a></h2>
+<p>With <span class="math notranslate nohighlight">\(\psi_y = \phi_y + v/r\)</span>, <span class="math notranslate nohighlight">\(\psi_z = 1 + O(\psi^2)\)</span>, and keeping the
+terms linear in the displacements and rotations, the dot products of
+<a class="reference internal" href="#equation-fsdt-tl-strains">(2)</a> are</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\mathbf{X}_{,x} \cdot \mathbf{d}_{,x} \approx \phi_{x,x} \qquad
+\mathbf{X}_{,y} \cdot \mathbf{d}_{,y} - \frac{1}{r} \approx
+\psi_{y,y} + \frac{1}{r}\left(v_{,y} + \frac{w}{r}\right) =
+\phi_{y,y} + \frac{v_{,y}}{r} + \frac{\varepsilon^L_{yy}}{r}\\\mathbf{X}_{,x} \cdot \mathbf{d}_{,y} \approx \phi_{x,y} +
+\frac{v_{,x}}{r} \qquad
+\mathbf{X}_{,y} \cdot \mathbf{d}_{,x} \approx \psi_{y,x} = \phi_{y,x} +
+\frac{v_{,x}}{r}\\\mathbf{X}_{,y} \cdot \mathbf{d} \approx \psi_y + w_{,y} - \frac{v}{r}
+= \phi_y + w_{,y} \qquad
+\mathbf{X}_{,x} \cdot \mathbf{d} \approx \phi_x + w_{,x}\end{aligned}\end{align} \]</div>
+<p>with <span class="math notranslate nohighlight">\(\varepsilon^L_{yy} = v_{,y} + w/r\)</span> and <span class="math notranslate nohighlight">\(\gamma^L_{xy} = u_{,y} +
+v_{,x}\)</span> the linear membrane strains. In <span class="math notranslate nohighlight">\(\mathbf{X}_{,y} \cdot
+\mathbf{d}_{,y}\)</span> the reference <span class="math notranslate nohighlight">\(1/r\)</span> and the hoop strain come from <span class="math notranslate nohighlight">\((1 +
+v_{,y} + w/r) \psi_z/r\)</span>; in <span class="math notranslate nohighlight">\(\mathbf{X}_{,x} \cdot \mathbf{d}_{,y}\)</span> the term
+<span class="math notranslate nohighlight">\(v_{,x}/r\)</span> comes from <span class="math notranslate nohighlight">\(v_{,x} \psi_z/r\)</span>. Without the two Koiter terms the
+linear curvatures are those of Sanders plus <span class="math notranslate nohighlight">\((0, \varepsilon^L_{yy}/r,
+\gamma^L_{xy}/(2r))\)</span>; with them</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\kappa^L_{xx} = \phi_{x,x} \qquad
+\kappa^L_{yy} = \phi_{y,y} + \frac{v_{,y}}{r} \qquad
+\kappa^L_{xy} = \phi_{x,y} + \phi_{y,x} + \frac{3}{2} \frac{v_{,x}}{r}
+- \frac{1}{2} \frac{u_{,y}}{r}\\\gamma^L_{yz} = \phi_y + w_{,y} \qquad \gamma^L_{xz} = \phi_x + w_{,x}\end{aligned}\end{align} \]</div>
+<p>the linear strains of <code class="docutils literal notranslate"><span class="pre">'cylshell_fsdt_sanders'</span></code>, whose twist contains the
+rotation about the normal, <span class="math notranslate nohighlight">\((v_{,x} - u_{,y})/(2r)\)</span>. The symbolic check
+<code class="docutils literal notranslate"><span class="pre">check_linear_part</span></code> of the generator of <code class="docutils literal notranslate"><span class="pre">'cylshell_fsdt_tl'</span></code> verifies
+each of these steps and the equality of the linear strain-displacement
+operator with that of <code class="docutils literal notranslate"><span class="pre">'cylshell_fsdt_sanders'</span></code>. The Koiter terms use the
+complete Green-Lagrange strains, which a rigid rotation does not change.
+For the plate, <span class="math notranslate nohighlight">\(1/r = 0\)</span>, the linear part is that of
+<code class="docutils literal notranslate"><span class="pre">'plate_fsdt_donnell'</span></code> (<code class="docutils literal notranslate"><span class="pre">check_linear_part</span></code> of <code class="docutils literal notranslate"><span class="pre">'plate_fsdt_tl'</span></code>).</p>
+</section>
+<section id="dropped-terms">
+<h2>Dropped terms<a class="headerlink" href="#dropped-terms" title="Link to this heading">#</a></h2>
+<p>As in every FSDT
+model of panels, the coefficient of <span class="math notranslate nohighlight">\(z^2\)</span> of the in-plane strains is
+dropped, and so is the coefficient of <span class="math notranslate nohighlight">\(z\)</span> of the transverse shear strains,
+<span class="math notranslate nohighlight">\(\mathbf{d}_{,\alpha} \cdot \mathbf{d} = (\psi_x^2 + \psi_y^2)(\psi_x
+\psi_{x,\alpha} + \psi_y \psi_{y,\alpha})/2\)</span>, of the fourth order.</p>
+</section>
+<section id="comparison-with-the-moderate-rotation-theory">
+<h2>Comparison with the moderate rotation theory<a class="headerlink" href="#comparison-with-the-moderate-rotation-theory" title="Link to this heading">#</a></h2>
+<p>With the orders of magnitude of <a class="reference internal" href="ref.html#palmerio1990moderate" id="id10"><span>[palmerio1990Moderate]</span></a>, the strains
+<a class="reference internal" href="#equation-fsdt-tl-strains">(2)</a> without the two Koiter terms are those of Eq. (20)
+there, with <span class="math notranslate nohighlight">\(E^{(0)}_{33} = 0\)</span>, to <span class="math notranslate nohighlight">\(O(\epsilon^3)\)</span>: the differences are of
+the fourth order, e.g. the quadratic terms of the in-plane gradients in the
+membrane strains, <span class="math notranslate nohighlight">\(u_{,x} \phi_{x,x}\)</span> in <span class="math notranslate nohighlight">\(\kappa_{xx}\)</span> and
+<span class="math notranslate nohighlight">\(u^{(1)}_3 (w_{,x} + \phi_x)/2\)</span> in <span class="math notranslate nohighlight">\(\gamma_{xz}\)</span>. For the plate the
+non-linear terms of the curvatures, among them the cubic terms <span class="math notranslate nohighlight">\(-w_{,x}
+(\phi_x \phi_{x,x} + \phi_y \phi_{y,x})\)</span> from the third component of the
+director, are all of the fourth order once the normal is inextensible, and
+the model differs from <code class="docutils literal notranslate"><span class="pre">'plate_fsdt_gl'</span></code> at <span class="math notranslate nohighlight">\(O(\epsilon^3)\)</span> through the
+transverse shear strains only. For the cylinder the curvatures contain
+quadratic terms of the order of the linear ones, from <span class="math notranslate nohighlight">\(\Phi^{(0)}_{y3}
+\Phi^{(1)}_{y3}\)</span> with <span class="math notranslate nohighlight">\(\Phi^{(1)}_{y3} = u^{(1)}_{3,y} - \psi_y/r\)</span>, which the
+linear curvatures of <code class="docutils literal notranslate"><span class="pre">'cylshell_fsdt_gl'</span></code> lack. The terms beyond
+<span class="math notranslate nohighlight">\(\epsilon^3\)</span> are kept, so that the strains are exact for the field
+<span class="math notranslate nohighlight">\(\mathbf{X} + z \mathbf{d}\)</span>, built from dot products of vectors that a
+rigid rotation turns together.</p>
+</section>
+<section id="rigid-rotations">
+<h2>Rigid rotations<a class="headerlink" href="#rigid-rotations" title="Link to this heading">#</a></h2>
+<p>Under a rigid rotation <span class="math notranslate nohighlight">\(\boldsymbol{R}\)</span> of a deformed state the vectors
+<span class="math notranslate nohighlight">\(\mathbf{X}_{,\alpha}\)</span> turn without change of their dot products, and the
+membrane strains do not change for any angle. The director
+<a class="reference internal" href="#equation-fsdt-tl-director">(1)</a> cannot follow the rotation exactly: with <span class="math notranslate nohighlight">\(\psi\)</span> the
+components of the rotated director, its third component differs from that
+of the unit vector by <span class="math notranslate nohighlight">\((\psi_x^2 + \psi_y^2)^2/8 + \ldots\)</span>, of the fourth
+order in the angle <span class="math notranslate nohighlight">\(t\)</span>. A rigid rotation of the flat plate, with the
+rotations those of the rotated normal, gives zero membrane and bending
+strains and transverse shear strains of <span class="math notranslate nohighlight">\(O(t^5)\)</span>; a rotation of a bent
+plate or of the cylinder changes the curvatures and transverse shear
+strains by <span class="math notranslate nohighlight">\(O(t^4)\)</span>, against <span class="math notranslate nohighlight">\(O(t^2)\)</span>, the factor <span class="math notranslate nohighlight">\(\cos t\)</span>, for the linear
+curvatures of the GL models.</p>
+</section>
+<section id="third-order-shear-deformation-theory">
+<span id="tsdt-tl"></span><h2>Third-order shear deformation theory<a class="headerlink" href="#third-order-shear-deformation-theory" title="Link to this heading">#</a></h2>
+<p>Reddy’s displacement field <a class="reference internal" href="ref.html#reddy1984higherorder" id="id11"><span>[reddy1984HigherOrder]</span></a> adds to the field of the
+FSDT a cubic term that makes the transverse shear strains vanish at the
+faces <span class="math notranslate nohighlight">\(z = \pm h/2\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{u}(z) = \mathbf{u} + z (\phi_x, \phi_y, 0) - c_1 z^3 (\phi_x +
+w_{,x}, \; \phi_y + w_{,y}, \; 0), \qquad c_1 = \frac{4}{3 h^2}\]</div>
+<p>For finite rotations, the vector of the cubic term, <span class="math notranslate nohighlight">\((\phi_x + w_{,x},
+\phi_y + w_{,y}, 0)\)</span>, is read as the linear part of the difference between
+the director <a class="reference internal" href="#equation-fsdt-tl-director">(1)</a> and the normal of the deformed
+mid-surface, not normalized,</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{N} = \mathbf{X}_{,x} \times \mathbf{X}_{,y}\]</div>
+<p>whose linear part is <span class="math notranslate nohighlight">\((-w_{,x}, -w_{,y} + v/r, 1 + u_{,x} + v_{,y} + w/r)\)</span>
+in the local basis. The deformed position of the point at <span class="math notranslate nohighlight">\(z\)</span> of the models
+<code class="docutils literal notranslate"><span class="pre">'plate_tsdt_tl'</span></code> and <code class="docutils literal notranslate"><span class="pre">'cylshell_tsdt_tl'</span></code> is</p>
+<div class="math notranslate nohighlight" id="equation-tsdt-tl-field">
+<span class="eqno">(3)<a class="headerlink" href="#equation-tsdt-tl-field" title="Link to this equation">#</a></span>\[\mathbf{r}(z) = \mathbf{X} + z \mathbf{d} + z^3 \mathbf{q}, \qquad
+\mathbf{q} = -c_1 (\mathbf{d} - \mathbf{N})\]</div>
+<p>Its strains are the coefficients of <span class="math notranslate nohighlight">\(z^0\)</span>, <span class="math notranslate nohighlight">\(z\)</span> and <span class="math notranslate nohighlight">\(z^3\)</span> of the in-plane
+Green-Lagrange strains and of <span class="math notranslate nohighlight">\(z^0\)</span> and <span class="math notranslate nohighlight">\(z^2\)</span> of the transverse shear
+strains, the powers of the linear TSDT: the strains
+<a class="reference internal" href="#equation-fsdt-tl-strains">(2)</a> and</p>
+<div class="math notranslate nohighlight" id="equation-tsdt-tl-strains">
+<span class="eqno">(4)<a class="headerlink" href="#equation-tsdt-tl-strains" title="Link to this equation">#</a></span>\[ \begin{align}\begin{aligned}\kappa^{(3)}_{xx} = \mathbf{X}_{,x} \cdot \mathbf{q}_{,x} \qquad
+\kappa^{(3)}_{yy} = \mathbf{X}_{,y} \cdot \mathbf{q}_{,y} -
+\frac{c_1}{r} (\varepsilon_{xx} + \varepsilon_{yy}) \qquad
+\kappa^{(3)}_{xy} = \mathbf{X}_{,x} \cdot \mathbf{q}_{,y} +
+\mathbf{X}_{,y} \cdot \mathbf{q}_{,x}\\\gamma^{(2)}_{yz} = 3 \mathbf{X}_{,y} \cdot \mathbf{q} \qquad
+\gamma^{(2)}_{xz} = 3 \mathbf{X}_{,x} \cdot \mathbf{q}\end{aligned}\end{align} \]</div>
+<p>with the derivatives of the vectors along <span class="math notranslate nohighlight">\(y\)</span> in the local basis of the
+cylinder as for <span class="math notranslate nohighlight">\(\mathbf{d}_{,y}\)</span>, and <span class="math notranslate nohighlight">\(1/r = 0\)</span> for the plate. Dropped, as
+in the linear TSDT: the coefficients of <span class="math notranslate nohighlight">\(z^2\)</span>, <span class="math notranslate nohighlight">\(z^4\)</span> and <span class="math notranslate nohighlight">\(z^6\)</span> of the
+in-plane strains, of the odd powers of the transverse shear strains and the
+transverse normal strain. The second derivatives of <span class="math notranslate nohighlight">\(u\)</span> and <span class="math notranslate nohighlight">\(v\)</span> enter
+through those of <span class="math notranslate nohighlight">\(\mathbf{X}\)</span>.</p>
+<p>Since <span class="math notranslate nohighlight">\(\mathbf{X}_{,\alpha} \cdot \mathbf{N} = 0\)</span> for any deformation,
+<span class="math notranslate nohighlight">\(\mathbf{X}_{,\alpha} \cdot \mathbf{N}_{,\beta} = -\mathbf{X}_{,\alpha\beta}
+\cdot \mathbf{N}\)</span> and, for the plate,</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\kappa^{(3)}_{xx} = -c_1 (\kappa_{xx} + \mathbf{X}_{,xx} \cdot
+\mathbf{N}) \qquad
+\kappa^{(3)}_{yy} = -c_1 (\kappa_{yy} + \mathbf{X}_{,yy} \cdot
+\mathbf{N}) \qquad
+\kappa^{(3)}_{xy} = -c_1 (\kappa_{xy} + 2 \mathbf{X}_{,xy} \cdot
+\mathbf{N})\\\gamma^{(2)}_\alpha = -3 c_1 \gamma_\alpha\end{aligned}\end{align} \]</div>
+<p>Reddy’s <span class="math notranslate nohighlight">\(\phi_{\alpha,\beta}\)</span> becomes the curvature of the director and
+<span class="math notranslate nohighlight">\(w_{,\alpha\beta}\)</span> the second fundamental form of the deformed mid-surface,
+<span class="math notranslate nohighlight">\(\mathbf{X}_{,\alpha\beta} \cdot \mathbf{N}\)</span>. The relation <span class="math notranslate nohighlight">\(\gamma^{(2)} =
+-3 c_1 \gamma\)</span> is exact, so that the transverse shear strain through the
+thickness, <span class="math notranslate nohighlight">\(\gamma_\alpha (1 - 4 z^2/h^2)\)</span>, vanishes at the faces for any
+deformation: Reddy’s traction-free faces hold at finite rotations.</p>
+<section id="cylinder">
+<h3>Cylinder<a class="headerlink" href="#cylinder" title="Link to this heading">#</a></h3>
+<p>The <span class="math notranslate nohighlight">\(z\)</span> component of <span class="math notranslate nohighlight">\(\mathbf{N}\)</span> is <span class="math notranslate nohighlight">\(1 + \varepsilon_{xx} +
+\varepsilon_{yy}\)</span> to first order, the stretch of the area of the
+mid-surface. In the plate it is dropped with the coefficient of <span class="math notranslate nohighlight">\(z^3\)</span> of
+the transverse shear strains, whose linear part it is, <span class="math notranslate nohighlight">\(c_1 (u_{,x} +
+v_{,y})_{,\alpha}\)</span>. In the cylinder it enters <span class="math notranslate nohighlight">\(\mathbf{q}_{,y}\)</span> through the
+curvature of the reference, <span class="math notranslate nohighlight">\(\mathbf{e}_{z,y} = \mathbf{e}_y/r\)</span>, and adds
+<span class="math notranslate nohighlight">\(c_1 (u_{,x} + v_{,y} + w/r)/r\)</span> to the linear part of <span class="math notranslate nohighlight">\(\mathbf{X}_{,y}
+\cdot \mathbf{q}_{,y}\)</span>. The term <span class="math notranslate nohighlight">\(-c_1 (\varepsilon_{xx} +
+\varepsilon_{yy})/r\)</span> of <a class="reference internal" href="#equation-tsdt-tl-strains">(4)</a>, with the Green-Lagrange
+membrane strains, removes it, as the Koiter terms of <a class="reference internal" href="#equation-fsdt-tl-strains">(2)</a>
+remove the membrane strains from the linear curvatures; the linear part is
+then that of <code class="docutils literal notranslate"><span class="pre">'cylshell_tsdt_sanders'</span></code>, <span class="math notranslate nohighlight">\(\kappa^{(3)}_{xx} = -c_1
+(\phi_{x,x} + w_{,xx})\)</span>, <span class="math notranslate nohighlight">\(\kappa^{(3)}_{yy} = -c_1 (\phi_{y,y} +
+w_{,yy})\)</span>, <span class="math notranslate nohighlight">\(\kappa^{(3)}_{xy} = -c_1 (\phi_{x,y} + \phi_{y,x} + 2
+w_{,xy})\)</span>, and the linear parts of <code class="docutils literal notranslate"><span class="pre">'plate_tsdt_tl'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">'cylshell_tsdt_tl'</span></code> are those of <code class="docutils literal notranslate"><span class="pre">'plate_tsdt_donnell'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">'cylshell_tsdt_sanders'</span></code>.</p>
+</section>
+<section id="id12">
+<h3>Rigid rotations<a class="headerlink" href="#id12" title="Link to this heading">#</a></h3>
+<p>The strains <a class="reference internal" href="#equation-tsdt-tl-strains">(4)</a> are dot products of vectors that a rigid
+rotation turns together, and Green-Lagrange membrane strains; as for the
+FSDT, only the second-order director cannot follow the rotation: a rigid
+rotation of the flat plate gives zero membrane, bending and third-order
+bending strains and transverse shear strains of <span class="math notranslate nohighlight">\(O(t^5)\)</span>, and a rotation of
+a bent plate or of the cylinder changes the other strains by <span class="math notranslate nohighlight">\(O(t^4)\)</span>. The
+linear third-order strains of <code class="docutils literal notranslate"><span class="pre">'plate_tsdt_gl'</span></code> and <code class="docutils literal notranslate"><span class="pre">'cylshell_tsdt_gl'</span></code>
+change at the second or the first order in the angle.</p>
+</section>
+<section id="third-order-terms-linear">
+<h3>Third-order terms linear<a class="headerlink" href="#third-order-terms-linear" title="Link to this heading">#</a></h3>
+<p>A simpler model keeps the first-order part <a class="reference internal" href="#equation-fsdt-tl-strains">(2)</a> and
+the linear third-order strains of Reddy, those of the GL models,
+<span class="math notranslate nohighlight">\(\kappa^{(3)}_{\alpha\beta} = -c_1 (\phi_{\alpha,\beta} + \phi_{\beta,\alpha}
++ 2 w_{,\alpha\beta})/(1 + \delta_{\alpha\beta})\)</span> and <span class="math notranslate nohighlight">\(\gamma^{(2)}_\alpha =
+-3 c_1 (\phi_\alpha + w_{,\alpha})\)</span>, as Amabili <a class="reference internal" href="ref.html#amabili2018nonlinear" id="id13"><span>[amabili2018Nonlinear]</span></a>,
+Sec. 3.9, does in a model with the nonlinear terms of von Kármán. It has
+the same linear part, but its shear strain at the faces is <span class="math notranslate nohighlight">\(\mathbf{X}_{,\alpha}
+\cdot \mathbf{d} - (\phi_\alpha + w_{,\alpha})\)</span>, cubic, not zero, and a
+rigid rotation about an oblique axis gives third-order strains of <span class="math notranslate nohighlight">\(O(t^2)\)</span>.
+In large bending the shear strain of the director, <span class="math notranslate nohighlight">\(\mathbf{X}_{,x} \cdot
+\mathbf{d}\)</span>, and the linear one, <span class="math notranslate nohighlight">\(\phi_x + w_{,x}\)</span>, cannot both vanish:
+with <span class="math notranslate nohighlight">\(\gamma\)</span> and <span class="math notranslate nohighlight">\(\gamma_L\)</span> these two strains, the transverse shear energy
+per unit area of an isotropic layer is <span class="math notranslate nohighlight">\(G h (\gamma^2 - \tfrac{2}{3} \gamma
+\gamma_L + \tfrac{1}{5} \gamma_L^2)/2\)</span>, which penalizes the bending by a
+factor of the order of <span class="math notranslate nohighlight">\((L/h)^2\)</span>: the model locks. A strip of <span class="math notranslate nohighlight">\(L/h = 500\)</span>,
+clamped at one end under a tip force of constant direction normal to its
+plane, <span class="math notranslate nohighlight">\(\alpha = P L^2/EI = 1\)</span>, whose inextensible elastica has the tip
+rotation 0.46 rad, <span class="math notranslate nohighlight">\(w = 0.3017 L\)</span> and <span class="math notranslate nohighlight">\(-u = 0.0564 L\)</span>, gives with that model
+<span class="math notranslate nohighlight">\(w\)</span> 25.5 % and <span class="math notranslate nohighlight">\(-u\)</span> 47 % too small, and at <span class="math notranslate nohighlight">\(\alpha = 3\)</span> (0.99 rad) 50 % and
+79 %; the field <a class="reference internal" href="#equation-tsdt-tl-field">(3)</a> gives -0.22 % and -0.47 % at <span class="math notranslate nohighlight">\(\alpha =
+1\)</span>, -1.4 % and -3.8 % at <span class="math notranslate nohighlight">\(\alpha = 3\)</span>, close to the FSDT model (-0.27 %,
+-0.59 %; -1.8 %, -4.7 %), the differences coming from the second-order
+director. A thick strip, <span class="math notranslate nohighlight">\(L/h = 5\)</span>, compared with the geometrically exact
+beam of Reissner <a class="reference internal" href="ref.html#reissner1972beam" id="id14"><span>[reissner1972Beam]</span></a> with the shear stiffness of its linear
+deflection, at <span class="math notranslate nohighlight">\(\alpha = 3\)</span> (0.98 rad): -3.4 % and -7.9 % for the linear
+third-order terms, -0.81 % and -0.20 % for <a class="reference internal" href="#equation-tsdt-tl-field">(3)</a>. Schmidt and
+Reddy <a class="reference internal" href="ref.html#schmidt1988refined" id="id15"><span>[schmidt1988Refined]</span></a>, Eqs. (17)-(19), written for an expansion of
+any order in the thickness coordinate, have products of the rotation
+terms of all orders in the strains, i.e. third-order strains that are not
+linear.</p>
+<p>The field <a class="reference internal" href="#equation-tsdt-tl-field">(3)</a> costs more: 21 generalized derivatives at an
+integration point of the plate instead of 15, and for a plate of 12 x 12
+terms the constitutive and geometric stiffness matrices take about 1.3 and
+1.7 times as long as with the linear third-order terms.</p>
+</section>
+</section>
+<section id="tangent-stiffness">
+<h2>Tangent stiffness<a class="headerlink" href="#tangent-stiffness" title="Link to this heading">#</a></h2>
+<p>At an integration point the strains depend on the generalized derivatives
+<span class="math notranslate nohighlight">\(\boldsymbol{d} = \boldsymbol{\Phi} \boldsymbol{c}\)</span> of the GL models: the
+gradients of <span class="math notranslate nohighlight">\(u, v, w\)</span>, for the cylinder the values of <span class="math notranslate nohighlight">\(v\)</span> and <span class="math notranslate nohighlight">\(w\)</span>, the
+rotations and their gradients, and for the TSDT the second derivatives
+of <span class="math notranslate nohighlight">\(u\)</span>, <span class="math notranslate nohighlight">\(v\)</span> and <span class="math notranslate nohighlight">\(w\)</span>. With <span class="math notranslate nohighlight">\(\boldsymbol{B} = \partial
+\boldsymbol{\varepsilon}/\partial \boldsymbol{d}\)</span>, quadratic in
+<span class="math notranslate nohighlight">\(\boldsymbol{d}\)</span>, and the generalized stresses <span class="math notranslate nohighlight">\(\boldsymbol{\sigma} =
+\boldsymbol{F}_c \boldsymbol{\varepsilon}\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\boldsymbol{f}_{int} = \int \boldsymbol{\Phi}^\top \boldsymbol{B}^\top
+\boldsymbol{\sigma} \, dA \qquad
+\boldsymbol{K}_T = \int \boldsymbol{\Phi}^\top \left(\boldsymbol{B}^\top
+\boldsymbol{F}_c \boldsymbol{B} + \boldsymbol{H}(\boldsymbol{\sigma},
+\boldsymbol{d})\right) \boldsymbol{\Phi} \, dA, \qquad
+\boldsymbol{H} = \sum_r \sigma_r \frac{\partial^2 \varepsilon_r}{\partial
+\boldsymbol{d}^2}\]</div>
+<p><span class="math notranslate nohighlight">\(\boldsymbol{H}\)</span> is linear in <span class="math notranslate nohighlight">\(\boldsymbol{d}\)</span> and involves the moments and
+transverse shear forces as well as the membrane forces. The geometric
+stiffness of linear buckling is <span class="math notranslate nohighlight">\(\boldsymbol{H}(\boldsymbol{\sigma}_L,
+\boldsymbol{0})\)</span>, homogeneous in the prebuckling state; with a constant
+membrane state only it is that of the GL models, whose analytical kernels
+the two models use for linear statics, vibration and linear buckling. The
+integrands of <span class="math notranslate nohighlight">\(\boldsymbol{f}_{int}\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{K}_T\)</span> are polynomials
+of degree <span class="math notranslate nohighlight">\(6 p\)</span> along each direction, <span class="math notranslate nohighlight">\(p\)</span> the degree of the approximation
+functions (the rotations enter without derivative), integrated exactly by
+<span class="math notranslate nohighlight">\(3 p + 1\)</span> Gauss-Legendre points, the default of these models.</p>
+</section>
+<section id="limitations">
+<h2>Limitations<a class="headerlink" href="#limitations" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Moderate rotations: the director has the length <span class="math notranslate nohighlight">\((1 + (\psi_x^2 +
+\psi_y^2)^2/4)^{1/2}\)</span>, with <span class="math notranslate nohighlight">\(\psi_x^2 + \psi_y^2 = \sin^2 t\)</span> for a
+normal rotated by <span class="math notranslate nohighlight">\(t\)</span>: 0.7 % too long at 0.5 rad, 6 % at 1 rad.</p></li>
+<li><p>The thickness does not change and the constitutive law is linear in the
+Green-Lagrange strains (small strains).</p></li>
+<li><p>The connections of <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDomain</span></code> stay linear in the local
+displacements and rotations.</p></li>
+<li><p>The third-order shear deformation theory keeps the transverse shear
+strain of the director through the thickness, <span class="math notranslate nohighlight">\(\gamma_\alpha (1 - 4
+z^2/h^2)\)</span>, and drops the higher powers of the thickness coordinate, as the
+linear TSDT.</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="fsdt_tsdt_gl.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Shear deformable models with Green-Lagrange membrane strains</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="annular_clpt.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Annular-sector plates</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#moderate-rotation-kinematics">Moderate rotation kinematics</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#strains">Strains</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#linear-part">Linear part</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dropped-terms">Dropped terms</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#comparison-with-the-moderate-rotation-theory">Comparison with the moderate rotation theory</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rigid-rotations">Rigid rotations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#third-order-shear-deformation-theory">Third-order shear deformation theory</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cylinder">Cylinder</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">Rigid rotations</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#third-order-terms-linear">Third-order terms linear</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tangent-stiffness">Tangent stiffness</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#limitations">Limitations</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/fsdt_tsdt_tl.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

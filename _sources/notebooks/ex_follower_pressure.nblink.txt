@@ -1,0 +1,6 @@
+{
+    "path": "../../../notebooks/ex_follower_pressure.ipynb",
+    "extra-media": [
+        "../../../notebooks/follower_utils.py"
+    ]
+}

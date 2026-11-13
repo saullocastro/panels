@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Approximation functions tabulated at the integration points &#8212; panels 0.15.0 documentation</title>
+    <title>Approximation functions tabulated at the integration points &#8212; panels 0.16.0 documentation</title>
   
   
   
@@ -37,9 +37,11 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=ef97403f"></script>
+    <script src="_static/documentation_options.js?v=7de89ed4"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tabulation';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
@@ -50,7 +52,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.15.0" />
+  <meta name="docsearch:version" content="0.16.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -118,7 +120,7 @@
   
   
   
-    <p class="title logo__title">panels 0.15.0 documentation</p>
+    <p class="title logo__title">panels 0.16.0 documentation</p>
   
 </a></div>
     
@@ -217,6 +219,34 @@
 
 
 <li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="tsdt_offset.html">
     Third-order shear deformation theory with a laminate offset
   </a>
@@ -252,92 +282,456 @@
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+  <a class="nav-link dropdown-item nav-internal" href="pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_linear_static.html">
     Linear static analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_linear_buckling.html">
     Linear buckling analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_frequency.html">
     Frequency analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_flutter.html">
     Panel flutter analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_newton_raphson.html">
     Non-linear static analysis with the Newton-Raphson method
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_arc_length.html">
     Non-linear static analysis with the arc-length methods
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_follower_pressure.html">
     Follower (hydrostatic) pressure
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_prescribed_displacements.html">
     Prescribed displacements
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_face_clamp.html">
     Clamped and face-clamped edges
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_cylinder.html">
     Cylinders modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_tstiff2d.html">
     Panels with a T-stiffener modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_wingbox.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_wingbox.html">
     Wing-box modeled as a multi-domain assembly
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_stiffpanelbay.html">
     Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
   </a>
 </li>
 
@@ -352,6 +746,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="changelog.html">
     Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="documentation_levels.html">
+    How the documentation is organised
   </a>
 </li>
 
@@ -523,6 +924,34 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="tsdt_offset.html">
     Third-order shear deformation theory with a laminate offset
   </a>
@@ -558,92 +987,456 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_linear_static.html">
+  <a class="nav-link nav-internal" href="pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_linear_static.html">
     Linear static analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_linear_buckling.html">
     Linear buckling analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_frequency.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_frequency.html">
     Frequency analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_flutter.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_flutter.html">
     Panel flutter analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_newton_raphson.html">
     Non-linear static analysis with the Newton-Raphson method
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_arc_length.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_arc_length.html">
     Non-linear static analysis with the arc-length methods
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_follower_pressure.html">
     Follower (hydrostatic) pressure
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_prescribed_displacements.html">
     Prescribed displacements
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_face_clamp.html">
     Clamped and face-clamped edges
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_cylinder.html">
     Cylinders modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_tstiff2d.html">
     Panels with a T-stiffener modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_multidomain_wingbox.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_wingbox.html">
     Wing-box modeled as a multi-domain assembly
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_stiffpanelbay.html">
     Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
   </a>
 </li>
 
@@ -658,6 +1451,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="changelog.html">
     Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="documentation_levels.html">
+    How the documentation is organised
   </a>
 </li>
 
@@ -771,10 +1571,9 @@
 <p>The numerically integrated matrices and vectors of <code class="docutils literal notranslate"><span class="pre">panels</span></code> are sums over
 the integration points of products of the approximation functions of the
 Ritz method. This page describes how the kernels evaluate these functions:
-before version 0.13.0 they were evaluated again in every loop over the terms
-of the matrix, the innermost loop included; they are now evaluated once per
-integration point and term, in tables. The results are the same, bit for
-bit, and the assembly is several times faster.</p>
+once per integration point and term, in tables, instead of again in every
+loop over the terms of the matrix, the innermost loop included. The results
+are the same, bit for bit, and the assembly is several times faster.</p>
 <section id="integrands">
 <h2>Integrands<a class="headerlink" href="#integrands" title="Link to this heading">#</a></h2>
 <p>Each field of a panel is approximated with the products of the hierarchical
@@ -794,9 +1593,9 @@ along <span class="math notranslate nohighlight">\(y\)</span>. The entry of a st
 <span class="math notranslate nohighlight">\(f''\)</span>, <span class="math notranslate nohighlight">\(g'\)</span>, <span class="math notranslate nohighlight">\(g''\)</span> of each field with the constitutive matrix and, for the
 non-linear matrices, with the displacement gradients at the point.</p>
 </section>
-<section id="previous-implementation-functions-in-the-innermost-loop">
-<h2>Previous implementation: functions in the innermost loop<a class="headerlink" href="#previous-implementation-functions-in-the-innermost-loop" title="Link to this heading">#</a></h2>
-<p>The kernels had the structure below, e.g. <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> of
+<section id="functions-evaluated-in-the-innermost-loop">
+<h2>Functions evaluated in the innermost loop<a class="headerlink" href="#functions-evaluated-in-the-innermost-loop" title="Link to this heading">#</a></h2>
+<p>A direct implementation has the structure below, e.g. <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> of
 <code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell_num.pyx</span></code>, with seven functions per side:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">ptx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nx</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">pty</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ny</span><span class="p">):</span>
@@ -830,8 +1629,8 @@ the functions evaluated again in each; the connections between panels and
 the stiffeners have the same nested structure, along a line or over an
 area.</p>
 </section>
-<section id="current-implementation-tables-per-integration-point">
-<h2>Current implementation: tables per integration point<a class="headerlink" href="#current-implementation-tables-per-integration-point" title="Link to this heading">#</a></h2>
+<section id="tables-per-integration-point">
+<h2>Tables per integration point<a class="headerlink" href="#tables-per-integration-point" title="Link to this heading">#</a></h2>
 <p>The functions are evaluated once per integration point and term, at the
 start of the loop over the integration points, in a table along <span class="math notranslate nohighlight">\(x\)</span> and
 another along <span class="math notranslate nohighlight">\(y\)</span>, and the loops over the terms read them:</p>
@@ -868,7 +1667,7 @@ another along <span class="math notranslate nohighlight">\(y\)</span>, and the l
 terms keep only the arithmetic of the entries, which is unchanged. The
 functions read from the tables are the same numbers, combined in the same
 order, such that the matrices and vectors are identical, bit for bit, to
-those of the previous implementation.</p>
+those of the direct implementation.</p>
 <p>The kernels that integrate along a line, e.g. the connections at a constant
 <span class="math notranslate nohighlight">\(\xi\)</span> or the prescribed displacements, evaluate the functions across the
 line at a single coordinate: their tables are filled once, before the
@@ -896,7 +1695,7 @@ double cantilever beam, see <a class="reference internal" href="cohesive_zone.ht
 the functions, e.g. <code class="docutils literal notranslate"><span class="pre">fk0</span></code> or <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB()</span></code> of the skin-base connection,
 are not affected. The kernel
 <code class="docutils literal notranslate"><span class="pre">calc_kTv</span></code> of the product of the tangent stiffness matrix by a vector,
-see <a class="reference internal" href="tangent_product.html#tangent-product"><span class="std std-ref">Tangent stiffness matrix and its product by a vector</span></a>, is written with the tables from the start.</p>
+see <a class="reference internal" href="tangent_product.html#tangent-product"><span class="std std-ref">Tangent stiffness matrix and its product by a vector</span></a>, is written with the tables.</p>
 </section>
 <section id="implementation">
 <h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading">#</a></h2>
@@ -920,116 +1719,19 @@ modified afterwards, and replaces each call by the read of the table;</p></li>
 <p>A kernel already tabulated is left unchanged, such that applying it twice
 does nothing. The helper <code class="docutils literal notranslate"><span class="pre">_terms_sdt</span></code> of the connections of the shear
 deformation theories, whose flags come from an array, was tabulated by
-hand in the same way.</p>
-</section>
-<section id="verification">
-<h2>Verification<a class="headerlink" href="#verification" title="Link to this heading">#</a></h2>
-<ul class="simple">
-<li><p>The matrices and vectors of every tabulated kernel were compared, bit for
-bit, with those of the previous implementation, recording the output of
-each call while running 20 test files of the models, of the follower
-pressures, of the partial integration domains, of the aerodynamic
-matrices, of the connections, of the cohesive zone and of the stiffened
-panels: the 73946 calls of 92 kernels gave identical outputs.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">tests/test_tabulate.py</span></code> checks the rewriting and that no kernel of the
-package evaluates the approximation functions in its loops any more.</p></li>
-<li><p>The tests of the package, among which the consistency of the tangent
-stiffness matrix with the internal force vector,
-<code class="docutils literal notranslate"><span class="pre">tests/tests_shell/test_tangent_consistency.py</span></code>, are unchanged and
-pass.</p></li>
-</ul>
+hand in the same way. The matrices and vectors of the tabulated kernels
+are identical, bit for bit, to those of the direct implementation, the
+functions being the same numbers combined in the same order.</p>
 </section>
 <section id="performance">
 <h2>Performance<a class="headerlink" href="#performance" title="Link to this heading">#</a></h2>
-<p>Single shell, laminate <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">45,</span> <span class="pre">-45,</span> <span class="pre">90]</span></code>, a follower pressure, one core,
-times in seconds before and after the tabulation, with the speed-up. The
-times were measured with <code class="docutils literal notranslate"><span class="pre">nx</span> <span class="pre">=</span> <span class="pre">2m</span></code>, <code class="docutils literal notranslate"><span class="pre">ny</span> <span class="pre">=</span> <span class="pre">2n</span></code> integration points, the
-default before <code class="docutils literal notranslate"><span class="pre">panels</span></code> 0.14.0, one point more in each direction than the
-current default <code class="xref py py-func docutils literal notranslate"><span class="pre">panels.shell.gauss_points()</span></code>, <span class="math notranslate nohighlight">\(\max(2m - 1, 7)\)</span>, for
-these <span class="math notranslate nohighlight">\(m = n \ge 8\)</span>:</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>model, <span class="math notranslate nohighlight">\(m = n\)</span></p></th>
-<th class="head"><p><code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> (<code class="docutils literal notranslate"><span class="pre">NLgeom</span></code>)</p></th>
-<th class="head"><p><code class="docutils literal notranslate"><span class="pre">fkG_num</span></code> (<code class="docutils literal notranslate"><span class="pre">NLgeom</span></code>)</p></th>
-<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_fint</span></code></p></th>
-<th class="head"><p><code class="docutils literal notranslate"><span class="pre">fkCfollower_num</span></code></p></th>
-<th class="head"><p><code class="docutils literal notranslate"><span class="pre">fkM_num</span></code></p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, 8</p></td>
-<td><p>0.26 → 0.028 (9.5)</p></td>
-<td><p>0.11 → 0.0039 (29)</p></td>
-<td><p>0.020 → 0.0028 (7.2)</p></td>
-<td><p>0.35 → 0.023 (15)</p></td>
-<td><p>0.18 → 0.0085 (21)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, 12</p></td>
-<td><p>4.95 → 0.30 (17)</p></td>
-<td><p>2.03 → 0.033 (62)</p></td>
-<td><p>0.17 → 0.015 (11)</p></td>
-<td><p>6.21 → 0.24 (26)</p></td>
-<td><p>3.11 → 0.087 (36)</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, 16</p></td>
-<td><p>39.6 → 1.65 (24)</p></td>
-<td><p>16.1 → 0.17 (97)</p></td>
-<td><p>0.76 → 0.051 (15)</p></td>
-<td><p>49.0 → 1.33 (37)</p></td>
-<td><p>24.0 → 0.48 (50)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cylshell_fsdt_sanders</span></code>, 12</p></td>
-<td><p>8.48 → 1.54 (5.5)</p></td>
-<td><p>2.34 → 0.074 (32)</p></td>
-<td><p>0.23 → 0.021 (11)</p></td>
-<td><p>6.26 → 0.38 (16)</p></td>
-<td><p>4.05 → 0.12 (33)</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_tsdt_donnell</span></code>, 12</p></td>
-<td><p>10.3 → 2.92 (3.5)</p></td>
-<td><p>1.53 → 0.040 (39)</p></td>
-<td><p>0.23 → 0.022 (10)</p></td>
-<td><p>6.20 → 0.24 (26)</p></td>
-<td><p>5.01 → 0.54 (9.2)</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>The speed-up grows with the number of terms. It is smaller for <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code>
-of the shear deformation theories, whose integrands have more arithmetic
-per pair of terms, which the tabulation does not change.</p>
-<p>Connections between two plates with <span class="math notranslate nohighlight">\(m = n = 8\)</span> and <span class="math notranslate nohighlight">\(12\)</span>, the skin-base
-connection with damage integrated with <span class="math notranslate nohighlight">\(50 \times 25\)</span> points:</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>kernel</p></th>
-<th class="head"><p><span class="math notranslate nohighlight">\(m = n = 8\)</span></p></th>
-<th class="head"><p><span class="math notranslate nohighlight">\(m = n = 12\)</span></p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kCSSxcte</span></code> (the three blocks)</p></td>
-<td><p>1.5 → 0.32 ms (4.9)</p></td>
-<td><p>9.8 → 0.66 ms (15)</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">kCSB_dmg</span></code> (the three blocks)</p></td>
-<td><p>3.60 → 0.106 s (34)</p></td>
-<td><p>27.5 → 0.49 s (57)</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kCpd</span></code></p></td>
-<td><p>0.19 → 0.057 ms (3.3)</p></td>
-<td><p>1.1 → 0.16 ms (7.1)</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>The double cantilever beam with cohesive zone of
-<code class="docutils literal notranslate"><span class="pre">tests/multidomain/test_dcb_damage.py</span></code> runs in 2 min 45 s instead of
-7 min 28 s, its non-linear matrices of the panels and its connections
-being tabulated, also measured with the default <code class="docutils literal notranslate"><span class="pre">nx</span> <span class="pre">=</span> <span class="pre">2m</span></code>, <code class="docutils literal notranslate"><span class="pre">ny</span> <span class="pre">=</span> <span class="pre">2n</span></code> of
-the panels before <code class="docutils literal notranslate"><span class="pre">panels</span></code> 0.14.0; its cohesive zone is assembled with cached operators by
-default, or with <code class="docutils literal notranslate"><span class="pre">kCSB_dmg</span></code> with <code class="docutils literal notranslate"><span class="pre">use_kernels=True</span></code>.</p>
+<p>Per integration point the tabulation removes <span class="math notranslate nohighlight">\(O(m^2 n^2)\)</span> evaluations of
+polynomials of degree up to 29 and keeps only the arithmetic of the entries.
+The speed-up therefore grows with the number of terms, and it is smaller for
+the integrands with more arithmetic per pair of terms, e.g. the constitutive
+stiffness matrix <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> of the shear deformation theories: for
+<span class="math notranslate nohighlight">\(m = n = 12\)</span> it is about 30 to 60 for the geometric stiffness matrices and
+3.5 to 17 for the non-linear constitutive stiffness matrices.</p>
 </section>
 </section>
 
@@ -1081,11 +1783,10 @@ default, or with <code class="docutils literal notranslate"><span class="pre">kC
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#integrands">Integrands</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#previous-implementation-functions-in-the-innermost-loop">Previous implementation: functions in the innermost loop</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#current-implementation-tables-per-integration-point">Current implementation: tables per integration point</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#functions-evaluated-in-the-innermost-loop">Functions evaluated in the innermost loop</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tables-per-integration-point">Tables per integration point</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kernels">Kernels</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation">Implementation</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verification">Verification</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance">Performance</a></li>
 </ul>
   </nav></div>

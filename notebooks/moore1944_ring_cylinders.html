@@ -1,0 +1,2139 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I &#8212; panels 0.16.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../_static/documentation_options.js?v=7de89ed4"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/moore1944_ring_cylinders';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II" href="moore1944_stiffened_cylinders.html" />
+    <link rel="prev" title="Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)" href="lanzi2003_torsion_cylinder.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.16.0" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.16.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Torsional-buckling-of-ring-stiffened-cylinders:-Moore-and-Wescoat-(1944),-Table-I">
+<h1>Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I<a class="headerlink" href="#Torsional-buckling-of-ring-stiffened-cylinders:-Moore-and-Wescoat-(1944),-Table-I" title="Link to this heading">#</a></h1>
+<p>Moore and Wescoat [1] tested in torsion 24S-T aluminium-alloy cylinders of mean diameter <span class="math notranslate nohighlight">\(D = 30.08\)</span> in, 36 in long overall, with a sheet <span class="math notranslate nohighlight">\(t = 0.020\)</span> in thick: specimen 16 without rings, specimens 17, 18, 13 and 13A with <span class="math notranslate nohighlight">\(1/2 \times 1/2\)</span> in solid ring stiffeners inside the skin. Their Table I (p. 25) gives the average observed shear-buckling stress and the theoretical one, from Donnell’s formula for hinged edges [2]. In the specimens with rings only, buckling is also the
+failure ([1] p. 5).</p>
+<p>This notebook computes the first buckling stress of the perfect cylinders with <code class="docutils literal notranslate"><span class="pre">panels.multidomain.MultiDomain</span></code>: the skin is made of curved Kirchhoff-Love domains with the Sanders-Koiter kinematics, and each ring is a web of annular-sector plate domains connected to the inner surface of the skin. The stiffened specimens 19, 14, 20, 15 and 21 of the same report are in the notebook <code class="docutils literal notranslate"><span class="pre">moore1944_stiffened_cylinders</span></code>. The same cases are modelled with BFSC finite elements in the notebook
+<code class="docutils literal notranslate"><span class="pre">moore1944_ring_cylinders</span></code> of the bfsccylinder package; its values are compared in Section 7.</p>
+<p>Lengths in in, forces in lbf, stresses in psi, torques in ft-lb as in [1].</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import json
+import time
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+import panels
+import moore1944_utils as mu
+from moore1944_utils import print_table, rel
+
+%matplotlib inline
+print('panels', panels.__version__)
+SPECS = ['16', '17', '18', '13', '13A']
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+panels 0.15.0
+</pre></div></div>
+</div>
+<section id="1.-Data">
+<h2>1. Data<a class="headerlink" href="#1.-Data" title="Link to this heading">#</a></h2>
+<p>All values are from [1]; “p.” is the printed page (the PDF page is two more).</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>quantity</p></th>
+<th class="head"><p>value</p></th>
+<th class="head"><p>source</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>material, 24S-T</p></td>
+<td><p><span class="math notranslate nohighlight">\(E = 10.5 \times 10^6\)</span> psi, <span class="math notranslate nohighlight">\(\nu = 1/3\)</span></p></td>
+<td><ol class="loweralpha simple" start="16">
+<li><p>7 (<span class="math notranslate nohighlight">\(G = 3.95 \times 10^6\)</span> psi is also given)</p></li>
+</ol>
+</td>
+</tr>
+<tr class="row-odd"><td><p>mean diameter, overall length</p></td>
+<td><p><span class="math notranslate nohighlight">\(D = 30.08\)</span> in, 36 in</p></td>
+<td><ol class="loweralpha simple" start="16">
+<li><p>3, Table I</p></li>
+</ol>
+</td>
+</tr>
+<tr class="row-even"><td><p>sheet thickness</p></td>
+<td><p><span class="math notranslate nohighlight">\(t = 0.020\)</span> in</p></td>
+<td><p>Table I</p></td>
+</tr>
+<tr class="row-odd"><td><p>end bulkheads</p></td>
+<td><p>3/4 in steel plates, the shell screwed to them</p></td>
+<td><ol class="loweralpha simple" start="16">
+<li><p>3, Fig. 1 (Section A-A)</p></li>
+</ol>
+</td>
+</tr>
+<tr class="row-even"><td><p>rings</p></td>
+<td><p><span class="math notranslate nohighlight">\(1/2 \times 1/2\)</span> in solid 24S-T bars, inside the skin, joined with 3/16 in pins</p></td>
+<td><ol class="loweralpha simple" start="16">
+<li><p>3, Fig. 1 (“Shell connection to intermediate ring stiffeners”)</p></li>
+</ol>
+</td>
+</tr>
+<tr class="row-odd"><td><p>ring stations</p></td>
+<td><p>Fig. 5, from the centres of the end bulkheads, 35 5/8 in apart</p></td>
+<td><p>Fig. 5</p></td>
+</tr>
+<tr class="row-even"><td><p>buckled section, observed and theoretical stresses</p></td>
+<td><p>Table I</p></td>
+<td><ol class="loweralpha simple" start="16">
+<li><p>25</p></li>
+</ol>
+</td>
+</tr>
+<tr class="row-odd"><td><p>stress and torque</p></td>
+<td><p><span class="math notranslate nohighlight">\(\tau = 0.422\,T\)</span> (psi, ft-lb) for <span class="math notranslate nohighlight">\(t = 0.020\)</span> in, i.e. <span class="math notranslate nohighlight">\(T = \tau \pi D^2 t/24\)</span></p></td>
+<td><p>Fig. 5, note 6; p. 7</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The bays below are those of Fig. 5: e.g. specimen 13A has rings at 4 5/16, 8 13/16, 17 13/16, 26 13/16 and 31 5/16 in from the centre of the first bulkhead. Specimens 13 and 13A buckled in different sections: 13 in the end sections (8.81 in), 13A in the intermediate ones (9.00 in, Fig. 5). Every specimen has a longitudinal stiffener on the seam of the sheet, “not considered effective in increasing shear-buckling resistance” (p. 4, footnote); it is not modelled.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rows = []
+for s in SPECS:
+    d = mu.SPECIMENS[s]
+    rows.append([s, d['t'], ' | '.join('%g' % b for b in d['bays']), d['panel'], d['obs'],
+                 d['theory']])
+print_table(rows, ['spec', 't (in)', 'bays (in)', 'buckled section L (in)',
+                   'observed (psi)', 'theory [1] (psi)'])
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+spec  t (in)                            bays (in)  buckled section L (in)  observed (psi)  theory [1] (psi)
+----  ------  -----------------------------------  ----------------------  --------------  ----------------
+  16    0.02                               35.625                   35.62            1110              1325
+  17    0.02                 4.3125 | 27 | 4.3125                   27.00            1280              1520
+  18    0.02        4.3125 | 13.5 | 13.5 | 4.3125                   13.50            1710              2210
+  13    0.02              8.8125 | 9 | 9 | 8.8125                    8.81            2310              2870
+ 13A    0.02  4.3125 | 4.5 | 9 | 9 | 4.5 | 4.3125                    9.00            2570              2770
+</pre></div></div>
+</div>
+</section>
+<section id="2.-Moore's-theoretical-column">
+<h2>2. Moore’s theoretical column<a class="headerlink" href="#2.-Moore's-theoretical-column" title="Link to this heading">#</a></h2>
+<p>Moore and Wescoat computed the theoretical stresses of Table I with Donnell’s formula for an unstiffened cylinder of length <span class="math notranslate nohighlight">\(L\)</span> with hinged ends [2], as printed in their appendix ([1] p. 23), valid for <span class="math notranslate nohighlight">\(L^2 t/D^3 &lt; 5.2\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\tau_0 = \frac{E t^2}{(1 - \nu^2) L^2} \left[2.8 + \sqrt{2.6 + 1.4 \left(\sqrt{1 - \nu^2}\,
+\frac{L^2}{t D}\right)^{3/2}}\right]\]</div>
+<p>with <span class="math notranslate nohighlight">\(L\)</span> the length of the buckled section, centre to centre of the rings. The rings are taken as hinged supports.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rows = []
+for s in SPECS:
+    d = mu.SPECIMENS[s]
+    L = float(d['panel'])
+    tau0 = mu.donnell_tau(L, d['t'])
+    rows.append([s, L, '%.1e' % (L**2*d['t']/mu.D**3), '%.0f' % tau0, d['theory'],
+                 '%+.1f' % rel(tau0, d['theory'])])
+print_table(rows, ['spec', 'L (in)', 'L^2 t/D^3', 'tau0 (psi)', 'Table I', 'diff %'])
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+spec  L (in)  L^2 t/D^3  tau0 (psi)  Table I  diff %
+----  ------  ---------  ----------  -------  ------
+  16   35.62    9.3e-04        1323     1325    -0.2
+  17    27.0    5.4e-04        1525     1520    +0.3
+  18    13.5    1.3e-04        2204     2210    -0.3
+  13    8.81    5.7e-05        2811     2870    -2.1
+ 13A     9.0    6.0e-05        2775     2770    +0.2
+</pre></div></div>
+</div>
+<p>The formula reproduces the column of Table I to 0.4 %, except specimen 13, 2.1 % below the printed 2870 psi; no other length or thickness of the report gives 2870 psi, and the printed value is kept as Moore’s.</p>
+</section>
+<section id="3.-The-model">
+<h2>3. The model<a class="headerlink" href="#3.-The-model" title="Link to this heading">#</a></h2>
+<p><strong>Domains.</strong> The skin is split along the axis at the ring stations, one bay per ring spacing, and along the circumference into <code class="docutils literal notranslate"><span class="pre">nsec</span></code> equal sectors. Each domain is a curved <code class="docutils literal notranslate"><span class="pre">Shell</span></code> of the model <code class="docutils literal notranslate"><span class="pre">cylshell_clpt_sanders</span></code> (Kirchhoff-Love, Sanders-Koiter kinematics) whose fields are series of Bardell’s hierarchical functions [3]; consecutive domains are connected with <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code> and <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code>, the last sector to the first one to close the cylinder.</p>
+<p><strong>Rings.</strong> Each ring is a web of annular-sector domains of the model <code class="docutils literal notranslate"><span class="pre">annular_clpt_donnell</span></code>, one per skin sector, of radial height 1/2 in and thickness 1/2 in (the bar), closed with <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code>. Its outer edge, at the radius of the inner surface of the skin <span class="math notranslate nohighlight">\(R - t/2\)</span>, is connected to the end <span class="math notranslate nohighlight">\(x = a\)</span> of the bay before the ring with</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">dict</span><span class="p">(</span><span class="n">p1</span><span class="o">=</span><span class="n">skin</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="n">ring</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">'BFxcte'</span><span class="p">,</span> <span class="n">xcte1</span><span class="o">=</span><span class="n">skin</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">xcte2</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">face</span><span class="o">=</span><span class="s1">'lower'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>which ties the four displacements and the rotation about the circumferential axis of the edge of the web to those of the inner surface of the skin (Kirchhoff-Love kinematics and the Sanders-Koiter term <span class="math notranslate nohighlight">\((1 + z/r)\,v\)</span> at the face). This is a continuous bond: the pins of [1] (Fig. 1) are not represented. The plate theory is a coarse approximation for a bar as thick as it is high: it represents the bending of the ring in its plane (membrane stiffness of the web) and out of it (bending of the
+web) and the eccentricity of the ring; its torsion is that of a Kirchhoff plate. Rigid ring supports, <span class="math notranslate nohighlight">\(v = w = 0\)</span> along the ring line with <span class="math notranslate nohighlight">\(w_{,x}\)</span> free, are a sensitivity (Section 6).</p>
+<p><strong>Ends.</strong> The shell is screwed to 3/4 in steel bulkheads ([1] Fig. 1). The baseline holds <span class="math notranslate nohighlight">\(u = v =
+w = 0\)</span> at both ends with <span class="math notranslate nohighlight">\(w_{,x}\)</span> free, the hinged edges of Moore’s theory; clamped ends and <span class="math notranslate nohighlight">\(u\)</span> free are sensitivities. The report does not state the end fixity; it says (p. 9) that clamped edges would raise the theoretical values by 10 to 12 %.</p>
+<p><strong>Load.</strong> A torque <span class="math notranslate nohighlight">\(T\)</span> on a perfect circular cylinder gives the uniform membrane shear flow <span class="math notranslate nohighlight">\(N_{xy}
+= T/(2 \pi R^2)\)</span> in the skin; the rings carry no stress. The pre-buckling state is therefore exactly the constant <span class="math notranslate nohighlight">\(N_{xy}\)</span>, given to the skin domains as their attribute <code class="docutils literal notranslate"><span class="pre">Nxy</span> <span class="pre">=</span> <span class="pre">1</span></code> lbf/in, and the critical shear flow is the lowest load multiplier <span class="math notranslate nohighlight">\(\lambda\)</span> of</p>
+<div class="math notranslate nohighlight">
+\[\left(\boldsymbol{K}_r + \lambda \boldsymbol{K}_{G,r}\right) \boldsymbol{\phi}_r = \boldsymbol{0},
+\qquad \boldsymbol{K}_r = \boldsymbol{Z}^T \boldsymbol{K} \boldsymbol{Z}, \quad
+\boldsymbol{K}_{G,r} = \boldsymbol{Z}^T \boldsymbol{K}_G \boldsymbol{Z}\]</div>
+<p>with <span class="math notranslate nohighlight">\(\boldsymbol{Z}\)</span> the basis of the null space of the connections (default <code class="docutils literal notranslate"><span class="pre">conn_method</span></code> of <code class="docutils literal notranslate"><span class="pre">MultiDomain</span></code>, <code class="docutils literal notranslate"><span class="pre">'null-space'</span></code>), so that <span class="math notranslate nohighlight">\(\tau_{cr} = \lambda/t\)</span>. Under torsion the load multipliers come in pairs <span class="math notranslate nohighlight">\(\pm\lambda\)</span> and the modes in pairs of the same <span class="math notranslate nohighlight">\(\lambda\)</span> (rotated around the axis); only the sense matters for an anisotropic shell. Section 5 checks the constant shear flow against a prescribed rotation of one end with the linear static pre-buckling state.</p>
+<p><strong>Runs.</strong> The analyses are run on a cluster node by the script <code class="docutils literal notranslate"><span class="pre">moore1944_runs.py</span></code> of this folder (stage 1), with the builders of <code class="docutils literal notranslate"><span class="pre">moore1944_utils.py</span></code>, which writes <code class="docutils literal notranslate"><span class="pre">results/moore1944_stage1.json</span></code>; this notebook reads that file. Meshes:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>mesh</p></th>
+<th class="head"><p>sectors</p></th>
+<th class="head"><p>terms per sector along the circumference</p></th>
+<th class="head"><p>terms per inch along the axis (min. 6, max. 30 per bay)</p></th>
+<th class="head"><p>terms across the ring webs</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>A</p></td>
+<td><p>8</p></td>
+<td><p>12</p></td>
+<td><p>0.8</p></td>
+<td><p>6</p></td>
+</tr>
+<tr class="row-odd"><td><p>B</p></td>
+<td><p>12</p></td>
+<td><p>14</p></td>
+<td><p>1.0</p></td>
+<td><p>6</p></td>
+</tr>
+<tr class="row-even"><td><p>C</p></td>
+<td><p>12</p></td>
+<td><p>18</p></td>
+<td><p>1.3</p></td>
+<td><p>8</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>with open('results/moore1944_stage1.json') as f:
+    RES = json.load(f)
+errors = [r for r in RES if 'error' in r]
+print('%d cases, %d errors' % (len(RES), len(errors)))
+for r in errors:
+    print(r['case'], r['spec'], r['error'])
+res = {(r['case'], r['spec']): r for r in RES if 'error' not in r}
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+36 cases, 0 errors
+</pre></div></div>
+</div>
+</section>
+<section id="4.-Convergence">
+<h2>4. Convergence<a class="headerlink" href="#4.-Convergence" title="Link to this heading">#</a></h2>
+<p><span class="math notranslate nohighlight">\(\tau_{cr}\)</span> (psi) of the first mode, its number of full circumferential waves <span class="math notranslate nohighlight">\(n\)</span> in the longest bay, and the change from the previous mesh.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rows = []
+for s in SPECS:
+    prev = None
+    for mesh in 'ABC':
+        r = res[('mesh ' + mesh, s)]
+        ch = '' if prev is None else '%+.2f' % rel(r['tau'], prev)
+        rows.append([s, mesh, r['domains'], r['size_r'], '%.1f' % r['tau'], ch, r['waves'],
+                     '%.0f' % r['seconds']])
+        prev = r['tau']
+print_table(rows, ['spec', 'mesh', 'domains', 'independent constants', 'tau_cr (psi)',
+                   'change %', 'n', 's'])
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+spec  mesh  domains  independent constants  tau_cr (psi)  change %   n    s
+----  ----  -------  ---------------------  ------------  --------  --  ---
+  16     A        8                   7232        1401.7            14   12
+  16     B       12                  13776        1401.6     -0.01  14   25
+  16     C       12                  18096        1401.6     -0.00  14   31
+  17     A       40                  10480        1574.7            15   40
+  17     B       60                  20928        1574.4     -0.02  15  140
+  17     C       60                  31704        1574.4     -0.00  15  416
+  18     A       56                  11336        2216.2            19   62
+  18     B       84                  22908        2207.4     -0.39  19  241
+  18     C       84                  38508        2207.3     -0.00  19  841
+  13     A       56                   9800        2800.4            22   37
+  13     B       84                  21084        2736.4     -2.29  22  285
+  13     C       84                  37308        2731.6     -0.17  22  803
+ 13A     A       88                  14072        2808.2            22   44
+ 13A     B      132                  26868        2744.0     -2.29  23  350
+ 13A     C      132                  44916        2739.8     -0.15  22  939
+</pre></div></div>
+</div>
+</section>
+<section id="5.-Cross-check:-torque-from-a-prescribed-end-rotation">
+<h2>5. Cross-check: torque from a prescribed end rotation<a class="headerlink" href="#5.-Cross-check:-torque-from-a-prescribed-end-rotation" title="Link to this heading">#</a></h2>
+<p>For specimen 18 (mesh B) the end <span class="math notranslate nohighlight">\(x = L\)</span> is rotated about the axis by <span class="math notranslate nohighlight">\(\theta = 10^{-3}\)</span>, <span class="math notranslate nohighlight">\(v =
+\theta R\)</span>, with <span class="math notranslate nohighlight">\(u = w = 0\)</span> there and the other end held; the prescribed displacements are imposed exactly (<code class="docutils literal notranslate"><span class="pre">pd_method='null-space'</span></code>). The torque at load factor 1 is the reaction work-conjugate to the prescribed displacements divided by <span class="math notranslate nohighlight">\(\theta\)</span> (<code class="docutils literal notranslate"><span class="pre">MultiDomain.reaction_pd</span></code>), and the linear buckling analysis about the linear static state (<code class="docutils literal notranslate"><span class="pre">MultiDomain.linear_buckling</span></code>) gives the critical torque.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>r_rot = res[('end rotation', '18')]
+r_cte = res[('mesh B', '18')]
+GJ = mu.E/(2*(1 + mu.NU))*2*np.pi*mu.R**3*0.020
+print('torque at theta = 1e-3: %.1f lbf in; G J theta/L = %.1f lbf in (thin-walled tube)'
+      % (r_rot['T']/r_rot['ev'][0]*12, GJ*1e-3/sum(mu.SPECIMENS['18']['bays'])))
+print('tau_cr: end rotation %.2f psi, constant shear flow %.2f psi, difference %.4f %%'
+      % (r_rot['tau'], r_cte['tau'], rel(r_rot['tau'], r_cte['tau'])))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+torque at theta = 1e-3: 47251.9 lbf in; G J theta/L = 47251.9 lbf in (thin-walled tube)
+tau_cr: end rotation 2207.45 psi, constant shear flow 2207.45 psi, difference 0.0000 %
+</pre></div></div>
+</div>
+</section>
+<section id="6.-Sensitivity-to-the-data-that-are-not-given">
+<h2>6. Sensitivity to the data that are not given<a class="headerlink" href="#6.-Sensitivity-to-the-data-that-are-not-given" title="Link to this heading">#</a></h2>
+<p>Mesh B, one change at a time: clamped ends (<span class="math notranslate nohighlight">\(w_{,x} = 0\)</span> also); <span class="math notranslate nohighlight">\(u\)</span> free at the ends; rigid ring supports instead of the ring webs; the Donnell kinematics in the skin (<code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>SENS = ['clamped', 'u free', 'rigid rings', 'Donnell skin']
+rows = []
+for s in SPECS:
+    base = res[('mesh B', s)]['tau']
+    row = [s, '%.1f' % base]
+    for name in SENS:
+        r = res.get((name, s))
+        row += ['%.1f (%+.1f %%)' % (r['tau'], rel(r['tau'], base)) if r else 'n/a']
+    rows.append(row)
+print_table(rows, ['spec', 'baseline'] + SENS)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+spec  baseline          clamped           u free      rigid rings     Donnell skin
+----  --------  ---------------  ---------------  ---------------  ---------------
+  16    1401.6  1403.9 (+0.2 %)  1351.8 (-3.5 %)  1401.6 (+0.0 %)  1403.3 (+0.1 %)
+  17    1574.4  1574.5 (+0.0 %)  1574.4 (-0.0 %)  1562.5 (-0.8 %)  1575.8 (+0.1 %)
+  18    2207.4  2207.5 (+0.0 %)  2207.4 (-0.0 %)  2156.3 (-2.3 %)  2208.1 (+0.0 %)
+  13    2736.4  2738.6 (+0.1 %)  2697.7 (-1.4 %)  2653.6 (-3.0 %)  2736.7 (+0.0 %)
+ 13A    2744.0  2744.0 (+0.0 %)  2744.0 (-0.0 %)  2667.0 (-2.8 %)  2744.6 (+0.0 %)
+</pre></div></div>
+</div>
+</section>
+<section id="7.-Comparison-with-Table-I-and-with-bfsccylinder">
+<h2>7. Comparison with Table I and with bfsccylinder<a class="headerlink" href="#7.-Comparison-with-Table-I-and-with-bfsccylinder" title="Link to this heading">#</a></h2>
+<p><span class="math notranslate nohighlight">\(\tau_{FE}\)</span> is the first buckling stress of the perfect cylinder, mesh C, hinged ends (<span class="math notranslate nohighlight">\(u = v = w
+= 0\)</span>). The bfsccylinder values are those of the notebook <code class="docutils literal notranslate"><span class="pre">moore1944_ring_cylinders</span></code> of that package (BFSC cylinder elements of Sanders-type kinematics, ring as a band of skin elements with the laminate skin + bar, same ends, Bloch sectors): 1403, 1592, 2252, 2810 and 2829 psi for specimens 16, 17, 18, 13 and 13A.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>BFSC = {'16': 1403, '17': 1592, '18': 2252, '13': 2810, '13A': 2829}
+rows = []
+for s in SPECS:
+    d = mu.SPECIMENS[s]
+    r = res[('mesh C', s)]
+    rows.append([s, d['panel'], r['waves'], '%.0f' % r['tau'], '%.0f' % r['T'], d['obs'],
+                 '%.0f' % mu.torque_ftlb(d['obs'], d['t']), d['theory'],
+                 '%+.1f' % rel(r['tau'], d['obs']), '%+.1f' % rel(r['tau'], d['theory']),
+                 BFSC[s], '%+.1f' % rel(r['tau'], BFSC[s])])
+print_table(rows, ['spec', 'L (in)', 'n', 'tau_FE (psi)', 'T_FE (ft-lb)', 'observed (psi)',
+                   'observed (ft-lb)', 'theory [1]', 'FE vs obs %', 'FE vs theory %',
+                   'bfsccylinder', 'panels vs bfsc %'])
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+spec  L (in)   n  tau_FE (psi)  T_FE (ft-lb)  observed (psi)  observed (ft-lb)  theory [1]  FE vs obs %  FE vs theory %  bfsccylinder  panels vs bfsc %
+----  ------  --  ------------  ------------  --------------  ----------------  ----------  -----------  --------------  ------------  ----------------
+  16   35.62  14          1402          3320            1110              2629        1325        +26.3            +5.8          1403              -0.1
+  17   27.00  15          1574          3729            1280              3032        1520        +23.0            +3.6          1592              -1.1
+  18   13.50  19          2207          5229            1710              4051        2210        +29.1            -0.1          2252              -2.0
+  13    8.81  22          2732          6471            2310              5472        2870        +18.3            -4.8          2810              -2.8
+ 13A    9.00  22          2740          6490            2570              6088        2770         +6.6            -1.1          2829              -3.2
+</pre></div></div>
+</div>
+</section>
+<section id="8.-Buckling-modes">
+<h2>8. Buckling modes<a class="headerlink" href="#8.-Buckling-modes" title="Link to this heading">#</a></h2>
+<p>Radial displacement <span class="math notranslate nohighlight">\(w\)</span> of the first mode on the unrolled skin (mesh C, arbitrary scale); the dashed lines are the rings.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig, axes = plt.subplots(len(SPECS), 1, figsize=(9, 2.3*len(SPECS)), sharex=True,
+                         constrained_layout=True)
+for ax, s in zip(axes, SPECS):
+    r = res[('mesh C', s)]
+    mode = r['mode']
+    wmax = max(np.abs(np.array(W)).max() for W in mode['W'])
+    for X, S, W in zip(mode['X'], mode['S'], mode['W']):
+        cs = ax.contourf(np.array(S), np.array(X), np.array(W)/wmax,
+                         levels=np.linspace(-1, 1, 21), cmap='RdBu_r')
+    x = 0.
+    for b in mu.SPECIMENS[s]['bays'][:-1]:
+        x += b
+        ax.axhline(x, color='k', ls='--', lw=0.8)
+    ax.set_ylabel('x (in)')
+    ax.set_title('specimen %s: tau_cr = %.0f psi, n = %d' % (s, r['tau'], r['waves']),
+                 fontsize=9)
+axes[-1].set_xlabel('arc length (in)')
+fig.colorbar(cs, ax=axes, shrink=0.5, label='w / max |w|')
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_moore1944_ring_cylinders_18_0.png" src="../_images/notebooks_moore1944_ring_cylinders_18_0.png" />
+</div>
+</div>
+</section>
+<section id="9.-Discussion">
+<h2>9. Discussion<a class="headerlink" href="#9.-Discussion" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Convergence.</strong> The last refinement changes <span class="math notranslate nohighlight">\(\tau_{cr}\)</span> by 0.17 % or less (Section 4); the first mode has 14 to 22 full waves along the circumference, more than the wavelengths measured in [1] (Fig. 5: <span class="math notranslate nohighlight">\(W = 9\)</span> in for specimen 16, about 10.5 waves), as Moore and Wescoat also found against Donnell’s theory (p. 9).</p></li>
+<li><p><strong>Pre-buckling state.</strong> The prescribed end rotation gives the torsional stiffness of the thin tube, <span class="math notranslate nohighlight">\(G J/L\)</span> with <span class="math notranslate nohighlight">\(J = 2 \pi R^3 t\)</span>, and the same buckling stress as the constant shear flow to <span class="math notranslate nohighlight">\(10^{-6}\)</span>: the rings carry no stress before buckling, and the constant <span class="math notranslate nohighlight">\(N_{xy}\)</span> is the exact pre-buckling state.</p></li>
+<li><p><strong>Specimen 16 and Donnell’s formula.</strong> With <span class="math notranslate nohighlight">\(u = v = w = 0\)</span> at both ends the model is 5.8 % above Moore’s theoretical value; with <span class="math notranslate nohighlight">\(u\)</span> free at the loaded end it is 1352 psi, 2.2 % above Donnell’s 1323 psi. The end fixity is not given in [1]; clamping the ends (<span class="math notranslate nohighlight">\(w_{,x} = 0\)</span>) raises <span class="math notranslate nohighlight">\(\tau_{cr}\)</span> by 0.2 % only, whereas [1] (p. 9) expects 10 to 12 % for clamped edges.</p></li>
+<li><p><strong>Ring-stiffened specimens.</strong> The model is 3.6 % above to 4.8 % below Moore’s column, which takes each bay as an unstiffened cylinder with hinged ends. Rigid ring supports with <span class="math notranslate nohighlight">\(w_{,x}\)</span> free lower <span class="math notranslate nohighlight">\(\tau_{cr}\)</span> by 0.8 to 3.0 %: the ring webs restrain the rotation <span class="math notranslate nohighlight">\(w_{,x}\)</span> of the skin in addition to <span class="math notranslate nohighlight">\(v\)</span> and <span class="math notranslate nohighlight">\(w\)</span>. Specimen 13 buckled in its end bays (8.81 in, Table I), the first mode of the model has its largest buckles in the two 9 in intermediate bays and smaller
+ones in the end bays (Section 8); its stress is 0.3 % below that of 13A, which buckled in the 9 in intermediate bays in the test and in the model. Moore and Wescoat explain the lower observed stress of 13 by a less uniform shear near the bulkheads (p. 9), which the model, with a uniform shear flow, does not have.</p></li>
+<li><p><strong>Test values.</strong> The observed stresses are 6.6 to 29 % below those of the perfect cylinders, within the range that [1] reports, 77 to 93 % of the theory (Table I); [1] attributes the difference to local out-of-roundness and initial buckles (p. 9), and the repeated tests of a specimen gave minima of 83 to 98 % of the maxima (p. 8).</p></li>
+<li><p><strong>bfsccylinder.</strong> The BFSC model gives 0.1 % (specimen 16) to 3.2 % (13A) more. The difference grows with the number of rings, which are modelled differently: here as annular plate webs on the inner face, there as bands of skin elements with the laminate skin + bar, whose Kirchhoff torsional stiffness is 2.4 times the St Venant value of the bar (bfsccylinder notebook); both ring models restrain the rotation of the skin.</p></li>
+<li><p><strong>Not represented.</strong> The pins joining the rings to the skin, the seam stiffener, the splices of the rings and the initial imperfections.</p></li>
+</ul>
+</section>
+<section id="References">
+<h2>References<a class="headerlink" href="#References" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Moore, R. L., and Wescoat, C., “Torsion Tests of Stiffened Circular Cylinders”, NACA ARR 4E31 (Wartime Report W-89), 1944: Table I p. 25, appendix p. 23, Figs. 1 and 5.</p></li>
+<li><p>Donnell, L. H., “Stability of Thin-Walled Tubes under Torsion”, NACA Report 479, 1933 (as given in [1], p. 23).</p></li>
+<li><p>Castro, S. G. P., and Donadon, M. V., “Assembly of semi-analytical models to address linear buckling and vibration of stiffened composite panels with debonding defect”, Composite Structures, 160, 2017, pp. 232-247, doi:10.1016/j.compstruct.2016.10.026.</p></li>
+</ol>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="lanzi2003_torsion_cylinder.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="moore1944_stiffened_cylinders.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#1.-Data">1. Data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#2.-Moore's-theoretical-column">2. Moore’s theoretical column</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#3.-The-model">3. The model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#4.-Convergence">4. Convergence</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#5.-Cross-check:-torque-from-a-prescribed-end-rotation">5. Cross-check: torque from a prescribed end rotation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#6.-Sensitivity-to-the-data-that-are-not-given">6. Sensitivity to the data that are not given</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#7.-Comparison-with-Table-I-and-with-bfsccylinder">7. Comparison with Table I and with bfsccylinder</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#8.-Buckling-modes">8. Buckling modes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#9.-Discussion">9. Discussion</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#References">References</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/notebooks/moore1944_ring_cylinders.nblink.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

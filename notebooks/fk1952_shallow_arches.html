@@ -1,0 +1,2223 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Snap-through of a shallow circular arch: Fung and Kaplan (1952) &#8212; panels 0.16.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../_static/documentation_options.js?v=7de89ed4"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/fk1952_shallow_arches';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)" href="simo1990_cylinder_postbuckling.html" />
+    <link rel="prev" title="Third-order shear deformation theory with a laminate offset: connections and reference surface" href="tsdt_offset_connections.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.16.0" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.16.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Snap-through of a shallow circular arch: Fung and Kaplan (1952)</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Snap-through-of-a-shallow-circular-arch:-Fung-and-Kaplan-(1952)">
+<h1>Snap-through of a shallow circular arch: Fung and Kaplan (1952)<a class="headerlink" href="#Snap-through-of-a-shallow-circular-arch:-Fung-and-Kaplan-(1952)" title="Link to this heading">#</a></h1>
+<ol class="upperalpha simple" start="25">
+<li><ol class="upperalpha simple" start="3">
+<li><p>Fung and A. Kaplan, <em>Buckling of low arches or curved beams of small curvature</em>, NACA TN 2840, November 1952 (NTRS 19930083579).</p></li>
+</ol>
+</li>
+</ol>
+<p>A shallow circular arch, hinged at both ends, under a sinusoidal dead load snaps through: the load-deflection path has a maximum, where the arch jumps to an inverted configuration under load control, and a minimum, with negative loads, between which the path is unstable. The path is traced through both limit points with the arc-length methods of <code class="docutils literal notranslate"><span class="pre">structsolve</span></code>, Riks and Crisfield, each with the convergence criteria <code class="docutils literal notranslate"><span class="pre">'crisfield'</span></code> and <code class="docutils literal notranslate"><span class="pre">'relative'</span></code>, and compared with the solution of the
+equilibrium equations of Fung and Kaplan, solved here for the circular arch:</p>
+<ul class="simple">
+<li><p>span <span class="math notranslate nohighlight">\(L = 100\)</span>, thickness <span class="math notranslate nohighlight">\(t = 1\)</span>, rise parameter <span class="math notranslate nohighlight">\(\lambda_1 = 2.2\)</span>, i.e. radius <span class="math notranslate nohighlight">\(\rho_0 = 1015.66\)</span> and rise <span class="math notranslate nohighlight">\(L^2/(8 \rho_0) = 1.23 t\)</span>;</p></li>
+<li><p>isotropic, <span class="math notranslate nohighlight">\(\nu = 0\)</span> (the load parameter <span class="math notranslate nohighlight">\(R\)</span> does not depend on <span class="math notranslate nohighlight">\(E\)</span>);</p></li>
+<li><p>hinged ends without initial thrust, <span class="math notranslate nohighlight">\(\beta = 1\)</span> and <span class="math notranslate nohighlight">\(S = 0\)</span>;</p></li>
+<li><p>reference: the symmetric equilibrium path of Eqs. (15) and (45), its maximum and minimum loads.</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%matplotlib inline
+import os
+import time
+
+import numpy as np
+import matplotlib.pyplot as plt
+from IPython.display import Markdown, display
+from scipy.optimize import brentq
+from structsolve import Analysis
+
+import scf_validation_utils as su
+from scf_validation_utils import pct, markdown_table, run_or_load
+
+# True runs panels again, otherwise the results saved in RESULTS are loaded
+RERUN = True
+RESULTS = 'results'
+</pre></div>
+</div>
+</div>
+<section id="Reference:-Fung-and-Kaplan-(1952)">
+<h2>Reference: Fung and Kaplan (1952)<a class="headerlink" href="#Reference:-Fung-and-Kaplan-(1952)" title="Link to this heading">#</a></h2>
+<p>Fung and Kaplan write the initial and the deflected center lines of the arch as <span class="math notranslate nohighlight">\(y_0 = \sum_m a_m L \sin(m \pi x/L)\)</span> and <span class="math notranslate nohighlight">\(y = \sum_m b_m L \sin(m \pi x/L)\)</span>, Eqs. (2) and (3), <span class="math notranslate nohighlight">\(y\)</span> positive upwards, and the lateral load per unit length, positive downwards, as <span class="math notranslate nohighlight">\(q = q_0 \sum_m k_m \sin(m \pi x/L)\)</span>, Eq. (12). With the nondimensional parameters of Eq. (14),</p>
+<div class="math notranslate nohighlight">
+\[\lambda_m = \frac{a_m L}{2} \sqrt{\frac{A}{I}}, \qquad B_m = \frac{b_m L}{2} \sqrt{\frac{A}{I}}, \qquad R = \frac{q_0 L^4}{2 \pi^4 E I} \sqrt{\frac{A}{I}}, \qquad S = \frac{H_0 L^2}{\pi^2 E I},\]</div>
+<p>and <span class="math notranslate nohighlight">\(\beta = \alpha/(\alpha + EA/L)\)</span>, Eq. (10), where <span class="math notranslate nohighlight">\(H_0\)</span> is the initial thrust and <span class="math notranslate nohighlight">\(\alpha\)</span> the spring constant of the end support, the equilibrium equations are, Eq. (15),</p>
+<div class="math notranslate nohighlight">
+\[B_m \left( \beta \sum_{n=1}^\infty n^2 B_n^2 - \beta \sum_{n=1}^\infty n^2 \lambda_n^2 + m^2 - S \right) = -\frac{R}{m^2} k_m + \lambda_m (m^2 - S) \qquad (m = 1, 2, 3, \dots)\]</div>
+<p>For hinged ends without initial thrust, <span class="math notranslate nohighlight">\(\beta = 1\)</span> (<span class="math notranslate nohighlight">\(\alpha = \infty\)</span>) and <span class="math notranslate nohighlight">\(S = 0\)</span>; for the sinusoidal load, <span class="math notranslate nohighlight">\(q = q_0 \sin(\pi x/L)\)</span>, <span class="math notranslate nohighlight">\(k_1 = 1\)</span> and <span class="math notranslate nohighlight">\(k_m = 0\)</span> for <span class="math notranslate nohighlight">\(m &gt; 1\)</span>. The circular arc of radius <span class="math notranslate nohighlight">\(\rho_0\)</span> is, Eq. (45),</p>
+<div class="math notranslate nohighlight">
+\[y_0 = \frac{1}{2 \rho_0} x (L - x) = \frac{4 L^2}{\pi^3 \rho_0} \sum_{n = 1, 3, 5, \dots} \frac{1}{n^3} \sin \frac{n \pi x}{L},\]</div>
+<p>with the rise <span class="math notranslate nohighlight">\(L^2/(8 \rho_0)\)</span>, i.e. <span class="math notranslate nohighlight">\(\lambda_n = \lambda_1/n^3\)</span> for odd <span class="math notranslate nohighlight">\(n\)</span> and <span class="math notranslate nohighlight">\(\lambda_n = 0\)</span> for even <span class="math notranslate nohighlight">\(n\)</span>. With <span class="math notranslate nohighlight">\(T = \sum_n n^2 B_n^2 - \sum_n n^2 \lambda_n^2\)</span>, Eqs. (15) become</p>
+<div class="math notranslate nohighlight">
+\[B_1 (T + 1) = \lambda_1 - R, \qquad B_m (T + m^2) = m^2 \lambda_m = \frac{\lambda_1}{m} \quad (m = 3, 5, \dots), \qquad B_m (T + m^2) = 0 \quad (m = 2, 4, \dots).\]</div>
+<p>On the symmetric path the even <span class="math notranslate nohighlight">\(B_m\)</span> vanish, and the path is given parametrically by <span class="math notranslate nohighlight">\(T\)</span>: <span class="math notranslate nohighlight">\(B_m = \lambda_1/(m (T + m^2))\)</span> for odd <span class="math notranslate nohighlight">\(m \ge 3\)</span>, <span class="math notranslate nohighlight">\(B_1^2 = T + \sum_n n^2 \lambda_n^2 - \sum_{m \ge 3} m^2 B_m^2\)</span> from the definition of <span class="math notranslate nohighlight">\(T\)</span>, with both signs of <span class="math notranslate nohighlight">\(B_1\)</span>, and <span class="math notranslate nohighlight">\(R = \lambda_1 - B_1 (T + 1)\)</span>. The sums are truncated at <span class="math notranslate nohighlight">\(m = 20001\)</span>, their terms decreasing as <span class="math notranslate nohighlight">\(m^{-4}\)</span>. Since
+<span class="math notranslate nohighlight">\(\mathrm{d} B_1^2/\mathrm{d}T = 1 + 2 \lambda_1^2 \sum_{m \ge 3} (T + m^2)^{-3}\)</span>, the limit points, <span class="math notranslate nohighlight">\(\mathrm{d}R/\mathrm{d}T = 0\)</span>, satisfy</p>
+<div class="math notranslate nohighlight">
+\[\left( 1 + 2 \lambda_1^2 \sum_{m = 3, 5, \dots} \frac{1}{(T + m^2)^3} \right) (T + 1) + 2 B_1^2 = 0,\]</div>
+<p>the same <span class="math notranslate nohighlight">\(T\)</span> for both signs of <span class="math notranslate nohighlight">\(B_1\)</span>: the maximum (<span class="math notranslate nohighlight">\(B_1 &gt; 0\)</span>) and the minimum (<span class="math notranslate nohighlight">\(B_1 &lt; 0\)</span>) are symmetric about <span class="math notranslate nohighlight">\(\lambda_1\)</span>, <span class="math notranslate nohighlight">\(R_{max} + R_{min} = 2 \lambda_1\)</span>. For the sinusoidal arch, <span class="math notranslate nohighlight">\(\lambda_m = 0\)</span> for <span class="math notranslate nohighlight">\(m \ge 2\)</span>, these are Eqs. (23), <span class="math notranslate nohighlight">\(B_1^3 - B_1 (\lambda_1^2 - 1) = \lambda_1 - R\)</span>, and (25), <span class="math notranslate nohighlight">\((B_1)_{cr} = \sqrt{(\lambda_1^2 - 1)/3}\)</span> and <span class="math notranslate nohighlight">\(R_{cr} = \lambda_1 + \sqrt{4 (\lambda_1^2 - 1)^3/27}\)</span>, shown for comparison.</p>
+<p>The equation of <span class="math notranslate nohighlight">\(m = 2\)</span> admits <span class="math notranslate nohighlight">\(B_2 \ne 0\)</span> at <span class="math notranslate nohighlight">\(T = -4\)</span>, the bifurcation into the unsymmetric mode of Eqs. (26)-(29). For the sinusoidal arch it precedes the limit point, condition (3) after Eq. (29), when <span class="math notranslate nohighlight">\(B_1 = \sqrt{\lambda_1^2 - 4}\)</span> of Eq. (29) is larger than <span class="math notranslate nohighlight">\((B_1)_{cr}\)</span> of Eq. (25), i.e. for <span class="math notranslate nohighlight">\(\lambda_1^2 &gt; 5.5\)</span>. With <span class="math notranslate nohighlight">\(\lambda_1 = 2.2\)</span> the path from <span class="math notranslate nohighlight">\(R = 0\)</span>, <span class="math notranslate nohighlight">\(T = 0\)</span>, reaches the limit point before <span class="math notranslate nohighlight">\(T = -4\)</span> (below), and the two
+bifurcation points lie on the unstable part of the path, between the maximum and the minimum; <span class="math notranslate nohighlight">\(T\)</span> does not go below its value at <span class="math notranslate nohighlight">\(B_1 = 0\)</span>, <span class="math notranslate nohighlight">\(-4.64\)</span>, so the other even modes, <span class="math notranslate nohighlight">\(T = -m^2\)</span> with <span class="math notranslate nohighlight">\(m \ge 4\)</span>, do not appear. The maximum of the symmetric path is therefore the critical load.</p>
+<p>The deflection compared is that of the midspan, positive downwards, <span class="math notranslate nohighlight">\(-w_C = y_0(L/2) - y(L/2) = -(2/\sqrt{A/I}) \sum_m (B_m - \lambda_m) \sin(m \pi/2)\)</span>, with <span class="math notranslate nohighlight">\(\sqrt{A/I} = \sqrt{12}/t\)</span>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>LAM1 = 2.2
+MS = np.arange(3, 20002, 2)  # odd m &gt;= 3
+SUM_N2LAM2 = LAM1**2*(1 + np.sum(MS**-4.))  # sum n^2 lambda_n^2, n odd
+
+
+def b1_squared(T):
+    return T + SUM_N2LAM2 - LAM1**2*np.sum((T + MS**2.)**-2)
+
+
+def fk_point(T, sign):
+    r'''R, -w_C/t and B_1 of the symmetric path at T, B_1 with the sign ``sign``'''
+    B1 = sign*np.sqrt(max(b1_squared(T), 0.))
+    Bm = LAM1/(MS*(T + MS**2.))
+    sin_m = np.sin(MS*np.pi/2)
+    w_t = (B1 - LAM1 + np.sum((Bm - LAM1/MS**3.)*sin_m))/np.sqrt(3)
+    return LAM1 - B1*(T + 1), -w_t, B1
+
+
+def stationary(T):
+    return (1 + 2*LAM1**2*np.sum((T + MS**2.)**-3))*(T + 1) + 2*b1_squared(T)
+
+
+T_LIM = brentq(stationary, -3.9, -3., xtol=1e-14)
+FK_MAX, FK_MIN = fk_point(T_LIM, 1), fk_point(T_LIM, -1)
+FK_BIF = fk_point(-4., 1), fk_point(-4., -1)
+
+# the symmetric path, from R = 0 (T = 0, B_1 = lambda_1) to R = 6 on the inverted branch
+T0 = brentq(b1_squared, -6., -4.)
+T6 = brentq(lambda T: fk_point(T, -1)[0] - 6., 0., 10.)
+ref_path = np.array([fk_point(T, 1) for T in np.linspace(0., T0, 2001)]
+                    + [fk_point(T, -1) for T in np.linspace(T0, T6, 2001)[1:]])
+print('-w_C/t increases monotonically along the reference path:', bool(np.all(np.diff(ref_path[:, 1]) &gt; 0)))
+
+R25 = LAM1 + np.sqrt(4/27*(LAM1**2 - 1)**3)
+rows = [['maximum', '%.4f' % T_LIM, '%.4f' % FK_MAX[2], '%.4f' % FK_MAX[0], '%.4f' % FK_MAX[1]],
+        ['minimum', '%.4f' % T_LIM, '%.4f' % FK_MIN[2], '%.4f' % FK_MIN[0], '%.4f' % FK_MIN[1]],
+        ['bifurcation, $B_1 &gt; 0$', '-4', '%.4f' % FK_BIF[0][2], '%.4f' % FK_BIF[0][0], '%.4f' % FK_BIF[0][1]],
+        ['bifurcation, $B_1 &lt; 0$', '-4', '%.4f' % FK_BIF[1][2], '%.4f' % FK_BIF[1][0], '%.4f' % FK_BIF[1][1]],
+        ['$B_1 = 0$, smallest $T$ of the path', '%.4f' % T0, '0', '%.4f' % fk_point(T0, 1)[0], '%.4f' % fk_point(T0, 1)[1]],
+        ['end of the path', '%.4f' % T6, '%.4f' % fk_point(T6, -1)[2], '6', '%.4f' % fk_point(T6, -1)[1]]]
+display(Markdown(markdown_table(['circular arch, $\\lambda_1 = %g$' % LAM1, '$T$', '$B_1$', '$R$', '$-w_C/t$'], rows)))
+display(Markdown('Sinusoidal arch with the same $\\lambda_1$, Eq. (25): $(B_1)_{cr}$ = %.4f, $R_{cr}$ = %.4f; '
+                 '$R_{max} + R_{min}$ of the circular arch: %.6f'
+                 % (np.sqrt((LAM1**2 - 1)/3), R25, FK_MAX[0] + FK_MIN[0])))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+-w_C/t increases monotonically along the reference path: True
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>circular arch, <span class="math notranslate nohighlight">\(\lambda_1 = 2.2\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(T\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(B_1\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(R\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(-w_C/t\)</span></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>maximum</p></td>
+<td><p>-3.4462</p></td>
+<td><p>1.1373</p></td>
+<td><p>4.9822</p></td>
+<td><p>0.6413</p></td>
+</tr>
+<tr class="row-odd"><td><p>minimum</p></td>
+<td><p>-3.4462</p></td>
+<td><p>-1.1373</p></td>
+<td><p>-0.5822</p></td>
+<td><p>1.9546</p></td>
+</tr>
+<tr class="row-even"><td><p>bifurcation, <span class="math notranslate nohighlight">\(B_1 &gt; 0\)</span></p></td>
+<td><p>-4</p></td>
+<td><p>0.8381</p></td>
+<td><p>4.7143</p></td>
+<td><p>0.8222</p></td>
+</tr>
+<tr class="row-odd"><td><p>bifurcation, <span class="math notranslate nohighlight">\(B_1 &lt; 0\)</span></p></td>
+<td><p>-4</p></td>
+<td><p>-0.8381</p></td>
+<td><p>-0.3143</p></td>
+<td><p>1.7900</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(B_1 = 0\)</span>, smallest <span class="math notranslate nohighlight">\(T\)</span> of the path</p></td>
+<td><p>-4.6406</p></td>
+<td><p>0</p></td>
+<td><p>2.2000</p></td>
+<td><p>1.3182</p></td>
+</tr>
+<tr class="row-odd"><td><p>end of the path</p></td>
+<td><p>0.6244</p></td>
+<td><p>-2.3393</p></td>
+<td><p>6</p></td>
+<td><p>2.6179</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p>Sinusoidal arch with the same <span class="math notranslate nohighlight">\(\lambda_1\)</span>, Eq. (25): <span class="math notranslate nohighlight">\((B_1)_{cr}\)</span> = 1.1314, <span class="math notranslate nohighlight">\(R_{cr}\)</span> = 5.0963; <span class="math notranslate nohighlight">\(R_{max} + R_{min}\)</span> of the circular arch: 4.400000</p>
+</div>
+</div>
+</section>
+<section id="panels-model">
+<h2>panels model<a class="headerlink" href="#panels-model" title="Link to this heading">#</a></h2>
+<p>The arch is a strip of a cylindrical panel of radius <span class="math notranslate nohighlight">\(\rho_0\)</span>, <code class="docutils literal notranslate"><span class="pre">cylshell_clpt_sanders</span></code>, made by <code class="docutils literal notranslate"><span class="pre">su.make_shell</span></code>, in cylindrical bending: the axial width <span class="math notranslate nohighlight">\(a = 10\)</span> with free curved edges, <span class="math notranslate nohighlight">\(x = 0, a\)</span>, and the straight edges, <span class="math notranslate nohighlight">\(y = 0, b\)</span>, hinged, <span class="math notranslate nohighlight">\(u = v = w = 0\)</span> with the rotations free, which are the hinged ends without end flexibility or initial thrust of Fung and Kaplan, <span class="math notranslate nohighlight">\(\beta = 1\)</span> and <span class="math notranslate nohighlight">\(S = 0\)</span>. With <span class="math notranslate nohighlight">\(\nu = 0\)</span> the strip has no anticlastic coupling
+and its stiffnesses per unit width, <span class="math notranslate nohighlight">\(E t^3/12\)</span> and <span class="math notranslate nohighlight">\(E t\)</span>, are <span class="math notranslate nohighlight">\(E I\)</span> and <span class="math notranslate nohighlight">\(E A\)</span> of the beam per unit width, such that <span class="math notranslate nohighlight">\(R = q_0 L^4 \sqrt{A/I}/(2 \pi^4 E I) = p_0 L^4 \sqrt{12}/(2 \pi^4 (E t^3/12) t)\)</span> with the pressure amplitude <span class="math notranslate nohighlight">\(p_0 = q_0/a\)</span>.</p>
+<p>From <span class="math notranslate nohighlight">\(\lambda_1 = (a_1 L/2) \sqrt{12}/t\)</span> and Eq. (45), <span class="math notranslate nohighlight">\(a_1 L = \lambda_1 t/\sqrt{3}\)</span> and <span class="math notranslate nohighlight">\(\rho_0 = 4 L^2/(\pi^3 a_1 L)\)</span>. The arc has the chord <span class="math notranslate nohighlight">\(L = 2 \rho_0 \sin \theta\)</span> and the length <span class="math notranslate nohighlight">\(b = 2 \rho_0 \theta\)</span>. The dead pressure <span class="math notranslate nohighlight">\(p = -p_0 \sin(\pi y/b)\)</span>, <code class="docutils literal notranslate"><span class="pre">add_pressure_load(...,</span> <span class="pre">cte=False)</span></code>, acts along the normal of the undeformed arc, inwards, with <span class="math notranslate nohighlight">\(p_0\)</span> for the reference load <span class="math notranslate nohighlight">\(R_{ref} = 6\)</span>, above the maximum, such that <span class="math notranslate nohighlight">\(R = 6 \lambda\)</span> with
+the load factor <span class="math notranslate nohighlight">\(\lambda\)</span> of <code class="docutils literal notranslate"><span class="pre">structsolve</span></code>. The model differs from the shallow-arch theory of Fung and Kaplan, which neglects <span class="math notranslate nohighlight">\((\mathrm{d}y/\mathrm{d}x)^2\)</span> against 1, by terms of the order of <span class="math notranslate nohighlight">\(\theta^2\)</span>: the load along the arc length <span class="math notranslate nohighlight">\(y\)</span> and the normal of the arc instead of the span coordinate <span class="math notranslate nohighlight">\(x\)</span> and the vertical, the exact circular arc instead of the parabola of Eq. (45) (rise <span class="math notranslate nohighlight">\(\rho_0 (1 - \cos \theta)\)</span> instead of <span class="math notranslate nohighlight">\(L^2/(8 \rho_0)\)</span>), and Sanders’
+kinematics.</p>
+<p>The Ritz approximation has <span class="math notranslate nohighlight">\(3 \times 14\)</span> terms (<span class="math notranslate nohighlight">\(x \times y\)</span>). The four paths use <code class="docutils literal notranslate"><span class="pre">NL_method</span> <span class="pre">=</span> <span class="pre">'arc_length_riks'</span></code> or <code class="docutils literal notranslate"><span class="pre">'arc_length_crisfield'</span></code> and <code class="docutils literal notranslate"><span class="pre">convergence</span> <span class="pre">=</span> <span class="pre">'crisfield'</span></code> or <code class="docutils literal notranslate"><span class="pre">'relative'</span></code>, with the default tolerance <code class="docutils literal notranslate"><span class="pre">relTOL</span></code> and <code class="docutils literal notranslate"><span class="pre">initialInc</span> <span class="pre">=</span> <span class="pre">maxInc</span> <span class="pre">=</span> <span class="pre">0.05</span></code>, since <code class="docutils literal notranslate"><span class="pre">structsolve</span></code> caps the arc length of a step at <code class="docutils literal notranslate"><span class="pre">max(maxInc,</span> <span class="pre">initial</span> <span class="pre">arc</span> <span class="pre">length)</span></code>; <code class="docutils literal notranslate"><span class="pre">maxArcLength</span></code> is large enough for each path to end at the load factor 1, <span class="math notranslate nohighlight">\(R = 6\)</span>, on the inverted branch:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">an</span> <span class="o">=</span> <span class="n">Analysis</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">calc_fext</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">calc_fint</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">calc_kG</span><span class="p">)</span>
+<span class="n">an</span><span class="o">.</span><span class="n">NL_method</span> <span class="o">=</span> <span class="n">method</span>
+<span class="n">an</span><span class="o">.</span><span class="n">convergence</span> <span class="o">=</span> <span class="n">convergence</span>
+<span class="n">an</span><span class="o">.</span><span class="n">initialInc</span> <span class="o">=</span> <span class="n">an</span><span class="o">.</span><span class="n">maxInc</span> <span class="o">=</span> <span class="mf">0.05</span>
+<span class="n">an</span><span class="o">.</span><span class="n">maxArcLength</span> <span class="o">=</span> <span class="mf">1.e6</span>
+<span class="n">increments</span><span class="p">,</span> <span class="n">cs</span> <span class="o">=</span> <span class="n">an</span><span class="o">.</span><span class="n">static</span><span class="p">(</span><span class="n">NLgeom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The limit points are the first local maximum of the load along the path and the following local minimum, refined with a parabola through the three points around each, <span class="math notranslate nohighlight">\(R\)</span> as a function of <span class="math notranslate nohighlight">\(w_C\)</span>, which decreases monotonically along the paths. The panels model contains the unsymmetric modes; <code class="docutils literal notranslate"><span class="pre">asym</span></code> is the largest difference between the deflections at <span class="math notranslate nohighlight">\(y = b/4\)</span> and <span class="math notranslate nohighlight">\(3b/4\)</span> along the path, which checks that the paths remain on the symmetric branch through the bifurcation
+points. Two more runs, Riks with Crisfield’s criterion, check the convergence of the Ritz approximation, <span class="math notranslate nohighlight">\(3 \times 20\)</span> terms, and the resolution of the path, <code class="docutils literal notranslate"><span class="pre">initialInc</span> <span class="pre">=</span> <span class="pre">maxInc</span> <span class="pre">=</span> <span class="pre">0.02</span></code>.</p>
+<p><strong>Results and run times.</strong> The results are computed when the notebook is executed (<code class="docutils literal notranslate"><span class="pre">RERUN</span> <span class="pre">=</span> <span class="pre">True</span></code>) and saved in <code class="docutils literal notranslate"><span class="pre">results/fk1952_shallow_arches.json</span></code>; with <code class="docutils literal notranslate"><span class="pre">RERUN</span> <span class="pre">=</span> <span class="pre">False</span></code> the saved results are loaded instead. The run times, the column <code class="docutils literal notranslate"><span class="pre">time</span></code> below, are the wall-clock times of <code class="docutils literal notranslate"><span class="pre">an.static()</span></code>, one run at a time; they indicate the cost and are not benchmarks.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>L, T_ARCH, WIDTH, E = 100., 1., 10., 1.e5
+A1L = LAM1*T_ARCH/np.sqrt(3)
+RHO0 = 4*L**2/(np.pi**3*A1L)
+THETA = np.arcsin(L/2/RHO0)
+B_ARC = 2*RHO0*THETA
+RREF = 6.
+P0 = RREF*2*np.pi**4*(E*T_ARCH**3/12)/(L**4*np.sqrt(12)/T_ARCH)
+METHODS = [('Riks', 'arc_length_riks'), ('Crisfield', 'arc_length_crisfield')]
+CRITERIA = ('crisfield', 'relative')
+print('rho0 = %.4f, theta = %.5f rad, b = %.4f, rise rho0 (1 - cos theta) = %.4f, L^2/(8 rho0) = %.4f'
+      % (RHO0, THETA, B_ARC, RHO0*(1 - np.cos(THETA)), L**2/(8*RHO0)))
+print('default relTOL of structsolve:', Analysis().relTOL)
+
+
+def arch(n=14):
+    s = su.make_shell('clpt', WIDTH, B_ARC, [0.], [T_ARCH], [(E, 0.)], r=RHO0, bcs='FFFF', m=3, n=n)
+    for edge in ('y1', 'y2'):
+        for field in 'uvw':
+            setattr(s, edge + field, 0.)
+    s._rebuild()
+    s.add_pressure_load(lambda x, y: -P0*np.sin(np.pi*y/B_ARC), cte=False)
+    return s
+
+
+def run(method, convergence, n=14, inc=0.05):
+    s = arch(n)
+    an = Analysis(s.calc_fext, s.calc_fint, s.calc_kC, s.calc_kG)
+    an.NL_method = method
+    an.convergence = convergence
+    an.initialInc = an.maxInc = inc
+    an.maxArcLength = 1.e6
+    t0 = time.time()
+    increments, cs = an.static(NLgeom=True, silent=True)
+    elapsed = time.time() - t0
+    wc = [su.center(s, c) for c in cs]
+    asym = max(abs(su.center(s, c, y=B_ARC/4) - su.center(s, c, y=3*B_ARC/4)) for c in cs)
+    return dict(R=(RREF*np.asarray(increments)).tolist(), wc=wc, time=elapsed, asym=asym,
+                ndof=int(s.get_size()), relTOL=an.relTOL)
+
+
+def compute():
+    res = dict(paths={}, checks={})
+    for label, method in METHODS:
+        for convergence in CRITERIA:
+            res['paths']['%s/%s' % (label, convergence)] = run(method, convergence)
+    res['checks']['3 x 20 terms'] = run('arc_length_riks', 'crisfield', n=20)
+    res['checks']['inc = 0.02'] = run('arc_length_riks', 'crisfield', inc=0.02)
+    return res
+
+
+def limit_points(o):
+    r'''Maximum and following minimum of R along the path, refined with a parabola R(w_C)'''
+    R = np.r_[0., o['R']]
+    w = np.r_[0., o['wc']]
+    dR = np.diff(R)
+    i = int(np.flatnonzero(dR &lt; 0)[0])
+    j = i + int(np.flatnonzero(dR[i:] &gt; 0)[0])
+    out = []
+    for k in (i, j):
+        c = np.polyfit(w[k-1:k+2], R[k-1:k+2], 2)
+        wk = -c[1]/(2*c[0])
+        out.append((float(np.polyval(c, wk)), float(-wk/T_ARCH)))
+    return out
+
+
+res = run_or_load(os.path.join(RESULTS, 'fk1952_shallow_arches.json'), compute, rerun=RERUN)
+print('w_C decreases monotonically along every path:', all(np.all(np.diff(o['wc']) &lt; 0) for o in list(res['paths'].values()) + list(res['checks'].values())))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+rho0 = 1015.6599, theta = 0.04925 rad, b = 100.0404, rise rho0 (1 - cos theta) = 1.2315, L^2/(8 rho0) = 1.2307
+default relTOL of structsolve: 1e-09
+computed in 301 s, saved to results/fk1952_shallow_arches.json
+w_C decreases monotonically along every path: True
+</pre></div></div>
+</div>
+</section>
+<section id="Limit-loads">
+<h2>Limit loads<a class="headerlink" href="#Limit-loads" title="Link to this heading">#</a></h2>
+<p>Maximum and minimum loads, <span class="math notranslate nohighlight">\(R_{max}\)</span> and <span class="math notranslate nohighlight">\(R_{min}\)</span>, and the midspan deflections at them, <span class="math notranslate nohighlight">\(-w_C/t\)</span>, against the symmetric path of Eqs. (15) and (45), with the differences in parentheses (relative for <span class="math notranslate nohighlight">\(R_{max}\)</span>, absolute for <span class="math notranslate nohighlight">\(R_{min}\)</span>). <code class="docutils literal notranslate"><span class="pre">steps</span></code> is the number of converged steps of the whole path, up to <span class="math notranslate nohighlight">\(R = 6\)</span>, and <code class="docutils literal notranslate"><span class="pre">time</span></code> its run time, see above.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def limit_row(label, o, d=4):
+    (Rmax, wmax), (Rmin, wmin) = limit_points(o)
+    f = '%%.%df (%%+.%df)' % (d, d)
+    return [label, '%%.%df (%%+.3f%%%%)' % d % (Rmax, pct(Rmax, FK_MAX[0])), f % (wmax, wmax - FK_MAX[1]),
+            f % (Rmin, Rmin - FK_MIN[0]), f % (wmin, wmin - FK_MIN[1]),
+            '%%.%df' % d % (Rmax + Rmin), len(o['R']), '%.1e' % o['asym'], '%.1f s' % o['time']]
+
+
+header = ['method / criterion', '$R_{max}$', '$-w_C/t$ at $R_{max}$', '$R_{min}$', '$-w_C/t$ at $R_{min}$',
+          '$R_{max} + R_{min}$', 'steps', 'asym', 'time']
+rows = [['Fung and Kaplan, Eqs. (15), (45)', '%.4f' % FK_MAX[0], '%.4f' % FK_MAX[1], '%.4f' % FK_MIN[0],
+         '%.4f' % FK_MIN[1], '%.4f' % (FK_MAX[0] + FK_MIN[0]), '', '', '']]
+rows += [limit_row(key, o) for key, o in res['paths'].items()]
+display(Markdown(markdown_table(header, rows)))
+base = res['paths']['Riks/crisfield']
+for key, o in res['paths'].items():
+    print('%-19s largest difference from Riks/crisfield along the path: R %.1e, w_C/t %.1e'
+          % (key, np.abs(np.subtract(o['R'], base['R'])).max(), np.abs(np.subtract(o['wc'], base['wc'])).max()/T_ARCH))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>method / criterion</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(R_{max}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(-w_C/t\)</span> at <span class="math notranslate nohighlight">\(R_{max}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(R_{min}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(-w_C/t\)</span> at <span class="math notranslate nohighlight">\(R_{min}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(R_{max} + R_{min}\)</span></p></th>
+<th class="head"><p>steps</p></th>
+<th class="head"><p>asym</p></th>
+<th class="head"><p>time</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Fung and Kaplan, Eqs. (15), (45)</p></td>
+<td><p>4.9822</p></td>
+<td><p>0.6413</p></td>
+<td><p>-0.5822</p></td>
+<td><p>1.9546</p></td>
+<td><p>4.4000</p></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Riks/crisfield</p></td>
+<td><p>4.9858 (+0.074%)</p></td>
+<td><p>0.6422 (+0.0008)</p></td>
+<td><p>-0.5883 (-0.0061)</p></td>
+<td><p>1.9581 (+0.0035)</p></td>
+<td><p>4.3976</p></td>
+<td><p>129</p></td>
+<td><p>6.5e-14</p></td>
+<td><p>27.4 s</p></td>
+</tr>
+<tr class="row-even"><td><p>Riks/relative</p></td>
+<td><p>4.9858 (+0.074%)</p></td>
+<td><p>0.6422 (+0.0008)</p></td>
+<td><p>-0.5883 (-0.0061)</p></td>
+<td><p>1.9581 (+0.0035)</p></td>
+<td><p>4.3976</p></td>
+<td><p>129</p></td>
+<td><p>6.5e-14</p></td>
+<td><p>28.0 s</p></td>
+</tr>
+<tr class="row-odd"><td><p>Crisfield/crisfield</p></td>
+<td><p>4.9858 (+0.074%)</p></td>
+<td><p>0.6422 (+0.0008)</p></td>
+<td><p>-0.5883 (-0.0061)</p></td>
+<td><p>1.9581 (+0.0035)</p></td>
+<td><p>4.3976</p></td>
+<td><p>129</p></td>
+<td><p>6.2e-14</p></td>
+<td><p>28.0 s</p></td>
+</tr>
+<tr class="row-even"><td><p>Crisfield/relative</p></td>
+<td><p>4.9858 (+0.074%)</p></td>
+<td><p>0.6422 (+0.0008)</p></td>
+<td><p>-0.5883 (-0.0061)</p></td>
+<td><p>1.9581 (+0.0035)</p></td>
+<td><p>4.3976</p></td>
+<td><p>129</p></td>
+<td><p>6.2e-14</p></td>
+<td><p>29.0 s</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Riks/crisfield      largest difference from Riks/crisfield along the path: R 0.0e+00, w_C/t 0.0e+00
+Riks/relative       largest difference from Riks/crisfield along the path: R 5.8e-09, w_C/t 3.5e-10
+Crisfield/crisfield largest difference from Riks/crisfield along the path: R 8.6e-08, w_C/t 4.4e-09
+Crisfield/relative  largest difference from Riks/crisfield along the path: R 8.6e-08, w_C/t 4.4e-09
+</pre></div></div>
+</div>
+<section id="Convergence-checks">
+<h3>Convergence checks<a class="headerlink" href="#Convergence-checks" title="Link to this heading">#</a></h3>
+<p>Riks with Crisfield’s criterion: the model above (<span class="math notranslate nohighlight">\(3 \times 14\)</span> terms, <code class="docutils literal notranslate"><span class="pre">initialInc</span> <span class="pre">=</span> <span class="pre">maxInc</span> <span class="pre">=</span> <span class="pre">0.05</span></code>), <span class="math notranslate nohighlight">\(3 \times 20\)</span> terms, and a shorter step, <code class="docutils literal notranslate"><span class="pre">initialInc</span> <span class="pre">=</span> <span class="pre">maxInc</span> <span class="pre">=</span> <span class="pre">0.02</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rows = [limit_row('3 x 14 terms, inc = 0.05', res['paths']['Riks/crisfield'], d=6)]
+rows += [limit_row(key, o, d=6) for key, o in res['checks'].items()]
+display(Markdown(markdown_table(['run'] + header[1:], rows)))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>run</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(R_{max}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(-w_C/t\)</span> at <span class="math notranslate nohighlight">\(R_{max}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(R_{min}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(-w_C/t\)</span> at <span class="math notranslate nohighlight">\(R_{min}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(R_{max} + R_{min}\)</span></p></th>
+<th class="head"><p>steps</p></th>
+<th class="head"><p>asym</p></th>
+<th class="head"><p>time</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>3 x 14 terms, inc = 0.05</p></td>
+<td><p>4.985849 (+0.074%)</p></td>
+<td><p>0.642160 (+0.000848)</p></td>
+<td><p>-0.588278 (-0.006111)</p></td>
+<td><p>1.958128 (+0.003521)</p></td>
+<td><p>4.397571</p></td>
+<td><p>129</p></td>
+<td><p>6.5e-14</p></td>
+<td><p>27.4 s</p></td>
+</tr>
+<tr class="row-odd"><td><p>3 x 20 terms</p></td>
+<td><p>4.985849 (+0.074%)</p></td>
+<td><p>0.642160 (+0.000848)</p></td>
+<td><p>-0.588278 (-0.006111)</p></td>
+<td><p>1.958128 (+0.003521)</p></td>
+<td><p>4.397571</p></td>
+<td><p>129</p></td>
+<td><p>8.5e-14</p></td>
+<td><p>75.5 s</p></td>
+</tr>
+<tr class="row-even"><td><p>inc = 0.02</p></td>
+<td><p>4.985831 (+0.074%)</p></td>
+<td><p>0.642083 (+0.000770)</p></td>
+<td><p>-0.588294 (-0.006128)</p></td>
+<td><p>1.958166 (+0.003560)</p></td>
+<td><p>4.397537</p></td>
+<td><p>321</p></td>
+<td><p>1.4e-13</p></td>
+<td><p>65.1 s</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="Load-deflection-path">
+<h2>Load-deflection path<a class="headerlink" href="#Load-deflection-path" title="Link to this heading">#</a></h2>
+<p>The four paths of panels (they coincide) against the symmetric path of Fung and Kaplan, with the limit points of the reference (circles) and the bifurcation points at <span class="math notranslate nohighlight">\(T = -4\)</span> (squares). The end of the path, <span class="math notranslate nohighlight">\(R = 6\)</span> on the inverted branch, is also compared, at the same load, where the deflection is well conditioned.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>styles = {'Riks/crisfield': dict(color='tab:red', lw=2.5, alpha=0.5), 'Riks/relative': dict(color='tab:orange', ls='--'),
+          'Crisfield/crisfield': dict(color='tab:green', ls='-.'), 'Crisfield/relative': dict(color='tab:purple', ls=':')}
+fig, ax = plt.subplots(figsize=(7, 5))
+ax.plot(ref_path[:, 1], ref_path[:, 0], 'k-', lw=1, label='Fung and Kaplan, Eqs. (15), (45)')
+for key, o in res['paths'].items():
+    ax.plot(-np.r_[0., o['wc']]/T_ARCH, np.r_[0., o['R']], label='panels, %s' % key, **styles[key])
+ax.plot([FK_MAX[1], FK_MIN[1]], [FK_MAX[0], FK_MIN[0]], 'o', mfc='none', mec='k', ms=9, label='limit points')
+ax.plot([p[1] for p in FK_BIF], [p[0] for p in FK_BIF], 's', mfc='none', mec='k', ms=7,
+        label='bifurcation points, $T = -4$')
+ax.axhline(0., color='0.6', lw=0.5)
+ax.set_xlabel('$-w_C/t$')
+ax.set_ylabel('$R$')
+ax.set_title('Circular arch, $\\lambda_1 = %g$, sinusoidal load' % LAM1)
+ax.grid(alpha=0.3)
+ax.legend(fontsize=8)
+plt.tight_layout()
+plt.show()
+
+o = res['paths']['Riks/crisfield']
+w_end_ref = fk_point(T6, -1)[1]
+print('R = 6 on the inverted branch: -w_C/t = %.4f (panels), %.4f (Fung and Kaplan), difference %+.4f'
+      % (-o['wc'][-1]/T_ARCH, w_end_ref, -o['wc'][-1]/T_ARCH - w_end_ref))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_fk1952_shallow_arches_11_0.png" src="../_images/notebooks_fk1952_shallow_arches_11_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+R = 6 on the inverted branch: -w_C/t = 2.6227 (panels), 2.6179 (Fung and Kaplan), difference +0.0047
+</pre></div></div>
+</div>
+</section>
+<section id="Discussion">
+<h2>Discussion<a class="headerlink" href="#Discussion" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Limit loads.</strong> The maximum load of panels, <span class="math notranslate nohighlight">\(R_{max} = 4.9858\)</span>, is 0.074% above that of Eqs. (15) and (45), 4.9822, at a midspan deflection larger by <span class="math notranslate nohighlight">\(0.0008 t\)</span>; the minimum, <span class="math notranslate nohighlight">\(-0.5883\)</span>, is <span class="math notranslate nohighlight">\(0.0061\)</span> below <span class="math notranslate nohighlight">\(-0.5822\)</span>, i.e. 0.11% of the load range <span class="math notranslate nohighlight">\(R_{max} - R_{min}\)</span>, at a deflection larger by <span class="math notranslate nohighlight">\(0.0035 t\)</span>. These differences, and <span class="math notranslate nohighlight">\(R_{max} + R_{min} = 4.3976\)</span> instead of <span class="math notranslate nohighlight">\(2 \lambda_1 = 4.4\)</span> for the shallow-arch theory, are of the order of
+<span class="math notranslate nohighlight">\(\theta^2 = 2.4 \times 10^{-3}\)</span>, the order of the terms in which the model differs from the theory of Fung and Kaplan (see the model above).</p></li>
+<li><p><strong>Path.</strong> The paths of panels follow the reference through the maximum, the unstable part and the minimum to the inverted branch; at <span class="math notranslate nohighlight">\(R = 6\)</span> the deflection is <span class="math notranslate nohighlight">\(2.6227 t\)</span> against <span class="math notranslate nohighlight">\(2.6179 t\)</span> (0.18%). On the steep branches a comparison of the loads at the same deflection is ill-conditioned and is not used.</p></li>
+<li><p><strong>Bifurcation.</strong> The paths remain symmetric, <code class="docutils literal notranslate"><span class="pre">asym</span></code> <span class="math notranslate nohighlight">\(\le 1.7 \times 10^{-13}\)</span>, through the two bifurcation points at <span class="math notranslate nohighlight">\(T = -4\)</span> on the unstable part of the path, which a symmetric load and a symmetric arch do not trigger; the unsymmetric branch of Eqs. (26)-(29) is not traced here, and with <span class="math notranslate nohighlight">\(\lambda_1 = 2.2\)</span> it does not change the critical load, the maximum of the symmetric path.</p></li>
+<li><p><strong>Arc-length methods and convergence criteria.</strong> The four paths coincide, 129 steps each, with differences of at most <span class="math notranslate nohighlight">\(9 \times 10^{-8}\)</span> in <span class="math notranslate nohighlight">\(R\)</span> along the path, and the same limit loads: the default tolerance, <code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-9</span></code>, is reached with either criterion at every step. Riks and Crisfield take the same time on this small model (126 degrees of freedom).</p></li>
+<li><p><strong>Convergence.</strong> With <span class="math notranslate nohighlight">\(3 \times 20\)</span> terms the limit loads are unchanged to six decimals, and with <code class="docutils literal notranslate"><span class="pre">initialInc</span> <span class="pre">=</span> <span class="pre">maxInc</span> <span class="pre">=</span> <span class="pre">0.02</span></code> (321 steps) they change by <span class="math notranslate nohighlight">\(2 \times 10^{-5}\)</span>: the model and the path are converged, and the differences from the reference are those of the model, not of the discretisation.</p></li>
+<li><p><strong>Shape of the arch.</strong> The sinusoidal arch with the same <span class="math notranslate nohighlight">\(\lambda_1\)</span> has <span class="math notranslate nohighlight">\(R_{cr} = 5.0963\)</span>, Eq. (25), 2.3% above the circular arch: the higher harmonics of the circular arc, <span class="math notranslate nohighlight">\(\lambda_n = \lambda_1/n^3\)</span>, lower the maximum load, and they are needed in the reference.</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="tsdt_offset_connections.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Third-order shear deformation theory with a laminate offset: connections and reference surface</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="simo1990_cylinder_postbuckling.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Reference:-Fung-and-Kaplan-(1952)">Reference: Fung and Kaplan (1952)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#panels-model">panels model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Limit-loads">Limit loads</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Convergence-checks">Convergence checks</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Load-deflection-path">Load-deflection path</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Discussion">Discussion</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/notebooks/fk1952_shallow_arches.nblink.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

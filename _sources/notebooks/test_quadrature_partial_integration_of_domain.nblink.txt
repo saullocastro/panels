@@ -1,0 +1,3 @@
+{
+    "path": "../../../notebooks/test_quadrature_partial_integration_of_domain.ipynb"
+}

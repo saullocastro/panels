@@ -1,0 +1,2718 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Clamped and face-clamped edges &#8212; panels 0.16.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../_static/documentation_options.js?v=7de89ed4"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/ex_face_clamp';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Cylinders modeled as multi-domain assemblies" href="ex_multidomain_cylinder.html" />
+    <link rel="prev" title="Prescribed displacements" href="ex_prescribed_displacements.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.16.0" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.16.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Clamped and face-clamped edges</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Clamped-and-face-clamped-edges">
+<h1>Clamped and face-clamped edges<a class="headerlink" href="#Clamped-and-face-clamped-edges" title="Link to this heading">#</a></h1>
+<p>This example compares two ways of clamping a thick plate: the clamp of the boundary condition flags and a clamp by the faces of the edge, imposed with prescribed displacements. It shows the warping of the section that the face clamp allows in the third-order shear deformation theory.</p>
+<p>In the classical laminated plate theory (CLPT), a clamped edge <span class="math notranslate nohighlight">\(x = 0\)</span> has <span class="math notranslate nohighlight">\(u = v = w = 0\)</span> and <span class="math notranslate nohighlight">\(w_{,x} = 0\)</span>. In the first-order shear deformation theory (FSDT), the rotations <span class="math notranslate nohighlight">\(\phi_x\)</span>, <span class="math notranslate nohighlight">\(\phi_y\)</span> replace the slope. The third-order theory (TSDT) of Reddy (1984) has the in-plane displacements</p>
+<div class="math notranslate nohighlight">
+\[u(z) = u_0 + z\phi_x - c_1 z^3 (\phi_x + w_{,x}), \qquad c_1 = \frac{4}{3h^2},\]</div>
+<p>about the mid-surface. With the flags, a clamped TSDT edge has <code class="docutils literal notranslate"><span class="pre">x1wr</span> <span class="pre">=</span> <span class="pre">0</span></code> together with <code class="docutils literal notranslate"><span class="pre">x1phix</span> <span class="pre">=</span> <span class="pre">x1phiy</span> <span class="pre">=</span> <span class="pre">0</span></code>, so the cross-section stays planar and unrotated. An edge clamped by its faces has <span class="math notranslate nohighlight">\(u = v = 0\)</span> at <span class="math notranslate nohighlight">\(z = d \mp h/2\)</span> and <span class="math notranslate nohighlight">\(w = 0\)</span>, where <span class="math notranslate nohighlight">\(d\)</span> is the offset of the mid-surface from the reference surface. This leaves the section free to warp. It is prescribed with the keyword <code class="docutils literal notranslate"><span class="pre">z</span></code> of <code class="docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_x</span></code>, see <a class="reference internal" href="../boundary_conditions.html"><span class="doc">Boundary
+conditions</span></a>.</p>
+<p>The square plates below, <span class="math notranslate nohighlight">\(a = b = 0.5\)</span> m, <span class="math notranslate nohighlight">\(h = 0.05\)</span> m (<span class="math notranslate nohighlight">\(h/a = 0.1\)</span>), <span class="math notranslate nohighlight">\(E = 70\)</span> GPa, <span class="math notranslate nohighlight">\(\nu = 0.3\)</span>, are clamped or simply supported at <span class="math notranslate nohighlight">\(x = 0, a\)</span>, free at <span class="math notranslate nohighlight">\(y = 0, b\)</span>, and loaded by a uniform pressure <span class="math notranslate nohighlight">\(q = 1\)</span> MPa. The prescribed displacements are imposed exactly by a <code class="docutils literal notranslate"><span class="pre">MultiDomain</span></code> with <code class="docutils literal notranslate"><span class="pre">pd_method='null-space'</span></code>. The thin-plate limits are checked against the solutions of Timoshenko and Woinowsky-Krieger (1959), and the thick plate shows the effect of
+the transverse shear deformation on each support.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%matplotlib inline
+import numpy as np
+import matplotlib.pyplot as plt
+from IPython.display import Markdown, display
+from structsolve import solve
+from structsolve.sparseutils import finalize_symmetric_matrix
+from panels.shell import Shell
+from panels.multidomain import MultiDomain
+from panels.multidomain.connections import fkCld_xcte
+
+
+def results_table(rows):
+    """Markdown table of (quantity, panels, reference, source) rows"""
+    out = ['| quantity | panels | reference | relative difference | reference source |',
+           '|---|---|---|---|---|']
+    for name, val, ref, src in rows:
+        out.append('| %s | %.6g | %.6g | %+.2e | %s |'
+                   % (name, val, ref, (val - ref)/abs(ref), src))
+    display(Markdown('\n'.join(out)))
+</pre></div>
+</div>
+</div>
+<section id="Model">
+<h2>Model<a class="headerlink" href="#Model" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">plate</span></code> builds a plate of thickness <code class="docutils literal notranslate"><span class="pre">h</span></code> with all edges free and the pressure load; <span class="math notranslate nohighlight">\(m = 26\)</span> terms along <span class="math notranslate nohighlight">\(x\)</span> resolve the boundary layer of the face clamp, see the convergence study below. <code class="docutils literal notranslate"><span class="pre">clamp_by_flags</span></code> constrains all the fields at an edge and, except for the FSDT, the slope of <span class="math notranslate nohighlight">\(w\)</span>. <code class="docutils literal notranslate"><span class="pre">simple_support</span></code> constrains <span class="math notranslate nohighlight">\(u = v = w = \phi_y = 0\)</span> at the edges <span class="math notranslate nohighlight">\(x = 0, a\)</span>. <code class="docutils literal notranslate"><span class="pre">face_clamp</span></code> prescribes <span class="math notranslate nohighlight">\(u = v = 0\)</span> at the two faces of the edge <span class="math notranslate nohighlight">\(x\)</span> and
+<span class="math notranslate nohighlight">\(w = 0\)</span>. <code class="docutils literal notranslate"><span class="pre">fields</span></code> evaluates the displacements, the rotations and the transverse shear strains at given points, and <code class="docutils literal notranslate"><span class="pre">uv_at</span></code> the in-plane displacements at a thickness coordinate <span class="math notranslate nohighlight">\(z\)</span> with the kinematics above.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>A = B = 0.5
+H = 0.05
+E, NU = 70e9, 0.3
+Q = 1e6
+D = E*H**3/(12*(1 - NU**2))
+
+
+def bending_stiffness(h):
+    return E*h**3/(12*(1 - NU**2))
+FIELDS = ('u', 'v', 'w', 'phix', 'phiy')
+
+
+def plate(model, offset=0., m=26, n=10, h=H):
+    s = Shell(model=model, a=A, b=B, stack=[0.], plyt=h, laminaprop=(E, NU),
+              offset=offset, m=m, n=n)
+    for edge in ('x1', 'x2', 'y1', 'y2'):
+        for field in FIELDS:
+            setattr(s, edge + field, 1.)
+            setattr(s, edge + field + 'r', 1.)
+    s.add_pressure_load(Q)
+    return s
+
+
+def clamp_by_flags(s, edge):
+    for field in FIELDS:
+        setattr(s, edge + field, 0.)
+    if 'fsdt' not in s.model:
+        setattr(s, edge + 'wr', 0.)
+
+
+def simple_support(s):
+    for edge in ('x1', 'x2'):
+        for field in ('u', 'v', 'w', 'phiy'):
+            setattr(s, edge + field, 0.)
+
+
+def face_clamp(s, x, k=1., cte=True):
+    zero = lambda y: 0.
+    for z in (s.offset - s.plyt/2, s.offset + s.plyt/2):
+        s.add_distr_pd_fixed_x(x, ku=k, kv=k, funcu=zero, funcv=zero, z=z,
+                               cte=cte)
+    s.add_distr_pd_fixed_x(x, kw=k, funcw=zero, cte=cte)
+
+
+def static(s, pd_method='null-space'):
+    md = MultiDomain([s], conn=[], pd_method=pd_method)
+    return md.linear_static()
+
+
+def fields(s, c, xs, ys):
+    xs = np.atleast_1d(np.asarray(xs, dtype=float))
+    ys = np.atleast_1d(np.asarray(ys, dtype=float))
+    s.uvw(c, xs=xs, ys=ys)
+    out = {k: s.fields[k].ravel().copy() for k in FIELDS}
+    if 'clpt' in s.model:
+        out['gxz'] = out['gyz'] = 0*out['u']
+    else:
+        s.strain(c, xs=xs, ys=ys, NLgeom=False)
+        out['gxz'] = s.fields['gxz'].ravel().copy()
+        out['gyz'] = s.fields['gyz'].ravel().copy()
+    return out
+
+
+def uv_at(s, f, z):
+    c1 = 4/(3*s.plyt**2) if 'tsdt' in s.model else 0.
+    d = s.offset
+    p = -c1*((z - d)**3 + d**3)
+    return (f['u'] + z*f['phix'] + p*f['gxz'],
+            f['v'] + z*f['phiy'] + p*f['gyz'])
+
+
+xs, ys = [g.ravel() for g in np.meshgrid(np.linspace(0, A, 7),
+                                          np.linspace(0, B, 5))]
+</pre></div>
+</div>
+</div>
+</section>
+<section id="CLPT-and-FSDT:-the-face-clamp-is-the-clamp-of-the-flags">
+<h2>CLPT and FSDT: the face clamp is the clamp of the flags<a class="headerlink" href="#CLPT-and-FSDT:-the-face-clamp-is-the-clamp-of-the-flags" title="Link to this heading">#</a></h2>
+<p>In these theories the displacements are linear in <span class="math notranslate nohighlight">\(z\)</span>. Zero displacements at both faces then mean zero displacement and zero rotation of the whole section, so the face clamp and the clamp of the flags give the same solution.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for model in ['plate_clpt_donnell', 'plate_fsdt_donnell']:
+    s = plate(model)
+    for x in (0., A):
+        face_clamp(s, x)
+    c = static(s)
+    t = plate(model)
+    clamp_by_flags(t, 'x1')
+    clamp_by_flags(t, 'x2')
+    ct = static(t)
+    f, ft = fields(s, c, xs, ys), fields(t, ct, xs, ys)
+    diff = max(np.abs(f[k] - ft[k]).max() for k in FIELDS)
+    print('%-20s largest difference of the fields: %.1e of the largest w'
+          % (model, diff/np.abs(ft['w']).max()))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+plate_clpt_donnell   largest difference of the fields: 0.0e+00 of the largest w
+plate_fsdt_donnell   largest difference of the fields: 0.0e+00 of the largest w
+</pre></div></div>
+</div>
+</section>
+<section id="Thin-plate:-comparison-with-the-classical-solutions">
+<h2>Thin plate: comparison with the classical solutions<a class="headerlink" href="#Thin-plate:-comparison-with-the-classical-solutions" title="Link to this heading">#</a></h2>
+<p>For the thin plate the CLPT applies. Timoshenko and Woinowsky-Krieger (1959) give, in Table 47 (Art. 48, p. 219), the deflections of a uniformly loaded rectangular plate with the edges <span class="math notranslate nohighlight">\(x = 0, a\)</span> simply supported and the other two free, for <span class="math notranslate nohighlight">\(\nu = 0.3\)</span>: for the square plate, <span class="math notranslate nohighlight">\(w = 0.01309\, q a^4/D\)</span> at the center and <span class="math notranslate nohighlight">\(w = 0.01509\, q a^4/D\)</span> at the middle of the free edges.</p>
+<p>For the edges <span class="math notranslate nohighlight">\(x = 0, a\)</span> clamped and the others free they give no table. The reference is the cylindrical bending of an infinitely long plate with built-in edges (Art. 3, Eq. (18), p. 15),</p>
+<div class="math notranslate nohighlight">
+\[w_{max} = \frac{q a^4}{384 D} f_1(u), \qquad f_1(u) = \frac{24}{u^4}\left(\frac{u^2}{2} + \frac{u}{\sinh u} - \frac{u}{\tanh u}\right),\]</div>
+<p>where <span class="math notranslate nohighlight">\(u\)</span> grows with the axial force; without axial force, as in the linear analysis here, <span class="math notranslate nohighlight">\(u \to 0\)</span> and <span class="math notranslate nohighlight">\(f_1 \to 1\)</span>. The square plate with free edges is not in cylindrical bending: the anticlastic curvature makes the deflection vary along <span class="math notranslate nohighlight">\(y\)</span>. For the simple support, Table 47 quantifies this effect: the long plate, <span class="math notranslate nohighlight">\(b/a = \infty\)</span>, has <span class="math notranslate nohighlight">\(0.01302\, qa^4/D\)</span> (<span class="math notranslate nohighlight">\(= 5/384\)</span>), the square plate 0.01309 at the center and 0.01509 at the free edges.</p>
+<p>The CLPT does not depend on <span class="math notranslate nohighlight">\(h/a\)</span> in these normalized deflections; the TSDT is solved for <span class="math notranslate nohighlight">\(h/a = 0.01\)</span>, a thin plate, where the planar and face clamps nearly coincide.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>f1 = lambda u: 24/u**4*(u**2/2 + u/np.sinh(u) - u/np.tanh(u))
+print('f_1(u) for u -&gt; 0:', ', '.join('%.6f' % f1(u) for u in (0.1, 0.03, 0.01)))
+pts = ([A/2, A/2], [B/2, 0.])  # center and middle of the free edge y = 0
+thin = {}
+for model, h in (('plate_clpt_donnell', H), ('plate_tsdt_donnell', H/10)):
+    Dh = bending_stiffness(h)
+    s = plate(model, h=h)
+    simple_support(s)
+    thin[model, 'simple support'] = fields(s, static(s), *pts)['w']*Dh/(Q*A**4)
+    s = plate(model, h=h)
+    clamp_by_flags(s, 'x1')
+    clamp_by_flags(s, 'x2')
+    thin[model, 'planar clamp'] = fields(s, static(s), *pts)['w']*Dh/(Q*A**4)
+    if 'tsdt' in model:
+        s = plate(model, h=h)
+        for x in (0., A):
+            face_clamp(s, x)
+        thin[model, 'face clamp'] = fields(s, static(s), *pts)['w']*Dh/(Q*A**4)
+for (model, bc), w in thin.items():
+    print('%-20s h/a = %.2f, %-15s w D/(q a^4): center %.6f, free edge %.6f'
+          % (model, 0.1 if 'clpt' in model else 0.01, bc, *w))
+rows = []
+for model in ('plate_clpt_donnell', 'plate_tsdt_donnell'):
+    label = '`%s`%s' % (model, '' if 'clpt' in model else ', $h/a = 0.01$')
+    rows.append(('%s, simple support, center' % label,
+                 thin[model, 'simple support'][0], 0.01309,
+                 'Timoshenko and Woinowsky-Krieger (1959), Table 47'))
+    rows.append(('%s, simple support, free edge' % label,
+                 thin[model, 'simple support'][1], 0.01509,
+                 'Timoshenko and Woinowsky-Krieger (1959), Table 47'))
+    for bc in ('planar clamp', 'face clamp'):
+        if (model, bc) in thin:
+            rows.append(('%s, %s, center' % (label, bc), thin[model, bc][0], 1/384,
+                         'cylindrical bending, $1/384$, Timoshenko and '
+                         'Woinowsky-Krieger (1959), Eq. (18)'))
+results_table(rows)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+f_1(u) for u -&gt; 0: 0.999001, 0.999910, 0.999990
+plate_clpt_donnell   h/a = 0.10, simple support  w D/(q a^4): center 0.013094, free edge 0.015011
+plate_clpt_donnell   h/a = 0.10, planar clamp    w D/(q a^4): center 0.002560, free edge 0.002907
+plate_tsdt_donnell   h/a = 0.01, simple support  w D/(q a^4): center 0.013097, free edge 0.015021
+plate_tsdt_donnell   h/a = 0.01, planar clamp    w D/(q a^4): center 0.002563, free edge 0.002913
+plate_tsdt_donnell   h/a = 0.01, face clamp      w D/(q a^4): center 0.002573, free edge 0.002924
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>quantity</p></th>
+<th class="head"><p>panels</p></th>
+<th class="head"><p>reference</p></th>
+<th class="head"><p>relative difference</p></th>
+<th class="head"><p>reference source</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, simple support, center</p></td>
+<td><p>0.0130937</p></td>
+<td><p>0.01309</p></td>
+<td><p>+2.81e-04</p></td>
+<td><p>Timoshenko and Woinowsky-Krieger (1959), Table 47</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, simple support, free edge</p></td>
+<td><p>0.0150113</p></td>
+<td><p>0.01509</p></td>
+<td><p>-5.22e-03</p></td>
+<td><p>Timoshenko and Woinowsky-Krieger (1959), Table 47</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, planar clamp, center</p></td>
+<td><p>0.00255952</p></td>
+<td><p>0.00260417</p></td>
+<td><p>-1.71e-02</p></td>
+<td><p>cylindrical bending, <span class="math notranslate nohighlight">\(1/384\)</span>, Timoshenko and Woinowsky-Krieger (1959), Eq. (18)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plate_tsdt_donnell</span></code>, <span class="math notranslate nohighlight">\(h/a = 0.01\)</span>, simple support, center</p></td>
+<td><p>0.0130974</p></td>
+<td><p>0.01309</p></td>
+<td><p>+5.69e-04</p></td>
+<td><p>Timoshenko and Woinowsky-Krieger (1959), Table 47</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_tsdt_donnell</span></code>, <span class="math notranslate nohighlight">\(h/a = 0.01\)</span>, simple support, free edge</p></td>
+<td><p>0.015021</p></td>
+<td><p>0.01509</p></td>
+<td><p>-4.57e-03</p></td>
+<td><p>Timoshenko and Woinowsky-Krieger (1959), Table 47</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plate_tsdt_donnell</span></code>, <span class="math notranslate nohighlight">\(h/a = 0.01\)</span>, planar clamp, center</p></td>
+<td><p>0.00256321</p></td>
+<td><p>0.00260417</p></td>
+<td><p>-1.57e-02</p></td>
+<td><p>cylindrical bending, <span class="math notranslate nohighlight">\(1/384\)</span>, Timoshenko and Woinowsky-Krieger (1959), Eq. (18)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_tsdt_donnell</span></code>, <span class="math notranslate nohighlight">\(h/a = 0.01\)</span>, face clamp, center</p></td>
+<td><p>0.00257286</p></td>
+<td><p>0.00260417</p></td>
+<td><p>-1.20e-02</p></td>
+<td><p>cylindrical bending, <span class="math notranslate nohighlight">\(1/384\)</span>, Timoshenko and Woinowsky-Krieger (1959), Eq. (18)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The simply supported plate reproduces the center value of Table 47 to the four printed digits and the free-edge value within 0.6%. The clamped plates lie 1.7% below the cylindrical bending value at the center, and above it at the free edges; the simply supported plate, by contrast, lies above <span class="math notranslate nohighlight">\(5/384\)</span> at the center (Table 47). At <span class="math notranslate nohighlight">\(h/a = 0.01\)</span> the TSDT is within 0.2% of the CLPT, and the face clamp lies 0.4% above the planar clamp.</p>
+</section>
+<section id="TSDT:-planar-clamp,-face-clamp-and-simple-support">
+<h2>TSDT: planar clamp, face clamp and simple support<a class="headerlink" href="#TSDT:-planar-clamp,-face-clamp-and-simple-support" title="Link to this heading">#</a></h2>
+<p>In the TSDT, <span class="math notranslate nohighlight">\(u(z)\)</span> is cubic. Prescribing <span class="math notranslate nohighlight">\(u = v = 0\)</span> at a third thickness coordinate besides the faces, here <span class="math notranslate nohighlight">\(z = d + h/4\)</span>, forces <span class="math notranslate nohighlight">\(\phi_x + w_{,x} = 0\)</span> and gives the planar clamp of the flags. The face clamp alone lets the section warp, and lies between the planar clamp and the simple support.</p>
+<p>The face clamp is a boundary layer: the warping is confined near the edge, and its deflection converges more slowly with the number of terms <span class="math notranslate nohighlight">\(m\)</span> along <span class="math notranslate nohighlight">\(x\)</span> than the planar clamp:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model = 'plate_tsdt_donnell'
+ms = [10, 14, 18, 22, 26, 30]
+conv = {'planar clamp': [], 'face clamp': []}
+for m in ms:
+    s = plate(model, m=m)
+    for x in (0., A):
+        face_clamp(s, x)
+    conv['face clamp'].append(fields(s, static(s), A/2, B/2)['w'][0]*D/(Q*A**4))
+    s = plate(model, m=m)
+    clamp_by_flags(s, 'x1')
+    clamp_by_flags(s, 'x2')
+    conv['planar clamp'].append(fields(s, static(s), A/2, B/2)['w'][0]*D/(Q*A**4))
+for i, m in enumerate(ms):
+    print('m = %2d: w D/(q a^4), planar clamp %.6f, face clamp %.6f'
+          % (m, conv['planar clamp'][i], conv['face clamp'][i]))
+fig, ax = plt.subplots(figsize=(5.5, 3.5))
+for name, vals in conv.items():
+    ax.plot(ms, vals, 'o-', label=name)
+ax.set_xlabel('$m$')
+ax.set_ylabel('central $w D/(q a^4)$')
+ax.legend()
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+m = 10: w D/(q a^4), planar clamp 0.002901, face clamp 0.002953
+m = 14: w D/(q a^4), planar clamp 0.002905, face clamp 0.003027
+m = 18: w D/(q a^4), planar clamp 0.002906, face clamp 0.003073
+m = 22: w D/(q a^4), planar clamp 0.002906, face clamp 0.003087
+m = 26: w D/(q a^4), planar clamp 0.002906, face clamp 0.003090
+m = 30: w D/(q a^4), planar clamp 0.002906, face clamp 0.003090
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_ex_face_clamp_9_1.png" src="../_images/notebooks_ex_face_clamp_9_1.png" />
+</div>
+</div>
+<p>With <span class="math notranslate nohighlight">\(m = 26\)</span> the face clamp is converged within about <span class="math notranslate nohighlight">\(10^{-3}\)</span> and the planar clamp within <span class="math notranslate nohighlight">\(10^{-4}\)</span>. The three supports of the thick plate, <span class="math notranslate nohighlight">\(h/a = 0.1\)</span>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model = 'plate_tsdt_donnell'
+face = plate(model)
+for x in (0., A):
+    face_clamp(face, x)
+c_face = static(face)
+
+planar = plate(model)
+clamp_by_flags(planar, 'x1')
+clamp_by_flags(planar, 'x2')
+c_planar = static(planar)
+
+u_three = plate(model)
+for x in (0., A):
+    face_clamp(u_three, x)
+    u_three.add_distr_pd_fixed_x(x, ku=1., kv=1., funcu=lambda y: 0.,
+                                 funcv=lambda y: 0., z=H/4)
+c_three = static(u_three)
+
+ss = plate(model)
+simple_support(ss)
+c_ss = static(ss)
+
+f3, fp = fields(u_three, c_three, xs, ys), fields(planar, c_planar, xs, ys)
+print('u = 0 at three coordinates vs planar clamp: largest difference %.1e '
+      'of the largest w' % (max(np.abs(f3[k] - fp[k]).max() for k in FIELDS)
+                            / np.abs(fp['w']).max()))
+center = {}
+for name, s, c in (('planar clamp', planar, c_planar),
+                   ('face clamp', face, c_face),
+                   ('simple support', ss, c_ss)):
+    center[name] = fields(s, c, A/2, B/2)['w'][0]*D/(Q*A**4)
+    print('%-15s w D/(q a^4) = %.6f' % (name, center[name]))
+clpt = {'planar clamp': thin['plate_clpt_donnell', 'planar clamp'][0],
+        'face clamp': thin['plate_clpt_donnell', 'planar clamp'][0],
+        'simple support': thin['plate_clpt_donnell', 'simple support'][0]}
+for name in center:
+    print('%-15s increase over the thin plate (CLPT): %+.1f%%'
+          % (name, 100*(center[name]/clpt[name] - 1)))
+results_table([
+    ('planar clamp, $w D/(q a^4)$', center['planar clamp'], 1/384,
+     'thin plate, cylindrical bending, Timoshenko and Woinowsky-Krieger (1959), Eq. (18)'),
+    ('face clamp, $w D/(q a^4)$', center['face clamp'], 1/384,
+     'thin plate, cylindrical bending, Timoshenko and Woinowsky-Krieger (1959), Eq. (18)'),
+    ('simple support, $w D/(q a^4)$', center['simple support'], 0.01309,
+     'thin plate, Timoshenko and Woinowsky-Krieger (1959), Table 47'),
+])
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+u = 0 at three coordinates vs planar clamp: largest difference 0.0e+00 of the largest w
+planar clamp    w D/(q a^4) = 0.002906
+face clamp      w D/(q a^4) = 0.003090
+simple support  w D/(q a^4) = 0.013459
+planar clamp    increase over the thin plate (CLPT): +13.5%
+face clamp      increase over the thin plate (CLPT): +20.7%
+simple support  increase over the thin plate (CLPT): +2.8%
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>quantity</p></th>
+<th class="head"><p>panels</p></th>
+<th class="head"><p>reference</p></th>
+<th class="head"><p>relative difference</p></th>
+<th class="head"><p>reference source</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>planar clamp, <span class="math notranslate nohighlight">\(w D/(q a^4)\)</span></p></td>
+<td><p>0.00290625</p></td>
+<td><p>0.00260417</p></td>
+<td><p>+1.16e-01</p></td>
+<td><p>thin plate, cylindrical bending, Timoshenko and Woinowsky-Krieger (1959), Eq. (18)</p></td>
+</tr>
+<tr class="row-odd"><td><p>face clamp, <span class="math notranslate nohighlight">\(w D/(q a^4)\)</span></p></td>
+<td><p>0.00308958</p></td>
+<td><p>0.00260417</p></td>
+<td><p>+1.86e-01</p></td>
+<td><p>thin plate, cylindrical bending, Timoshenko and Woinowsky-Krieger (1959), Eq. (18)</p></td>
+</tr>
+<tr class="row-even"><td><p>simple support, <span class="math notranslate nohighlight">\(w D/(q a^4)\)</span></p></td>
+<td><p>0.013459</p></td>
+<td><p>0.01309</p></td>
+<td><p>+2.82e-02</p></td>
+<td><p>thin plate, Timoshenko and Woinowsky-Krieger (1959), Table 47</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The references are thin-plate values: the differences are the effect of the transverse shear deformation at <span class="math notranslate nohighlight">\(h/a = 0.1\)</span>, which the TSDT includes. The shear deflection adds to the bending deflection a part that grows as <span class="math notranslate nohighlight">\((h/a)^2\)</span> relative to it. It is about 3% for the simple support but about 13% for the planar clamp, because the clamp reduces the bending deflection about five times while the shear deflection is of the same order for both supports; the warping of the face clamp adds
+about 6% more. No published solution of this thick plate with free edges and clamped edges was found for a direct comparison; the Lévy solutions below check thick laminated plates with clamped and free edges when the other two edges are simply supported.</p>
+<p>The deflection along the center line <span class="math notranslate nohighlight">\(y = b/2\)</span>, and the in-plane displacement <span class="math notranslate nohighlight">\(u(z)\)</span> through the thickness at the clamped edge <span class="math notranslate nohighlight">\(x = 0\)</span>, at <span class="math notranslate nohighlight">\(y = b/2\)</span>. With the face clamp <span class="math notranslate nohighlight">\(u\)</span> vanishes at the faces and not inside, while the planar clamp keeps the whole section fixed:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>xl = np.linspace(0, A, 51)
+zs = np.linspace(-H/2, H/2, 41)
+fig, axes = plt.subplots(1, 2, figsize=(11, 3.8))
+for name, s, c in (('planar clamp', planar, c_planar),
+                   ('face clamp', face, c_face),
+                   ('simple support', ss, c_ss)):
+    w = fields(s, c, xl, np.full_like(xl, B/2))['w']
+    axes[0].plot(xl, w*D/(Q*A**4), label=name)
+    if name != 'simple support':
+        f = fields(s, c, [0.], [B/2])
+        axes[1].plot([uv_at(s, f, z)[0][0] for z in zs], zs, label=name)
+axes[0].set_xlabel('$x$ (m)')
+axes[0].set_ylabel('$w D/(q a^4)$')
+axes[0].legend()
+axes[1].set_xlabel('$u$ at $x = 0$ (m)')
+axes[1].set_ylabel('$z$ (m)')
+axes[1].legend()
+fig.tight_layout()
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_ex_face_clamp_13_0.png" src="../_images/notebooks_ex_face_clamp_13_0.png" />
+</div>
+</div>
+<p>At the face-clamped edge the section warps with <span class="math notranslate nohighlight">\(\phi_x = w_{,x}/2\)</span>, so that <span class="math notranslate nohighlight">\(\gamma_{xz} = 3\phi_x\)</span> there, and</p>
+<div class="math notranslate nohighlight">
+\[u(z) = \frac{w_{,x}}{2}\, z \left(1 - \frac{4 z^2}{h^2}\right),\]</div>
+<p>which vanishes at <span class="math notranslate nohighlight">\(z = \pm h/2\)</span>. The value at <span class="math notranslate nohighlight">\(z = h/4\)</span> is compared with this expression:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>f = fields(face, c_face, np.zeros(11), np.linspace(0, B, 11))
+u_h4 = uv_at(face, f, H/4)[0]
+ref_h4 = f['gxz']/3*H/4*(1 - 4*(H/4)**2/H**2)
+print('largest |u| at the faces: %.1e m, largest |u| at z = h/4: %.3e m'
+      % (np.abs(uv_at(face, f, H/2)[0]).max(), np.abs(u_h4).max()))
+print('largest |gxz - 3 phix|: %.1e' % np.abs(f['gxz'] - 3*f['phix']).max())
+i = np.argmax(np.abs(u_h4))
+results_table([('$u(h/4)$ at $x = 0$, $y = %.2f$ (m)' % np.linspace(0, B, 11)[i],
+                u_h4[i], ref_h4[i],
+                r'$(w_{,x}/2) z (1 - 4z^2/h^2)$, with $\gamma_{xz} = 3\phi_x$')])
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+largest |u| at the faces: 4.4e-16 m, largest |u| at z = h/4: 4.078e-06 m
+largest |gxz - 3 phix|: 5.3e-14
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>quantity</p></th>
+<th class="head"><p>panels</p></th>
+<th class="head"><p>reference</p></th>
+<th class="head"><p>relative difference</p></th>
+<th class="head"><p>reference source</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(u(h/4)\)</span> at <span class="math notranslate nohighlight">\(x = 0\)</span>, <span class="math notranslate nohighlight">\(y = 0.50\)</span> (m)</p></td>
+<td><p>-4.07829e-06</p></td>
+<td><p>-4.07829e-06</p></td>
+<td><p>-3.35e-12</p></td>
+<td><p><span class="math notranslate nohighlight">\((w_{,x}/2) z (1 - 4z^2/h^2)\)</span>, with <span class="math notranslate nohighlight">\(\gamma_{xz} = 3\phi_x\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="Thick-laminated-plates:-Lévy-solutions">
+<h2>Thick laminated plates: Lévy solutions<a class="headerlink" href="#Thick-laminated-plates:-Lévy-solutions" title="Link to this heading">#</a></h2>
+<p>Plates with two opposite edges simply supported have Lévy-type solutions. Reddy (2003), Sec. 7.4, gives them for the FSDT and antisymmetric cross-ply laminates, with the edges <span class="math notranslate nohighlight">\(y = 0, b\)</span> simply supported (SS-1: <span class="math notranslate nohighlight">\(u_0 = w_0 = \phi_x = 0\)</span>, Eq. (7.4.5), p. 413) and the edges <span class="math notranslate nohighlight">\(x = 0, a\)</span> simply supported (S: <span class="math notranslate nohighlight">\(v_0 = w_0 = \phi_y = 0\)</span>), clamped (C: <span class="math notranslate nohighlight">\(u_0 = v_0 = w_0 = \phi_x = \phi_y = 0\)</span>) or free (F), Eq. (7.4.15), p. 415. Table 7.4.1, p. 416, lists the center deflection of
+square plates with the laminates <span class="math notranslate nohighlight">\((0/90)\)</span> and <span class="math notranslate nohighlight">\((0/90)_5\)</span> of material 1, <span class="math notranslate nohighlight">\(E_1 = 25 E_2\)</span>, <span class="math notranslate nohighlight">\(G_{12} = G_{13} = 0.5 E_2\)</span>, <span class="math notranslate nohighlight">\(G_{23} = 0.2 E_2\)</span>, <span class="math notranslate nohighlight">\(\nu_{12} = 0.25\)</span> (Eq. (7.4.16)), shear correction <span class="math notranslate nohighlight">\(K = 5/6\)</span>, under the sinusoidal load <span class="math notranslate nohighlight">\(q = q_0 \sin(\pi x/a) \sin(\pi y/b)\)</span> (Eq. (7.4.18), there with <span class="math notranslate nohighlight">\(x\)</span> measured from the center), as</p>
+<div class="math notranslate nohighlight">
+\[\bar{w} = w_0(a/2, b/2) \frac{E_2 h^3}{b^4 q_0} \times 10^2\]</div>
+<p>(Eq. (7.4.19)), for <span class="math notranslate nohighlight">\(b/h = 5\)</span> and 10 with the FSDT and for the CLPT, whose <span class="math notranslate nohighlight">\(\bar{w}\)</span> does not depend on <span class="math notranslate nohighlight">\(b/h\)</span>. The column names give the conditions at <span class="math notranslate nohighlight">\(x = 0\)</span> and <span class="math notranslate nohighlight">\(x = a\)</span>; FC, for example, has <span class="math notranslate nohighlight">\(x = 0\)</span> free and <span class="math notranslate nohighlight">\(x = a\)</span> clamped. In the FSDT the clamp of the flags and the face clamp are the same (see above), so the columns with C check both. <code class="docutils literal notranslate"><span class="pre">fsdt_shear_correction</span> <span class="pre">=</span> <span class="pre">5/6</span></code> gives the shear correction of Reddy, <code class="docutils literal notranslate"><span class="pre">Shell.add_pressure_load</span></code> with a function the
+sinusoidal load.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>E2 = 1.e9
+MAT1 = (25*E2, E2, 0.25, 0.5*E2, 0.5*E2, 0.2*E2)  # Reddy (2003), Eq. (7.4.16)
+Q0 = 1.e3
+BCS = ('SS', 'SC', 'CC', 'FF', 'FS', 'FC')
+TABLE_741 = {  # Reddy (2003), Table 7.4.1, p. 416: (layers, b/h, theory)
+    (2, 5, 'fsdt'): (1.758, 1.477, 1.257, 2.777, 2.335, 1.897),
+    (2, 10, 'fsdt'): (1.237, 0.883, 0.656, 2.028, 1.687, 1.223),
+    (2, 10, 'clpt'): (1.064, 0.664, 0.429, 1.777, 1.471, 0.980),
+    (10, 5, 'fsdt'): (1.137, 1.045, 0.945, 1.663, 1.460, 1.258),
+    (10, 10, 'fsdt'): (0.615, 0.480, 0.385, 0.915, 0.800, 0.612),
+    (10, 10, 'clpt'): (0.442, 0.266, 0.167, 0.665, 0.579, 0.380)}
+
+
+def levy_plate(theory, layers, b_h, bcx, m=15, n=15):
+    a = b = 1.
+    h = b/b_h
+    s = Shell(model='plate_%s_donnell' % theory, a=a, b=b,
+              stack=[0, 90]*(layers//2), plyt=h/layers, laminaprop=MAT1,
+              m=m, n=n)
+    if theory == 'fsdt':
+        s.fsdt_shear_correction = 5/6
+    for edge in ('x1', 'x2', 'y1', 'y2'):
+        for field in FIELDS:
+            setattr(s, edge + field, 1.)
+            setattr(s, edge + field + 'r', 1.)
+    for edge in ('y1', 'y2'):  # SS-1
+        for field in ('u', 'w', 'phix'):
+            setattr(s, edge + field, 0.)
+    for edge, bc in zip(('x1', 'x2'), bcx):
+        if bc == 'C':
+            clamp_by_flags(s, edge)
+        elif bc == 'S':
+            for field in ('v', 'w', 'phiy'):
+                setattr(s, edge + field, 0.)
+    s.add_pressure_load(lambda x, y: Q0*np.sin(np.pi*x/a)*np.sin(np.pi*y/b))
+    return s, h
+
+
+def wbar(s, h, c):
+    w = fields(s, c, [s.a/2], [s.b/2])['w'][0]
+    return abs(w)*E2*h**3/(s.b**4*Q0)*1e2
+
+
+rows = []
+for (layers, b_h, theory), refs in TABLE_741.items():
+    vals = []
+    for bcx, ref in zip(BCS, refs):
+        s, h = levy_plate(theory, layers, b_h, bcx)
+        vals.append(wbar(s, h, static(s)))
+        lam = '(0/90)' if layers == 2 else '(0/90)$_5$'
+        rows.append(('%s, %s, %s' % (lam, theory.upper() if theory == 'fsdt'
+                                     else 'CLPT', bcx if theory == 'clpt'
+                                     else '$b/h = %d$, %s' % (b_h, bcx)),
+                     vals[-1], ref, 'Reddy (2003), Table 7.4.1, p. 416'))
+    print('%2d layers, b/h = %2d, %s: %s' % (layers, b_h, theory,
+          ', '.join('%s %.4f' % (bc, v) for bc, v in zip(BCS, vals))))
+results_table(rows)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+ 2 layers, b/h =  5, fsdt: SS 1.7584, SC 1.4770, CC 1.2565, FF 2.7770, FS 2.3345, FC 1.8971
+ 2 layers, b/h = 10, fsdt: SS 1.2373, SC 0.8829, CC 0.6563, FF 2.0282, FS 1.6872, FC 1.2226
+ 2 layers, b/h = 10, clpt: SS 1.0636, SC 0.6637, CC 0.4289, FF 1.7765, FS 1.4708, FC 0.9802
+10 layers, b/h =  5, fsdt: SS 1.1365, SC 1.0449, CC 0.9446, FF 1.6628, FS 1.4597, FC 1.2578
+10 layers, b/h = 10, fsdt: SS 0.6154, SC 0.4797, CC 0.3852, FF 0.9148, FS 0.8001, FC 0.6122
+10 layers, b/h = 10, clpt: SS 0.4418, SC 0.2661, CC 0.1673, FF 0.6648, FS 0.5791, FC 0.3800
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>quantity</p></th>
+<th class="head"><p>panels</p></th>
+<th class="head"><p>reference</p></th>
+<th class="head"><p>relative difference</p></th>
+<th class="head"><p>reference source</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>(0/90), FSDT, <span class="math notranslate nohighlight">\(b/h = 5\)</span>, SS</p></td>
+<td><p>1.75835</p></td>
+<td><p>1.758</p></td>
+<td><p>+2.00e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-odd"><td><p>(0/90), FSDT, <span class="math notranslate nohighlight">\(b/h = 5\)</span>, SC</p></td>
+<td><p>1.47704</p></td>
+<td><p>1.477</p></td>
+<td><p>+2.79e-05</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-even"><td><p>(0/90), FSDT, <span class="math notranslate nohighlight">\(b/h = 5\)</span>, CC</p></td>
+<td><p>1.25654</p></td>
+<td><p>1.257</p></td>
+<td><p>-3.68e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-odd"><td><p>(0/90), FSDT, <span class="math notranslate nohighlight">\(b/h = 5\)</span>, FF</p></td>
+<td><p>2.77697</p></td>
+<td><p>2.777</p></td>
+<td><p>-1.13e-05</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-even"><td><p>(0/90), FSDT, <span class="math notranslate nohighlight">\(b/h = 5\)</span>, FS</p></td>
+<td><p>2.33455</p></td>
+<td><p>2.335</p></td>
+<td><p>-1.93e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-odd"><td><p>(0/90), FSDT, <span class="math notranslate nohighlight">\(b/h = 5\)</span>, FC</p></td>
+<td><p>1.89712</p></td>
+<td><p>1.897</p></td>
+<td><p>+6.18e-05</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-even"><td><p>(0/90), FSDT, <span class="math notranslate nohighlight">\(b/h = 10\)</span>, SS</p></td>
+<td><p>1.23727</p></td>
+<td><p>1.237</p></td>
+<td><p>+2.19e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-odd"><td><p>(0/90), FSDT, <span class="math notranslate nohighlight">\(b/h = 10\)</span>, SC</p></td>
+<td><p>0.882868</p></td>
+<td><p>0.883</p></td>
+<td><p>-1.49e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-even"><td><p>(0/90), FSDT, <span class="math notranslate nohighlight">\(b/h = 10\)</span>, CC</p></td>
+<td><p>0.656271</p></td>
+<td><p>0.656</p></td>
+<td><p>+4.13e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-odd"><td><p>(0/90), FSDT, <span class="math notranslate nohighlight">\(b/h = 10\)</span>, FF</p></td>
+<td><p>2.02818</p></td>
+<td><p>2.028</p></td>
+<td><p>+8.80e-05</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-even"><td><p>(0/90), FSDT, <span class="math notranslate nohighlight">\(b/h = 10\)</span>, FS</p></td>
+<td><p>1.68722</p></td>
+<td><p>1.687</p></td>
+<td><p>+1.31e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-odd"><td><p>(0/90), FSDT, <span class="math notranslate nohighlight">\(b/h = 10\)</span>, FC</p></td>
+<td><p>1.22257</p></td>
+<td><p>1.223</p></td>
+<td><p>-3.51e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-even"><td><p>(0/90), CLPT, SS</p></td>
+<td><p>1.06358</p></td>
+<td><p>1.064</p></td>
+<td><p>-3.98e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-odd"><td><p>(0/90), CLPT, SC</p></td>
+<td><p>0.663664</p></td>
+<td><p>0.664</p></td>
+<td><p>-5.06e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-even"><td><p>(0/90), CLPT, CC</p></td>
+<td><p>0.42895</p></td>
+<td><p>0.429</p></td>
+<td><p>-1.17e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-odd"><td><p>(0/90), CLPT, FF</p></td>
+<td><p>1.77652</p></td>
+<td><p>1.777</p></td>
+<td><p>-2.70e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-even"><td><p>(0/90), CLPT, FS</p></td>
+<td><p>1.47083</p></td>
+<td><p>1.471</p></td>
+<td><p>-1.13e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-odd"><td><p>(0/90), CLPT, FC</p></td>
+<td><p>0.980194</p></td>
+<td><p>0.98</p></td>
+<td><p>+1.98e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-even"><td><p>(0/90)<span class="math notranslate nohighlight">\(_5\)</span>, FSDT, <span class="math notranslate nohighlight">\(b/h = 5\)</span>, SS</p></td>
+<td><p>1.13653</p></td>
+<td><p>1.137</p></td>
+<td><p>-4.17e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-odd"><td><p>(0/90)<span class="math notranslate nohighlight">\(_5\)</span>, FSDT, <span class="math notranslate nohighlight">\(b/h = 5\)</span>, SC</p></td>
+<td><p>1.04491</p></td>
+<td><p>1.045</p></td>
+<td><p>-8.66e-05</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-even"><td><p>(0/90)<span class="math notranslate nohighlight">\(_5\)</span>, FSDT, <span class="math notranslate nohighlight">\(b/h = 5\)</span>, CC</p></td>
+<td><p>0.944648</p></td>
+<td><p>0.945</p></td>
+<td><p>-3.72e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-odd"><td><p>(0/90)<span class="math notranslate nohighlight">\(_5\)</span>, FSDT, <span class="math notranslate nohighlight">\(b/h = 5\)</span>, FF</p></td>
+<td><p>1.66277</p></td>
+<td><p>1.663</p></td>
+<td><p>-1.36e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-even"><td><p>(0/90)<span class="math notranslate nohighlight">\(_5\)</span>, FSDT, <span class="math notranslate nohighlight">\(b/h = 5\)</span>, FS</p></td>
+<td><p>1.45966</p></td>
+<td><p>1.46</p></td>
+<td><p>-2.32e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-odd"><td><p>(0/90)<span class="math notranslate nohighlight">\(_5\)</span>, FSDT, <span class="math notranslate nohighlight">\(b/h = 5\)</span>, FC</p></td>
+<td><p>1.25779</p></td>
+<td><p>1.258</p></td>
+<td><p>-1.70e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-even"><td><p>(0/90)<span class="math notranslate nohighlight">\(_5\)</span>, FSDT, <span class="math notranslate nohighlight">\(b/h = 10\)</span>, SS</p></td>
+<td><p>0.615446</p></td>
+<td><p>0.615</p></td>
+<td><p>+7.25e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-odd"><td><p>(0/90)<span class="math notranslate nohighlight">\(_5\)</span>, FSDT, <span class="math notranslate nohighlight">\(b/h = 10\)</span>, SC</p></td>
+<td><p>0.479658</p></td>
+<td><p>0.48</p></td>
+<td><p>-7.13e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-even"><td><p>(0/90)<span class="math notranslate nohighlight">\(_5\)</span>, FSDT, <span class="math notranslate nohighlight">\(b/h = 10\)</span>, CC</p></td>
+<td><p>0.385232</p></td>
+<td><p>0.385</p></td>
+<td><p>+6.03e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-odd"><td><p>(0/90)<span class="math notranslate nohighlight">\(_5\)</span>, FSDT, <span class="math notranslate nohighlight">\(b/h = 10\)</span>, FF</p></td>
+<td><p>0.914792</p></td>
+<td><p>0.915</p></td>
+<td><p>-2.27e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-even"><td><p>(0/90)<span class="math notranslate nohighlight">\(_5\)</span>, FSDT, <span class="math notranslate nohighlight">\(b/h = 10\)</span>, FS</p></td>
+<td><p>0.80006</p></td>
+<td><p>0.8</p></td>
+<td><p>+7.54e-05</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-odd"><td><p>(0/90)<span class="math notranslate nohighlight">\(_5\)</span>, FSDT, <span class="math notranslate nohighlight">\(b/h = 10\)</span>, FC</p></td>
+<td><p>0.612152</p></td>
+<td><p>0.612</p></td>
+<td><p>+2.49e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-even"><td><p>(0/90)<span class="math notranslate nohighlight">\(_5\)</span>, CLPT, SS</p></td>
+<td><p>0.441752</p></td>
+<td><p>0.442</p></td>
+<td><p>-5.60e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-odd"><td><p>(0/90)<span class="math notranslate nohighlight">\(_5\)</span>, CLPT, SC</p></td>
+<td><p>0.266053</p></td>
+<td><p>0.266</p></td>
+<td><p>+2.00e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-even"><td><p>(0/90)<span class="math notranslate nohighlight">\(_5\)</span>, CLPT, CC</p></td>
+<td><p>0.167314</p></td>
+<td><p>0.167</p></td>
+<td><p>+1.88e-03</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-odd"><td><p>(0/90)<span class="math notranslate nohighlight">\(_5\)</span>, CLPT, FF</p></td>
+<td><p>0.664824</p></td>
+<td><p>0.665</p></td>
+<td><p>-2.64e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-even"><td><p>(0/90)<span class="math notranslate nohighlight">\(_5\)</span>, CLPT, FS</p></td>
+<td><p>0.579136</p></td>
+<td><p>0.579</p></td>
+<td><p>+2.34e-04</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+<tr class="row-odd"><td><p>(0/90)<span class="math notranslate nohighlight">\(_5\)</span>, CLPT, FC</p></td>
+<td><p>0.379989</p></td>
+<td><p>0.38</p></td>
+<td><p>-2.91e-05</p></td>
+<td><p>Reddy (2003), Table 7.4.1, p. 416</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">panels</span></code> agrees with every value of the table within 0.06%, the rounding of its three printed decimals. The table has no TSDT values; for the 10-layer plates the TSDT gives, with the clamp of the flags and with the face clamp at <span class="math notranslate nohighlight">\(x = 0, a\)</span> (CC), the center deflections below; they differ from the FSDT values because the theories differ, and are not a comparison with a reference:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for b_h in (5, 10):
+    out = {}
+    for name in ('planar clamp', 'face clamp'):
+        s, h = levy_plate('tsdt', 10, b_h, 'FF' if name == 'face clamp' else 'CC')
+        if name == 'face clamp':
+            for x in (0., s.a):
+                for z in (-h/2, h/2):
+                    s.add_distr_pd_fixed_x(x, ku=1., kv=1., funcu=lambda y: 0.,
+                                           funcv=lambda y: 0., z=z)
+                s.add_distr_pd_fixed_x(x, kw=1., funcw=lambda y: 0.)
+        out[name] = wbar(s, h, static(s))
+    ref = TABLE_741[(10, b_h, 'fsdt')][BCS.index('CC')]
+    print('(0/90)_5, b/h = %2d, CC: TSDT planar clamp %.4f (%+.1f%% of the FSDT '
+          'value of Table 7.4.1), TSDT face clamp %.4f (%+.1f%%)'
+          % (b_h, out['planar clamp'], 100*(out['planar clamp']/ref - 1),
+             out['face clamp'], 100*(out['face clamp']/ref - 1)))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(0/90)_5, b/h =  5, CC: TSDT planar clamp 0.8790 (-7.0% of the FSDT value of Table 7.4.1), TSDT face clamp 0.8780 (-7.1%)
+(0/90)_5, b/h = 10, CC: TSDT planar clamp 0.3754 (-2.5% of the FSDT value of Table 7.4.1), TSDT face clamp 0.3820 (-0.8%)
+</pre></div></div>
+</div>
+</section>
+<section id="Independence-of-the-reference-surface">
+<h2>Independence of the reference surface<a class="headerlink" href="#Independence-of-the-reference-surface" title="Link to this heading">#</a></h2>
+<p>Both clamps are defined by the physical section. The deflections do not depend on the offset <span class="math notranslate nohighlight">\(d\)</span> of the reference surface:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>res = {}
+for offset in (0., 0.3*H, 0.5*H):
+    s = plate(model, offset)
+    for x in (0., A):
+        face_clamp(s, x)
+    t = plate(model, offset)
+    clamp_by_flags(t, 'x1')
+    clamp_by_flags(t, 'x2')
+    res[offset] = (fields(s, static(s), xs, ys)['w'],
+                   fields(t, static(t), xs, ys)['w'])
+for offset in (0.3*H, 0.5*H):
+    print('offset %.3f m: largest relative change of w, face clamp %.1e, '
+          'planar clamp %.1e' % (offset,
+          *[np.abs(res[offset][i] - res[0.][i]).max()/np.abs(res[0.][i]).max()
+            for i in (0, 1)]))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+offset 0.015 m: largest relative change of w, face clamp 1.2e-11, planar clamp 1.7e-11
+offset 0.025 m: largest relative change of w, face clamp 1.5e-11, planar clamp 3.7e-11
+</pre></div></div>
+</div>
+</section>
+<section id="Penalty-method">
+<h2>Penalty method<a class="headerlink" href="#Penalty-method" title="Link to this heading">#</a></h2>
+<p>With the penalty method, the springs of the prescribed displacements, <code class="docutils literal notranslate"><span class="pre">fkCld_xcte</span></code>, are given the same <code class="docutils literal notranslate"><span class="pre">z</span></code> and added to the stiffness matrix by the user. With a stiffness of <span class="math notranslate nohighlight">\(10^4 E\)</span>, the face clamp at <span class="math notranslate nohighlight">\(x = 0\)</span> and a shortening <span class="math notranslate nohighlight">\(\delta = 10^{-5}\)</span> m of both faces at <span class="math notranslate nohighlight">\(x = a\)</span> give the solution of the null-space method:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>delta = 1e-5
+
+
+def build(k, offset=0.):
+    s = plate(model, offset)
+    face_clamp(s, 0., k=k)
+    for z in (offset - H/2, offset + H/2):
+        s.add_distr_pd_fixed_x(A, ku=k, kv=k, funcu=lambda y: -delta,
+                               funcv=lambda y: 0., z=z)
+    s.add_distr_pd_fixed_x(A, kw=k, funcw=lambda y: 0.)
+    return s
+
+
+s = build(1.)
+c = static(s)
+k = 1e4*E
+p = build(k)
+md = MultiDomain([p], conn=[])
+size = md.get_size()
+kCp = 0
+for x in (0., A):
+    for z in (-H/2, H/2):
+        kCp = kCp + fkCld_xcte(k, k, 0., p, x, size, 0, 0, z=z)
+    kCp = kCp + fkCld_xcte(0., 0., k, p, x, size, 0, 0)
+K = md.calc_kC() + finalize_symmetric_matrix(kCp)
+cp = solve(K, md.calc_fext(), silent=True)
+f, fpen = fields(s, c, xs, ys), fields(p, cp, xs, ys)
+for key in ('u', 'w'):
+    print('largest difference of %s, penalty vs null-space: %.1e of the '
+          'largest' % (key, np.abs(fpen[key] - f[key]).max()
+                       / np.abs(f[key]).max()))
+fa = fields(s, c, np.full(5, A), np.linspace(0, B, 5))
+u_face = uv_at(s, fa, H/2)[0]
+results_table([('$u$ of the face $z = h/2$ at $x = a$ (m)', u_face.mean(),
+                -delta, 'prescribed value')])
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+largest difference of u, penalty vs null-space: 1.0e-05 of the largest
+largest difference of w, penalty vs null-space: 1.3e-05 of the largest
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>quantity</p></th>
+<th class="head"><p>panels</p></th>
+<th class="head"><p>reference</p></th>
+<th class="head"><p>relative difference</p></th>
+<th class="head"><p>reference source</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(u\)</span> of the face <span class="math notranslate nohighlight">\(z = h/2\)</span> at <span class="math notranslate nohighlight">\(x = a\)</span> (m)</p></td>
+<td><p>-1e-05</p></td>
+<td><p>-1e-05</p></td>
+<td><p>+2.25e-11</p></td>
+<td><p>prescribed value</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="References">
+<h2>References<a class="headerlink" href="#References" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><ol class="upperalpha simple" start="10">
+<li><ol class="upperalpha simple" start="14">
+<li><p>Reddy, “A simple higher-order theory for laminated composite plates”. Journal of Applied Mechanics, 51(4):745-752, 1984. <a class="reference external" href="https://doi.org/10.1115/1.3167719">https://doi.org/10.1115/1.3167719</a>.</p></li>
+</ol>
+</li>
+</ol>
+</li>
+<li><ol class="upperalpha simple" start="19">
+<li><p>Timoshenko and S. Woinowsky-Krieger, “Theory of Plates and Shells”. 2nd ed., McGraw-Hill, New York, 1959.</p></li>
+</ol>
+</li>
+<li><ol class="upperalpha simple" start="10">
+<li><ol class="upperalpha simple" start="14">
+<li><p>Reddy, “Mechanics of Laminated Composite Plates and Shells: Theory and Analysis”. 2nd ed., CRC Press, Boca Raton, 2003. <a class="reference external" href="https://doi.org/10.1201/b12409">https://doi.org/10.1201/b12409</a>.</p></li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="ex_prescribed_displacements.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Prescribed displacements</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="ex_multidomain_cylinder.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Cylinders modeled as multi-domain assemblies</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Model">Model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#CLPT-and-FSDT:-the-face-clamp-is-the-clamp-of-the-flags">CLPT and FSDT: the face clamp is the clamp of the flags</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Thin-plate:-comparison-with-the-classical-solutions">Thin plate: comparison with the classical solutions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#TSDT:-planar-clamp,-face-clamp-and-simple-support">TSDT: planar clamp, face clamp and simple support</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Thick-laminated-plates:-Lévy-solutions">Thick laminated plates: Lévy solutions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Independence-of-the-reference-surface">Independence of the reference surface</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Penalty-method">Penalty method</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#References">References</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/notebooks/ex_face_clamp.nblink.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

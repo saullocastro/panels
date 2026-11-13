@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Multi-domain assemblies &#8212; panels 0.15.0 documentation</title>
+    <title>Multi-domain assemblies &#8212; panels 0.16.0 documentation</title>
   
   
   
@@ -37,9 +37,11 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=ef97403f"></script>
+    <script src="_static/documentation_options.js?v=7de89ed4"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'multidomain_overview';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
@@ -50,7 +52,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.15.0" />
+  <meta name="docsearch:version" content="0.16.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -118,7 +120,7 @@
   
   
   
-    <p class="title logo__title">panels 0.15.0 documentation</p>
+    <p class="title logo__title">panels 0.16.0 documentation</p>
   
 </a></div>
     
@@ -217,6 +219,34 @@
 
 
 <li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="tsdt_offset.html">
     Third-order shear deformation theory with a laminate offset
   </a>
@@ -252,92 +282,456 @@
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+  <a class="nav-link dropdown-item nav-internal" href="pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_linear_static.html">
     Linear static analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_linear_buckling.html">
     Linear buckling analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_frequency.html">
     Frequency analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_flutter.html">
     Panel flutter analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_newton_raphson.html">
     Non-linear static analysis with the Newton-Raphson method
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_arc_length.html">
     Non-linear static analysis with the arc-length methods
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_follower_pressure.html">
     Follower (hydrostatic) pressure
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_prescribed_displacements.html">
     Prescribed displacements
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_face_clamp.html">
     Clamped and face-clamped edges
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_cylinder.html">
     Cylinders modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_tstiff2d.html">
     Panels with a T-stiffener modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_wingbox.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_wingbox.html">
     Wing-box modeled as a multi-domain assembly
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_stiffpanelbay.html">
     Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
   </a>
 </li>
 
@@ -352,6 +746,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="changelog.html">
     Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="documentation_levels.html">
+    How the documentation is organised
   </a>
 </li>
 
@@ -523,6 +924,34 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="tsdt_offset.html">
     Third-order shear deformation theory with a laminate offset
   </a>
@@ -558,92 +987,456 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_linear_static.html">
+  <a class="nav-link nav-internal" href="pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_linear_static.html">
     Linear static analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_linear_buckling.html">
     Linear buckling analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_frequency.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_frequency.html">
     Frequency analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_flutter.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_flutter.html">
     Panel flutter analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_newton_raphson.html">
     Non-linear static analysis with the Newton-Raphson method
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_arc_length.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_arc_length.html">
     Non-linear static analysis with the arc-length methods
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_follower_pressure.html">
     Follower (hydrostatic) pressure
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_prescribed_displacements.html">
     Prescribed displacements
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_face_clamp.html">
     Clamped and face-clamped edges
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_cylinder.html">
     Cylinders modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_tstiff2d.html">
     Panels with a T-stiffener modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_multidomain_wingbox.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_wingbox.html">
     Wing-box modeled as a multi-domain assembly
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_stiffpanelbay.html">
     Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
   </a>
 </li>
 
@@ -658,6 +1451,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="changelog.html">
     Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="documentation_levels.html">
+    How the documentation is organised
   </a>
 </li>
 
@@ -835,9 +1635,45 @@ each domain:</p>
 </table>
 </div>
 <p>The kernels and the conventions of each connection are described in
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections</span></code>. The connections of the models with
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections</span></code>. The penalty kernels of the models
+with 3 degrees of freedom per term are in one module per connection:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">func</span></code></p></th>
+<th class="head"><p>penalty kernels</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code></p></td>
+<td><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCSSxcte</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSSxcte11()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSSxcte12()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSSxcte22()</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code></p></td>
+<td><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCSSycte</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSSycte11()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSSycte12()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSSycte22()</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code></p></td>
+<td><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCBFycte</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">'BFxcte'</span></code></p></td>
+<td><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCBFxcte</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'BFxycte'</span></code></p></td>
+<td><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCBFxycte</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">'SB'</span></code></p></td>
+<td><p><code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB()</span></code> of <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.skin_base</span></code>, all the models</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code></p></td>
+<td><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCSB_dmg</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>the suffixes <code class="docutils literal notranslate"><span class="pre">11</span></code>, <code class="docutils literal notranslate"><span class="pre">12</span></code> and <code class="docutils literal notranslate"><span class="pre">22</span></code> giving the blocks of the domains
+<code class="docutils literal notranslate"><span class="pre">p1</span></code> and <code class="docutils literal notranslate"><span class="pre">p2</span></code>, e.g. <span class="math notranslate nohighlight">\(\boldsymbol{K}_{12}\)</span> couples the Ritz constants of
+<code class="docutils literal notranslate"><span class="pre">p1</span></code> with those of <code class="docutils literal notranslate"><span class="pre">p2</span></code>. The connections of the models with
 5 degrees of freedom per term, FSDT and TSDT, are those of
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCsdt</span></code>, and two connected domains must
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCsdt</span></code> and the kernels <code class="docutils literal notranslate"><span class="pre">_sdt</span></code> of the
+modules <code class="docutils literal notranslate"><span class="pre">kCBF*</span></code>, and two connected domains must
 have the same number of degrees of freedom per term; <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code> is
 available for the classical laminated plate theory only, see
 <a class="reference internal" href="cohesive_zone.html#cohesive-zone"><span class="std std-ref">Cohesive zone model of the multi-domain approach</span></a>.</p>
@@ -888,144 +1724,34 @@ give the reactions.</p>
 <p>The functions of <code class="docutils literal notranslate"><span class="pre">panels.multidomain</span></code> build and analyse complete
 assemblies, and show how to build others:</p>
 <ul class="simple">
-<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">create_cylinder()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">create_cylinder_blade_stiffened()</span></code> and
-the analyses of <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.cylinder</span></code> and
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.cylinder_blade_stiffened</span></code>, see
-<a class="reference internal" href="ex_multidomain_cylinder.html"><span class="doc">Cylinders modeled as multi-domain assemblies</span></a>;</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">create_cylinder()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">create_cylinder_blade_stiffened()</span></code>,
+<code class="xref py py-func docutils literal notranslate"><span class="pre">create_cylinder_z_stiffened()</span></code> and the analyses of
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.cylinder</span></code> and
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.cylinder_blade_stiffened</span></code>;</p></li>
 <li><p>the panel with one T-stiffener of
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.tstiff2d_1stiff_compression</span></code>,
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.tstiff2d_1stiff_freq</span></code> and
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.tstiff2d_1stiff_flutter</span></code>, see
-<a class="reference internal" href="ex_multidomain_tstiff2d.html"><span class="doc">Panels with a T-stiffener modeled as multi-domain assemblies</span></a>;</p></li>
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.tstiff2d_1stiff_flutter</span></code>;</p></li>
 <li><p>the rectangular wing-box of <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.wingbox</span></code>, with
-skins, spars, ribs and optionally blade stringers, see
-<a class="reference internal" href="ex_multidomain_wingbox.html"><span class="doc">Wing-box modeled as a multi-domain assembly</span></a>.</p></li>
+skins, spars, ribs and optionally blade stringers.</p></li>
 </ul>
 </section>
-<section id="example">
-<h2>Example<a class="headerlink" href="#example" title="Link to this heading">#</a></h2>
-<p>A square plate divided in two or four domains, simply supported on the
-outer edges, with the connections <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code> and <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">domains</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">laminaprop</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">xs</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">ys</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-            <span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">1.e3</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""Square plate divided in domains, with all the outer edges simply</span>
-<span class="sd">    supported</span>
-
-<span class="sd">    ``layout`` is ``'x'`` for two domains divided at `x = x_s a`, ``'y'``</span>
-<span class="sd">    for two domains divided at `y = y_s a`, or ``'2x2'`` for four domains</span>
-<span class="sd">    divided at both, with an interior corner.</span>
-
-<span class="sd">    """</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">plate</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">bcs</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">make_plate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">laminaprop</span><span class="p">,</span> <span class="n">bcs</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span>
-                          <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="o">=</span><span class="n">y0</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">layout</span> <span class="o">==</span> <span class="s1">'x'</span><span class="p">:</span>
-        <span class="n">p1</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">xs</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="s1">'SSFS'</span><span class="p">)</span>
-        <span class="n">p2</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="n">xs</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">xs</span><span class="p">)</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="s1">'FSSS'</span><span class="p">)</span>
-        <span class="n">conn</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">p1</span><span class="o">=</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="n">p2</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">'SSxcte'</span><span class="p">,</span> <span class="n">xcte1</span><span class="o">=</span><span class="n">p1</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">xcte2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                     <span class="o">**</span><span class="n">penalties</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="s1">'xcte'</span><span class="p">,</span> <span class="n">factor</span><span class="p">))]</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">],</span> <span class="n">conn</span>
-    <span class="k">if</span> <span class="n">layout</span> <span class="o">==</span> <span class="s1">'y'</span><span class="p">:</span>
-        <span class="n">p1</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">ys</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="s1">'SSSF'</span><span class="p">)</span>
-        <span class="n">p2</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ys</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ys</span><span class="p">)</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="s1">'SFSS'</span><span class="p">)</span>
-        <span class="n">conn</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">p1</span><span class="o">=</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="n">p2</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">'SSycte'</span><span class="p">,</span> <span class="n">ycte1</span><span class="o">=</span><span class="n">p1</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">ycte2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                     <span class="o">**</span><span class="n">penalties</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="s1">'ycte'</span><span class="p">,</span> <span class="n">factor</span><span class="p">))]</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">],</span> <span class="n">conn</span>
-    <span class="k">assert</span> <span class="n">layout</span> <span class="o">==</span> <span class="s1">'2x2'</span>
-    <span class="n">p00</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">xs</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="n">ys</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="s1">'SSFF'</span><span class="p">)</span>
-    <span class="n">p10</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="n">xs</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">xs</span><span class="p">)</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="n">ys</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="s1">'FSSF'</span><span class="p">)</span>
-    <span class="n">p01</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ys</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="n">xs</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ys</span><span class="p">)</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="s1">'SFFS'</span><span class="p">)</span>
-    <span class="n">p11</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="n">xs</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="n">ys</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">xs</span><span class="p">)</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ys</span><span class="p">)</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="s1">'FFSS'</span><span class="p">)</span>
-    <span class="n">conn</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">pA</span><span class="p">,</span> <span class="n">pB</span> <span class="ow">in</span> <span class="p">((</span><span class="n">p00</span><span class="p">,</span> <span class="n">p10</span><span class="p">),</span> <span class="p">(</span><span class="n">p01</span><span class="p">,</span> <span class="n">p11</span><span class="p">)):</span>
-        <span class="n">conn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">p1</span><span class="o">=</span><span class="n">pA</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="n">pB</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">'SSxcte'</span><span class="p">,</span> <span class="n">xcte1</span><span class="o">=</span><span class="n">pA</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">xcte2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                         <span class="o">**</span><span class="n">penalties</span><span class="p">(</span><span class="n">pA</span><span class="p">,</span> <span class="n">pB</span><span class="p">,</span> <span class="s1">'xcte'</span><span class="p">,</span> <span class="n">factor</span><span class="p">)))</span>
-    <span class="k">for</span> <span class="n">pA</span><span class="p">,</span> <span class="n">pB</span> <span class="ow">in</span> <span class="p">((</span><span class="n">p00</span><span class="p">,</span> <span class="n">p01</span><span class="p">),</span> <span class="p">(</span><span class="n">p10</span><span class="p">,</span> <span class="n">p11</span><span class="p">)):</span>
-        <span class="n">conn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">p1</span><span class="o">=</span><span class="n">pA</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="n">pB</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">'SSycte'</span><span class="p">,</span> <span class="n">ycte1</span><span class="o">=</span><span class="n">pA</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">ycte2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                         <span class="o">**</span><span class="n">penalties</span><span class="p">(</span><span class="n">pA</span><span class="p">,</span> <span class="n">pB</span><span class="p">,</span> <span class="s1">'ycte'</span><span class="p">,</span> <span class="n">factor</span><span class="p">)))</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">p00</span><span class="p">,</span> <span class="n">p10</span><span class="p">,</span> <span class="n">p01</span><span class="p">,</span> <span class="n">p11</span><span class="p">],</span> <span class="n">conn</span>
-</pre></div>
-</div>
-<p>The deflection of the plate under a sinusoidal pressure, solved with the
-null-space method, reduced and expanded back, agrees with the solution of
-Pagano (1970) given in the test:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'model'</span><span class="p">,</span> <span class="p">[</span><span class="n">FSDT</span><span class="p">,</span> <span class="n">TSDT</span><span class="p">])</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">test_bending_divided_plate_pagano</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""Pagano (1970), deflection at the interior corner of four domains,</span>
-<span class="sd">    solved with the reduced system and expanded back"""</span>
-    <span class="n">a</span> <span class="o">=</span> <span class="mf">1.</span>
-    <span class="n">h</span> <span class="o">=</span> <span class="n">a</span><span class="o">/</span><span class="mi">10</span>
-    <span class="n">q0</span> <span class="o">=</span> <span class="mf">1.e3</span>
-    <span class="n">panels</span><span class="p">,</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">domains</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-                           <span class="n">orthotropic</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="n">G12</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">G13</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">G23</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span> <span class="s1">'2x2'</span><span class="p">,</span>
-                           <span class="n">xs</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">ys</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-    <span class="n">md</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">(</span><span class="n">panels</span><span class="p">,</span> <span class="n">conn</span><span class="p">,</span> <span class="n">conn_method</span><span class="o">=</span><span class="s1">'null-space'</span><span class="p">)</span>
-    <span class="n">fext</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">sinusoidal_load</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q0</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">md</span><span class="o">.</span><span class="n">get_size</span><span class="p">())</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">panels</span><span class="p">)</span>
-    <span class="n">c_r</span> <span class="o">=</span> <span class="n">solve</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">()),</span> <span class="n">md</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">fext</span><span class="p">),</span> <span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">c</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">c_r</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">get_size</span><span class="p">(),)</span>
-    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">panels</span><span class="p">:</span>
-        <span class="n">res</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">uvw</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eval_panel</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">gridx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">gridy</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">w</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s1">'w'</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">y0</span> <span class="o">==</span> <span class="mi">0</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">x0</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)]</span>
-        <span class="n">wbar</span> <span class="o">=</span> <span class="mi">100</span><span class="o">*</span><span class="n">w</span><span class="o">*</span><span class="n">E2</span><span class="o">*</span><span class="n">h</span><span class="o">**</span><span class="mi">3</span><span class="o">/</span><span class="p">(</span><span class="n">q0</span><span class="o">*</span><span class="n">a</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">wbar</span><span class="p">,</span> <span class="n">PAGANO</span><span class="p">[</span><span class="n">model</span><span class="p">],</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Two plates in series under tension, connected with the penalty method, and
-the section force computed by <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.force()</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s1">'module'</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">tension</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">"""Two plates in series under uniform tension ``N``</span>
-
-<span class="sd">    ::</span>
-
-<span class="sd">        u = 0  ________________________</span>
-<span class="sd">         |    |          |            |</span>
-<span class="sd">         |    |    p1    |     p2     | --&gt; N</span>
-<span class="sd">         |    |__________|____________|</span>
-
-<span class="sd">    The stress state is exactly uniform, so the post-processing of every</span>
-<span class="sd">    panel must give ``Nxx = N``, ``exx = N/(E t)`` and ``eyy = -nu exx``.</span>
-
-<span class="sd">    """</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">plate</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
-        <span class="n">p</span> <span class="o">=</span> <span class="n">Shell</span><span class="p">(</span><span class="n">group</span><span class="o">=</span><span class="s1">'g'</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">B</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
-                  <span class="n">stack</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">plyt</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">laminaprop</span><span class="o">=</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">nu</span><span class="p">),</span>
-                  <span class="n">model</span><span class="o">=</span><span class="s1">'plate_clpt_donnell'</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'x1'</span><span class="p">,</span> <span class="s1">'x2'</span><span class="p">,</span> <span class="s1">'y1'</span><span class="p">,</span> <span class="s1">'y2'</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">dof</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'u'</span><span class="p">,</span> <span class="s1">'v'</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">):</span>
-                <span class="nb">setattr</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">edge</span> <span class="o">+</span> <span class="n">dof</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
-                <span class="nb">setattr</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">edge</span> <span class="o">+</span> <span class="n">dof</span> <span class="o">+</span> <span class="s1">'r'</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">p</span>
-
-    <span class="n">p1</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">)</span>
-    <span class="n">p2</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">)</span>
-    <span class="n">p1</span><span class="o">.</span><span class="n">x1u</span> <span class="o">=</span> <span class="n">p1</span><span class="o">.</span><span class="n">x1w</span> <span class="o">=</span> <span class="n">p1</span><span class="o">.</span><span class="n">x1wr</span> <span class="o">=</span> <span class="mf">0.</span>
-    <span class="n">p2</span><span class="o">.</span><span class="n">x2w</span> <span class="o">=</span> <span class="mf">0.</span>
-    <span class="c1"># removing the rigid body motion along y</span>
-    <span class="n">p1</span><span class="o">.</span><span class="n">add_point_pd</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1e9</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
-    <span class="n">p2</span><span class="o">.</span><span class="n">add_distr_load_fixed_x</span><span class="p">(</span><span class="n">p2</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">funcx</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">N</span><span class="p">)</span>
-
-    <span class="n">kt</span><span class="p">,</span> <span class="n">kr</span> <span class="o">=</span> <span class="n">calc_kt_kr</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="s1">'xcte'</span><span class="p">)</span>
-    <span class="n">conn</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">p1</span><span class="o">=</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="n">p2</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">'SSxcte'</span><span class="p">,</span> <span class="n">xcte1</span><span class="o">=</span><span class="n">p1</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">xcte2</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
-                 <span class="n">kt</span><span class="o">=</span><span class="n">kt</span><span class="p">,</span> <span class="n">kr</span><span class="o">=</span><span class="n">kr</span><span class="p">)]</span>
-    <span class="n">md</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">([</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">],</span> <span class="n">conn</span><span class="p">,</span> <span class="n">conn_method</span><span class="o">=</span><span class="s1">'penalty'</span><span class="p">)</span>
-    <span class="n">c</span> <span class="o">=</span> <span class="n">solve</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">(),</span> <span class="n">md</span><span class="o">.</span><span class="n">calc_fext</span><span class="p">(),</span> <span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">md</span><span class="p">,</span> <span class="n">c</span>
-</pre></div>
-</div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'panel'</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">test_force_equals_applied_load</span><span class="p">(</span><span class="n">tension</span><span class="p">,</span> <span class="n">panel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""The section force along x = cte is the applied load N*b"""</span>
-    <span class="n">md</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">tension</span>
-    <span class="n">p</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">panels</span><span class="p">[</span><span class="n">panel</span><span class="p">]</span>
-    <span class="n">res</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">force</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">'g'</span><span class="p">,</span> <span class="n">eval_panel</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">x_cte_force</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">a</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">nr_y_gauss</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-                   <span class="n">gridx</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">'Fxx'</span><span class="p">],</span> <span class="n">N</span><span class="o">*</span><span class="n">B</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">'Fxy'</span><span class="p">],</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="o">*</span><span class="n">N</span><span class="o">*</span><span class="n">B</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">'Fyy'</span><span class="p">],</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="o">*</span><span class="n">N</span><span class="o">*</span><span class="n">B</span><span class="p">)</span>
-</pre></div>
-</div>
+<section id="boundary-conditions-of-divided-domains">
+<h2>Boundary conditions of divided domains<a class="headerlink" href="#boundary-conditions-of-divided-domains" title="Link to this heading">#</a></h2>
+<p>When a domain is divided, each part keeps the flags of the outer edges it
+shares with the original domain, and its connected edges are free, all
+their flags <code class="docutils literal notranslate"><span class="pre">1</span></code>: the connections, not the flags, tie the fields across
+the joint. A square plate simply supported on its outer edges and divided
+along <span class="math notranslate nohighlight">\(x = x_s\)</span> into two domains, or along <span class="math notranslate nohighlight">\(x = x_s\)</span> and <span class="math notranslate nohighlight">\(y = y_s\)</span> into
+four domains with an interior corner, connected with <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code>, reproduces the undivided plate; with the null-space method
+and the FSDT or the TSDT, the deflection at the interior corner of a
+<span class="math notranslate nohighlight">\([0/90/90/0]\)</span> plate, <span class="math notranslate nohighlight">\(h/a = 0.1\)</span>, under a sinusoidal pressure, the
+problem of Pagano (1970), agrees to <span class="math notranslate nohighlight">\(2 \times 10^{-4}\)</span> with the closed-form
+solutions of the same theories. For a uniform
+membrane state the section force of <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.force()</span></code>, the
+integral of the stress resultants along a line, equals the applied load in
+every domain, also across a penalty connection.</p>
 </section>
 </section>
 
@@ -1080,7 +1806,7 @@ the section force computed by <code class="xref py py-meth docutils literal notr
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#connections">Connections</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imposing-the-connections">Imposing the connections</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ready-made-assemblies">Ready-made assemblies</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example">Example</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#boundary-conditions-of-divided-domains">Boundary conditions of divided domains</a></li>
 </ul>
   </nav></div>
 

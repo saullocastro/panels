@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>&lt;no title&gt; &#8212; panels 0.15.0 documentation</title>
+    <title>Multidomain connections &#8212; panels 0.16.0 documentation</title>
   
   
   
@@ -37,9 +37,12 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=ef97403f"></script>
+    <script src="_static/documentation_options.js?v=7de89ed4"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'multidomain_connections';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -49,7 +52,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.15.0" />
+  <meta name="docsearch:version" content="0.16.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -117,7 +120,7 @@
   
   
   
-    <p class="title logo__title">panels 0.15.0 documentation</p>
+    <p class="title logo__title">panels 0.16.0 documentation</p>
   
 </a></div>
     
@@ -216,6 +219,34 @@
 
 
 <li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="tsdt_offset.html">
     Third-order shear deformation theory with a laminate offset
   </a>
@@ -251,92 +282,456 @@
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+  <a class="nav-link dropdown-item nav-internal" href="pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_linear_static.html">
     Linear static analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_linear_buckling.html">
     Linear buckling analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_frequency.html">
     Frequency analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_flutter.html">
     Panel flutter analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_newton_raphson.html">
     Non-linear static analysis with the Newton-Raphson method
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_arc_length.html">
     Non-linear static analysis with the arc-length methods
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_follower_pressure.html">
     Follower (hydrostatic) pressure
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_prescribed_displacements.html">
     Prescribed displacements
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_face_clamp.html">
     Clamped and face-clamped edges
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_cylinder.html">
     Cylinders modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_tstiff2d.html">
     Panels with a T-stiffener modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_wingbox.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_wingbox.html">
     Wing-box modeled as a multi-domain assembly
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_stiffpanelbay.html">
     Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
   </a>
 </li>
 
@@ -351,6 +746,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="changelog.html">
     Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="documentation_levels.html">
+    How the documentation is organised
   </a>
 </li>
 
@@ -522,6 +924,34 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="tsdt_offset.html">
     Third-order shear deformation theory with a laminate offset
   </a>
@@ -557,92 +987,456 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_linear_static.html">
+  <a class="nav-link nav-internal" href="pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_linear_static.html">
     Linear static analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_linear_buckling.html">
     Linear buckling analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_frequency.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_frequency.html">
     Frequency analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_flutter.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_flutter.html">
     Panel flutter analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_newton_raphson.html">
     Non-linear static analysis with the Newton-Raphson method
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_arc_length.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_arc_length.html">
     Non-linear static analysis with the arc-length methods
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_follower_pressure.html">
     Follower (hydrostatic) pressure
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_prescribed_displacements.html">
     Prescribed displacements
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_face_clamp.html">
     Clamped and face-clamped edges
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_cylinder.html">
     Cylinders modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_tstiff2d.html">
     Panels with a T-stiffener modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_multidomain_wingbox.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_wingbox.html">
     Wing-box modeled as a multi-domain assembly
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_stiffpanelbay.html">
     Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
   </a>
 </li>
 
@@ -657,6 +1451,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="changelog.html">
     Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="documentation_levels.html">
+    How the documentation is organised
   </a>
 </li>
 
@@ -709,14 +1510,16 @@
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="shell.html">Plates and cylindrical shells (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.shell</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="shell_fext.html">External force vector (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.shell_fext</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot_shell.html">Contour plots (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.plot_shell</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Model database (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.modelDB</span></code>)</a></li>
 
+
 <li class="toctree-l1"><a class="reference internal" href="bardell_api.html">Bardell’s functions (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.bardell</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidomain.html">Multi-domain assemblies (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain</span></code>)</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Multidomain connections</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidomain_cylinder.html">Cylinders modeled as multi-domain assemblies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidomain_tstiff2d.html">Panels with a T-stiffener modeled as 2D domains</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidomain_wingbox.html">Wing-box modeled as a multi-domain assembly</a></li>
@@ -769,7 +1572,7 @@
     
     <li class="breadcrumb-item"><a href="api.html" class="nav-link">API reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">&lt;no title&gt;</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Multidomain connections</span></li>
   </ul>
 </nav>
 </div>
@@ -786,7 +1589,386 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  
+  <section id="multidomain-connections">
+<span id="id1"></span><h1>Multidomain connections<a class="headerlink" href="#multidomain-connections" title="Link to this heading">#</a></h1>
+<p>Each domain of a <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDomain</span></code> assembly is a <code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code> with its
+own set of Bardell approximation functions, see <a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s hierarchical functions</span></a>.
+The domains are joined by connections, given to the assembly as dictionaries
+with the key <code class="docutils literal notranslate"><span class="pre">'func'</span></code>, e.g. <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code>, see <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_kC_conn()</span></code>.
+This page describes the connections currently supported. They are imposed
+exactly with the null-space method by default, see <a class="reference internal" href="multidomain_null_space.html#null-space"><span class="std std-ref">Exact connections with the null-space method</span></a> and
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.nullspace</span></code>, or with the penalty
+stiffnesses of the kernels below with <code class="docutils literal notranslate"><span class="pre">conn_method='penalty'</span></code>.</p>
+<section id="penalty-method">
+<h2>Penalty method<a class="headerlink" href="#penalty-method" title="Link to this heading">#</a></h2>
+<p>Each penalty kernel adds, for each quantity <span class="math notranslate nohighlight">\(q_k\)</span> that must be continuous
+across the connection, the energy:</p>
+<div class="math notranslate nohighlight" id="equation-conn-penalty">
+<span class="eqno">(1)<a class="headerlink" href="#equation-conn-penalty" title="Link to this equation">#</a></span>\[U_k = \frac{1}{2} k_k \int \left( q_k^{(1)} - q_k^{(2)} \right)^2\]</div>
+<p>integrated along the connected edges, or over the connected area for
+<code class="docutils literal notranslate"><span class="pre">'SB'</span></code>, with the translation or rotation penalty constant <span class="math notranslate nohighlight">\(k_k\)</span>, <code class="docutils literal notranslate"><span class="pre">kt</span></code> or
+<code class="docutils literal notranslate"><span class="pre">kr</span></code> <a class="reference internal" href="ref.html#castro2017multidomain" id="id2"><span>[castro2017Multidomain]</span></a>. The quantities <span class="math notranslate nohighlight">\(q_k\)</span> of each connection are
+given in the sections below.</p>
+<p>With the null-space method the quantities penalized by the kernels become
+the linear constraints:</p>
+<div class="math notranslate nohighlight" id="equation-conn-constraints">
+<span class="eqno">(2)<a class="headerlink" href="#equation-conn-constraints" title="Link to this equation">#</a></span>\[\boldsymbol{B} \boldsymbol{c} = \boldsymbol{0}\]</div>
+<p>which are eliminated with a basis <span class="math notranslate nohighlight">\(\boldsymbol{Z}\)</span> of their null space,
+<span class="math notranslate nohighlight">\(\boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r\)</span>. The results are the limit
+of the penalty method for penalty constants going to infinity, see
+<a class="reference internal" href="multidomain_null_space.html#null-space"><span class="std std-ref">Exact connections with the null-space method</span></a>.</p>
+</section>
+<section id="base-flange-bf">
+<h2>Base-flange, BF<a class="headerlink" href="#base-flange-bf" title="Link to this heading">#</a></h2>
+<section id="kcbfycte">
+<h3>kCBFycte<a class="headerlink" href="#kcbfycte" title="Link to this heading">#</a></h3>
+<p>Connection of type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>                     <span class="n">_</span>
+                      <span class="o">|</span>
+  <span class="o">||</span> <span class="o">--&gt;</span> <span class="n">Flange</span>       <span class="o">|</span>
+  <span class="o">||</span>                  <span class="o">|-&gt;</span> <span class="n">Can</span> <span class="n">be</span> <span class="n">used</span> <span class="n">to</span> <span class="n">model</span> <span class="n">a</span> <span class="n">stiffener</span>
+<span class="o">======</span>  <span class="o">--&gt;</span> <span class="n">Base</span>      <span class="o">|</span>
+                     <span class="n">_</span><span class="o">|</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">ycte</span></code> indicates the connection exists at a constant <span class="math notranslate nohighlight">\(y_1\)</span> for panel 1
+(base) and <span class="math notranslate nohighlight">\(y_2\)</span> for panel 2 (flange), see
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCBFycte</span></code>. The connection <code class="docutils literal notranslate"><span class="pre">'BFxcte'</span></code>,
+along <span class="math notranslate nohighlight">\(y\)</span>, is the same at a constant <span class="math notranslate nohighlight">\(x_1\)</span> and <span class="math notranslate nohighlight">\(x_2\)</span>, see
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCBFxcte</span></code>. In both, <code class="docutils literal notranslate"><span class="pre">p1</span></code> is the base
+and <code class="docutils literal notranslate"><span class="pre">p2</span></code> the flange.</p>
+<p>The rotation penalty of <code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code> uses the rotation of the normal about
+<span class="math notranslate nohighlight">\(x\)</span> of each panel, <span class="math notranslate nohighlight">\(-w_{,y}\)</span> for the classical laminated plate theory,
+including the term <span class="math notranslate nohighlight">\(v/r\)</span> for the Sanders-Koiter kinematics, and <span class="math notranslate nohighlight">\(\phi_y\)</span> for
+the FSDT and TSDT; the connection <code class="docutils literal notranslate"><span class="pre">'BFxcte'</span></code> penalizes <span class="math notranslate nohighlight">\(-w_{,x}\)</span> or
+<span class="math notranslate nohighlight">\(\phi_x\)</span>.</p>
+</section>
+<section id="bfxcte-at-a-face-of-the-base">
+<h3>BFxcte at a face of the base<a class="headerlink" href="#bfxcte-at-a-face-of-the-base" title="Link to this heading">#</a></h3>
+<p>Both connections tie the flange to the reference surface of the base. A
+flange attached to a face of the base, e.g. the web of a ring frame on the
+inner or the outer surface of a cylinder, is connected with the key
+<code class="docutils literal notranslate"><span class="pre">'face'</span></code> of <code class="docutils literal notranslate"><span class="pre">'BFxcte'</span></code>, <code class="docutils literal notranslate"><span class="pre">'lower'</span></code> for the face <span class="math notranslate nohighlight">\(z_1 = d_1 - h_1/2\)</span>
+and <code class="docutils literal notranslate"><span class="pre">'upper'</span></code> for <span class="math notranslate nohighlight">\(z_1 = d_1 + h_1/2\)</span>, <span class="math notranslate nohighlight">\(d_1\)</span> being the offset and <span class="math notranslate nohighlight">\(h_1\)</span>
+the thickness of the base:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>           <span class="n">base</span><span class="p">,</span> <span class="n">z1</span> <span class="n">up</span>
+<span class="o">====================================</span>  <span class="n">upper</span> <span class="n">face</span><span class="p">,</span> <span class="n">z1</span> <span class="o">=</span> <span class="n">d1</span> <span class="o">+</span> <span class="n">h1</span><span class="o">/</span><span class="mi">2</span>
+<span class="o">------------------------------------</span>  <span class="n">reference</span> <span class="n">surface</span><span class="p">,</span> <span class="n">z1</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="o">====================================</span>  <span class="n">lower</span> <span class="n">face</span><span class="p">,</span> <span class="n">z1</span> <span class="o">=</span> <span class="n">d1</span> <span class="o">-</span> <span class="n">h1</span><span class="o">/</span><span class="mi">2</span>
+             <span class="o">||</span>  <span class="n">edge</span> <span class="n">x2</span> <span class="o">=</span> <span class="mi">0</span>
+             <span class="o">||</span>  <span class="n">flange</span><span class="p">,</span> <span class="n">x2</span> <span class="o">=</span> <span class="o">-</span><span class="n">z1</span>
+             <span class="o">||</span>
+</pre></div>
+</div>
+<p>The words <code class="docutils literal notranslate"><span class="pre">'lower'</span></code> and <code class="docutils literal notranslate"><span class="pre">'upper'</span></code> refer to the coordinate <span class="math notranslate nohighlight">\(z\)</span> of the
+domain whose face is connected, as for <code class="docutils literal notranslate"><span class="pre">'SB'</span></code> below, where the lower
+face of <code class="docutils literal notranslate"><span class="pre">p1</span></code> meets the upper face of <code class="docutils literal notranslate"><span class="pre">p2</span></code>: for <code class="docutils literal notranslate"><span class="pre">'BFxcte'</span></code> it is the
+coordinate <span class="math notranslate nohighlight">\(z_1\)</span> of the base <code class="docutils literal notranslate"><span class="pre">p1</span></code>. For a <code class="docutils literal notranslate"><span class="pre">'cylshell_*'</span></code> base, whose
+<span class="math notranslate nohighlight">\(z\)</span> points outwards, <code class="docutils literal notranslate"><span class="pre">'lower'</span></code> is the inner surface and <code class="docutils literal notranslate"><span class="pre">'upper'</span></code> the
+outer surface, whatever the axes of the flange, e.g. an <code class="docutils literal notranslate"><span class="pre">'annular_*'</span></code>
+plate.</p>
+<p>The axis <span class="math notranslate nohighlight">\(x_2\)</span> of the flange is <span class="math notranslate nohighlight">\(-z_1\)</span>, so that a flange below the lower
+face has its edge <span class="math notranslate nohighlight">\(x_2 = 0\)</span> there, <code class="docutils literal notranslate"><span class="pre">xcte2=0</span></code>, and a flange above the
+upper face its edge <span class="math notranslate nohighlight">\(x_2 = a_2\)</span>, <code class="docutils literal notranslate"><span class="pre">xcte2=p2.a</span></code>. The face is a line of
+points of the normals of the base, which follow its reference surface
+with the Sanders-Koiter kinematics for a <code class="docutils literal notranslate"><span class="pre">'cylshell_*'</span></code> base, whatever
+its model, see below, and with the kinematics of its model otherwise; for
+the classical laminated plate theory</p>
+<div class="math notranslate nohighlight">
+\[u_1(z) = u_1 - z w_{1,x}, \qquad v_1(z) = \left(1 + \frac{z}{r_1}\right)
+v_1 - z w_{1,y}\]</div>
+<p>the term <span class="math notranslate nohighlight">\(z v_1/r_1\)</span> being that of the Sanders-Koiter kinematics, and the
+connection imposes <span class="math notranslate nohighlight">\(u_1(z_1) = w_2\)</span>, <span class="math notranslate nohighlight">\(v_1(z_1) = v_2\)</span>, <span class="math notranslate nohighlight">\(w_1 =
+-u_2\)</span> and the continuity of the rotation about <span class="math notranslate nohighlight">\(y\)</span>, with the penalty
+energy integrated along the length <span class="math notranslate nohighlight">\(b_1\)</span> of the base, or exactly with the
+null-space method. The two edges share the natural coordinate <span class="math notranslate nohighlight">\(\eta\)</span> and
+must span the same angle: an <code class="docutils literal notranslate"><span class="pre">'annular_*'</span></code> flange on a <code class="docutils literal notranslate"><span class="pre">'cylshell_*'</span></code>
+base, whose <span class="math notranslate nohighlight">\(z\)</span> points outwards, has its edge at the radius of the
+connected surface, <span class="math notranslate nohighlight">\(r_2 - x_{2} = r_1 + z_1\)</span>, and <span class="math notranslate nohighlight">\(b_2/r_2 = b_1/r_1\)</span>;
+the connection raises a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> otherwise. For example, the
+internal and the external ring frames of a cylinder <code class="docutils literal notranslate"><span class="pre">cyl</span></code> at the station
+<code class="docutils literal notranslate"><span class="pre">x_f</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">dict</span><span class="p">(</span><span class="n">p1</span><span class="o">=</span><span class="n">cyl</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="n">web_in</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">'BFxcte'</span><span class="p">,</span> <span class="n">xcte1</span><span class="o">=</span><span class="n">x_f</span><span class="p">,</span> <span class="n">xcte2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+     <span class="n">face</span><span class="o">=</span><span class="s1">'lower'</span><span class="p">)</span>
+<span class="nb">dict</span><span class="p">(</span><span class="n">p1</span><span class="o">=</span><span class="n">cyl</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="n">web_out</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">'BFxcte'</span><span class="p">,</span> <span class="n">xcte1</span><span class="o">=</span><span class="n">x_f</span><span class="p">,</span> <span class="n">xcte2</span><span class="o">=</span><span class="n">web_out</span><span class="o">.</span><span class="n">a</span><span class="p">,</span>
+     <span class="n">face</span><span class="o">=</span><span class="s1">'upper'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>with <code class="docutils literal notranslate"><span class="pre">web_in.r</span> <span class="pre">=</span> <span class="pre">cyl.r</span> <span class="pre">+</span> <span class="pre">cyl.offset</span> <span class="pre">-</span> <span class="pre">h/2</span></code> and <code class="docutils literal notranslate"><span class="pre">web_out.r</span> <span class="pre">-</span> <span class="pre">web_out.a</span> <span class="pre">=</span>
+<span class="pre">cyl.r</span> <span class="pre">+</span> <span class="pre">cyl.offset</span> <span class="pre">+</span> <span class="pre">h/2</span></code>. With the offset <span class="math notranslate nohighlight">\(d_1 = h_1/2\)</span> the lower face is
+the reference surface and <code class="docutils literal notranslate"><span class="pre">face='lower'</span></code> is the connection without the
+key.</p>
+</section>
+<section id="rigid-rotation-at-a-face-of-a-donnell-cylinder">
+<h3>Rigid rotation at a face of a Donnell cylinder<a class="headerlink" href="#rigid-rotation-at-a-face-of-a-donnell-cylinder" title="Link to this heading">#</a></h3>
+<p>A rigid rotation of the assembly by the small angle <span class="math notranslate nohighlight">\(\Omega\)</span> about the axis
+of a cylinder moves each point by <span class="math notranslate nohighlight">\(\rho \Omega\)</span> along the circumference,
+<span class="math notranslate nohighlight">\(\rho\)</span> being its distance to the axis. At the reference surface of the
+cylinder, of radius <span class="math notranslate nohighlight">\(r_1\)</span>, the displacements are</p>
+<div class="math notranslate nohighlight">
+\[u_1 = 0, \qquad v_1 = r_1 \Omega, \qquad w_1 = 0\]</div>
+<p>for every model. The membrane strains <span class="math notranslate nohighlight">\(u_{1,x}\)</span>, <span class="math notranslate nohighlight">\(v_{1,y} + w_1/r_1\)</span>,
+<span class="math notranslate nohighlight">\(u_{1,y} + v_{1,x}\)</span> and the changes of curvature <span class="math notranslate nohighlight">\(-w_{1,xx}\)</span>,
+<span class="math notranslate nohighlight">\(-w_{1,yy}\)</span>, <span class="math notranslate nohighlight">\(-2 w_{1,xy}\)</span> of the Donnell kinematics vanish, as do those of
+the Sanders-Koiter kinematics and, with <span class="math notranslate nohighlight">\(\phi_x = \phi_y = 0\)</span>, the
+transverse shear strains of the FSDT and TSDT: the rotation about the axis
+is free of strain in every model of the cylinder. The face <span class="math notranslate nohighlight">\(z_1 = z_f\)</span>, at
+the radius <span class="math notranslate nohighlight">\(r_1 + z_f\)</span>, moves by <span class="math notranslate nohighlight">\((r_1 + z_f) \Omega\)</span>. The rotation of the
+normal about <span class="math notranslate nohighlight">\(x\)</span> of the Sanders-Koiter kinematics, <span class="math notranslate nohighlight">\(-w_{1,y} + v_1/r_1\)</span>,
+gives this displacement exactly,</p>
+<div class="math notranslate nohighlight">
+\[v_1(z_f) = \left(1 + \frac{z_f}{r_1}\right) v_1 - z_f w_{1,y} = (r_1 +
+z_f) \Omega\]</div>
+<p>whereas the Donnell kinematics, which neglect <span class="math notranslate nohighlight">\(v_1/r_1\)</span> in the rotation of
+the normal, give <span class="math notranslate nohighlight">\(v_1(z_f) = v_1 - z_f w_{1,y} = r_1 \Omega\)</span>. The flange,
+an <code class="docutils literal notranslate"><span class="pre">'annular_*'</span></code> plate whose connected edge is at the radius <span class="math notranslate nohighlight">\(r_1 + z_f\)</span>,
+rotates with <span class="math notranslate nohighlight">\(v_2 = (r_1 + z_f) \Omega\)</span> along that edge, and the
+condition <span class="math notranslate nohighlight">\(v_1(z_f) = v_2\)</span> of the connection has the residual</p>
+<div class="math notranslate nohighlight">
+\[v_1(z_f) - v_2 = -z_f \Omega, \qquad \frac{\left| v_1(z_f) - v_2
+\right|}{v_2} = \frac{|z_f|}{r_1 + z_f}\]</div>
+<p>of the order of <span class="math notranslate nohighlight">\(h_1/(2 r_1)\)</span> for a face at <span class="math notranslate nohighlight">\(|z_f| = h_1/2\)</span>. The other
+conditions of the connection have no residual. With the penalty method the
+rigid rotation stores the energy <span class="math notranslate nohighlight">\(\frac{1}{2} k_t b_1 z_f^2 \Omega^2\)</span>; with
+the null-space method it violates the constraints, and the motion free of
+strain that satisfies them rotates the flange by <span class="math notranslate nohighlight">\(r_1 \Omega/(r_1 + z_f)\)</span>:
+its edge follows the reference surface of the cylinder instead of the
+face. The translations normal to the axis and the tilts of the axis have
+<span class="math notranslate nohighlight">\(v_1 \neq 0\)</span> as well, with the same residual <span class="math notranslate nohighlight">\(-z_f v_1/r_1\)</span> at the face.</p>
+<p>The term <span class="math notranslate nohighlight">\(z_f v_1/r_1\)</span> is of the order neglected by the Donnell
+kinematics, so that either choice is consistent with these kinematics,
+but only the Sanders-Koiter term at the face keeps the rigid rotation of
+the assembly free of energy and of residual. It enters the connection
+alone and does not change the strains of the cylinder, which remain those
+of its model. The key <code class="docutils literal notranslate"><span class="pre">'kinematics'</span></code> of <code class="docutils literal notranslate"><span class="pre">'BFxcte'</span></code> therefore defaults
+to <code class="docutils literal notranslate"><span class="pre">'sanders'</span></code>, the face following the Sanders-Koiter kinematics for
+every <code class="docutils literal notranslate"><span class="pre">'cylshell_*'</span></code> model. With <code class="docutils literal notranslate"><span class="pre">kinematics='model'</span></code> the face follows
+the kinematics of the model of the cylinder, which differ from those of
+Sanders and Koiter only for <code class="docutils literal notranslate"><span class="pre">'cylshell_clpt_donnell'</span></code>,
+<code class="docutils literal notranslate"><span class="pre">'cylshell_fsdt_donnell'</span></code> and <code class="docutils literal notranslate"><span class="pre">'cylshell_tsdt_donnell'</span></code>; for these the
+residual above is present, and the connection issues a <code class="docutils literal notranslate"><span class="pre">UserWarning</span></code>
+that names this section, see <code class="xref py py-func docutils literal notranslate"><span class="pre">kCBFxcte_face.face_rinv()</span></code>. The key
+<code class="docutils literal notranslate"><span class="pre">'kinematics'</span></code> without the key <code class="docutils literal notranslate"><span class="pre">'face'</span></code> raises a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>: at the
+reference surface the kinematics of the face do not enter the connection.</p>
+</section>
+<section id="bfycte-at-a-face-of-the-base">
+<h3>BFycte at a face of the base<a class="headerlink" href="#bfycte-at-a-face-of-the-base" title="Link to this heading">#</a></h3>
+<p>The connection <code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code> has the same keys <code class="docutils literal notranslate"><span class="pre">'face'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">'kinematics'</span></code>, with the same meaning: the edge <span class="math notranslate nohighlight">\(y_2 =\)</span> <code class="docutils literal notranslate"><span class="pre">ycte2</span></code> of the
+flange is tied to the line <span class="math notranslate nohighlight">\(y_1 =\)</span> <code class="docutils literal notranslate"><span class="pre">ycte1</span></code> of the face <span class="math notranslate nohighlight">\(z_1 = d_1 \mp
+h_1/2\)</span> of the base, see
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCBFycte_face</span></code>. On a <code class="docutils literal notranslate"><span class="pre">'cylshell_*'</span></code>
+base this line is a generator, and the flange is a flat plate along it,
+e.g. a blade stringer or the web of a Z stringer, whose height then starts
+at the surface of the skin instead of its middle surface:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>           <span class="n">skin</span><span class="p">,</span> <span class="n">z1</span> <span class="n">up</span> <span class="p">(</span><span class="n">outwards</span><span class="p">)</span>
+<span class="o">====================================</span>  <span class="n">outer</span> <span class="n">face</span><span class="p">,</span> <span class="s1">'upper'</span>
+<span class="o">------------------------------------</span>  <span class="n">reference</span> <span class="n">surface</span><span class="p">,</span> <span class="n">z1</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="o">====================================</span>  <span class="n">inner</span> <span class="n">face</span><span class="p">,</span> <span class="s1">'lower'</span>
+             <span class="o">||</span>  <span class="n">edge</span> <span class="n">y2</span> <span class="o">=</span> <span class="mi">0</span>
+             <span class="o">||</span>  <span class="n">blade</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="o">-</span><span class="n">z1</span>
+             <span class="o">||</span>
+</pre></div>
+</div>
+<p>The axis <span class="math notranslate nohighlight">\(y_2\)</span> of the flange is <span class="math notranslate nohighlight">\(-z_1\)</span>: a flange below the lower face has
+its edge <span class="math notranslate nohighlight">\(y_2 = 0\)</span> there, <code class="docutils literal notranslate"><span class="pre">ycte2=0</span></code>, and a flange above the upper face
+its edge <span class="math notranslate nohighlight">\(y_2 = b_2\)</span>, <code class="docutils literal notranslate"><span class="pre">ycte2=p2.b</span></code>. The connection imposes <span class="math notranslate nohighlight">\(u_1(z_1) =
+u_2\)</span>, <span class="math notranslate nohighlight">\(v_1(z_1) = w_2\)</span>, <span class="math notranslate nohighlight">\(w_1 = -v_2\)</span> and the equality of the rotations of
+the normals about <span class="math notranslate nohighlight">\(x\)</span>, that of the base at its face being</p>
+<div class="math notranslate nohighlight">
+\[\theta_{y1}(z) = \frac{\partial v_1(z)}{\partial z} = -w_{1,y} +
+\frac{v_1}{r_1}\]</div>
+<p>for the classical laminated plate theory, the same at every <span class="math notranslate nohighlight">\(z\)</span>, with the
+term <span class="math notranslate nohighlight">\(v_1/r_1\)</span> of the Sanders-Koiter kinematics whenever <span class="math notranslate nohighlight">\(v_1(z)\)</span> has the
+term <span class="math notranslate nohighlight">\(z v_1/r_1\)</span>, and <span class="math notranslate nohighlight">\(\partial v_1/\partial z\)</span> of the displacement field
+of the FSDT and TSDT, which at a face of a TSDT laminate is <span class="math notranslate nohighlight">\(-w_{1,y} +
+v_1/r_1\)</span>, the transverse shear strain vanishing there. A rigid rotation
+<span class="math notranslate nohighlight">\(\Omega\)</span> about the axis of the cylinder, <span class="math notranslate nohighlight">\(v_1 = r_1 \Omega\)</span>, moves the face
+by <span class="math notranslate nohighlight">\((r_1 + z_1) \Omega\)</span> and rotates its normal by <span class="math notranslate nohighlight">\(\Omega\)</span>, as the blade
+rotating with it, whose root is at the radius <span class="math notranslate nohighlight">\(r_1 + z_1\)</span>: the motion is
+free of penalty energy and of residual. With <code class="docutils literal notranslate"><span class="pre">kinematics='model'</span></code> a
+Donnell cylinder leaves the residuals <span class="math notranslate nohighlight">\(-z_1 \Omega\)</span> and <span class="math notranslate nohighlight">\(-\Omega\)</span>; the
+second is that of the connection at the reference surface of a Donnell
+cylinder, whose rotation of the normal neglects <span class="math notranslate nohighlight">\(v/r\)</span>. The two edges share
+the natural coordinate <span class="math notranslate nohighlight">\(\xi\)</span> and have the same length, <code class="docutils literal notranslate"><span class="pre">p1.a</span> <span class="pre">==</span> <span class="pre">p2.a</span></code>.</p>
+<p>The blade builder <code class="xref py py-func docutils literal notranslate"><span class="pre">create_cylinder_blade_stiffened()</span></code> and the Z
+builder <code class="xref py py-func docutils literal notranslate"><span class="pre">create_cylinder_z_stiffened()</span></code> connect the blades and the webs
+at the face on the side of the stringer, <code class="docutils literal notranslate"><span class="pre">'lower'</span></code> for internal and
+<code class="docutils literal notranslate"><span class="pre">'upper'</span></code> for external stringers, so that the given height of a blade,
+or of a web, is measured from the surface of the skin, or from the face of
+the attached flange of a Z stringer.</p>
+</section>
+<section id="kcbfxycte">
+<h3>kCBFxycte<a class="headerlink" href="#kcbfxycte" title="Link to this heading">#</a></h3>
+<p>Connection of type, seen along the common edge, for the default angle of
+90 degrees:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>               <span class="o">^</span> <span class="n">z1</span> <span class="o">=</span> <span class="n">y2</span>
+               <span class="o">|</span>
+               <span class="o">|</span>  <span class="n">p2</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">a</span> <span class="n">rib</span><span class="p">,</span> <span class="n">edge</span> <span class="n">y2</span> <span class="o">=</span> <span class="mi">0</span>
+               <span class="o">|</span>
+<span class="o">===============</span><span class="n">o</span>     <span class="n">o</span><span class="p">:</span> <span class="n">the</span> <span class="n">common</span> <span class="n">edge</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">x2</span> <span class="p">(</span><span class="n">into</span> <span class="n">the</span> <span class="n">page</span><span class="p">)</span>
+<span class="n">p1</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">a</span> <span class="n">spar</span><span class="p">,</span> <span class="n">edge</span> <span class="n">x1</span> <span class="o">=</span> <span class="n">a1</span>       <span class="o">---&gt;</span> <span class="n">x1</span> <span class="o">=</span> <span class="n">z2</span>
+</pre></div>
+</div>
+<p>between the edge <span class="math notranslate nohighlight">\(x_1 =\)</span> <code class="docutils literal notranslate"><span class="pre">xcte1</span></code> of <code class="docutils literal notranslate"><span class="pre">p1</span></code> and the edge <span class="math notranslate nohighlight">\(y_2 =\)</span>
+<code class="docutils literal notranslate"><span class="pre">ycte2</span></code> of <code class="docutils literal notranslate"><span class="pre">p2</span></code>, the same straight line, with <span class="math notranslate nohighlight">\(y_1 = x_2\)</span> and <code class="docutils literal notranslate"><span class="pre">p1.b</span>
+<span class="pre">==</span> <span class="pre">p2.a</span></code>, the two domains at the angle <code class="docutils literal notranslate"><span class="pre">'angle'</span></code>, by default 90
+degrees, measured from the normal of <code class="docutils literal notranslate"><span class="pre">p1</span></code> to that of <code class="docutils literal notranslate"><span class="pre">p2</span></code> about the
+common axis. It joins, for example, a spar <code class="docutils literal notranslate"><span class="pre">p1</span></code>, whose edge at the end of
+a bay is <span class="math notranslate nohighlight">\(x_1 = a_1\)</span>, to a rib <code class="docutils literal notranslate"><span class="pre">p2</span></code>, whose edges <span class="math notranslate nohighlight">\(y_2 = 0\)</span> or <span class="math notranslate nohighlight">\(y_2 =
+b_2\)</span> run along the height of a wing-box, when the spar is connected to the
+skins with <code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code> and the rib with <code class="docutils literal notranslate"><span class="pre">'BFxcte'</span></code>. The displacements of
+<code class="docutils literal notranslate"><span class="pre">p2</span></code> are rotated to the frame of <code class="docutils literal notranslate"><span class="pre">p1</span></code>, and the rotations about the
+common axis are equal: <span class="math notranslate nohighlight">\(-w_{1,x}\)</span> of <code class="docutils literal notranslate"><span class="pre">p1</span></code> and <span class="math notranslate nohighlight">\(w_{2,y}\)</span> of <code class="docutils literal notranslate"><span class="pre">p2</span></code>, with
+<span class="math notranslate nohighlight">\(-v_2/r_2\)</span> for the Sanders-Koiter kinematics, or <span class="math notranslate nohighlight">\(\theta_{x1}\)</span> and
+<span class="math notranslate nohighlight">\(-\theta_{y2}\)</span> for the FSDT and TSDT, see
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCBFxycte</span></code>.</p>
+</section>
+</section>
+<section id="skin-base-sb">
+<h2>Skin-base, SB<a class="headerlink" href="#skin-base-sb" title="Link to this heading">#</a></h2>
+<p>Connection of type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">======</span>        <span class="o">==&gt;</span> <span class="n">base</span><span class="p">,</span> <span class="n">p1</span>
+<span class="o">------</span>        <span class="o">--&gt;</span> <span class="n">skin</span><span class="p">,</span> <span class="n">p2</span>
+                <span class="o">|</span>
+                <span class="n">v</span> <span class="o">-</span><span class="n">z</span>
+</pre></div>
+</div>
+<p>The two panels share the axes <span class="math notranslate nohighlight">\(x, y, z\)</span>, <span class="math notranslate nohighlight">\(z\)</span> being normal to their
+reference surfaces, and <code class="docutils literal notranslate"><span class="pre">p1</span></code> is the panel on the positive side of the
+interface along <span class="math notranslate nohighlight">\(z\)</span>, <code class="docutils literal notranslate"><span class="pre">p2</span></code> the one on the negative side, whatever their
+roles or their order in the assembly: the lower face <span class="math notranslate nohighlight">\(z_1 = d_1 - h_1/2\)</span> of
+<code class="docutils literal notranslate"><span class="pre">p1</span></code> is connected to the upper face <span class="math notranslate nohighlight">\(z_2 = d_2 + h_2/2\)</span> of <code class="docutils literal notranslate"><span class="pre">p2</span></code>, with
+the offsets <span class="math notranslate nohighlight">\(d_1\)</span>, <span class="math notranslate nohighlight">\(d_2\)</span> of the laminates, <span class="math notranslate nohighlight">\(u_1(z_1) = u_2(z_2)\)</span>, <span class="math notranslate nohighlight">\(v_1(z_1)
+= v_2(z_2)\)</span> and <span class="math notranslate nohighlight">\(w_1 = w_2\)</span>, each panel with its own kinematics, for all the
+models, see <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.skin_base</span></code>. The sketch
+shows a stiffener base on the side of positive <span class="math notranslate nohighlight">\(z\)</span> of the skin; a pad-up on
+the side of negative <span class="math notranslate nohighlight">\(z\)</span> of a skin is <code class="docutils literal notranslate"><span class="pre">p2</span></code>, with the skin <code class="docutils literal notranslate"><span class="pre">p1</span></code>. The same
+holds for <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code>.</p>
+<p>The connection <code class="docutils literal notranslate"><span class="pre">'SB'</span></code> penalizes the displacements <span class="math notranslate nohighlight">\(u(z), v(z), w\)</span> of the
+lower face of <code class="docutils literal notranslate"><span class="pre">p1</span></code> and of the upper face of <code class="docutils literal notranslate"><span class="pre">p2</span></code>, with the offsets of the
+laminates and the kinematics of each panel, with its slope and, with the
+Sanders-Koiter kinematics, the term <span class="math notranslate nohighlight">\(v/r\)</span>, see <code class="xref py py-func docutils literal notranslate"><span class="pre">kCsdt._sb_components()</span></code>
+and <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB()</span></code>. The rotation penalty <code class="docutils literal notranslate"><span class="pre">'kr'</span></code> of <code class="docutils literal notranslate"><span class="pre">'SB'</span></code> applies only to
+the FSDT and TSDT, whose rotations are independent of <span class="math notranslate nohighlight">\(u, v, w\)</span>: the
+rotations of the normal at the reference surfaces are then penalized with
+<code class="docutils literal notranslate"><span class="pre">kr</span></code>. The rotations of the classical laminated plate theory follow from
+<span class="math notranslate nohighlight">\(w\)</span>, already tied by <span class="math notranslate nohighlight">\(w_1 = w_2\)</span>, and tying them too would over-constrain the
+connection with the Sanders-Koiter kinematics.</p>
+</section>
+<section id="skin-skin-ss">
+<h2>Skin-skin, SS<a class="headerlink" href="#skin-skin-ss" title="Link to this heading">#</a></h2>
+<section id="kcssxcte">
+<h3>kCSSxcte<a class="headerlink" href="#kcssxcte" title="Link to this heading">#</a></h3>
+<p>Connection of type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">__________</span>
+<span class="o">|</span>        <span class="o">|</span>
+<span class="o">|</span>        <span class="o">|</span>      <span class="o">/^</span>\ <span class="n">x2</span>
+<span class="o">|</span>   <span class="n">S2</span>   <span class="o">|</span>       <span class="o">|</span>
+<span class="o">|</span>        <span class="o">|</span>   <span class="n">y2</span>  <span class="o">|</span>
+<span class="o">|</span>        <span class="o">|</span>   <span class="o">&lt;----</span>
+<span class="o">|</span><span class="n">________</span><span class="o">|</span> <span class="p">(</span><span class="n">connection</span> <span class="n">at</span> <span class="n">x2</span><span class="o">=</span><span class="n">xcte2</span><span class="p">)</span>
+<span class="n">__________</span> <span class="p">(</span><span class="n">connection</span> <span class="n">at</span> <span class="n">x1</span><span class="o">=</span><span class="n">xcte1</span><span class="p">)</span>
+<span class="o">|</span>        <span class="o">|</span>
+<span class="o">|</span>        <span class="o">|</span>      <span class="o">/^</span>\ <span class="n">x1</span>
+<span class="o">|</span>   <span class="n">S1</span>   <span class="o">|</span>       <span class="o">|</span>
+<span class="o">|</span>        <span class="o">|</span>   <span class="n">y1</span>  <span class="o">|</span>
+<span class="o">|</span><span class="n">________</span><span class="o">|</span>   <span class="o">&lt;----</span>
+</pre></div>
+</div>
+</section>
+<section id="kcssycte">
+<h3>kCSSycte<a class="headerlink" href="#kcssycte" title="Link to this heading">#</a></h3>
+<p>Connection of type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>           <span class="o">/-&gt;</span> <span class="p">(</span><span class="n">connection</span> <span class="n">at</span> <span class="n">y1</span><span class="o">=</span><span class="n">ycte1</span><span class="p">)</span>
+          <span class="o">/</span>
+         <span class="o">/</span>  <span class="o">/-&gt;</span><span class="p">(</span><span class="n">connection</span> <span class="n">at</span> <span class="n">y2</span><span class="o">=</span><span class="n">ycte2</span><span class="p">)</span>
+<span class="n">_________</span><span class="o">|</span> <span class="o">|</span><span class="n">_________</span>
+<span class="o">|</span>        <span class="o">|</span> <span class="o">|</span>        <span class="o">|</span>
+<span class="o">|</span>        <span class="o">|</span> <span class="o">|</span>        <span class="o">|</span>
+<span class="o">|</span>   <span class="n">S1</span>   <span class="o">|</span> <span class="o">|</span>   <span class="n">S2</span>   <span class="o">|</span>
+<span class="o">|</span>        <span class="o">|</span> <span class="o">|</span>        <span class="o">|</span>
+<span class="o">|</span><span class="n">________</span><span class="o">|</span> <span class="o">|</span><span class="n">________</span><span class="o">|</span>
+
+    <span class="o">/^</span>\ <span class="n">x1</span>       <span class="o">/^</span>\ <span class="n">x2</span>
+     <span class="o">|</span>            <span class="o">|</span>
+ <span class="n">y1</span>  <span class="o">|</span>        <span class="n">y2</span>  <span class="o">|</span>
+ <span class="o">&lt;----</span>        <span class="o">&lt;----</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="damaged-skin-base-connection">
+<h2>Damaged skin-base connection<a class="headerlink" href="#damaged-skin-base-connection" title="Link to this heading">#</a></h2>
+<p>The connection <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code> has a traction-separation law at the interface,
+see <a class="reference internal" href="cohesive_zone.html#cohesive-zone"><span class="std std-ref">Cohesive zone model of the multi-domain approach</span></a>, <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCSB_dmg</span></code> and
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.tsl</span></code>. Its out-of-plane stiffness is that
+of the cohesive interface, with the damage mapped by the traction-separation
+law of <code class="xref py py-func docutils literal notranslate"><span class="pre">calc_kw_tsl()</span></code>, and it keeps this penalty stiffness also with
+<code class="docutils literal notranslate"><span class="pre">conn_method='null-space'</span></code>. The damaged connections were implemented by
+D’Souza <a class="reference internal" href="ref.html#nathan2024msc" id="id3"><span>[nathan2024MSc]</span></a>.</p>
+</section>
+<section id="models-based-on-shear-deformation-theories">
+<h2>Models based on shear deformation theories<a class="headerlink" href="#models-based-on-shear-deformation-theories" title="Link to this heading">#</a></h2>
+<p>The kernels above, apart from <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB()</span></code> of <code class="docutils literal notranslate"><span class="pre">'SB'</span></code>, which serves
+all the models, assume the 3 DOFs <span class="math notranslate nohighlight">\(u, v, w\)</span> of the models based on the
+classical laminated plate theory. The connections <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code> of the plate and cylindrical shell models based on the FSDT
+and TSDT, with the 5 DOFs <span class="math notranslate nohighlight">\(u, v, w, \phi_x, \phi_y\)</span>, are in
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCsdt</span></code>, with <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB_sdt()</span></code>, the
+matrix of <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB()</span></code> for these models, and the connections <code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code>
+and <code class="docutils literal notranslate"><span class="pre">'BFxcte'</span></code> of these models are the functions <code class="docutils literal notranslate"><span class="pre">fkCBFycte*_sdt</span></code> and
+<code class="docutils literal notranslate"><span class="pre">fkCBFxcte*_sdt</span></code> of <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCBFycte</span></code> and
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCBFxcte</span></code>. The coupling block of
+<code class="docutils literal notranslate"><span class="pre">'BFxycte'</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCBFxycte12()</span></code>, serves the models with 3 and with 5
+DOFs, with the blocks <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCBFxycte11_sdt()</span></code> and
+<code class="xref py py-func docutils literal notranslate"><span class="pre">fkCBFxycte22_sdt()</span></code> of each panel.</p>
+</section>
+<section id="exact-connections-the-null-space-method">
+<h2>Exact connections: the null-space method<a class="headerlink" href="#exact-connections-the-null-space-method" title="Link to this heading">#</a></h2>
+<p>With <code class="docutils literal notranslate"><span class="pre">MultiDomain(...,</span> <span class="pre">conn_method='null-space')</span></code>, the default, the
+connections <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code>, <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code>, <code class="docutils literal notranslate"><span class="pre">'BFxcte'</span></code>, <code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code>,
+<code class="docutils literal notranslate"><span class="pre">'BFxycte'</span></code> and <code class="docutils literal notranslate"><span class="pre">'SB'</span></code> are not added as penalty stiffnesses, but imposed
+exactly: the quantities penalized by the kernels above become the linear
+constraints of Eq. <a class="reference internal" href="#equation-conn-constraints">(2)</a> on the Ritz constants, which are
+eliminated from them. No penalty constant is needed, see
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.nullspace</span></code>.</p>
+</section>
+<section id="prescribed-displacements-with-penalties">
+<h2>Prescribed displacements with penalties<a class="headerlink" href="#prescribed-displacements-with-penalties" title="Link to this heading">#</a></h2>
+<p>With <code class="docutils literal notranslate"><span class="pre">MultiDomain(...,</span> <span class="pre">pd_method='penalty')</span></code> a displacement
+prescribed at a point or along a line, see <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_point_pd()</span></code>,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_x()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_y()</span></code>,
+is imposed with a spring between the panel and the support: the penalty
+stiffness is added to the stiffness matrix with the kernels of
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCpd</span></code>, for the models with 3 and with 5
+DOFs per term, and the force of the spring is in the external force vector of
+<code class="xref py py-func docutils literal notranslate"><span class="pre">shell_fext()</span></code>. The in-plane displacements are those at the thickness
+coordinate <code class="docutils literal notranslate"><span class="pre">z</span></code> of the kernels, the one given to the methods of
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code>, by default the reference surface. With
+<code class="docutils literal notranslate"><span class="pre">pd_method='null-space'</span></code>, the default, the prescribed displacements are imposed exactly,
+see <code class="xref py py-func docutils literal notranslate"><span class="pre">nullspace.pd_constraint_matrix()</span></code>.</p>
+</section>
+<section id="penalty-constants">
+<h2>Penalty constants<a class="headerlink" href="#penalty-constants" title="Link to this heading">#</a></h2>
+<p>Function <code class="xref py py-func docutils literal notranslate"><span class="pre">calc_kt_kr()</span></code> calculates the penalty constants for
+translation (<code class="docutils literal notranslate"><span class="pre">kt</span></code>) and rotation (<code class="docutils literal notranslate"><span class="pre">kr</span></code>) from the laminates of the two
+connected panels, based on <a class="reference internal" href="ref.html#castro2017multidomain" id="id4"><span>[castro2017Multidomain]</span></a>, with a strain
+compatibility criterion. The aim is to have penalty constants that are just
+high enough to produce the desired compatibility, but not too high such that
+numerical stability issues start to appear. The penalty constants are not
+used by the connections imposed with the null-space method, apart from the
+key <code class="docutils literal notranslate"><span class="pre">'kr'</span></code> of <code class="docutils literal notranslate"><span class="pre">'SB'</span></code>, which tells whether the rotations of the FSDT and
+TSDT are connected. For <code class="docutils literal notranslate"><span class="pre">'SB'</span></code> the function gives no <code class="docutils literal notranslate"><span class="pre">kr</span></code>.</p>
+<p>The discretisation of the cohesive domain of a <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code> connection
+follows from <code class="xref py py-func docutils literal notranslate"><span class="pre">tsl_resolution()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">tsl_margin()</span></code> and
+<code class="xref py py-func docutils literal notranslate"><span class="pre">tsl_discretization()</span></code>, see <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.tsl</span></code>.</p>
+</section>
+<section id="api">
+<h2>API<a class="headerlink" href="#api" title="Link to this heading">#</a></h2>
+</section>
+</section>
+
 
                 </article>
               
@@ -833,9 +2015,29 @@
     <i class="fa-solid fa-list"></i> On this page
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="simple pst-show_toc_level nav section-nav flex-column">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#penalty-method">Penalty method</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#base-flange-bf">Base-flange, BF</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#kcbfycte">kCBFycte</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bfxcte-at-a-face-of-the-base">BFxcte at a face of the base</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rigid-rotation-at-a-face-of-a-donnell-cylinder">Rigid rotation at a face of a Donnell cylinder</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bfycte-at-a-face-of-the-base">BFycte at a face of the base</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#kcbfxycte">kCBFxycte</a></li>
 </ul>
-
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#skin-base-sb">Skin-base, SB</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#skin-skin-ss">Skin-skin, SS</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#kcssxcte">kCSSxcte</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#kcssycte">kCSSycte</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#damaged-skin-base-connection">Damaged skin-base connection</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#models-based-on-shear-deformation-theories">Models based on shear deformation theories</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exact-connections-the-null-space-method">Exact connections: the null-space method</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prescribed-displacements-with-penalties">Prescribed displacements with penalties</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#penalty-constants">Penalty constants</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api">API</a></li>
+</ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">

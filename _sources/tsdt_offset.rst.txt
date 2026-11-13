@@ -108,7 +108,9 @@ see :meth:`.Shell._get_lam_ABD`. In `z` the products of the strains would
 require the integrals of `z^5`, which do not appear in `\zeta`. Likewise,
 the mass matrix uses the moments of the density about the mid-surface,
 `J_n = \int \rho \zeta^n d\zeta`, `n = 0, 1, 2, 3, 4, 6`, see
-:meth:`.Shell.calc_kM`.
+:meth:`.Shell.calc_kM`. For free edges the Ritz spaces of the different
+offsets coincide, so that the choice of the reference surface changes
+neither a free homogeneous plate nor its natural frequencies.
 
 .. _tsdt_offset_connections:
 
@@ -135,9 +137,11 @@ computed with the offset `d` and the thickness `h` of each panel, see
 h/2` they become `\theta_x = -w_{,x}` and `\theta_y = \Phi_y - \phi_y -
 w_{,y}`. The rotations `\phi_x, \phi_y` belong to the mid-surfaces, at the
 coordinates `z = d` of each panel, and are not continuous across the
-connection of panels with different offsets. For the FSDT the rotation is
-constant through the thickness, `\theta = \phi`, and for the CLPT it is
-`-w_{,x}` and `-w_{,y}` for any offset: their connections are unchanged.
+connection of panels with different offsets, where they jump by the
+transverse shear term while `\theta_x` and `\theta_y` are continuous. For
+the FSDT the rotation is constant through the thickness, `\theta =
+\phi`, and for the CLPT it is `-w_{,x}` and `-w_{,y}` for any offset:
+their connections are unchanged.
 
 .. _tsdt_offset_prescribed_rotations:
 
@@ -156,10 +160,11 @@ the terms of the transverse shear strains, and for `d = \pm h/2` the
 prescribed rotations are `-w_{,x}` and `\Phi_y - \phi_y - w_{,y}`. For the
 FSDT, and for the TSDT with `d = 0`, the prescribed rotations are `\phi_x`
 and `\Phi_y`, as before. The penalty method,
-``pd_method='penalty'``, does not prescribe rotations.
-
-.. literalinclude:: ../../tests/multidomain/test_tsdt_prescribed_rotations.py
-    :pyobject: test_prescribed_rotation_with_offset
+``pd_method='penalty'``, does not prescribe rotations. With a rotation
+prescribed at a point or along an edge, the rotation at the reference
+surface evaluated from the fields therefore equals the prescribed value,
+whereas the rotation at the mid-surface differs from it by the transverse
+shear term.
 
 .. _tsdt_offset_clamped_edges:
 
@@ -176,32 +181,6 @@ edge. The face clamp, `u = 0` at `z = d \mp h/2`, gives instead `\phi_x =
 w_{,x}/2` and `u = -(d/2)(1 - 4 d^2/h^2) w_{,x}`, i.e. `u(d) = 0` at the
 mid-surface and `\hat{\gamma}_{xz} = 3 w_{,x}/2`, leaving the section free
 to warp, see :ref:`boundary_conditions_face_clamp`. Both clamps are
-properties of the physical section and do not depend on the offset:
-
-.. literalinclude:: ../../tests/multidomain/test_face_clamp.py
-    :pyobject: test_face_clamp_does_not_depend_on_the_reference_surface
-
-.. _tsdt_offset_example:
-
-Example
--------
-
-Two plates with the offsets `d_1 = 0` and `d_2`, connected along `x =
-x_s` with the null-space method and loaded by a pressure, have continuous
-rotations at the reference surface, whereas the rotations at the
-mid-surfaces jump across the connection:
-
-.. literalinclude:: ../../tests/multidomain/test_tsdt_offset_connections.py
-    :pyobject: test_reference_rotation_continuous_with_different_offsets
-
-and two plates with the same offset reproduce the single plate:
-
-.. literalinclude:: ../../tests/multidomain/test_tsdt_offset_connections.py
-    :pyobject: test_same_offset_split_plate_equals_single_plate
-
-For a free homogeneous plate, the choice of the reference surface does not
-change the structure, and the natural frequencies do not depend on the
-offset:
-
-.. literalinclude:: ../../tests/tests_shell/test_tsdt_offset.py
-    :pyobject: test_free_plate_frequencies_do_not_depend_on_the_reference_surface
+properties of the physical section and do not depend on the offset: the
+deflections of a homogeneous plate clamped either way on two opposite
+edges do not depend on the offset, and the planar clamp is the stiffer one.

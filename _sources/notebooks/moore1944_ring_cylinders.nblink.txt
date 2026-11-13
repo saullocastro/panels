@@ -1,0 +1,7 @@
+{
+    "path": "../../../notebooks/moore1944_ring_cylinders.ipynb",
+    "extra-media": [
+        "../../../notebooks/moore1944_utils.py",
+        "../../../notebooks/moore1944_runs.py"
+    ]
+}

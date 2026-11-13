@@ -1,0 +1,4714 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Benchmarks with the penalty and the null-space connections &#8212; panels 0.16.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../_static/documentation_options.js?v=7de89ed4"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/conn_method_comparison';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Partial integration of a matrix with Gauss-Legendre points" href="test_quadrature_partial_integration_matrix.html" />
+    <link rel="prev" title="Benchmark data: Krueger (2012), NASA/CR-2012-217562" href="krueger2012_mmb_benchmark.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.16.0" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.16.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Benchmarks with the penalty and the null-space connections</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Benchmarks-with-the-penalty-and-the-null-space-connections">
+<h1>Benchmarks with the penalty and the null-space connections<a class="headerlink" href="#Benchmarks-with-the-penalty-and-the-null-space-connections" title="Link to this heading">#</a></h1>
+<p><strong>References.</strong> M. Stamatelos and G. Labeas, see <a class="reference internal" href="stamatelos_labeas_2023_multidomain.html"><span class="doc">stamatelos_labeas_2023_multidomain</span></a>; the DCB references, see the <a class="reference internal" href="dcb_mode_I_validation_summary.html"><span class="doc">validation summary</span></a>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">panels</span></code> models of the benchmark notebooks are compared with the two methods of imposing the multidomain connections, see <a class="reference internal" href="../multidomain_null_space.html"><span class="doc">Exact connections with the null-space method</span></a>:</p>
+<ul class="simple">
+<li><p><strong>penalty</strong>: <code class="docutils literal notranslate"><span class="pre">conn_method='penalty'</span></code>, the penalty stiffnesses used by the notebooks, raised 100 times for the <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code> edges of the DCB, see <code class="docutils literal notranslate"><span class="pre">dcb_utils.build_dcb</span></code>, and the default <code class="docutils literal notranslate"><span class="pre">calc_kt_kr</span></code> constant for the <code class="docutils literal notranslate"><span class="pre">'SB'</span></code> bond;</p></li>
+<li><p><strong>null-space</strong>: <code class="docutils literal notranslate"><span class="pre">conn_method='null-space'</span></code>, the <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code>, <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code>, <code class="docutils literal notranslate"><span class="pre">'BFxcte'</span></code>, <code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code> and <code class="docutils literal notranslate"><span class="pre">'SB'</span></code> connections imposed exactly.</p></li>
+</ul>
+<p>The cohesive zone <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code> and the prescribed displacements of the arms are penalty stiffnesses in both cases. All the models use the classical laminated plate theory (CLPT).</p>
+<p>The null-space results are produced by <code class="docutils literal notranslate"><span class="pre">conn_method_study.py</span></code>, which takes the cases, discretisations and openings from the DCB notebooks themselves, and saves them in <code class="docutils literal notranslate"><span class="pre">results/conn_methods/</span></code>; the penalty results of the DCB cases are the results of the notebooks, <code class="docutils literal notranslate"><span class="pre">results/*.npz</span></code>. The cases and openings are those of the current notebooks.</p>
+<p>The run times of both methods, the fields <code class="docutils literal notranslate"><span class="pre">time</span></code> and <code class="docutils literal notranslate"><span class="pre">cpu_time</span></code> of <code class="docutils literal notranslate"><span class="pre">results/*.npz</span></code> and <code class="docutils literal notranslate"><span class="pre">results/conn_methods/null_space/*.npz</span></code>, the profile of the cost, <code class="docutils literal notranslate"><span class="pre">results/conn_methods/profile.json</span></code>, and the run times of the Stamatelos notebook were measured in one job on one node of a computing cluster, under the same conditions for both methods: one run at a time, each in its own process, with one BLAS thread (the field evaluations of <code class="docutils literal notranslate"><span class="pre">panels</span></code> use their own threads, <code class="docutils literal notranslate"><span class="pre">out_num_cores</span></code>, with
+both methods), the penalty runs first and the null-space runs after them. The run time <code class="docutils literal notranslate"><span class="pre">time</span></code> is the wall time of <code class="docutils literal notranslate"><span class="pre">dcb_utils.solve_dcb</span></code>.</p>
+<p>To compute the results again, after the results of the DCB notebooks (<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">notebooks/dcb_mode_I_validation_rerun.py</span> <span class="pre">run</span> <span class="pre">--jobs</span> <span class="pre">1</span></code>), delete <code class="docutils literal notranslate"><span class="pre">results/conn_methods/null_space/*.npz</span></code> and <code class="docutils literal notranslate"><span class="pre">results/conn_methods/profile.json</span></code> and run, from the root of the repository:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>python notebooks/conn_method_study.py run --jobs 1 --methods null-space
+python notebooks/conn_method_study.py compliance
+python notebooks/conn_method_study.py profile
+python notebooks/conn_method_study.py stamatelos
+</pre></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%matplotlib inline
+import json
+import os
+import sys
+
+import numpy as np
+import matplotlib.pyplot as plt
+from IPython.display import Markdown, display
+
+sys.path.insert(0, os.path.abspath('.'))
+import dcb_utils as du
+import conn_method_study as study
+
+R = 'results'
+OUT = os.path.join(R, 'conn_methods')
+# the DCB cases, discretisations and openings of the current notebooks
+jobs, compliances = study.collect()
+jobs = sorted(jobs, key=lambda j: (j['notebook'], j['name']))
+
+
+def load(path):
+    if not os.path.exists(path):
+        return None
+    r = du.load(path)
+    return r if len(r['delta']) else None
+
+
+def curve(r):
+    return np.r_[0., r['delta']], np.r_[0., r['P']]
+
+
+def complete(r, job):
+    return r is not None and np.isclose(r['delta'][-1], job['openings'][-1])
+
+
+pct = lambda a, b: 100*(a/b - 1)
+res = {j['name']: dict(penalty=load(os.path.join(R, j['name'] + '.npz')),
+                       null=load(os.path.join(study.method_dir('null-space'), j['name'] + '.npz')))
+       for j in jobs}
+print('%d DCB cases: %s' % (len(jobs), ', '.join(j['name'] for j in jobs)))
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+17 DCB cases: alfano2001_TableII_XAS913C, alfano2001_TableI_to1.7, alfano2001_TableI_to1.7_K1e5, alfano2001_TableI_to57, camanho2003_DCB_AS4PEEK, krueger2008_DCB_MD_tau40, krueger2008_DCB_MD_tau60, krueger2008_DCB_UD_tau40, krueger2008_DCB_UD_tau60, tijs2022_a40_G0.95, tijs2022_a48, tijs2023_full_weld, tijs2023_weld_center, tijs2023_weld_center_autoclave, tijs2023_weld_center_standard, turon2007_le0.125_tau60, turon2007_le0.125_tau60_K1e6
+</pre></div></div>
+</div>
+<section id="DCB:-peak-loads">
+<h2>DCB: peak loads<a class="headerlink" href="#DCB:-peak-loads" title="Link to this heading">#</a></h2>
+<p>Both methods. For each case: the peak load <span class="math notranslate nohighlight">\(P_{max}\)</span> and the initial stiffness <span class="math notranslate nohighlight">\(K_0\)</span> of <code class="docutils literal notranslate"><span class="pre">dcb_utils.summary</span></code>, the crack growth <span class="math notranslate nohighlight">\(\Delta a\)</span> at the last opening, the number of bisections of the increments and the run time, measured with both methods under the same conditions, see above and <em>Measured wall times</em>. The differences are those of the null-space method with respect to the penalty method. Runs not yet complete show the openings reached and the peak of those openings,
+marked with *.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rows = ['| case | openings | penalty $P_{max}$ (N) | null-space $P_{max}$ (N) | diff. (%) '
+        '| $K_0$ diff. (%) | $\\Delta a$ penalty / null-space (mm) | bisections | time penalty / null-space (min) |',
+        '|---|---|---|---|---|---|---|---|---|']
+table = {}
+for j in jobs:
+    name, n = j['name'], len(j['openings'])
+    rp, rn = res[name]['penalty'], res[name]['null']
+    sp = du.summary(*curve(rp))
+    sn = du.summary(*curve(rn)) if rn is not None else None
+    done = complete(rn, j)
+    table[name] = dict(penalty=sp, null=sn, done=done)
+    k = 0 if rn is None else len(rn['delta'])
+    Pn = '-' if sn is None else '%.2f%s' % (sn['Pmax'], '' if done else '*')
+    dP = '%+.3f' % pct(sn['Pmax'], sp['Pmax']) if done else '-'
+    dK = '%+.3f' % pct(sn['K0'], sp['K0']) if done else '-'
+    da = '%.1f / %s' % (rp['a'][-1] - j['case']['a0'], '-' if rn is None else '%.1f' % (rn['a'][-1] - j['case']['a0']))
+    bis = '%d / %s' % (rp['failed'], '-' if rn is None else '%d' % rn['failed'])
+    tt = '%.1f / %s' % (float(rp['time'])/60, '-' if rn is None else '%.1f' % (float(rn['time'])/60))
+    rows.append(f"| {name} | {k} of {n} | {sp['Pmax']:.2f} | {Pn} | {dP} | {dK} | {da} | {bis} | {tt} |")
+display(Markdown('\n'.join(rows)))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>case</p></th>
+<th class="head"><p>openings</p></th>
+<th class="head"><p>penalty <span class="math notranslate nohighlight">\(P_{max}\)</span> (N)</p></th>
+<th class="head"><p>null-space <span class="math notranslate nohighlight">\(P_{max}\)</span> (N)</p></th>
+<th class="head"><p>diff. (%)</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(K_0\)</span> diff. (%)</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\Delta a\)</span> penalty / null-space (mm)</p></th>
+<th class="head"><p>bisections</p></th>
+<th class="head"><p>time penalty / null-space (min)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>alfano2001_TableII_XAS913C</p></td>
+<td><p>60 of 60</p></td>
+<td><p>93.56</p></td>
+<td><p>93.62</p></td>
+<td><p>+0.065</p></td>
+<td><p>+0.131</p></td>
+<td><p>9.1 / 9.1</p></td>
+<td><p>0 / 0</p></td>
+<td><p>18.3 / 20.2</p></td>
+</tr>
+<tr class="row-odd"><td><p>alfano2001_TableI_to1.7</p></td>
+<td><p>40 of 40</p></td>
+<td><p>50.78</p></td>
+<td><p>50.78</p></td>
+<td><p>+0.002</p></td>
+<td><p>+0.066</p></td>
+<td><p>6.0 / 6.0</p></td>
+<td><p>0 / 0</p></td>
+<td><p>14.4 / 14.9</p></td>
+</tr>
+<tr class="row-even"><td><p>alfano2001_TableI_to1.7_K1e5</p></td>
+<td><p>40 of 40</p></td>
+<td><p>50.81</p></td>
+<td><p>50.81</p></td>
+<td><p>+0.003</p></td>
+<td><p>+0.066</p></td>
+<td><p>6.0 / 6.0</p></td>
+<td><p>0 / 0</p></td>
+<td><p>17.2 / 16.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>alfano2001_TableI_to57</p></td>
+<td><p>60 of 60</p></td>
+<td><p>64.46</p></td>
+<td><p>64.45</p></td>
+<td><p>-0.026</p></td>
+<td><p>+0.130</p></td>
+<td><p>9.0 / 9.0</p></td>
+<td><p>0 / 0</p></td>
+<td><p>16.4 / 17.1</p></td>
+</tr>
+<tr class="row-even"><td><p>camanho2003_DCB_AS4PEEK</p></td>
+<td><p>60 of 60</p></td>
+<td><p>140.08</p></td>
+<td><p>140.08</p></td>
+<td><p>+0.005</p></td>
+<td><p>+0.123</p></td>
+<td><p>7.4 / 7.4</p></td>
+<td><p>0 / 0</p></td>
+<td><p>15.8 / 14.7</p></td>
+</tr>
+<tr class="row-odd"><td><p>krueger2008_DCB_MD_tau40</p></td>
+<td><p>60 of 60</p></td>
+<td><p>108.69</p></td>
+<td><p>108.65</p></td>
+<td><p>-0.033</p></td>
+<td><p>+0.154</p></td>
+<td><p>7.1 / 7.1</p></td>
+<td><p>0 / 0</p></td>
+<td><p>11.6 / 11.9</p></td>
+</tr>
+<tr class="row-even"><td><p>krueger2008_DCB_MD_tau60</p></td>
+<td><p>60 of 60</p></td>
+<td><p>109.97</p></td>
+<td><p>109.96</p></td>
+<td><p>-0.004</p></td>
+<td><p>+0.161</p></td>
+<td><p>9.9 / 9.9</p></td>
+<td><p>0 / 0</p></td>
+<td><p>15.4 / 16.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>krueger2008_DCB_UD_tau40</p></td>
+<td><p>60 of 60</p></td>
+<td><p>63.52</p></td>
+<td><p>63.49</p></td>
+<td><p>-0.038</p></td>
+<td><p>+0.130</p></td>
+<td><p>8.5 / 8.5</p></td>
+<td><p>0 / 0</p></td>
+<td><p>14.1 / 14.8</p></td>
+</tr>
+<tr class="row-even"><td><p>krueger2008_DCB_UD_tau60</p></td>
+<td><p>60 of 60</p></td>
+<td><p>64.24</p></td>
+<td><p>64.23</p></td>
+<td><p>-0.008</p></td>
+<td><p>+0.133</p></td>
+<td><p>9.9 / 9.9</p></td>
+<td><p>0 / 0</p></td>
+<td><p>20.3 / 21.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>tijs2022_a40_G0.95</p></td>
+<td><p>60 of 60</p></td>
+<td><p>182.07</p></td>
+<td><p>182.04</p></td>
+<td><p>-0.018</p></td>
+<td><p>+0.304</p></td>
+<td><p>10.6 / 10.6</p></td>
+<td><p>0 / 0</p></td>
+<td><p>15.2 / 15.9</p></td>
+</tr>
+<tr class="row-even"><td><p>tijs2022_a48</p></td>
+<td><p>60 of 60</p></td>
+<td><p>166.23</p></td>
+<td><p>166.22</p></td>
+<td><p>-0.006</p></td>
+<td><p>+0.115</p></td>
+<td><p>10.1 / 10.1</p></td>
+<td><p>0 / 0</p></td>
+<td><p>14.9 / 14.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>tijs2023_full_weld</p></td>
+<td><p>60 of 60</p></td>
+<td><p>147.97</p></td>
+<td><p>147.98</p></td>
+<td><p>+0.009</p></td>
+<td><p>+0.131</p></td>
+<td><p>4.9 / 5.2</p></td>
+<td><p>0 / 0</p></td>
+<td><p>14.7 / 14.2</p></td>
+</tr>
+<tr class="row-even"><td><p>tijs2023_weld_center</p></td>
+<td><p>60 of 60</p></td>
+<td><p>119.19</p></td>
+<td><p>119.14</p></td>
+<td><p>-0.039</p></td>
+<td><p>+0.357</p></td>
+<td><p>5.5 / 5.5</p></td>
+<td><p>0 / 0</p></td>
+<td><p>12.2 / 12.4</p></td>
+</tr>
+<tr class="row-odd"><td><p>tijs2023_weld_center_autoclave</p></td>
+<td><p>60 of 60</p></td>
+<td><p>87.88</p></td>
+<td><p>87.88</p></td>
+<td><p>+0.000</p></td>
+<td><p>+0.156</p></td>
+<td><p>8.2 / 8.2</p></td>
+<td><p>0 / 0</p></td>
+<td><p>16.1 / 14.7</p></td>
+</tr>
+<tr class="row-even"><td><p>tijs2023_weld_center_standard</p></td>
+<td><p>60 of 60</p></td>
+<td><p>114.99</p></td>
+<td><p>114.98</p></td>
+<td><p>-0.008</p></td>
+<td><p>+0.151</p></td>
+<td><p>5.8 / 5.8</p></td>
+<td><p>0 / 0</p></td>
+<td><p>11.8 / 12.6</p></td>
+</tr>
+<tr class="row-odd"><td><p>turon2007_le0.125_tau60</p></td>
+<td><p>60 of 60</p></td>
+<td><p>64.02</p></td>
+<td><p>64.04</p></td>
+<td><p>+0.020</p></td>
+<td><p>+0.098</p></td>
+<td><p>11.1 / 11.1</p></td>
+<td><p>0 / 0</p></td>
+<td><p>16.8 / 17.6</p></td>
+</tr>
+<tr class="row-even"><td><p>turon2007_le0.125_tau60_K1e6</p></td>
+<td><p>60 of 60</p></td>
+<td><p>64.13</p></td>
+<td><p>64.14</p></td>
+<td><p>+0.011</p></td>
+<td><p>+0.098</p></td>
+<td><p>4.4 / 4.4</p></td>
+<td><p>0 / 0</p></td>
+<td><p>12.3 / 13.1</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="DCB:-load-opening-curves">
+<h2>DCB: load-opening curves<a class="headerlink" href="#DCB:-load-opening-curves" title="Link to this heading">#</a></h2>
+<p>The difference between the curves is the largest difference of the load at the same opening, relative to the peak load of the penalty method, before and after the peak.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rows = ['| case | openings compared | before the peak, max. $|P_{null} - P_{pen}|/P_{max}$ (%) | after the peak (%) |',
+        '|---|---|---|---|']
+for j in jobs:
+    rp, rn = res[j['name']]['penalty'], res[j['name']]['null']
+    if rn is None:
+        continue
+    k = len(rn['P'])
+    ipk = int(np.argmax(rp['P']))
+    d = 100*np.abs(rn['P'] - rp['P'][:k])/rp['P'].max()
+    pre = d[:min(ipk + 1, k)].max()
+    post = '%.3f' % d[ipk + 1:].max() if k &gt; ipk + 1 else '-'
+    rows.append(f"| {j['name']} | {k} of {len(rp['P'])} | {pre:.3f} | {post} |")
+display(Markdown('\n'.join(rows)))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>case</p></th>
+<th class="head"><p>openings compared</p></th>
+<th class="head"><p>before the peak, max. <span class="math notranslate nohighlight">\(|P_{null} - P_{pen}|/P_{max}\)</span> (%)</p></th>
+<th class="head"><p>after the peak (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>alfano2001_TableII_XAS913C</p></td>
+<td><p>60 of 60</p></td>
+<td><p>0.103</p></td>
+<td><p>0.067</p></td>
+</tr>
+<tr class="row-odd"><td><p>alfano2001_TableI_to1.7</p></td>
+<td><p>40 of 40</p></td>
+<td><p>0.043</p></td>
+<td><p>0.032</p></td>
+</tr>
+<tr class="row-even"><td><p>alfano2001_TableI_to1.7_K1e5</p></td>
+<td><p>40 of 40</p></td>
+<td><p>0.042</p></td>
+<td><p>0.032</p></td>
+</tr>
+<tr class="row-odd"><td><p>alfano2001_TableI_to57</p></td>
+<td><p>60 of 60</p></td>
+<td><p>0.102</p></td>
+<td><p>0.089</p></td>
+</tr>
+<tr class="row-even"><td><p>camanho2003_DCB_AS4PEEK</p></td>
+<td><p>60 of 60</p></td>
+<td><p>0.096</p></td>
+<td><p>0.147</p></td>
+</tr>
+<tr class="row-odd"><td><p>krueger2008_DCB_MD_tau40</p></td>
+<td><p>60 of 60</p></td>
+<td><p>0.112</p></td>
+<td><p>0.129</p></td>
+</tr>
+<tr class="row-even"><td><p>krueger2008_DCB_MD_tau60</p></td>
+<td><p>60 of 60</p></td>
+<td><p>0.120</p></td>
+<td><p>0.068</p></td>
+</tr>
+<tr class="row-odd"><td><p>krueger2008_DCB_UD_tau40</p></td>
+<td><p>60 of 60</p></td>
+<td><p>0.101</p></td>
+<td><p>0.085</p></td>
+</tr>
+<tr class="row-even"><td><p>krueger2008_DCB_UD_tau60</p></td>
+<td><p>60 of 60</p></td>
+<td><p>0.107</p></td>
+<td><p>0.082</p></td>
+</tr>
+<tr class="row-odd"><td><p>tijs2022_a40_G0.95</p></td>
+<td><p>60 of 60</p></td>
+<td><p>0.105</p></td>
+<td><p>0.064</p></td>
+</tr>
+<tr class="row-even"><td><p>tijs2022_a48</p></td>
+<td><p>60 of 60</p></td>
+<td><p>0.091</p></td>
+<td><p>0.132</p></td>
+</tr>
+<tr class="row-odd"><td><p>tijs2023_full_weld</p></td>
+<td><p>60 of 60</p></td>
+<td><p>0.096</p></td>
+<td><p>0.064</p></td>
+</tr>
+<tr class="row-even"><td><p>tijs2023_weld_center</p></td>
+<td><p>60 of 60</p></td>
+<td><p>0.111</p></td>
+<td><p>0.146</p></td>
+</tr>
+<tr class="row-odd"><td><p>tijs2023_weld_center_autoclave</p></td>
+<td><p>60 of 60</p></td>
+<td><p>0.116</p></td>
+<td><p>0.083</p></td>
+</tr>
+<tr class="row-even"><td><p>tijs2023_weld_center_standard</p></td>
+<td><p>60 of 60</p></td>
+<td><p>0.113</p></td>
+<td><p>0.105</p></td>
+</tr>
+<tr class="row-odd"><td><p>turon2007_le0.125_tau60</p></td>
+<td><p>60 of 60</p></td>
+<td><p>0.079</p></td>
+<td><p>0.067</p></td>
+</tr>
+<tr class="row-even"><td><p>turon2007_le0.125_tau60_K1e6</p></td>
+<td><p>60 of 60</p></td>
+<td><p>0.079</p></td>
+<td><p>0.054</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>n = len(jobs)
+ncol = 4
+fig, axes = plt.subplots(int(np.ceil(n/ncol)), ncol, figsize=(15, 3.2*np.ceil(n/ncol)),
+                         constrained_layout=True)
+for ax, j in zip(axes.ravel(), jobs):
+    rp, rn = res[j['name']]['penalty'], res[j['name']]['null']
+    ax.plot(*curve(rp), color='k', lw=1.5, label='penalty')
+    if rn is not None:
+        ax.plot(*curve(rn), color='C3', lw=1.2, ls='--', label='null-space')
+    ax.set_title(j['name'], fontsize=9)
+    ax.set_xlabel(r'$\delta$ (mm)', fontsize=8)
+    ax.set_ylabel('$P$ (N)', fontsize=8)
+    ax.tick_params(labelsize=7)
+    ax.grid(True, alpha=0.3)
+axes.ravel()[0].legend(fontsize=7)
+for ax in axes.ravel()[n:]:
+    ax.axis('off')
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_conn_method_comparison_6_0.png" src="../_images/notebooks_conn_method_comparison_6_0.png" />
+</div>
+</div>
+</section>
+<section id="DCB:-elastic-compliances">
+<h2>DCB: elastic compliances<a class="headerlink" href="#DCB:-elastic-compliances" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">dcb_utils.elastic_compliance</span></code> of <code class="docutils literal notranslate"><span class="pre">dcb_lecinana2023.ipynb</span></code> and of the calibration of <code class="docutils literal notranslate"><span class="pre">dcb_tijs2023_phd.ipynb</span></code>, a single opening well below the damage onset.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>path = os.path.join(OUT, 'compliance.json')
+if os.path.exists(path):
+    comp = json.load(open(path))
+    rows = ['| notebook | $a_0$ (mm) | penalty (mm/N) | null-space (mm/N) | diff. (%) |', '|---|---|---|---|---|']
+    for c in comp:
+        rows.append(f"| {c['notebook']} | {c['a0']:.2f} | {c['penalty']:.6f} | {c['null-space']:.6f} "
+                    f"| {pct(c['null-space'], c['penalty']):+.3f} |")
+    display(Markdown('\n'.join(rows)))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>notebook</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(a_0\)</span> (mm)</p></th>
+<th class="head"><p>penalty (mm/N)</p></th>
+<th class="head"><p>null-space (mm/N)</p></th>
+<th class="head"><p>diff. (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>dcb_tijs2023_phd.ipynb</p></td>
+<td><p>30.00</p></td>
+<td><p>0.007848</p></td>
+<td><p>0.007833</p></td>
+<td><p>-0.186</p></td>
+</tr>
+<tr class="row-odd"><td><p>dcb_tijs2023_phd.ipynb</p></td>
+<td><p>35.00</p></td>
+<td><p>0.012259</p></td>
+<td><p>0.012239</p></td>
+<td><p>-0.162</p></td>
+</tr>
+<tr class="row-even"><td><p>dcb_tijs2023_phd.ipynb</p></td>
+<td><p>40.00</p></td>
+<td><p>0.018076</p></td>
+<td><p>0.018050</p></td>
+<td><p>-0.144</p></td>
+</tr>
+<tr class="row-odd"><td><p>dcb_tijs2023_phd.ipynb</p></td>
+<td><p>45.00</p></td>
+<td><p>0.025492</p></td>
+<td><p>0.025459</p></td>
+<td><p>-0.129</p></td>
+</tr>
+<tr class="row-even"><td><p>dcb_tijs2023_phd.ipynb</p></td>
+<td><p>30.00</p></td>
+<td><p>0.012343</p></td>
+<td><p>0.012317</p></td>
+<td><p>-0.208</p></td>
+</tr>
+<tr class="row-odd"><td><p>dcb_tijs2023_phd.ipynb</p></td>
+<td><p>35.00</p></td>
+<td><p>0.019270</p></td>
+<td><p>0.019235</p></td>
+<td><p>-0.182</p></td>
+</tr>
+<tr class="row-even"><td><p>dcb_tijs2023_phd.ipynb</p></td>
+<td><p>40.00</p></td>
+<td><p>0.028417</p></td>
+<td><p>0.028372</p></td>
+<td><p>-0.161</p></td>
+</tr>
+<tr class="row-odd"><td><p>dcb_tijs2023_phd.ipynb</p></td>
+<td><p>45.00</p></td>
+<td><p>0.040097</p></td>
+<td><p>0.040039</p></td>
+<td><p>-0.145</p></td>
+</tr>
+<tr class="row-even"><td><p>dcb_tijs2023_phd.ipynb</p></td>
+<td><p>30.00</p></td>
+<td><p>0.023891</p></td>
+<td><p>0.023843</p></td>
+<td><p>-0.200</p></td>
+</tr>
+<tr class="row-odd"><td><p>dcb_tijs2023_phd.ipynb</p></td>
+<td><p>35.00</p></td>
+<td><p>0.037480</p></td>
+<td><p>0.037415</p></td>
+<td><p>-0.174</p></td>
+</tr>
+<tr class="row-even"><td><p>dcb_tijs2023_phd.ipynb</p></td>
+<td><p>40.00</p></td>
+<td><p>0.055445</p></td>
+<td><p>0.055360</p></td>
+<td><p>-0.154</p></td>
+</tr>
+<tr class="row-odd"><td><p>dcb_tijs2023_phd.ipynb</p></td>
+<td><p>45.00</p></td>
+<td><p>0.078399</p></td>
+<td><p>0.078290</p></td>
+<td><p>-0.139</p></td>
+</tr>
+<tr class="row-even"><td><p>dcb_lecinana2023.ipynb</p></td>
+<td><p>32.05</p></td>
+<td><p>0.009551</p></td>
+<td><p>0.009535</p></td>
+<td><p>-0.173</p></td>
+</tr>
+<tr class="row-odd"><td><p>dcb_lecinana2023.ipynb</p></td>
+<td><p>33.40</p></td>
+<td><p>0.010763</p></td>
+<td><p>0.010745</p></td>
+<td><p>-0.167</p></td>
+</tr>
+<tr class="row-even"><td><p>dcb_lecinana2023.ipynb</p></td>
+<td><p>35.93</p></td>
+<td><p>0.013301</p></td>
+<td><p>0.013281</p></td>
+<td><p>-0.156</p></td>
+</tr>
+<tr class="row-odd"><td><p>dcb_lecinana2023.ipynb</p></td>
+<td><p>38.05</p></td>
+<td><p>0.015713</p></td>
+<td><p>0.015690</p></td>
+<td><p>-0.148</p></td>
+</tr>
+<tr class="row-even"><td><p>dcb_lecinana2023.ipynb</p></td>
+<td><p>42.97</p></td>
+<td><p>0.022398</p></td>
+<td><p>0.022368</p></td>
+<td><p>-0.133</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="DCB:-computational-cost">
+<h2>DCB: computational cost<a class="headerlink" href="#DCB:-computational-cost" title="Link to this heading">#</a></h2>
+<p>The wall times of the runs, measured with both methods under the same conditions, are compared in <em>Measured wall times</em> below. The cost is also measured by component, with <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">notebooks/conn_method_study.py</span> <span class="pre">profile</span></code> (<code class="docutils literal notranslate"><span class="pre">profile_case</span></code> and <code class="docutils literal notranslate"><span class="pre">profile_panels</span></code>, saved in <code class="docutils literal notranslate"><span class="pre">results/conn_methods/profile.json</span></code>), after the runs, in the same job and with the same settings of the threads:</p>
+<ul class="simple">
+<li><p>each component of a Newton-Raphson iteration of <code class="docutils literal notranslate"><span class="pre">dcb_utils.solve_dcb</span></code> is timed for each case, with both methods one after the other, at the linear solution at the opening of the stored peak load, where the damage grows ahead of the crack tip;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">kT_pan</span></code> is the tangent stiffness of the panels, <code class="docutils literal notranslate"><span class="pre">calc_kT</span></code>, with the nonlinear terms of CLPT, timed once; <code class="docutils literal notranslate"><span class="pre">residual</span></code> is <code class="docutils literal notranslate"><span class="pre">get_kC_conn</span></code> plus <code class="docutils literal notranslate"><span class="pre">calc_fint</span></code>; <code class="docutils literal notranslate"><span class="pre">kT_TSL</span></code> the damage-rate stiffness of the cohesive zone; <code class="docutils literal notranslate"><span class="pre">reduce</span></code> the product <span class="math notranslate nohighlight">\(\boldsymbol{Z}^\top \boldsymbol{K} \boldsymbol{Z}\)</span>, the sum of the matrices and the products of the vectors by <span class="math notranslate nohighlight">\(\boldsymbol{Z}\)</span>; <code class="docutils literal notranslate"><span class="pre">solve</span></code> the sparse solution of <code class="docutils literal notranslate"><span class="pre">structsolve.solve</span></code>; <code class="docutils literal notranslate"><span class="pre">Z</span></code> the construction of the null-space basis, once per
+run; the components other than <code class="docutils literal notranslate"><span class="pre">kT_pan</span></code> are the median of 3 repetitions.</p></li>
+</ul>
+<p>The cost of a run follows from these timings and from the number of calls of each component, given by the iterations of each opening and the rules of <code class="docutils literal notranslate"><span class="pre">solve_dcb</span></code>, see <code class="docutils literal notranslate"><span class="pre">conn_method_study.iteration_counts</span></code> and <code class="docutils literal notranslate"><span class="pre">conn_method_study.predicted_cost</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>PR = json.load(open(os.path.join(OUT, 'profile.json')))
+IT = PR['iterations']
+names = sorted(j['name'] for j in jobs)
+missing = [nm for nm in names if nm + '|penalty' not in IT or nm + '|null-space' not in IT]
+if missing:
+    print('not in profile.json, skipped in the cost tables:', ', '.join(missing))
+names = [nm for nm in names if nm not in missing]
+bond = {j['name']: j['case'].get('bond_width') for j in jobs}
+per_res = lambda t: t['kC_conn'] + t['fint']
+per_red = lambda t: t['reduce'] + t['sum'] + t['vec']
+rest = lambda t: per_res(t) + t['kT_TSL'] + per_red(t) + t['solve']
+rows = ['| case | unknowns penalty / null-space | nonzeros of the system (M) | `Z` (s) | `kT_pan` penalty / null-space (s) '
+        '| `residual` (s) | `kT_TSL` (s) | `reduce` (s) | `solve` (s) | iteration without `kT_pan` (s) | diff. (%) |',
+        '|---|---|---|---|---|---|---|---|---|---|---|']
+for name in names:
+    p, n = IT[name + '|penalty'], IT[name + '|null-space']
+    tp, tn = p['t'], n['t']
+    rows.append(f"| {name} | {p['size']} / {n['size_r']} | {p['nnz_k0']/1e6:.2f} / {n['nnz_k0']/1e6:.2f} | {n['t_Z']:.3f} "
+                f"| {tp['kT_pan']:.1f} / {tn['kT_pan']:.1f} | {per_res(tp):.2f} / {per_res(tn):.2f} "
+                f"| {tp['kT_TSL']:.2f} / {tn['kT_TSL']:.2f} | - / {per_red(tn):.3f} | {tp['solve']:.2f} / {tn['solve']:.2f} "
+                f"| {rest(tp):.2f} / {rest(tn):.2f} | {pct(rest(tn), rest(tp)):+.1f} |")
+display(Markdown('\n'.join(rows)))
+kTs = np.array([[IT[nm + '|' + m]['t']['kT_pan'] for m in ('penalty', 'null-space')] for nm in names])
+print('kT_pan: %.1f to %.1f s; null-space / penalty %.3f to %.3f, the same computation, timed once'
+      % (kTs.min(), kTs.max(), (kTs[:, 1]/kTs[:, 0]).min(), (kTs[:, 1]/kTs[:, 0]).max()))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>case</p></th>
+<th class="head"><p>unknowns penalty / null-space</p></th>
+<th class="head"><p>nonzeros of the system (M)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">Z</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">kT_pan</span></code> penalty / null-space (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">residual</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">kT_TSL</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">reduce</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">solve</span></code> (s)</p></th>
+<th class="head"><p>iteration without <code class="docutils literal notranslate"><span class="pre">kT_pan</span></code> (s)</p></th>
+<th class="head"><p>diff. (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>alfano2001_TableII_XAS913C</p></td>
+<td><p>2268 / 1948</p></td>
+<td><p>2.14 / 2.00</p></td>
+<td><p>0.027</p></td>
+<td><p>5.0 / 5.1</p></td>
+<td><p>0.81 / 0.82</p></td>
+<td><p>0.58 / 0.61</p></td>
+<td><ul class="simple">
+<li><p>/ 0.109</p></li>
+</ul>
+</td>
+<td><p>0.44 / 0.37</p></td>
+<td><p>1.86 / 1.90</p></td>
+<td><p>+2.2</p></td>
+</tr>
+<tr class="row-odd"><td><p>alfano2001_TableI_to1.7</p></td>
+<td><p>2184 / 2104</p></td>
+<td><p>2.69 / 2.62</p></td>
+<td><p>0.008</p></td>
+<td><p>8.8 / 8.6</p></td>
+<td><p>0.77 / 0.71</p></td>
+<td><p>0.42 / 0.41</p></td>
+<td><ul class="simple">
+<li><p>/ 0.119</p></li>
+</ul>
+</td>
+<td><p>0.53 / 0.46</p></td>
+<td><p>1.74 / 1.70</p></td>
+<td><p>-2.8</p></td>
+</tr>
+<tr class="row-even"><td><p>alfano2001_TableI_to1.7_K1e5</p></td>
+<td><p>2184 / 2104</p></td>
+<td><p>2.69 / 2.62</p></td>
+<td><p>0.008</p></td>
+<td><p>9.1 / 8.5</p></td>
+<td><p>0.66 / 0.60</p></td>
+<td><p>0.33 / 0.31</p></td>
+<td><ul class="simple">
+<li><p>/ 0.124</p></li>
+</ul>
+</td>
+<td><p>0.58 / 0.47</p></td>
+<td><p>1.60 / 1.51</p></td>
+<td><p>-5.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>alfano2001_TableI_to57</p></td>
+<td><p>2268 / 1948</p></td>
+<td><p>2.14 / 2.01</p></td>
+<td><p>0.029</p></td>
+<td><p>5.0 / 4.9</p></td>
+<td><p>0.79 / 0.68</p></td>
+<td><p>0.51 / 0.54</p></td>
+<td><ul class="simple">
+<li><p>/ 0.107</p></li>
+</ul>
+</td>
+<td><p>0.45 / 0.33</p></td>
+<td><p>1.78 / 1.66</p></td>
+<td><p>-6.8</p></td>
+</tr>
+<tr class="row-even"><td><p>camanho2003_DCB_AS4PEEK</p></td>
+<td><p>2268 / 1948</p></td>
+<td><p>2.14 / 1.99</p></td>
+<td><p>0.027</p></td>
+<td><p>5.2 / 5.1</p></td>
+<td><p>0.58 / 0.53</p></td>
+<td><p>0.33 / 0.32</p></td>
+<td><ul class="simple">
+<li><p>/ 0.098</p></li>
+</ul>
+</td>
+<td><p>0.44 / 0.29</p></td>
+<td><p>1.38 / 1.24</p></td>
+<td><p>-10.4</p></td>
+</tr>
+<tr class="row-odd"><td><p>krueger2008_DCB_MD_tau40</p></td>
+<td><p>2268 / 1948</p></td>
+<td><p>2.19 / 2.04</p></td>
+<td><p>0.027</p></td>
+<td><p>5.2 / 5.3</p></td>
+<td><p>0.49 / 0.46</p></td>
+<td><p>0.27 / 0.26</p></td>
+<td><ul class="simple">
+<li><p>/ 0.104</p></li>
+</ul>
+</td>
+<td><p>0.47 / 0.33</p></td>
+<td><p>1.26 / 1.15</p></td>
+<td><p>-8.9</p></td>
+</tr>
+<tr class="row-even"><td><p>krueger2008_DCB_MD_tau60</p></td>
+<td><p>2268 / 1948</p></td>
+<td><p>2.19 / 2.04</p></td>
+<td><p>0.029</p></td>
+<td><p>5.1 / 5.1</p></td>
+<td><p>0.70 / 0.63</p></td>
+<td><p>0.44 / 0.43</p></td>
+<td><ul class="simple">
+<li><p>/ 0.117</p></li>
+</ul>
+</td>
+<td><p>0.53 / 0.33</p></td>
+<td><p>1.70 / 1.51</p></td>
+<td><p>-11.2</p></td>
+</tr>
+<tr class="row-odd"><td><p>krueger2008_DCB_UD_tau40</p></td>
+<td><p>2268 / 1948</p></td>
+<td><p>2.14 / 2.00</p></td>
+<td><p>0.028</p></td>
+<td><p>5.0 / 5.0</p></td>
+<td><p>0.63 / 0.58</p></td>
+<td><p>0.39 / 0.39</p></td>
+<td><ul class="simple">
+<li><p>/ 0.095</p></li>
+</ul>
+</td>
+<td><p>0.44 / 0.33</p></td>
+<td><p>1.49 / 1.39</p></td>
+<td><p>-6.2</p></td>
+</tr>
+<tr class="row-even"><td><p>krueger2008_DCB_UD_tau60</p></td>
+<td><p>2268 / 1948</p></td>
+<td><p>2.14 / 2.00</p></td>
+<td><p>0.027</p></td>
+<td><p>5.0 / 5.0</p></td>
+<td><p>0.91 / 0.87</p></td>
+<td><p>0.68 / 0.73</p></td>
+<td><ul class="simple">
+<li><p>/ 0.113</p></li>
+</ul>
+</td>
+<td><p>0.43 / 0.33</p></td>
+<td><p>2.05 / 2.05</p></td>
+<td><p>-0.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>tijs2022_a40_G0.95</p></td>
+<td><p>2268 / 1948</p></td>
+<td><p>2.14 / 2.02</p></td>
+<td><p>0.027</p></td>
+<td><p>5.1 / 5.0</p></td>
+<td><p>0.66 / 0.59</p></td>
+<td><p>0.41 / 0.38</p></td>
+<td><ul class="simple">
+<li><p>/ 0.095</p></li>
+</ul>
+</td>
+<td><p>0.40 / 0.32</p></td>
+<td><p>1.50 / 1.39</p></td>
+<td><p>-7.4</p></td>
+</tr>
+<tr class="row-even"><td><p>tijs2022_a48</p></td>
+<td><p>2268 / 1948</p></td>
+<td><p>2.14 / 2.05</p></td>
+<td><p>0.030</p></td>
+<td><p>5.3 / 5.3</p></td>
+<td><p>0.61 / 0.58</p></td>
+<td><p>0.36 / 0.37</p></td>
+<td><ul class="simple">
+<li><p>/ 0.104</p></li>
+</ul>
+</td>
+<td><p>0.46 / 0.33</p></td>
+<td><p>1.47 / 1.39</p></td>
+<td><p>-5.2</p></td>
+</tr>
+<tr class="row-odd"><td><p>tijs2023_full_weld</p></td>
+<td><p>2268 / 1948</p></td>
+<td><p>2.19 / 2.04</p></td>
+<td><p>0.028</p></td>
+<td><p>5.0 / 5.1</p></td>
+<td><p>1.04 / 1.00</p></td>
+<td><p>0.19 / 0.19</p></td>
+<td><ul class="simple">
+<li><p>/ 0.099</p></li>
+</ul>
+</td>
+<td><p>0.44 / 0.30</p></td>
+<td><p>1.71 / 1.59</p></td>
+<td><p>-6.7</p></td>
+</tr>
+<tr class="row-even"><td><p>tijs2023_weld_center</p></td>
+<td><p>2268 / 1948</p></td>
+<td><p>2.19 / 2.08</p></td>
+<td><p>0.026</p></td>
+<td><p>5.1 / 5.1</p></td>
+<td><p>0.51 / 0.45</p></td>
+<td><p>0.26 / 0.25</p></td>
+<td><ul class="simple">
+<li><p>/ 0.105</p></li>
+</ul>
+</td>
+<td><p>0.46 / 0.32</p></td>
+<td><p>1.26 / 1.13</p></td>
+<td><p>-10.4</p></td>
+</tr>
+<tr class="row-odd"><td><p>tijs2023_weld_center_autoclave</p></td>
+<td><p>2268 / 1948</p></td>
+<td><p>2.19 / 2.08</p></td>
+<td><p>0.028</p></td>
+<td><p>5.2 / 5.3</p></td>
+<td><p>0.58 / 0.56</p></td>
+<td><p>0.35 / 0.34</p></td>
+<td><ul class="simple">
+<li><p>/ 0.112</p></li>
+</ul>
+</td>
+<td><p>0.48 / 0.37</p></td>
+<td><p>1.43 / 1.38</p></td>
+<td><p>-3.8</p></td>
+</tr>
+<tr class="row-even"><td><p>tijs2023_weld_center_standard</p></td>
+<td><p>2268 / 1948</p></td>
+<td><p>2.19 / 2.08</p></td>
+<td><p>0.029</p></td>
+<td><p>5.2 / 5.3</p></td>
+<td><p>0.50 / 0.47</p></td>
+<td><p>0.26 / 0.26</p></td>
+<td><ul class="simple">
+<li><p>/ 0.113</p></li>
+</ul>
+</td>
+<td><p>0.45 / 0.33</p></td>
+<td><p>1.24 / 1.18</p></td>
+<td><p>-4.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>turon2007_le0.125_tau60</p></td>
+<td><p>2268 / 1948</p></td>
+<td><p>2.14 / 2.02</p></td>
+<td><p>0.033</p></td>
+<td><p>5.1 / 5.3</p></td>
+<td><p>0.70 / 0.69</p></td>
+<td><p>0.45 / 0.48</p></td>
+<td><ul class="simple">
+<li><p>/ 0.103</p></li>
+</ul>
+</td>
+<td><p>0.46 / 0.36</p></td>
+<td><p>1.63 / 1.63</p></td>
+<td><p>-0.0</p></td>
+</tr>
+<tr class="row-even"><td><p>turon2007_le0.125_tau60_K1e6</p></td>
+<td><p>2268 / 1948</p></td>
+<td><p>2.14 / 2.01</p></td>
+<td><p>0.028</p></td>
+<td><p>5.1 / 5.1</p></td>
+<td><p>0.59 / 0.56</p></td>
+<td><p>0.36 / 0.35</p></td>
+<td><ul class="simple">
+<li><p>/ 0.094</p></li>
+</ul>
+</td>
+<td><p>0.42 / 0.31</p></td>
+<td><p>1.40 / 1.31</p></td>
+<td><p>-6.3</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+kT_pan: 4.9 to 9.1 s; null-space / penalty 0.938 to 1.034, the same computation, timed once
+</pre></div></div>
+</div>
+<p>The tangent of the panels is computed by numerical integration of the nonlinear CLPT terms, <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> and <code class="docutils literal notranslate"><span class="pre">fkG_num</span></code>, on the default <code class="docutils literal notranslate"><span class="pre">max(2m</span> <span class="pre">-</span> <span class="pre">1,</span> <span class="pre">7)</span></code> by <code class="docutils literal notranslate"><span class="pre">max(2n</span> <span class="pre">-</span> <span class="pre">1,</span> <span class="pre">7)</span></code> points of <code class="docutils literal notranslate"><span class="pre">panels.shell.gauss_points</span></code>. Its cost grows as <span class="math notranslate nohighlight">\(n_x n_y (3 m n)^2\)</span>, so that it comes almost entirely from the two cohesive-zone panels, which have the largest numbers of terms:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for name, pans in PR['panels'].items():
+    tot = sum(r['t_kC'] + r['t_kG'] for r in pans)
+    rows = [f'**{name}**', '', '| panel | terms $m \\times n$ | points $n_x \\times n_y$ | `calc_kC` (s) | `calc_kG` (s) | share (%) |',
+            '|---|---|---|---|---|---|']
+    for r in pans:
+        kind = 'cohesive zone' if r['tsl'] else 'arm / bonded'
+        rows.append(f"| {r['group']}, {kind}, a = {r['a']:.1f} mm | {r['m']} x {r['n']} | {r['nx']} x {r['ny']} "
+                    f"| {r['t_kC']:.2f} | {r['t_kG']:.2f} | {100*(r['t_kC'] + r['t_kG'])/tot:.1f} |")
+    display(Markdown('\n'.join(rows)))
+p = IT['turon2007_le0.125_tau60|penalty']
+print('cProfile of one iteration without kT_pan, turon2007_le0.125_tau60, penalty:')
+print('\n'.join(p['cprofile'].splitlines()[:22]))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>alfano2001_TableI_to57</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>panel</p></th>
+<th class="head"><p>terms <span class="math notranslate nohighlight">\(m \times n\)</span></p></th>
+<th class="head"><p>points <span class="math notranslate nohighlight">\(n_x \times n_y\)</span></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kC</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kG</span></code> (s)</p></th>
+<th class="head"><p>share (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 51.3 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>bot, cohesive zone, a = 18.7 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.04</p></td>
+<td><p>0.22</p></td>
+<td><p>47.2</p></td>
+</tr>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 30.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 51.3 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-even"><td><p>top, cohesive zone, a = 18.7 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.14</p></td>
+<td><p>0.22</p></td>
+<td><p>49.4</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 30.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>alfano2001_TableII_XAS913C</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>panel</p></th>
+<th class="head"><p>terms <span class="math notranslate nohighlight">\(m \times n\)</span></p></th>
+<th class="head"><p>points <span class="math notranslate nohighlight">\(n_x \times n_y\)</span></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kC</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kG</span></code> (s)</p></th>
+<th class="head"><p>share (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 51.6 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>bot, cohesive zone, a = 18.4 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.25</p></td>
+<td><p>0.23</p></td>
+<td><p>48.3</p></td>
+</tr>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 30.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 51.6 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-even"><td><p>top, cohesive zone, a = 18.4 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.25</p></td>
+<td><p>0.23</p></td>
+<td><p>48.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 30.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>alfano2001_TableI_to1.7</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>panel</p></th>
+<th class="head"><p>terms <span class="math notranslate nohighlight">\(m \times n\)</span></p></th>
+<th class="head"><p>points <span class="math notranslate nohighlight">\(n_x \times n_y\)</span></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kC</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kG</span></code> (s)</p></th>
+<th class="head"><p>share (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>bot, cohesive zone, a = 70.0 mm</p></td>
+<td><p>30 x 10</p></td>
+<td><p>59 x 19</p></td>
+<td><p>3.69</p></td>
+<td><p>0.41</p></td>
+<td><p>48.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>bot, arm / bonded, a = 30.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.5</p></td>
+</tr>
+<tr class="row-even"><td><p>top, cohesive zone, a = 70.0 mm</p></td>
+<td><p>30 x 10</p></td>
+<td><p>59 x 19</p></td>
+<td><p>3.94</p></td>
+<td><p>0.41</p></td>
+<td><p>50.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 30.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.5</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>alfano2001_TableI_to1.7_K1e5</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>panel</p></th>
+<th class="head"><p>terms <span class="math notranslate nohighlight">\(m \times n\)</span></p></th>
+<th class="head"><p>points <span class="math notranslate nohighlight">\(n_x \times n_y\)</span></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kC</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kG</span></code> (s)</p></th>
+<th class="head"><p>share (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>bot, cohesive zone, a = 70.0 mm</p></td>
+<td><p>30 x 10</p></td>
+<td><p>59 x 19</p></td>
+<td><p>3.82</p></td>
+<td><p>0.39</p></td>
+<td><p>49.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>bot, arm / bonded, a = 30.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.5</p></td>
+</tr>
+<tr class="row-even"><td><p>top, cohesive zone, a = 70.0 mm</p></td>
+<td><p>30 x 10</p></td>
+<td><p>59 x 19</p></td>
+<td><p>3.81</p></td>
+<td><p>0.40</p></td>
+<td><p>49.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 30.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.5</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>camanho2003_DCB_AS4PEEK</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>panel</p></th>
+<th class="head"><p>terms <span class="math notranslate nohighlight">\(m \times n\)</span></p></th>
+<th class="head"><p>points <span class="math notranslate nohighlight">\(n_x \times n_y\)</span></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kC</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kG</span></code> (s)</p></th>
+<th class="head"><p>share (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 50.3 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.03</p></td>
+<td><p>0.00</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>bot, cohesive zone, a = 18.8 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.10</p></td>
+<td><p>0.24</p></td>
+<td><p>47.6</p></td>
+</tr>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 32.9 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 50.3 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-even"><td><p>top, cohesive zone, a = 18.8 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.18</p></td>
+<td><p>0.22</p></td>
+<td><p>49.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 32.9 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>krueger2008_DCB_UD_tau40</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>panel</p></th>
+<th class="head"><p>terms <span class="math notranslate nohighlight">\(m \times n\)</span></p></th>
+<th class="head"><p>points <span class="math notranslate nohighlight">\(n_x \times n_y\)</span></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kC</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kG</span></code> (s)</p></th>
+<th class="head"><p>share (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 101.1 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>bot, cohesive zone, a = 18.9 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.14</p></td>
+<td><p>0.22</p></td>
+<td><p>48.3</p></td>
+</tr>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 30.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 101.1 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-even"><td><p>top, cohesive zone, a = 18.9 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.14</p></td>
+<td><p>0.22</p></td>
+<td><p>48.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 30.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>krueger2008_DCB_UD_tau60</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>panel</p></th>
+<th class="head"><p>terms <span class="math notranslate nohighlight">\(m \times n\)</span></p></th>
+<th class="head"><p>points <span class="math notranslate nohighlight">\(n_x \times n_y\)</span></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kC</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kG</span></code> (s)</p></th>
+<th class="head"><p>share (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 101.1 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>bot, cohesive zone, a = 18.9 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.14</p></td>
+<td><p>0.22</p></td>
+<td><p>48.3</p></td>
+</tr>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 30.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 101.1 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-even"><td><p>top, cohesive zone, a = 18.9 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.15</p></td>
+<td><p>0.22</p></td>
+<td><p>48.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 30.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>krueger2008_DCB_MD_tau40</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>panel</p></th>
+<th class="head"><p>terms <span class="math notranslate nohighlight">\(m \times n\)</span></p></th>
+<th class="head"><p>points <span class="math notranslate nohighlight">\(n_x \times n_y\)</span></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kC</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kG</span></code> (s)</p></th>
+<th class="head"><p>share (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 125.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>bot, cohesive zone, a = 21.8 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.30</p></td>
+<td><p>0.24</p></td>
+<td><p>48.4</p></td>
+</tr>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 31.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 125.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-even"><td><p>top, cohesive zone, a = 21.8 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.29</p></td>
+<td><p>0.24</p></td>
+<td><p>48.2</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 31.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>krueger2008_DCB_MD_tau60</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>panel</p></th>
+<th class="head"><p>terms <span class="math notranslate nohighlight">\(m \times n\)</span></p></th>
+<th class="head"><p>points <span class="math notranslate nohighlight">\(n_x \times n_y\)</span></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kC</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kG</span></code> (s)</p></th>
+<th class="head"><p>share (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 125.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>bot, cohesive zone, a = 21.8 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.18</p></td>
+<td><p>0.22</p></td>
+<td><p>48.0</p></td>
+</tr>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 31.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 125.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-even"><td><p>top, cohesive zone, a = 21.8 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.21</p></td>
+<td><p>0.22</p></td>
+<td><p>48.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 31.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>tijs2022_a48</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>panel</p></th>
+<th class="head"><p>terms <span class="math notranslate nohighlight">\(m \times n\)</span></p></th>
+<th class="head"><p>points <span class="math notranslate nohighlight">\(n_x \times n_y\)</span></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kC</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kG</span></code> (s)</p></th>
+<th class="head"><p>share (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 28.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.03</p></td>
+<td><p>0.00</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>bot, cohesive zone, a = 24.0 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.06</p></td>
+<td><p>0.22</p></td>
+<td><p>47.3</p></td>
+</tr>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 48.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 28.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-even"><td><p>top, cohesive zone, a = 24.0 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.15</p></td>
+<td><p>0.23</p></td>
+<td><p>49.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 48.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>tijs2022_a40_G0.95</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>panel</p></th>
+<th class="head"><p>terms <span class="math notranslate nohighlight">\(m \times n\)</span></p></th>
+<th class="head"><p>points <span class="math notranslate nohighlight">\(n_x \times n_y\)</span></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kC</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kG</span></code> (s)</p></th>
+<th class="head"><p>share (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 36.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.03</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>bot, cohesive zone, a = 24.0 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.14</p></td>
+<td><p>0.22</p></td>
+<td><p>48.3</p></td>
+</tr>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 40.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 36.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-even"><td><p>top, cohesive zone, a = 24.0 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.14</p></td>
+<td><p>0.22</p></td>
+<td><p>48.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 40.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>tijs2023_full_weld</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>panel</p></th>
+<th class="head"><p>terms <span class="math notranslate nohighlight">\(m \times n\)</span></p></th>
+<th class="head"><p>points <span class="math notranslate nohighlight">\(n_x \times n_y\)</span></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kC</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kG</span></code> (s)</p></th>
+<th class="head"><p>share (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 78.3 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.03</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>bot, cohesive zone, a = 21.7 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.13</p></td>
+<td><p>0.22</p></td>
+<td><p>48.1</p></td>
+</tr>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 44.3 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 78.3 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-even"><td><p>top, cohesive zone, a = 21.7 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.15</p></td>
+<td><p>0.22</p></td>
+<td><p>48.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 44.3 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>tijs2023_weld_center</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>panel</p></th>
+<th class="head"><p>terms <span class="math notranslate nohighlight">\(m \times n\)</span></p></th>
+<th class="head"><p>points <span class="math notranslate nohighlight">\(n_x \times n_y\)</span></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kC</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kG</span></code> (s)</p></th>
+<th class="head"><p>share (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 78.3 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.03</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>bot, cohesive zone, a = 21.7 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.12</p></td>
+<td><p>0.22</p></td>
+<td><p>48.0</p></td>
+</tr>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 36.2 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 78.3 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-even"><td><p>top, cohesive zone, a = 21.7 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.15</p></td>
+<td><p>0.22</p></td>
+<td><p>48.7</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 36.2 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>tijs2023_weld_center_standard</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>panel</p></th>
+<th class="head"><p>terms <span class="math notranslate nohighlight">\(m \times n\)</span></p></th>
+<th class="head"><p>points <span class="math notranslate nohighlight">\(n_x \times n_y\)</span></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kC</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kG</span></code> (s)</p></th>
+<th class="head"><p>share (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 78.3 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>bot, cohesive zone, a = 21.7 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.26</p></td>
+<td><p>0.23</p></td>
+<td><p>48.5</p></td>
+</tr>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 36.2 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 78.3 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-even"><td><p>top, cohesive zone, a = 21.7 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.24</p></td>
+<td><p>0.23</p></td>
+<td><p>48.2</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 36.2 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>tijs2023_weld_center_autoclave</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>panel</p></th>
+<th class="head"><p>terms <span class="math notranslate nohighlight">\(m \times n\)</span></p></th>
+<th class="head"><p>points <span class="math notranslate nohighlight">\(n_x \times n_y\)</span></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kC</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kG</span></code> (s)</p></th>
+<th class="head"><p>share (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 78.3 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>bot, cohesive zone, a = 21.7 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.26</p></td>
+<td><p>0.23</p></td>
+<td><p>48.3</p></td>
+</tr>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 36.2 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 78.3 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-even"><td><p>top, cohesive zone, a = 21.7 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.26</p></td>
+<td><p>0.23</p></td>
+<td><p>48.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 36.2 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>turon2007_le0.125_tau60</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>panel</p></th>
+<th class="head"><p>terms <span class="math notranslate nohighlight">\(m \times n\)</span></p></th>
+<th class="head"><p>points <span class="math notranslate nohighlight">\(n_x \times n_y\)</span></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kC</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kG</span></code> (s)</p></th>
+<th class="head"><p>share (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 71.4 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>bot, cohesive zone, a = 23.6 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.20</p></td>
+<td><p>0.30</p></td>
+<td><p>48.1</p></td>
+</tr>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 55.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 71.4 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.9</p></td>
+</tr>
+<tr class="row-even"><td><p>top, cohesive zone, a = 23.6 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.28</p></td>
+<td><p>0.23</p></td>
+<td><p>48.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 55.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>turon2007_le0.125_tau60_K1e6</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>panel</p></th>
+<th class="head"><p>terms <span class="math notranslate nohighlight">\(m \times n\)</span></p></th>
+<th class="head"><p>points <span class="math notranslate nohighlight">\(n_x \times n_y\)</span></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kC</span></code> (s)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_kG</span></code> (s)</p></th>
+<th class="head"><p>share (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 81.7 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.03</p></td>
+<td><p>0.00</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>bot, cohesive zone, a = 13.3 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.17</p></td>
+<td><p>0.22</p></td>
+<td><p>48.7</p></td>
+</tr>
+<tr class="row-even"><td><p>bot, arm / bonded, a = 55.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 81.7 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-even"><td><p>top, cohesive zone, a = 13.3 mm</p></td>
+<td><p>25 x 10</p></td>
+<td><p>49 x 19</p></td>
+<td><p>2.14</p></td>
+<td><p>0.22</p></td>
+<td><p>48.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>top, arm / bonded, a = 55.0 mm</p></td>
+<td><p>8 x 8</p></td>
+<td><p>15 x 15</p></td>
+<td><p>0.04</p></td>
+<td><p>0.01</p></td>
+<td><p>0.8</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+cProfile of one iteration without kT_pan, turon2007_le0.125_tau60, penalty:
+         20752 function calls (20716 primitive calls) in 1.661 seconds
+
+   Ordered by: internal time
+   List reduced from 336 to 12 due to restriction &lt;12&gt;
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.400    0.400    0.400    0.400 {built-in method scipy.sparse.linalg._dsolve._superlu.gssv}
+        1    0.314    0.314    0.493    0.493 multidomain.py:4820(calc_kT_TSL)
+        1    0.274    0.274    0.285    0.285 multidomain.py:4748(_kC_TSL)
+        4    0.156    0.039    0.167    0.042 multidomain.py:2335(uvw)
+        4    0.134    0.033    0.134    0.033 {built-in method scipy.sparse._sparsetools.csr_sort_indices}
+        6    0.124    0.021    0.126    0.021 shell.py:3757(calc_fint)
+       16    0.043    0.003    0.043    0.003 {built-in method scipy.sparse._sparsetools.coo_tocsr}
+        1    0.027    0.027    0.035    0.035 sparseutils.py:96(make_symmetric)
+       17    0.026    0.002    0.026    0.002 {built-in method scipy.sparse._sparsetools.csr_plus_csr}
+      336    0.020    0.000    0.020    0.000 {method &#39;reduce&#39; of &#39;numpy.ufunc&#39; objects}
+        1    0.020    0.020    0.025    0.025 sparseutils.py:78(_used_cols)
+        3    0.017    0.006    0.017    0.006 {method &#39;repeat&#39; of &#39;numpy.ndarray&#39; objects}
+
+
+</pre></div></div>
+</div>
+<section id="Cost-of-the-runs">
+<h3>Cost of the runs<a class="headerlink" href="#Cost-of-the-runs" title="Link to this heading">#</a></h3>
+<p>For each case, the cost of the runs is predicted at the openings reached by the null-space run, from its iterations and from those of the penalty run at the same openings. The tangent of the panels is given the mean of the timings of the two methods, since it is the same computation. The column <em>same iterations</em> uses the iterations of the penalty run for both methods, which isolates the cost of an iteration from the number of iterations.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>COMP = ('kT_pan', 'residual', 'kT_TSL', 'solve', 'reduce', 'setup', 'opening')
+def trunc(r, k):
+    return {kk: (np.asarray(v)[:k] if np.ndim(v) else v) for kk, v in r.items()}
+
+pred = {}
+rows = ['| case | openings | iterations penalty / null-space | `kT_pan` calls penalty / null-space '
+        '| penalty (h) | null-space (h) | diff. (%) | same iterations, diff. (%) | `kT_pan` share (%) |',
+        '|---|---|---|---|---|---|---|---|---|']
+for name in names:
+    rp, rn = res[name]['penalty'], res[name]['null']
+    if rn is None:
+        continue
+    k = len(rn['iters'])
+    rp = trunc(rp, k)
+    kT = 0.5*(IT[name + '|penalty']['t']['kT_pan'] + IT[name + '|null-space']['t']['kT_pan'])
+    npn, nnn = study.iteration_counts(rp, bond[name]), study.iteration_counts(rn, bond[name])
+    cp = study.predicted_cost(IT[name + '|penalty'], npn, kT)
+    cn = study.predicted_cost(IT[name + '|null-space'], nnn, kT)
+    cs = study.predicted_cost(IT[name + '|null-space'], npn, kT)
+    pred[name] = dict(penalty=cp, null=cn, k=k)
+    Tp, Tn, Ts = (sum(c.values()) for c in (cp, cn, cs))
+    rows.append(f"| {name} | {k} | {npn['iter']} / {nnn['iter']} | {npn['kT_pan']} / {nnn['kT_pan']} "
+                f"| {Tp/3600:.2f} | {Tn/3600:.2f} | {pct(Tn, Tp):+.1f} | {pct(Ts, Tp):+.2f} | {100*cp['kT_pan']/Tp:.1f} |")
+display(Markdown('\n'.join(rows)))
+
+fig, ax = plt.subplots(figsize=(10, 0.45*2*len(pred) + 1), constrained_layout=True)
+labels, y = [], 0
+for name, d in pred.items():
+    for m, key in (('penalty', 'penalty'), ('null-space', 'null')):
+        left = 0.
+        for i, comp in enumerate(COMP):
+            v = d[key][comp]/3600
+            ax.barh(y, v, left=left, color='C%d' % i, label=comp if y == 0 else None)
+            left += v
+        labels.append(f'{name}, {m}')
+        y += 1
+    y += 0.5
+ax.set_yticks([i + 0.5*(i//2) for i in range(len(labels))])
+ax.set_yticklabels(labels, fontsize=7)
+ax.invert_yaxis()
+ax.set_xlabel('predicted cost at the openings of the null-space run (h)')
+ax.legend(fontsize=8, ncol=len(COMP), loc='lower center', bbox_to_anchor=(0.5, 1.0))
+ax.grid(True, axis='x', alpha=0.3)
+plt.show()
+
+tot = {m: {c: sum(d[m][c] for d in pred.values()) for c in COMP} for m in ('penalty', 'null')}
+rows = ['| component | penalty (%) | null-space (%) |', '|---|---|---|']
+for c in COMP:
+    rows.append(f"| `{c}` | {100*tot['penalty'][c]/sum(tot['penalty'].values()):.2f} | {100*tot['null'][c]/sum(tot['null'].values()):.2f} |")
+display(Markdown('Share of the components in the predicted cost of all the cases above:\n\n' + '\n'.join(rows)))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>case</p></th>
+<th class="head"><p>openings</p></th>
+<th class="head"><p>iterations penalty / null-space</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">kT_pan</span></code> calls penalty / null-space</p></th>
+<th class="head"><p>penalty (h)</p></th>
+<th class="head"><p>null-space (h)</p></th>
+<th class="head"><p>diff. (%)</p></th>
+<th class="head"><p>same iterations, diff. (%)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">kT_pan</span></code> share (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>alfano2001_TableII_XAS913C</p></td>
+<td><p>60</p></td>
+<td><p>200 / 208</p></td>
+<td><p>116 / 121</p></td>
+<td><p>0.29</p></td>
+<td><p>0.30</p></td>
+<td><p>+4.9</p></td>
+<td><p>+0.97</p></td>
+<td><p>56.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>alfano2001_TableI_to1.7</p></td>
+<td><p>40</p></td>
+<td><p>89 / 93</p></td>
+<td><p>78 / 78</p></td>
+<td><p>0.24</p></td>
+<td><p>0.24</p></td>
+<td><p>-0.0</p></td>
+<td><p>-0.79</p></td>
+<td><p>78.1</p></td>
+</tr>
+<tr class="row-even"><td><p>alfano2001_TableI_to1.7_K1e5</p></td>
+<td><p>40</p></td>
+<td><p>111 / 111</p></td>
+<td><p>80 / 80</p></td>
+<td><p>0.25</p></td>
+<td><p>0.25</p></td>
+<td><p>-1.2</p></td>
+<td><p>-1.22</p></td>
+<td><p>77.1</p></td>
+</tr>
+<tr class="row-odd"><td><p>alfano2001_TableI_to57</p></td>
+<td><p>60</p></td>
+<td><p>192 / 192</p></td>
+<td><p>111 / 110</p></td>
+<td><p>0.27</p></td>
+<td><p>0.26</p></td>
+<td><p>-3.3</p></td>
+<td><p>-2.83</p></td>
+<td><p>57.7</p></td>
+</tr>
+<tr class="row-even"><td><p>camanho2003_DCB_AS4PEEK</p></td>
+<td><p>60</p></td>
+<td><p>181 / 180</p></td>
+<td><p>114 / 113</p></td>
+<td><p>0.25</p></td>
+<td><p>0.24</p></td>
+<td><p>-4.0</p></td>
+<td><p>-3.32</p></td>
+<td><p>66.6</p></td>
+</tr>
+<tr class="row-odd"><td><p>krueger2008_DCB_MD_tau40</p></td>
+<td><p>60</p></td>
+<td><p>144 / 150</p></td>
+<td><p>93 / 95</p></td>
+<td><p>0.20</p></td>
+<td><p>0.20</p></td>
+<td><p>-0.1</p></td>
+<td><p>-2.56</p></td>
+<td><p>68.7</p></td>
+</tr>
+<tr class="row-even"><td><p>krueger2008_DCB_MD_tau60</p></td>
+<td><p>60</p></td>
+<td><p>179 / 179</p></td>
+<td><p>105 / 109</p></td>
+<td><p>0.25</p></td>
+<td><p>0.25</p></td>
+<td><p>-2.0</p></td>
+<td><p>-4.22</p></td>
+<td><p>59.6</p></td>
+</tr>
+<tr class="row-odd"><td><p>krueger2008_DCB_UD_tau40</p></td>
+<td><p>60</p></td>
+<td><p>176 / 175</p></td>
+<td><p>103 / 103</p></td>
+<td><p>0.23</p></td>
+<td><p>0.22</p></td>
+<td><p>-2.5</p></td>
+<td><p>-2.35</p></td>
+<td><p>62.3</p></td>
+</tr>
+<tr class="row-even"><td><p>krueger2008_DCB_UD_tau60</p></td>
+<td><p>60</p></td>
+<td><p>208 / 206</p></td>
+<td><p>115 / 117</p></td>
+<td><p>0.30</p></td>
+<td><p>0.30</p></td>
+<td><p>+0.4</p></td>
+<td><p>-0.11</p></td>
+<td><p>53.1</p></td>
+</tr>
+<tr class="row-odd"><td><p>tijs2022_a40_G0.95</p></td>
+<td><p>60</p></td>
+<td><p>184 / 186</p></td>
+<td><p>112 / 114</p></td>
+<td><p>0.25</p></td>
+<td><p>0.24</p></td>
+<td><p>-1.4</p></td>
+<td><p>-2.83</p></td>
+<td><p>63.1</p></td>
+</tr>
+<tr class="row-even"><td><p>tijs2022_a48</p></td>
+<td><p>60</p></td>
+<td><p>180 / 178</p></td>
+<td><p>115 / 111</p></td>
+<td><p>0.25</p></td>
+<td><p>0.24</p></td>
+<td><p>-4.3</p></td>
+<td><p>-1.73</p></td>
+<td><p>66.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>tijs2023_full_weld</p></td>
+<td><p>60</p></td>
+<td><p>145 / 150</p></td>
+<td><p>102 / 107</p></td>
+<td><p>0.23</p></td>
+<td><p>0.23</p></td>
+<td><p>+1.7</p></td>
+<td><p>-2.31</p></td>
+<td><p>61.9</p></td>
+</tr>
+<tr class="row-even"><td><p>tijs2023_weld_center</p></td>
+<td><p>60</p></td>
+<td><p>147 / 152</p></td>
+<td><p>101 / 102</p></td>
+<td><p>0.20</p></td>
+<td><p>0.20</p></td>
+<td><p>-1.6</p></td>
+<td><p>-3.10</p></td>
+<td><p>69.6</p></td>
+</tr>
+<tr class="row-odd"><td><p>tijs2023_weld_center_autoclave</p></td>
+<td><p>60</p></td>
+<td><p>173 / 175</p></td>
+<td><p>109 / 110</p></td>
+<td><p>0.24</p></td>
+<td><p>0.24</p></td>
+<td><p>-0.4</p></td>
+<td><p>-1.28</p></td>
+<td><p>66.0</p></td>
+</tr>
+<tr class="row-even"><td><p>tijs2023_weld_center_standard</p></td>
+<td><p>60</p></td>
+<td><p>146 / 155</p></td>
+<td><p>98 / 104</p></td>
+<td><p>0.20</p></td>
+<td><p>0.21</p></td>
+<td><p>+4.4</p></td>
+<td><p>-1.36</p></td>
+<td><p>70.2</p></td>
+</tr>
+<tr class="row-odd"><td><p>turon2007_le0.125_tau60</p></td>
+<td><p>60</p></td>
+<td><p>199 / 197</p></td>
+<td><p>117 / 119</p></td>
+<td><p>0.28</p></td>
+<td><p>0.28</p></td>
+<td><p>+0.4</p></td>
+<td><p>-0.29</p></td>
+<td><p>61.2</p></td>
+</tr>
+<tr class="row-even"><td><p>turon2007_le0.125_tau60_K1e6</p></td>
+<td><p>60</p></td>
+<td><p>134 / 139</p></td>
+<td><p>97 / 101</p></td>
+<td><p>0.20</p></td>
+<td><p>0.21</p></td>
+<td><p>+1.9</p></td>
+<td><p>-1.82</p></td>
+<td><p>67.9</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_conn_method_comparison_14_1.png" src="../_images/notebooks_conn_method_comparison_14_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p>Share of the components in the predicted cost of all the cases above:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>component</p></th>
+<th class="head"><p>penalty (%)</p></th>
+<th class="head"><p>null-space (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kT_pan</span></code></p></td>
+<td><p>64.61</p></td>
+<td><p>65.86</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">residual</span></code></p></td>
+<td><p>17.28</p></td>
+<td><p>16.39</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kT_TSL</span></code></p></td>
+<td><p>7.52</p></td>
+<td><p>7.71</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">solve</span></code></p></td>
+<td><p>8.61</p></td>
+<td><p>6.52</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">reduce</span></code></p></td>
+<td><p>0.54</p></td>
+<td><p>2.02</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">setup</span></code></p></td>
+<td><p>0.00</p></td>
+<td><p>0.00</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">opening</span></code></p></td>
+<td><p>1.45</p></td>
+<td><p>1.49</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="Measured-wall-times">
+<h3>Measured wall times<a class="headerlink" href="#Measured-wall-times" title="Link to this heading">#</a></h3>
+<p>The runs of the two methods were timed under the same conditions, so that their wall times compare the methods directly. The ratio between the measured wall time and the predicted cost of each run checks the prediction from the profile, with the calls of the components of the run itself.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rows = ['| case | iterations penalty / null-space | time penalty / null-space (min) | measured diff. (%) '
+        '| predicted diff. (%) | measured / predicted, penalty / null-space |',
+        '|---|---|---|---|---|---|']
+meas = {}
+for name in names:
+    rp, rn = res[name]['penalty'], res[name]['null']
+    if not complete(rn, [j for j in jobs if j['name'] == name][0]):
+        continue
+    kT = 0.5*(IT[name + '|penalty']['t']['kT_pan'] + IT[name + '|null-space']['t']['kT_pan'])
+    cp = sum(study.predicted_cost(IT[name + '|penalty'], study.iteration_counts(rp, bond[name]), kT).values())
+    cn = sum(study.predicted_cost(IT[name + '|null-space'], study.iteration_counts(rn, bond[name]), kT).values())
+    meas[name] = m = dict(tp=float(rp['time']), tn=float(rn['time']), cp=cp, cn=cn)
+    rows.append(f"| {name} | {int(np.sum(rp['iters']))} / {int(np.sum(rn['iters']))} | {m['tp']/60:.1f} / {m['tn']/60:.1f} "
+                f"| {pct(m['tn'], m['tp']):+.1f} | {pct(cn, cp):+.1f} | {m['tp']/cp:.2f} / {m['tn']/cn:.2f} |")
+TP, TN = (sum(m[k] for m in meas.values()) for k in ('tp', 'tn'))
+CP, CN = (sum(m[k] for m in meas.values()) for k in ('cp', 'cn'))
+rows.append(f"| all {len(meas)} cases | - | {TP/60:.1f} / {TN/60:.1f} | {pct(TN, TP):+.1f} | {pct(CN, CP):+.1f} | {TP/CP:.2f} / {TN/CN:.2f} |")
+display(Markdown('\n'.join(rows)))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>case</p></th>
+<th class="head"><p>iterations penalty / null-space</p></th>
+<th class="head"><p>time penalty / null-space (min)</p></th>
+<th class="head"><p>measured diff. (%)</p></th>
+<th class="head"><p>predicted diff. (%)</p></th>
+<th class="head"><p>measured / predicted, penalty / null-space</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>alfano2001_TableII_XAS913C</p></td>
+<td><p>200 / 208</p></td>
+<td><p>18.3 / 20.2</p></td>
+<td><p>+9.9</p></td>
+<td><p>+4.9</p></td>
+<td><p>1.07 / 1.12</p></td>
+</tr>
+<tr class="row-odd"><td><p>alfano2001_TableI_to1.7</p></td>
+<td><p>89 / 93</p></td>
+<td><p>14.4 / 14.9</p></td>
+<td><p>+3.4</p></td>
+<td><p>-0.0</p></td>
+<td><p>0.99 / 1.02</p></td>
+</tr>
+<tr class="row-even"><td><p>alfano2001_TableI_to1.7_K1e5</p></td>
+<td><p>111 / 111</p></td>
+<td><p>17.2 / 16.0</p></td>
+<td><p>-7.2</p></td>
+<td><p>-1.2</p></td>
+<td><p>1.13 / 1.06</p></td>
+</tr>
+<tr class="row-odd"><td><p>alfano2001_TableI_to57</p></td>
+<td><p>192 / 192</p></td>
+<td><p>16.4 / 17.1</p></td>
+<td><p>+4.6</p></td>
+<td><p>-3.3</p></td>
+<td><p>1.02 / 1.11</p></td>
+</tr>
+<tr class="row-even"><td><p>camanho2003_DCB_AS4PEEK</p></td>
+<td><p>181 / 180</p></td>
+<td><p>15.8 / 14.7</p></td>
+<td><p>-6.5</p></td>
+<td><p>-4.0</p></td>
+<td><p>1.07 / 1.04</p></td>
+</tr>
+<tr class="row-odd"><td><p>krueger2008_DCB_MD_tau40</p></td>
+<td><p>144 / 150</p></td>
+<td><p>11.6 / 11.9</p></td>
+<td><p>+2.4</p></td>
+<td><p>-0.1</p></td>
+<td><p>0.98 / 1.01</p></td>
+</tr>
+<tr class="row-even"><td><p>krueger2008_DCB_MD_tau60</p></td>
+<td><p>179 / 179</p></td>
+<td><p>15.4 / 16.5</p></td>
+<td><p>+7.5</p></td>
+<td><p>-2.0</p></td>
+<td><p>1.02 / 1.12</p></td>
+</tr>
+<tr class="row-odd"><td><p>krueger2008_DCB_UD_tau40</p></td>
+<td><p>176 / 175</p></td>
+<td><p>14.1 / 14.8</p></td>
+<td><p>+4.6</p></td>
+<td><p>-2.5</p></td>
+<td><p>1.02 / 1.10</p></td>
+</tr>
+<tr class="row-even"><td><p>krueger2008_DCB_UD_tau60</p></td>
+<td><p>208 / 206</p></td>
+<td><p>20.3 / 21.5</p></td>
+<td><p>+5.8</p></td>
+<td><p>+0.4</p></td>
+<td><p>1.13 / 1.19</p></td>
+</tr>
+<tr class="row-odd"><td><p>tijs2022_a40_G0.95</p></td>
+<td><p>184 / 186</p></td>
+<td><p>15.2 / 15.9</p></td>
+<td><p>+4.4</p></td>
+<td><p>-1.4</p></td>
+<td><p>1.02 / 1.08</p></td>
+</tr>
+<tr class="row-even"><td><p>tijs2022_a48</p></td>
+<td><p>180 / 178</p></td>
+<td><p>14.9 / 14.8</p></td>
+<td><p>-0.9</p></td>
+<td><p>-4.3</p></td>
+<td><p>0.98 / 1.01</p></td>
+</tr>
+<tr class="row-odd"><td><p>tijs2023_full_weld</p></td>
+<td><p>145 / 150</p></td>
+<td><p>14.7 / 14.2</p></td>
+<td><p>-3.1</p></td>
+<td><p>+1.7</p></td>
+<td><p>1.06 / 1.01</p></td>
+</tr>
+<tr class="row-even"><td><p>tijs2023_weld_center</p></td>
+<td><p>147 / 152</p></td>
+<td><p>12.2 / 12.4</p></td>
+<td><p>+1.0</p></td>
+<td><p>-1.6</p></td>
+<td><p>1.00 / 1.03</p></td>
+</tr>
+<tr class="row-odd"><td><p>tijs2023_weld_center_autoclave</p></td>
+<td><p>173 / 175</p></td>
+<td><p>16.1 / 14.7</p></td>
+<td><p>-8.9</p></td>
+<td><p>-0.4</p></td>
+<td><p>1.11 / 1.02</p></td>
+</tr>
+<tr class="row-even"><td><p>tijs2023_weld_center_standard</p></td>
+<td><p>146 / 155</p></td>
+<td><p>11.8 / 12.6</p></td>
+<td><p>+6.3</p></td>
+<td><p>+4.4</p></td>
+<td><p>0.97 / 0.98</p></td>
+</tr>
+<tr class="row-odd"><td><p>turon2007_le0.125_tau60</p></td>
+<td><p>199 / 197</p></td>
+<td><p>16.8 / 17.6</p></td>
+<td><p>+4.9</p></td>
+<td><p>+0.4</p></td>
+<td><p>1.02 / 1.06</p></td>
+</tr>
+<tr class="row-even"><td><p>turon2007_le0.125_tau60_K1e6</p></td>
+<td><p>134 / 139</p></td>
+<td><p>12.3 / 13.1</p></td>
+<td><p>+6.3</p></td>
+<td><p>+1.9</p></td>
+<td><p>1.02 / 1.06</p></td>
+</tr>
+<tr class="row-odd"><td><p>all 17 cases</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>257.6 / 262.8</p></td>
+<td><p>+2.0</p></td>
+<td><p>-0.4</p></td>
+<td><p>1.04 / 1.06</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def rng(v, f='%.1f'):
+    v = np.asarray(list(v), dtype=float)
+    return (f + ' to ' + f) % (v.min(), v.max())
+
+share_kT = [100*d['penalty']['kT_pan']/sum(d['penalty'].values()) for d in pred.values()] + \
+           [100*d['null']['kT_pan']/sum(d['null'].values()) for d in pred.values()]
+share_tsl = [100*sum(r['t_kC'] + r['t_kG'] for r in pans if r['tsl'])/sum(r['t_kC'] + r['t_kG'] for r in pans)
+             for pans in PR['panels'].values()]
+P_, N_ = [IT[nm + '|penalty'] for nm in names], [IT[nm + '|null-space'] for nm in names]
+fmt_pan = lambda tsl: ', '.join(sorted({'%d x %d terms integrated on %d x %d points' % (r['m'], r['n'], r['nx'], r['ny'])
+                                        for pans in PR['panels'].values() for r in pans if r['tsl'] == tsl}))
+removed = [p['size'] - n['size_r'] for p, n in zip(P_, N_)]
+nnz = [pct(n['nnz_k0'], p['nnz_k0']) for p, n in zip(P_, N_)]
+solve_ = [pct(n['t']['solve'], p['t']['solve']) for p, n in zip(P_, N_)]
+red_ = [per_red(n['t']) for n in N_]
+tZ = [n['t_Z'] for n in N_]
+diff_same, diff = [], []
+it_p = it_n = 0
+for name, d in pred.items():
+    rp = trunc(res[name]['penalty'], d['k'])
+    kT = 0.5*(IT[name + '|penalty']['t']['kT_pan'] + IT[name + '|null-space']['t']['kT_pan'])
+    npn = study.iteration_counts(rp, bond[name])
+    Ts = sum(study.predicted_cost(IT[name + '|null-space'], npn, kT).values())
+    Tp, Tn = sum(d['penalty'].values()), sum(d['null'].values())
+    diff_same.append(pct(Ts, Tp))
+    diff.append(pct(Tn, Tp))
+    it_p += int(np.sum(rp['iters']))
+    it_n += int(np.sum(res[name]['null']['iters']))
+share_res = [100*d[m]['residual']/sum(d[m].values()) for d in pred.values() for m in ('penalty', 'null')]
+share_red = [100*d['null']['reduce']/sum(d['null'].values()) for d in pred.values()]
+it_rest = [pct(rest(n['t']), rest(p['t'])) for p, n in zip(P_, N_)]
+
+meas_diff = [pct(m['tn'], m['tp']) for m in meas.values()]
+ratio_p = [m['tp']/m['cp'] for m in meas.values()]
+ratio_n = [m['tn']/m['cn'] for m in meas.values()]
+per_it = [pct(m['tn']/np.sum(res[nm]['null']['iters']), m['tp']/np.sum(res[nm]['penalty']['iters'])) for nm, m in meas.items()]
+display(Markdown(f'''**Summary of the cost**
+
+- The tangent stiffness of the panels, `kT_pan`, is {rng(share_kT)} % of the predicted cost of a run, and within it the numerical integration of the two cohesive-zone panels, {rng(share_tsl)} % of `kT_pan`: they have {fmt_pan(True)}, against {fmt_pan(False)} for the other panels. This computation is the same with both methods.
+- The null-space method removes {rng(removed, '%d')} of the unknowns, but only {rng(np.negative(nnz))} % of the nonzeros of the system, which are dominated by the full coupling of the cohesive-zone panels by `'SB_TSL'`, a penalty stiffness with both methods. The sparse solution is {rng(np.negative(solve_), '%.0f')} % faster and `get_kC_conn` no longer computes the edge penalties, while $Z^\top K Z$ adds {rng(red_, '%.2f')} s per iteration. The basis $Z$ is built once, in {rng(tZ, '%.3f')} s.
+- With the same iterations, the predicted cost of the null-space runs differs from that of the penalty runs by {rng(diff_same, '%+.2f')} %. The runs differ also by their numbers of iterations, {it_p} for the penalty runs against {it_n} for the null-space runs over the openings compared, giving {rng(diff, '%+.1f')} % case by case: the Newton-Raphson iterations follow slightly different paths, without a systematic trend.
+- Measured under the same conditions, the run time of the null-space method differs from that of the penalty method by {rng(meas_diff, '%+.1f')} % case by case, {rng(per_it, '%+.1f')} % per iteration, and is {TN/3600:.2f} h against {TP/3600:.2f} h for the {len(meas)} cases ({pct(TN, TP):+.1f} %). The ratio measured / predicted is {rng(ratio_p, '%.2f')} for the penalty runs and {rng(ratio_n, '%.2f')} for the null-space runs, {TP/CP:.2f} and {TN/CN:.2f} in total: the profile of one iteration at the peak load predicts the runs to within these factors. The residual is {rng(share_res)} % of the predicted cost, with one trial of the line search per iteration, so that twice as many trials, whose number is not stored, would change the cost of a run by less than that.
+- The connections are a small part of the cost: `reduce`, the only component added by the null-space method, is {rng(share_red)} % of the predicted cost of the null-space runs, and is offset, wholly or in part, by the faster sparse solution and residual: an iteration without `kT_pan` differs by {rng(it_rest, '%+.1f')} % from that of the penalty method. A significant reduction of the cost of these runs must come from the tangent of the panels, the residual and the damage-rate stiffness of the cohesive zone, not from the connections.'''))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<p><strong>Summary of the cost</strong></p>
+<ul class="simple">
+<li><p>The tangent stiffness of the panels, <code class="docutils literal notranslate"><span class="pre">kT_pan</span></code>, is 53.1 to 78.1 % of the predicted cost of a run, and within it the numerical integration of the two cohesive-zone panels, 96.6 to 99.0 % of <code class="docutils literal notranslate"><span class="pre">kT_pan</span></code>: they have 25 x 10 terms integrated on 49 x 19 points, 30 x 10 terms integrated on 59 x 19 points, against 8 x 8 terms integrated on 15 x 15 points for the other panels. This computation is the same with both methods.</p></li>
+<li><p>The null-space method removes 80 to 320 of the unknowns, but only 2.8 to 7.4 % of the nonzeros of the system, which are dominated by the full coupling of the cohesive-zone panels by <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code>, a penalty stiffness with both methods. The sparse solution is 12 to 38 % faster and <code class="docutils literal notranslate"><span class="pre">get_kC_conn</span></code> no longer computes the edge penalties, while <span class="math notranslate nohighlight">\(Z^  op K Z\)</span> adds 0.09 to 0.12 s per iteration. The basis <span class="math notranslate nohighlight">\(Z\)</span> is built once, in 0.008 to 0.033 s.</p></li>
+<li><p>With the same iterations, the predicted cost of the null-space runs differs from that of the penalty runs by -4.22 to +0.97 %. The runs differ also by their numbers of iterations, 2788 for the penalty runs against 2826 for the null-space runs over the openings compared, giving -4.3 to +4.9 % case by case: the Newton-Raphson iterations follow slightly different paths, without a systematic trend.</p></li>
+<li><p>Measured under the same conditions, the run time of the null-space method differs from that of the penalty method by -8.9 to +9.9 % case by case, -10.0 to +7.5 % per iteration, and is 4.38 h against 4.29 h for the 17 cases (+2.0 %). The ratio measured / predicted is 0.97 to 1.13 for the penalty runs and 0.98 to 1.19 for the null-space runs, 1.04 and 1.06 in total: the profile of one iteration at the peak load predicts the runs to within these factors. The residual is 10.1 to 25.7 % of the
+predicted cost, with one trial of the line search per iteration, so that twice as many trials, whose number is not stored, would change the cost of a run by less than that.</p></li>
+<li><p>The connections are a small part of the cost: <code class="docutils literal notranslate"><span class="pre">reduce</span></code>, the only component added by the null-space method, is 1.3 to 2.4 % of the predicted cost of the null-space runs, and is offset, wholly or in part, by the faster sparse solution and residual: an iteration without <code class="docutils literal notranslate"><span class="pre">kT_pan</span></code> differs by -11.2 to +2.2 % from that of the penalty method. A significant reduction of the cost of these runs must come from the tangent of the panels, the residual and the damage-rate stiffness of the cohesive zone,
+not from the connections.</p></li>
+</ul>
+</div>
+</div>
+</section>
+</section>
+<section id="Stamatelos-and-Labeas-(2023):-buckling-of-divided-and-stiffened-plates">
+<h2>Stamatelos and Labeas (2023): buckling of divided and stiffened plates<a class="headerlink" href="#Stamatelos-and-Labeas-(2023):-buckling-of-divided-and-stiffened-plates" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">stamatelos_labeas_2023_multidomain.ipynb</span></code> executed with both methods: <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code> and <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code> strips, <code class="docutils literal notranslate"><span class="pre">'SB'</span></code> bonded sub-laminates and <code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code>/<code class="docutils literal notranslate"><span class="pre">'BFxcte'</span></code> plate blades. The penalty runs use the penalty factors of the notebook, the null-space runs ignore them. The eigenvalues are in N/m, and the single-domain references are those of the notebook. The run times of the notebook, printed below the figure, were measured in the job of the DCB runs, the two methods one after the other.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>path = os.path.join(OUT, 'stamatelos.json')
+S = json.load(open(path)) if os.path.exists(path) else None
+if S is not None:
+    P, N = S['penalty'], S['null-space']
+    rows = ['| model | reference | penalty | diff. (%) | null-space | diff. (%) |', '|---|---|---|---|---|---|']
+    ref = P['ref_sd']
+    for along, func in (('y', 'SSycte'), ('x', 'SSxcte')):
+        for f in ('0.1', '1', '10', '100', '1000'):
+            ev = P['strips'][f'{along}_{f}']
+            rows.append(f"| 3 {func} strips, mode 1, penalty x{f} | {ref[0]:.1f} | {ev[0]:.1f} | {pct(ev[0], ref[0]):+.4f} | | |")
+        evn = N['strips'][f'{along}_1']
+        rows.append(f"| 3 {func} strips, mode 1, null-space | {ref[0]:.1f} | | | {evn[0]:.1f} | {pct(evn[0], ref[0]):+.4f} |")
+    for name, d in P['table2'].items():
+        dn = N['table2'][name]
+        rows.append(f"| Table 2 {name}, 3 SSxcte (N/mm) | {d['sd']:.4f} | {d['Nxx']:.4f} | {pct(d['Nxx'], d['sd']):+.4f} "
+                    f"| {dn['Nxx']:.4f} | {pct(dn['Nxx'], dn['sd']):+.4f} |")
+    for i in range(3):
+        a, b, r = P['table3'][i], N['table3'][i], P['table3_sd'][i]
+        rows.append(f"| Table 3 mode {i + 1}, 3 SSycte | {r:.1f} | {a:.1f} | {pct(a, r):+.4f} | {b:.1f} | {pct(b, r):+.4f} |")
+    mono = P['sb_mono'][0]
+    for k in P['sb']:
+        a, b = P['sb'][k][0], N['sb'][k][0]
+        rows.append(f"| bonded halves, {k}, mode 1 | {mono:.1f} | {a:.1f} | {pct(a, mono):+.4f} | {b:.1f} | {pct(b, mono):+.4f} |")
+    for key, d in P['table45'].items():
+        dn = N['table45'][key]
+        for v in ('edge', 'interior', 'rotated'):
+            if f'{v}_1' in d:
+                rows.append(f"| Tables 4/5 {key}, blade {v} (N/mm) | {d['sd']:.2f} | {d[v + '_1']:.2f} | {pct(d[v + '_1'], d['sd']):+.2f} "
+                            f"| {dn[v + '_1']:.2f} | {pct(dn[v + '_1'], dn['sd']):+.2f} |")
+        if 'edge_100' in d:
+            rows.append(f"| Tables 4/5 {key}, blade edge, penalty x100 | {d['sd']:.2f} | {d['edge_100']:.2f} | {pct(d['edge_100'], d['sd']):+.2f} | | |")
+    display(Markdown('\n'.join(rows)))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>model</p></th>
+<th class="head"><p>reference</p></th>
+<th class="head"><p>penalty</p></th>
+<th class="head"><p>diff. (%)</p></th>
+<th class="head"><p>null-space</p></th>
+<th class="head"><p>diff. (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>3 SSycte strips, mode 1, penalty x0.1</p></td>
+<td><p>14297.9</p></td>
+<td><p>12065.5</p></td>
+<td><p>-15.6134</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>3 SSycte strips, mode 1, penalty x1</p></td>
+<td><p>14297.9</p></td>
+<td><p>14010.3</p></td>
+<td><p>-2.0113</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>3 SSycte strips, mode 1, penalty x10</p></td>
+<td><p>14297.9</p></td>
+<td><p>14268.2</p></td>
+<td><p>-0.2071</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>3 SSycte strips, mode 1, penalty x100</p></td>
+<td><p>14297.9</p></td>
+<td><p>14294.9</p></td>
+<td><p>-0.0208</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>3 SSycte strips, mode 1, penalty x1000</p></td>
+<td><p>14297.9</p></td>
+<td><p>14297.6</p></td>
+<td><p>-0.0020</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>3 SSycte strips, mode 1, null-space</p></td>
+<td><p>14297.9</p></td>
+<td></td>
+<td></td>
+<td><p>14297.9</p></td>
+<td><p>+0.0000</p></td>
+</tr>
+<tr class="row-even"><td><p>3 SSxcte strips, mode 1, penalty x0.1</p></td>
+<td><p>14297.9</p></td>
+<td><p>13269.5</p></td>
+<td><p>-7.1922</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>3 SSxcte strips, mode 1, penalty x1</p></td>
+<td><p>14297.9</p></td>
+<td><p>14250.9</p></td>
+<td><p>-0.3287</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>3 SSxcte strips, mode 1, penalty x10</p></td>
+<td><p>14297.9</p></td>
+<td><p>14293.1</p></td>
+<td><p>-0.0331</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>3 SSxcte strips, mode 1, penalty x100</p></td>
+<td><p>14297.9</p></td>
+<td><p>14297.4</p></td>
+<td><p>-0.0033</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>3 SSxcte strips, mode 1, penalty x1000</p></td>
+<td><p>14297.9</p></td>
+<td><p>14297.8</p></td>
+<td><p>-0.0003</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>3 SSxcte strips, mode 1, null-space</p></td>
+<td><p>14297.9</p></td>
+<td></td>
+<td></td>
+<td><p>14297.9</p></td>
+<td><p>+0.0000</p></td>
+</tr>
+<tr class="row-even"><td><p>Table 2 [0_3/90_3]s, 3 SSxcte (N/mm)</p></td>
+<td><p>27.1520</p></td>
+<td><p>27.1504</p></td>
+<td><p>-0.0059</p></td>
+<td><p>27.1520</p></td>
+<td><p>+0.0000</p></td>
+</tr>
+<tr class="row-odd"><td><p>Table 2 [0_3/90_3/0_3/90_3], 3 SSxcte (N/mm)</p></td>
+<td><p>17.2571</p></td>
+<td><p>17.2564</p></td>
+<td><p>-0.0042</p></td>
+<td><p>17.2571</p></td>
+<td><p>+0.0000</p></td>
+</tr>
+<tr class="row-even"><td><p>Table 2 [0_2/45_2/0_2/45_2/0_2], 3 SSxcte (N/mm)</p></td>
+<td><p>15.9435</p></td>
+<td><p>15.9427</p></td>
+<td><p>-0.0048</p></td>
+<td><p>15.9435</p></td>
+<td><p>+0.0003</p></td>
+</tr>
+<tr class="row-odd"><td><p>Table 2 [0_2/45_2/0_2/-45_2/0_2], 3 SSxcte (N/mm)</p></td>
+<td><p>15.0281</p></td>
+<td><p>15.0274</p></td>
+<td><p>-0.0049</p></td>
+<td><p>15.0281</p></td>
+<td><p>+0.0000</p></td>
+</tr>
+<tr class="row-even"><td><p>Table 2 [0_6/60_6], 3 SSxcte (N/mm)</p></td>
+<td><p>12.1101</p></td>
+<td><p>12.1102</p></td>
+<td><p>+0.0008</p></td>
+<td><p>12.1106</p></td>
+<td><p>+0.0039</p></td>
+</tr>
+<tr class="row-odd"><td><p>Table 3 mode 1, 3 SSycte</p></td>
+<td><p>14297.9</p></td>
+<td><p>14294.9</p></td>
+<td><p>-0.0208</p></td>
+<td><p>14297.9</p></td>
+<td><p>+0.0000</p></td>
+</tr>
+<tr class="row-even"><td><p>Table 3 mode 2, 3 SSycte</p></td>
+<td><p>14655.6</p></td>
+<td><p>14654.7</p></td>
+<td><p>-0.0064</p></td>
+<td><p>14655.6</p></td>
+<td><p>+0.0000</p></td>
+</tr>
+<tr class="row-odd"><td><p>Table 3 mode 3, 3 SSycte</p></td>
+<td><p>23840.2</p></td>
+<td><p>23839.5</p></td>
+<td><p>-0.0029</p></td>
+<td><p>23840.2</p></td>
+<td><p>+0.0002</p></td>
+</tr>
+<tr class="row-even"><td><p>bonded halves, SB, top first, mode 1</p></td>
+<td><p>17317.2</p></td>
+<td><p>17308.6</p></td>
+<td><p>-0.0496</p></td>
+<td><p>17317.2</p></td>
+<td><p>-0.0000</p></td>
+</tr>
+<tr class="row-odd"><td><p>bonded halves, SB, bottom first, mode 1</p></td>
+<td><p>17317.2</p></td>
+<td><p>17308.6</p></td>
+<td><p>-0.0496</p></td>
+<td><p>17317.2</p></td>
+<td><p>+0.0000</p></td>
+</tr>
+<tr class="row-even"><td><p>bonded halves, SB_TSL, top first, mode 1</p></td>
+<td><p>17317.2</p></td>
+<td><p>17308.6</p></td>
+<td><p>-0.0496</p></td>
+<td><p>17308.6</p></td>
+<td><p>-0.0496</p></td>
+</tr>
+<tr class="row-odd"><td><p>bonded halves, SB_TSL, bottom first, mode 1</p></td>
+<td><p>17317.2</p></td>
+<td><p>17308.6</p></td>
+<td><p>-0.0496</p></td>
+<td><p>17308.6</p></td>
+<td><p>-0.0496</p></td>
+</tr>
+<tr class="row-even"><td><p>Tables 4/5 table4/uniform, blade edge (N/mm)</p></td>
+<td><p>119.01</p></td>
+<td><p>119.62</p></td>
+<td><p>+0.51</p></td>
+<td><p>119.75</p></td>
+<td><p>+0.62</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tables 4/5 table4/uniform, blade interior (N/mm)</p></td>
+<td><p>119.01</p></td>
+<td><p>119.78</p></td>
+<td><p>+0.64</p></td>
+<td><p>119.89</p></td>
+<td><p>+0.73</p></td>
+</tr>
+<tr class="row-even"><td><p>Tables 4/5 table4/uniform, blade rotated (N/mm)</p></td>
+<td><p>119.01</p></td>
+<td><p>119.62</p></td>
+<td><p>+0.51</p></td>
+<td><p>119.75</p></td>
+<td><p>+0.62</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tables 4/5 table4/uniform, blade edge, penalty x100</p></td>
+<td><p>119.01</p></td>
+<td><p>119.75</p></td>
+<td><p>+0.62</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Tables 4/5 table4/triangular, blade edge (N/mm)</p></td>
+<td><p>179.21</p></td>
+<td><p>178.33</p></td>
+<td><p>-0.49</p></td>
+<td><p>179.12</p></td>
+<td><p>-0.05</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tables 4/5 table4/triangular, blade interior (N/mm)</p></td>
+<td><p>179.21</p></td>
+<td><p>179.45</p></td>
+<td><p>+0.14</p></td>
+<td><p>179.57</p></td>
+<td><p>+0.20</p></td>
+</tr>
+<tr class="row-even"><td><p>Tables 4/5 table4/triangular, blade rotated (N/mm)</p></td>
+<td><p>179.21</p></td>
+<td><p>178.33</p></td>
+<td><p>-0.49</p></td>
+<td><p>179.12</p></td>
+<td><p>-0.05</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tables 4/5 table4/triangular, blade edge, penalty x100</p></td>
+<td><p>179.21</p></td>
+<td><p>179.11</p></td>
+<td><p>-0.06</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Tables 4/5 table5/uniform, blade edge (N/mm)</p></td>
+<td><p>119.01</p></td>
+<td><p>117.84</p></td>
+<td><p>-0.98</p></td>
+<td><p>117.89</p></td>
+<td><p>-0.95</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tables 4/5 table5/uniform, blade interior (N/mm)</p></td>
+<td><p>119.01</p></td>
+<td><p>117.90</p></td>
+<td><p>-0.94</p></td>
+<td><p>117.93</p></td>
+<td><p>-0.91</p></td>
+</tr>
+<tr class="row-even"><td><p>Tables 4/5 table5/uniform, blade rotated (N/mm)</p></td>
+<td><p>119.01</p></td>
+<td><p>117.84</p></td>
+<td><p>-0.98</p></td>
+<td><p>117.89</p></td>
+<td><p>-0.95</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tables 4/5 table5/uniform, blade edge, penalty x100</p></td>
+<td><p>119.01</p></td>
+<td><p>117.89</p></td>
+<td><p>-0.95</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Tables 4/5 table5/triangular, blade edge (N/mm)</p></td>
+<td><p>179.19</p></td>
+<td><p>175.78</p></td>
+<td><p>-1.91</p></td>
+<td><p>176.59</p></td>
+<td><p>-1.45</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tables 4/5 table5/triangular, blade interior (N/mm)</p></td>
+<td><p>179.19</p></td>
+<td><p>176.89</p></td>
+<td><p>-1.29</p></td>
+<td><p>176.91</p></td>
+<td><p>-1.27</p></td>
+</tr>
+<tr class="row-even"><td><p>Tables 4/5 table5/triangular, blade rotated (N/mm)</p></td>
+<td><p>179.19</p></td>
+<td><p>175.78</p></td>
+<td><p>-1.91</p></td>
+<td><p>176.59</p></td>
+<td><p>-1.45</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tables 4/5 table5/triangular, blade edge, penalty x100</p></td>
+<td><p>179.19</p></td>
+<td><p>176.58</p></td>
+<td><p>-1.46</p></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>if S is not None:
+    heights = np.linspace(0., 9., 10)
+    fig, axes = plt.subplots(1, len(P['figure7']), figsize=(16, 3.2), constrained_layout=True)
+    rows = ['| lamination | max. diff. null-space vs penalty (%) | max. diff. penalty vs BladeStiff1D (%) | max. diff. null-space vs BladeStiff1D (%) |',
+            '|---|---|---|---|']
+    for ax, (name, d) in zip(axes, P['figure7'].items()):
+        dn = N['figure7'][name]
+        pm, pn, sd = map(np.array, (d['P_md'], dn['P_md'], d['P_sd']))
+        ax.plot(heights, sd, 's--', ms=3, mfc='none', color='C1', label='BladeStiff1D')
+        ax.plot(heights, pm, 'o-', ms=3, color='k', label='penalty')
+        ax.plot(heights, pn, 'x--', ms=4, color='C3', label='null-space')
+        ax.set_title(name, fontsize=8)
+        ax.set_xlabel('blade height (mm)', fontsize=8)
+        ax.grid(True, alpha=0.3)
+        rows.append(f"| {name} | {np.abs(pct(pn, pm)).max():.2f} | {np.abs(pct(pm, sd)).max():.1f} | {np.abs(pct(pn, sd)).max():.1f} |")
+    axes[0].set_ylabel('$P_{cr}$ (N)')
+    axes[0].legend(fontsize=7)
+    fig.suptitle('Figure 7 of Stamatelos and Labeas (2023): 11 SSycte strips and 10 BFycte blades')
+    plt.show()
+    display(Markdown('\n'.join(rows)))
+    print('notebook run time: penalty %.0f s, null-space %.0f s' % (P['time'], N['time']))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_conn_method_comparison_20_0.png" src="../_images/notebooks_conn_method_comparison_20_0.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>lamination</p></th>
+<th class="head"><p>max. diff. null-space vs penalty (%)</p></th>
+<th class="head"><p>max. diff. penalty vs BladeStiff1D (%)</p></th>
+<th class="head"><p>max. diff. null-space vs BladeStiff1D (%)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>[0_3/90_3]s</p></td>
+<td><p>0.01</p></td>
+<td><p>1.3</p></td>
+<td><p>1.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>[0_3/90_3/0_3/90_3]</p></td>
+<td><p>0.02</p></td>
+<td><p>1.3</p></td>
+<td><p>1.3</p></td>
+</tr>
+<tr class="row-even"><td><p>[0_2/45_2/0_2/45_2/0_2]</p></td>
+<td><p>0.01</p></td>
+<td><p>1.3</p></td>
+<td><p>1.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>[0_2/45_2/0_2/-45_2/0_2]</p></td>
+<td><p>0.01</p></td>
+<td><p>1.3</p></td>
+<td><p>1.3</p></td>
+</tr>
+<tr class="row-even"><td><p>[0_6/60_6]</p></td>
+<td><p>0.01</p></td>
+<td><p>1.6</p></td>
+<td><p>1.6</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+notebook run time: penalty 81 s, null-space 77 s
+</pre></div></div>
+</div>
+</section>
+<section id="Discussion">
+<h2>Discussion<a class="headerlink" href="#Discussion" title="Link to this heading">#</a></h2>
+<p><strong>DCB.</strong> The 17 cases of 6 notebooks were run to the last opening with both methods, without bisections of the increments:</p>
+<ul class="simple">
+<li><p>the peak loads of the two methods agree within 0.07 %, and the load-opening curves within 0.12 % of the peak load before the peak and 0.15 % after it;</p></li>
+<li><p>the crack growth at the last opening is the same, except for <code class="docutils literal notranslate"><span class="pre">tijs2023_full_weld</span></code>, 0.3 mm longer with the null-space method;</p></li>
+<li><p>the null-space models are slightly stiffer, the initial stiffness by 0.07 % to 0.36 % and the elastic compliances lower by 0.13 % to 0.21 %: the connections <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code> and <code class="docutils literal notranslate"><span class="pre">'SB'</span></code> are exact, while their penalty stiffnesses, 100 times the default of <code class="docutils literal notranslate"><span class="pre">calc_kt_kr</span></code> for the edges, leave a small compliance.</p></li>
+</ul>
+<p>The penalty stiffnesses of <code class="docutils literal notranslate"><span class="pre">dcb_utils.build_dcb</span></code> are therefore adequate for these benchmarks: they change the stiffness by about 0.1 % to 0.4 % and the peak loads by less than 0.07 %, which is negligible for these benchmarks. The null-space method gives these results without a penalty factor to choose.</p>
+<p><strong>Stamatelos and Labeas (2023).</strong> For the strips connected by <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code> or <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code>, the plates of Tables 2 and 3 and the laminates bonded by <code class="docutils literal notranslate"><span class="pre">'SB'</span></code>, the null-space method reproduces the single-domain eigenvalues to within 0.004 %, whereas the penalty results depend on the penalty factor: -15.6 % at 0.1 times the default stiffness of the <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code> strips, -2.0 % at the default and -0.02 % at 100 times the default. For the plate blades connected by <code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code> and <code class="docutils literal notranslate"><span class="pre">'BFxcte'</span></code>, the
+null-space results are the limit of the penalty results, equal to those at 100 times the default penalty within 0.01 %, while the default penalty differs from them by up to 0.46 %. The remaining differences to the <code class="docutils literal notranslate"><span class="pre">BladeStiff1D</span></code> references of Tables 4 and 5, up to 1.5 % with the null-space method and 1.9 % with the default penalty, and of Figure 7, 1.3 % to 1.6 %, are those of the models, not of the connections. The <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code> connection is a penalty stiffness in both cases, and gives the
+same results.</p>
+<p><strong>Cost.</strong> See the summary of the cost above. Timed under the same conditions, one run at a time, the 17 DCB runs take 4.38 h with the null-space method against 4.29 h with the penalty method (+2.0 %), from -8.9 % to +9.9 % case by case, while the profile predicts -4.3 % to +4.9 %; the measured times are 0.97 to 1.19 times the predicted ones, so that the case-by-case differences are within the scatter of the timings. The tangent stiffness of the panels, the same with both methods, is 53 % to 78 %
+of the predicted cost of the DCB runs, almost entirely that of the cohesive-zone panels, and with the same iterations the null-space runs cost from 4.2 % less to 1.0 % more: the product <span class="math notranslate nohighlight">\(\boldsymbol{Z}^\top \boldsymbol{K} \boldsymbol{Z}\)</span> is offset, wholly or in part, by the smaller system and the residual without the edge penalties. The runs of the Stamatelos notebook took 77 s with the null-space method against 81 s with the penalty method, measured once under the same conditions; this
+notebook has many small models and was not profiled.</p>
+<p><strong>Conclusion.</strong> The null-space method gives the results of the penalty method in the limit of an infinite penalty stiffness, with no penalty factor to choose and no loss of conditioning, and at the same cost in the DCB benchmarks, +2 % over the 17 runs, within the scatter of the timings case by case. Where the penalty stiffnesses of the notebooks are large enough, as in the DCB benchmarks, both methods agree within 0.4 %; where they are not, the penalty results depend on the factor, while the
+null-space results do not.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="krueger2012_mmb_benchmark.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Benchmark data: Krueger (2012), NASA/CR-2012-217562</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="test_quadrature_partial_integration_matrix.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Partial integration of a matrix with Gauss-Legendre points</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#DCB:-peak-loads">DCB: peak loads</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#DCB:-load-opening-curves">DCB: load-opening curves</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#DCB:-elastic-compliances">DCB: elastic compliances</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#DCB:-computational-cost">DCB: computational cost</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Cost-of-the-runs">Cost of the runs</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Measured-wall-times">Measured wall times</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Stamatelos-and-Labeas-(2023):-buckling-of-divided-and-stiffened-plates">Stamatelos and Labeas (2023): buckling of divided and stiffened plates</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Discussion">Discussion</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/notebooks/conn_method_comparison.nblink.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

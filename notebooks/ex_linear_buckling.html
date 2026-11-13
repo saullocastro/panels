@@ -1,0 +1,2637 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Linear buckling analysis &#8212; panels 0.16.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../_static/documentation_options.js?v=7de89ed4"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/ex_linear_buckling';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Frequency analysis" href="ex_frequency.html" />
+    <link rel="prev" title="Linear static analysis" href="ex_linear_static.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.16.0" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.16.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Linear buckling analysis</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Linear-buckling-analysis">
+<h1>Linear buckling analysis<a class="headerlink" href="#Linear-buckling-analysis" title="Link to this heading">#</a></h1>
+<p>This example computes the critical loads and buckling modes of plates and cylindrical panels. It first checks the plate model against the classical closed-form solution of an isotropic plate, then analyses laminated plates with simply supported and free edges, and finally computes a pre-buckling stress state from a static analysis.</p>
+<p>In a linear buckling analysis, the pre-buckling state is proportional to a load multiplier <span class="math notranslate nohighlight">\(\lambda\)</span>. The second variation of the total potential energy has a constitutive part, <span class="math notranslate nohighlight">\(\boldsymbol{K}_C\)</span>, and a part proportional to the pre-buckling stresses, the geometric stiffness matrix <span class="math notranslate nohighlight">\(\boldsymbol{K}_G\)</span>. The structure is neutrally stable when</p>
+<div class="math notranslate nohighlight">
+\[(\boldsymbol{K}_C + \lambda \boldsymbol{K}_G)\boldsymbol{c} = \boldsymbol{0},\]</div>
+<p>an eigenvalue problem solved with <code class="docutils literal notranslate"><span class="pre">structsolve.lb</span></code>, which returns the load multipliers <span class="math notranslate nohighlight">\(\lambda\)</span> in increasing order and the buckling modes <span class="math notranslate nohighlight">\(\boldsymbol{c}\)</span>.</p>
+<section id="Constant-pre-buckling-stress-state">
+<h2>Constant pre-buckling stress state<a class="headerlink" href="#Constant-pre-buckling-stress-state" title="Link to this heading">#</a></h2>
+<p>The pre-buckling stress state can be given by the constant stress resultants <code class="docutils literal notranslate"><span class="pre">Nxx</span></code>, <code class="docutils literal notranslate"><span class="pre">Nyy</span></code> and <code class="docutils literal notranslate"><span class="pre">Nxy</span></code> of the <code class="docutils literal notranslate"><span class="pre">Shell</span></code> object, in N/m, negative in compression. <code class="docutils literal notranslate"><span class="pre">Shell.calc_kG</span></code> then integrates <span class="math notranslate nohighlight">\(\boldsymbol{K}_G\)</span> analytically. With <code class="docutils literal notranslate"><span class="pre">Nxx</span> <span class="pre">=</span> <span class="pre">-1</span></code> the load multiplier <span class="math notranslate nohighlight">\(\lambda\)</span> is the critical <span class="math notranslate nohighlight">\(N_{xx}\)</span> in N/m.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%matplotlib inline
+import numpy as np
+import matplotlib.pyplot as plt
+from IPython.display import Markdown, display
+from structsolve import lb, solve
+from panels.shell import Shell
+
+
+def results_table(rows):
+    """Markdown table of (quantity, panels, reference, source) rows"""
+    out = ['| quantity | panels | reference | relative difference | reference source |',
+           '|---|---|---|---|---|']
+    for name, val, ref, src in rows:
+        out.append('| %s | %.6g | %.6g | %+.2e | %s |'
+                   % (name, val, ref, (val - ref)/abs(ref), src))
+    display(Markdown('\n'.join(out)))
+
+
+def plot_modes(shells_vecs, titles, field='w'):
+    """Contour of ``field`` for a list of (shell, Ritz constants)"""
+    fig, axes = plt.subplots(1, len(titles), figsize=(4.5*len(titles), 3),
+                             squeeze=False)
+    for ax, (s, c), title in zip(axes[0], shells_vecs, titles):
+        mesh, fields = s.uvw(c, gridx=101, gridy=61)
+        cf = ax.contourf(mesh['Xs'], mesh['Ys'], fields[field], levels=30,
+                         cmap='coolwarm')
+        fig.colorbar(cf, ax=ax)
+        ax.set_title(title)
+        ax.set_xlabel('$x$ (m)')
+        ax.set_ylabel('$y$ (m)')
+        ax.set_aspect('equal')
+    fig.tight_layout()
+    plt.show()
+</pre></div>
+</div>
+</div>
+<section id="Check-against-the-closed-form-solution-of-an-isotropic-plate">
+<h3>Check against the closed-form solution of an isotropic plate<a class="headerlink" href="#Check-against-the-closed-form-solution-of-an-isotropic-plate" title="Link to this heading">#</a></h3>
+<p>A simply supported isotropic plate of length <span class="math notranslate nohighlight">\(a\)</span> and width <span class="math notranslate nohighlight">\(b\)</span> under a uniform compression <span class="math notranslate nohighlight">\(N_{xx}\)</span> buckles at (Timoshenko and Gere, 1961, Chapter 9)</p>
+<div class="math notranslate nohighlight">
+\[N_{xx,cr} = k \frac{\pi^2 D}{b^2}, \qquad k = \min_m \left(\frac{m b}{a} + \frac{a}{m b}\right)^2, \qquad D = \frac{E h^3}{12(1 - \nu^2)},\]</div>
+<p>with <span class="math notranslate nohighlight">\(m\)</span> half-waves along <span class="math notranslate nohighlight">\(x\)</span>; for <span class="math notranslate nohighlight">\(a/b = 2\)</span>, <span class="math notranslate nohighlight">\(k = 4\)</span> with <span class="math notranslate nohighlight">\(m = 2\)</span>. An isotropic material is given by <code class="docutils literal notranslate"><span class="pre">laminaprop</span> <span class="pre">=</span> <span class="pre">(E,</span> <span class="pre">nu)</span></code>. For a flat isotropic plate the membrane and bending problems are uncoupled, so the in-plane boundary conditions do not change <span class="math notranslate nohighlight">\(\lambda\)</span>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>E, nu, h = 70e9, 0.33, 2e-3
+s = Shell(model='plate_clpt_donnell', a=2., b=1., stack=[0.], plyt=h,
+          laminaprop=(E, nu), m=12, n=12)
+s.Nxx = -1.
+eigvals, eigvecs = lb(s.calc_kC(), s.calc_kG(), silent=True)
+D = E*h**3/(12*(1 - nu**2))
+ms = np.arange(1, 6)
+k = ((ms*s.b/s.a + s.a/(ms*s.b))**2).min()
+Ncr = k*np.pi**2*D/s.b**2
+print('panels: %.4f N/m, closed form: %.4f N/m (k = %.4f)'
+      % (eigvals[0], Ncr, k))
+iso_row = ('isotropic plate, $N_{xx,cr}$ (N/m)', eigvals[0], Ncr,
+           'closed form, Timoshenko and Gere (1961)')
+plot_modes([(s, eigvecs[:, 0])], ['isotropic plate, first mode, $w$'])
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+panels: 2067.4741 N/m, closed form: 2067.4741 N/m (k = 4.0000)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_ex_linear_buckling_3_1.png" src="../_images/notebooks_ex_linear_buckling_3_1.png" />
+</div>
+</div>
+</section>
+<section id="Laminated-plates,-simply-supported">
+<h3>Laminated plates, simply supported<a class="headerlink" href="#Laminated-plates,-simply-supported" title="Link to this heading">#</a></h3>
+<p>For a symmetric laminate without bending-twisting coupling, <span class="math notranslate nohighlight">\(\boldsymbol{B} = \boldsymbol{0}\)</span> and <span class="math notranslate nohighlight">\(D_{16} = D_{26} = 0\)</span> (specially orthotropic), simply supported on all edges (SSSS), the modes are again <span class="math notranslate nohighlight">\(w = \sin(m\pi x/a)\sin(n\pi y/b)\)</span>, and Kassapoglou (2013), Eq. (6.4), p. 126, gives for the compressive loads <span class="math notranslate nohighlight">\(N_x\)</span> and <span class="math notranslate nohighlight">\(N_y\)</span>, positive in compression, and the aspect ratio <span class="math notranslate nohighlight">\(AR = a/b\)</span></p>
+<div class="math notranslate nohighlight">
+\[\pi^2 \left[D_{11} m^4 + 2(D_{12} + 2D_{66}) m^2 n^2 (AR)^2 + D_{22} n^4 (AR)^4\right] = a^2 \left[N_x m^2 + N_y n^2 (AR)^2\right],\]</div>
+<p>minimized over <span class="math notranslate nohighlight">\(m\)</span> and <span class="math notranslate nohighlight">\(n\)</span>; with <span class="math notranslate nohighlight">\(N_y = k N_x\)</span> it is Eq. (6.5), p. 127. In <code class="docutils literal notranslate"><span class="pre">panels</span></code> the compression is a negative <code class="docutils literal notranslate"><span class="pre">Nxx</span></code> or <code class="docutils literal notranslate"><span class="pre">Nyy</span></code>, so with <code class="docutils literal notranslate"><span class="pre">Nxx</span> <span class="pre">=</span> <span class="pre">-1</span></code> the load multiplier <span class="math notranslate nohighlight">\(\lambda\)</span> is <span class="math notranslate nohighlight">\(N_x\)</span> of this equation, and with <code class="docutils literal notranslate"><span class="pre">Nyy</span> <span class="pre">=</span> <span class="pre">-1</span></code> it is <span class="math notranslate nohighlight">\(N_y\)</span> with <span class="math notranslate nohighlight">\(N_x = 0\)</span>. The stiffnesses <span class="math notranslate nohighlight">\(D_{ij}\)</span>, in N m, are those of the <code class="docutils literal notranslate"><span class="pre">ABD</span></code> matrix of the <code class="docutils literal notranslate"><span class="pre">Shell</span></code>.</p>
+<p>The plate of <span class="math notranslate nohighlight">\(2 \times 1\)</span> m first has the cross-ply laminate <span class="math notranslate nohighlight">\([0/90/90/0]_s\)</span> of carbon/epoxy plies of 0.125 mm, for which the equation is exact. Then the laminate <span class="math notranslate nohighlight">\([0/90/-45/+45]_s\)</span>, with <span class="math notranslate nohighlight">\(D_{16}, D_{26} \neq 0\)</span>: for it Kassapoglou (2013, p. 128) uses the same equation, neglecting <span class="math notranslate nohighlight">\(D_{16}\)</span> and <span class="math notranslate nohighlight">\(D_{26}\)</span>, as an approximation that gives “accurate trends and reasonable buckling predictions” when they are small compared with the other terms; the difference to
+<code class="docutils literal notranslate"><span class="pre">panels</span></code>, which keeps them, is the effect of the bending-twisting coupling. The cylindrical shell models with a large radius, <span class="math notranslate nohighlight">\(r = 10^8\)</span> m, give the plate results.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>LAMINA = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+CROSS_PLY = [0, 90, 90, 0, 0, 90, 90, 0]
+QUASI_ISO = [0, 90, -45, +45, +45, -45, 90, 0]
+
+
+def ncr_orthotropic(D, a, b, load, nmax=10):
+    """Kassapoglou (2013), Eq. (6.4): critical load of a specially
+    orthotropic SSSS plate under Nx (load='Nxx') or Ny (load='Nyy')"""
+    m, n = np.meshgrid(np.arange(1, nmax + 1), np.arange(1, nmax + 1))
+    AR = a/b
+    num = np.pi**2*(D[0, 0]*m**4 + 2*(D[0, 1] + 2*D[2, 2])*m**2*n**2*AR**2
+                    + D[1, 1]*n**4*AR**4)
+    den = a**2*(m**2 if load == 'Nxx' else n**2*AR**2)
+    return (num/den).min()
+
+
+def ssss(model, load, stack):
+    s = Shell(model=model, a=2., b=1., r=1.e8, m=12, n=12, plyt=0.125e-3,
+              stack=stack, laminaprop=LAMINA)
+    setattr(s, load, -1.)
+    return s
+
+
+rows = []
+modes = {}
+for name, stack in (('$[0/90/90/0]_s$', CROSS_PLY),
+                    ('$[0/90/-45/+45]_s$', QUASI_ISO)):
+    for model in ['plate_clpt_donnell', 'cylshell_clpt_donnell',
+                  'cylshell_clpt_sanders']:
+        for load in ('Nxx', 'Nyy'):
+            s = ssss(model, load, stack)
+            eigvals, eigvecs = lb(s.calc_kC(), s.calc_kG(), silent=True)
+            D = s.ABD[3:6, 3:6]
+            ref = ncr_orthotropic(D, s.a, s.b, load)
+            print('%-18s %-22s %s: lambda = %.6f N/m, Eq. (6.4): %.6f N/m'
+                  % (name.strip('$'), model, load, eigvals[0], ref))
+            src = ('Kassapoglou (2013), Eq. (6.4), p. 126' if stack is CROSS_PLY
+                   else 'Kassapoglou (2013), Eq. (6.4) without $D_{16}$, $D_{26}$, p. 128')
+            rows.append(('%s, `%s`, $%s$' % (name, model, load), eigvals[0],
+                         ref, src))
+            if model == 'plate_clpt_donnell':
+                modes[(name, load)] = (s, eigvecs[:, 0])
+    print('%s: D16/D11 = %.3f, D26/D22 = %.3f' % (name.strip('$'), D[0, 2]/D[0, 0],
+                                                  D[1, 2]/D[1, 1]))
+results_table(rows)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[0/90/90/0]_s      plate_clpt_donnell     Nxx: lambda = 145.759775 N/m, Eq. (6.4): 145.759775 N/m
+[0/90/90/0]_s      plate_clpt_donnell     Nyy: lambda = 61.865033 N/m, Eq. (6.4): 61.865033 N/m
+[0/90/90/0]_s      cylshell_clpt_donnell  Nxx: lambda = 145.759775 N/m, Eq. (6.4): 145.759775 N/m
+[0/90/90/0]_s      cylshell_clpt_donnell  Nyy: lambda = 61.865033 N/m, Eq. (6.4): 61.865033 N/m
+[0/90/90/0]_s      cylshell_clpt_sanders  Nxx: lambda = 145.759775 N/m, Eq. (6.4): 145.759775 N/m
+[0/90/90/0]_s      cylshell_clpt_sanders  Nyy: lambda = 61.865033 N/m, Eq. (6.4): 61.865033 N/m
+[0/90/90/0]_s: D16/D11 = 0.000, D26/D22 = 0.000
+[0/90/-45/+45]_s   plate_clpt_donnell     Nxx: lambda = 157.538625 N/m, Eq. (6.4): 158.778583 N/m
+[0/90/-45/+45]_s   plate_clpt_donnell     Nyy: lambda = 58.149231 N/m, Eq. (6.4): 58.429696 N/m
+[0/90/-45/+45]_s   cylshell_clpt_donnell  Nxx: lambda = 157.538625 N/m, Eq. (6.4): 158.778583 N/m
+[0/90/-45/+45]_s   cylshell_clpt_donnell  Nyy: lambda = 58.149231 N/m, Eq. (6.4): 58.429696 N/m
+[0/90/-45/+45]_s   cylshell_clpt_sanders  Nxx: lambda = 157.538625 N/m, Eq. (6.4): 158.778583 N/m
+[0/90/-45/+45]_s   cylshell_clpt_sanders  Nyy: lambda = 58.149231 N/m, Eq. (6.4): 58.429696 N/m
+[0/90/-45/+45]_s: D16/D11 = -0.035, D26/D22 = -0.059
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>quantity</p></th>
+<th class="head"><p>panels</p></th>
+<th class="head"><p>reference</p></th>
+<th class="head"><p>relative difference</p></th>
+<th class="head"><p>reference source</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\([0/90/90/0]_s\)</span>, <code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(Nxx\)</span></p></td>
+<td><p>145.76</p></td>
+<td><p>145.76</p></td>
+<td><p>+1.25e-11</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4), p. 126</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\([0/90/90/0]_s\)</span>, <code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(Nyy\)</span></p></td>
+<td><p>61.865</p></td>
+<td><p>61.865</p></td>
+<td><p>+7.24e-15</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4), p. 126</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\([0/90/90/0]_s\)</span>, <code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(Nxx\)</span></p></td>
+<td><p>145.76</p></td>
+<td><p>145.76</p></td>
+<td><p>+1.68e-11</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4), p. 126</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\([0/90/90/0]_s\)</span>, <code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(Nyy\)</span></p></td>
+<td><p>61.865</p></td>
+<td><p>61.865</p></td>
+<td><p>+1.01e-11</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4), p. 126</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\([0/90/90/0]_s\)</span>, <code class="docutils literal notranslate"><span class="pre">cylshell_clpt_sanders</span></code>, <span class="math notranslate nohighlight">\(Nxx\)</span></p></td>
+<td><p>145.76</p></td>
+<td><p>145.76</p></td>
+<td><p>+1.68e-11</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4), p. 126</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\([0/90/90/0]_s\)</span>, <code class="docutils literal notranslate"><span class="pre">cylshell_clpt_sanders</span></code>, <span class="math notranslate nohighlight">\(Nyy\)</span></p></td>
+<td><p>61.865</p></td>
+<td><p>61.865</p></td>
+<td><p>+1.01e-11</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4), p. 126</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\([0/90/-45/+45]_s\)</span>, <code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(Nxx\)</span></p></td>
+<td><p>157.539</p></td>
+<td><p>158.779</p></td>
+<td><p>-7.81e-03</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4) without <span class="math notranslate nohighlight">\(D_{16}\)</span>, <span class="math notranslate nohighlight">\(D_{26}\)</span>, p. 128</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\([0/90/-45/+45]_s\)</span>, <code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(Nyy\)</span></p></td>
+<td><p>58.1492</p></td>
+<td><p>58.4297</p></td>
+<td><p>-4.80e-03</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4) without <span class="math notranslate nohighlight">\(D_{16}\)</span>, <span class="math notranslate nohighlight">\(D_{26}\)</span>, p. 128</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\([0/90/-45/+45]_s\)</span>, <code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(Nxx\)</span></p></td>
+<td><p>157.539</p></td>
+<td><p>158.779</p></td>
+<td><p>-7.81e-03</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4) without <span class="math notranslate nohighlight">\(D_{16}\)</span>, <span class="math notranslate nohighlight">\(D_{26}\)</span>, p. 128</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\([0/90/-45/+45]_s\)</span>, <code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(Nyy\)</span></p></td>
+<td><p>58.1492</p></td>
+<td><p>58.4297</p></td>
+<td><p>-4.80e-03</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4) without <span class="math notranslate nohighlight">\(D_{16}\)</span>, <span class="math notranslate nohighlight">\(D_{26}\)</span>, p. 128</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\([0/90/-45/+45]_s\)</span>, <code class="docutils literal notranslate"><span class="pre">cylshell_clpt_sanders</span></code>, <span class="math notranslate nohighlight">\(Nxx\)</span></p></td>
+<td><p>157.539</p></td>
+<td><p>158.779</p></td>
+<td><p>-7.81e-03</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4) without <span class="math notranslate nohighlight">\(D_{16}\)</span>, <span class="math notranslate nohighlight">\(D_{26}\)</span>, p. 128</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\([0/90/-45/+45]_s\)</span>, <code class="docutils literal notranslate"><span class="pre">cylshell_clpt_sanders</span></code>, <span class="math notranslate nohighlight">\(Nyy\)</span></p></td>
+<td><p>58.1492</p></td>
+<td><p>58.4297</p></td>
+<td><p>-4.80e-03</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4) without <span class="math notranslate nohighlight">\(D_{16}\)</span>, <span class="math notranslate nohighlight">\(D_{26}\)</span>, p. 128</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The cross-ply plate agrees with the exact solution to the digits printed. The quasi-isotropic plate, with <span class="math notranslate nohighlight">\(|D_{16}/D_{11}| = 0.035\)</span> and <span class="math notranslate nohighlight">\(|D_{26}/D_{22}| = 0.059\)</span>, buckles at a load 0.8% (<span class="math notranslate nohighlight">\(N_{xx}\)</span>) and 0.5% (<span class="math notranslate nohighlight">\(N_{yy}\)</span>) lower than the approximation without <span class="math notranslate nohighlight">\(D_{16}\)</span> and <span class="math notranslate nohighlight">\(D_{26}\)</span>: the bending-twisting coupling skews the half-waves, as the mode plots below show, and lowers the critical load, so the approximation is slightly unconservative here.</p>
+</section>
+<section id="Plate-with-one-free-edge">
+<h3>Plate with one free edge<a class="headerlink" href="#Plate-with-one-free-edge" title="Link to this heading">#</a></h3>
+<p>The plate of <span class="math notranslate nohighlight">\(1 \times 0.5\)</span> m with the cross-ply laminate <span class="math notranslate nohighlight">\([0/90/90/0]_s\)</span> has one free edge: <span class="math notranslate nohighlight">\(u\)</span>, <span class="math notranslate nohighlight">\(v\)</span> and <span class="math notranslate nohighlight">\(w\)</span> are released at <span class="math notranslate nohighlight">\(y = b\)</span> (<code class="docutils literal notranslate"><span class="pre">y2u</span></code>, <code class="docutils literal notranslate"><span class="pre">y2v</span></code>, <code class="docutils literal notranslate"><span class="pre">y2w</span></code>) for <span class="math notranslate nohighlight">\(N_{xx}\)</span>, and at <span class="math notranslate nohighlight">\(x = a\)</span> for <span class="math notranslate nohighlight">\(N_{yy}\)</span>; the other three edges are simply supported. The laminate is specially orthotropic, and the problem has an exact solution (Leissa, 1985, Chapter III). With <span class="math notranslate nohighlight">\(w = Y(\eta)\sin(m\pi x/a)\)</span> and <span class="math notranslate nohighlight">\(\eta = y/b\)</span> (Eq. (3.2)), the equilibrium
+equation of the orthotropic plate under a uniform <span class="math notranslate nohighlight">\(N_x\)</span> becomes (Eqs. (3.3), (3.4))</p>
+<div class="math notranslate nohighlight">
+\[Y^{\mathrm{IV}} - A Y^{\mathrm{II}} - B Y = 0, \qquad A = 2 C_2 \pi^2 \rho^2, \qquad B = \pi^2 \rho^2 \left(K_x - C_1 \pi^2 \rho^2\right),\]</div>
+<p>with <span class="math notranslate nohighlight">\(\rho = m b/a\)</span>, the load parameter <span class="math notranslate nohighlight">\(K_x = N_x b^2/D_{22}\)</span>, positive in compression (Eq. (2.11)), <span class="math notranslate nohighlight">\(C_1 = D_{11}/D_{22}\)</span> and <span class="math notranslate nohighlight">\(C_2 = (D_{12} + 2D_{66})/D_{22}\)</span> (Eq. (2.16)). For <span class="math notranslate nohighlight">\(B &gt; 0\)</span>, that is <span class="math notranslate nohighlight">\(N_x &gt; D_{11} (m\pi/a)^2\)</span>, the roots of the auxiliary equation (Eqs. (3.6), (3.7)) are <span class="math notranslate nohighlight">\(\alpha^2 &gt; 0\)</span> and <span class="math notranslate nohighlight">\(-\beta^2 &lt; 0\)</span>, <span class="math notranslate nohighlight">\(\alpha^2, -\beta^2 = (A \pm \sqrt{A^2 + 4B})/2\)</span>, and the solution that satisfies <span class="math notranslate nohighlight">\(w = M_y = 0\)</span> at the simply supported
+edge <span class="math notranslate nohighlight">\(y = 0\)</span> is <span class="math notranslate nohighlight">\(Y = a_1 \sin\beta\eta + a_3 \sinh\alpha\eta\)</span> (Eq. (3.11)). At the free edge <span class="math notranslate nohighlight">\(y = b\)</span>, <span class="math notranslate nohighlight">\(M_y = V_y = 0\)</span> (Eq. (3.41b)), with <span class="math notranslate nohighlight">\(M_y = -(D_{12} w_{,xx} + D_{22} w_{,yy})\)</span> and <span class="math notranslate nohighlight">\(V_y = -(D_{12} + 4D_{66}) w_{,xxy} - D_{22} w_{,yyy}\)</span> (Eqs. (A.38e) and (A.38j) with <span class="math notranslate nohighlight">\(\boldsymbol{B} = \boldsymbol{0}\)</span> and <span class="math notranslate nohighlight">\(D_{16} = D_{26} = 0\)</span>). Nontrivial <span class="math notranslate nohighlight">\(a_1\)</span>, <span class="math notranslate nohighlight">\(a_3\)</span> require</p>
+<div class="math notranslate nohighlight">
+\[\alpha \left(\beta^2 + c\pi^2\rho^2\right)\left(\alpha^2 - d\pi^2\rho^2\right) \sin\beta \cosh\alpha = \beta \left(\alpha^2 - c\pi^2\rho^2\right)\left(\beta^2 + d\pi^2\rho^2\right) \sinh\alpha \cos\beta,\]</div>
+<p>with <span class="math notranslate nohighlight">\(c = D_{12}/D_{22}\)</span> and <span class="math notranslate nohighlight">\(d = (D_{12} + 4D_{66})/D_{22}\)</span>; for an isotropic plate, <span class="math notranslate nohighlight">\(c = \nu\)</span> and <span class="math notranslate nohighlight">\(d = 2 - \nu\)</span>, it is the characteristic equation (3.42) of Leissa (1985). The critical load is the smallest root <span class="math notranslate nohighlight">\(N_x\)</span> over the half-waves <span class="math notranslate nohighlight">\(m\)</span>, found by <code class="docutils literal notranslate"><span class="pre">ncr_sssf</span></code> with a scan of the sign of the determinant and <code class="docutils literal notranslate"><span class="pre">scipy.optimize.brentq</span></code>. The load <span class="math notranslate nohighlight">\(N_{yy}\)</span> with the free edge <span class="math notranslate nohighlight">\(x = a\)</span> is the same problem with <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span>, <span class="math notranslate nohighlight">\(a\)</span> and
+<span class="math notranslate nohighlight">\(b\)</span>, and <span class="math notranslate nohighlight">\(D_{11}\)</span> and <span class="math notranslate nohighlight">\(D_{22}\)</span> exchanged.</p>
+<p>For a long plate, <span class="math notranslate nohighlight">\(a/b &gt; 4\)</span>, Barbero (2017), Eq. (11.16), p. 406, gives the approximation</p>
+<div class="math notranslate nohighlight">
+\[N_{x,cr} = \frac{12 D_{66}}{b^2} + \frac{\pi^2 D_{11}}{a^2},\]</div>
+<p>compared below for a plate of <span class="math notranslate nohighlight">\(2.5 \times 0.5\)</span> m with the same laminate.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from scipy.optimize import brentq
+
+
+def sssf_det(N, D, a, b, m):
+    """Determinant of the SSSF orthotropic plate, free edge y = b, under the
+    compression N (positive), scaled by 1/cosh(alpha); Leissa (1985),
+    Eqs. (3.2)-(3.11), (3.41), (A.38e), (A.38j)"""
+    D11, D12, D22, D66 = D[0, 0], D[0, 1], D[1, 1], D[2, 2]
+    rho2 = (m*np.pi*b/a)**2  # pi^2 rho^2
+    Kx = N*b**2/D22
+    A = 2*(D12 + 2*D66)/D22*rho2
+    B = rho2*(Kx - D11/D22*rho2)
+    root = np.sqrt(A**2 + 4*B)
+    alpha, beta = np.sqrt((A + root)/2), np.sqrt(-(A - root)/2)
+    c, d = D12/D22, (D12 + 4*D66)/D22
+    return (alpha*(beta**2 + c*rho2)*(alpha**2 - d*rho2)*np.sin(beta)
+            - beta*(alpha**2 - c*rho2)*(beta**2 + d*rho2)*np.tanh(alpha)
+            * np.cos(beta))
+
+
+def ncr_sssf(D, a, b, mmax=6):
+    """Smallest critical compression N_x of the SSSF orthotropic plate and
+    its number of half-waves m along x"""
+    out = []
+    for m in range(1, mmax + 1):
+        N = D[0, 0]*(m*np.pi/a)**2*np.logspace(1e-6, 3, 4000)  # B &gt; 0
+        f = np.array([sssf_det(Ni, D, a, b, m) for Ni in N])
+        i = np.nonzero(np.sign(f[:-1]) != np.sign(f[1:]))[0][0]
+        out.append((brentq(sssf_det, N[i], N[i + 1], args=(D, a, b, m),
+                           xtol=1e-14, rtol=1e-14), m))
+    return min(out)
+
+
+def swap_xy(D):
+    """Bending stiffnesses with the axes x and y exchanged"""
+    return D[[1, 0, 2]][:, [1, 0, 2]]
+
+
+def one_free_edge(model, load, a=1., b=0.5):
+    s = Shell(model=model, a=a, b=b, r=1.e8, m=12, n=13, plyt=0.125e-3,
+              stack=CROSS_PLY, laminaprop=LAMINA)
+    edge = 'y2' if load == 'Nxx' else 'x2'
+    for field in 'uvw':
+        setattr(s, edge + field, 1)
+    setattr(s, load, -1.)
+    return s
+
+
+rows = []
+for model in ['plate_clpt_donnell', 'cylshell_clpt_donnell',
+              'cylshell_clpt_sanders']:
+    for load in ('Nxx', 'Nyy'):
+        s = one_free_edge(model, load)
+        eigvals, eigvecs = lb(s.calc_kC(), s.calc_kG(), silent=True)
+        D = s.ABD[3:6, 3:6]
+        if load == 'Nxx':
+            ref, m = ncr_sssf(D, s.a, s.b)
+        else:
+            ref, m = ncr_sssf(swap_xy(D), s.b, s.a)
+        print('%-22s free edge %s: lambda = %.6f N/m, exact: %.6f N/m (m = %d)'
+              % (model, load, eigvals[0], ref, m))
+        rows.append(('`%s`, free edge, $%s$' % (model, load), eigvals[0], ref,
+                     'exact, Leissa (1985), Eqs. (3.2)-(3.11), (3.41)'))
+        if model == 'plate_clpt_donnell':
+            modes[('free edge', load)] = (s, eigvecs[:, 0])
+
+s = one_free_edge('plate_clpt_donnell', 'Nxx', a=2.5, b=0.5)
+eigvals, eigvecs = lb(s.calc_kC(), s.calc_kG(), silent=True)
+D = s.ABD[3:6, 3:6]
+exact, m = ncr_sssf(D, s.a, s.b)
+barbero = 12*D[2, 2]/s.b**2 + np.pi**2*D[0, 0]/s.a**2
+print('long plate a/b = %g: lambda = %.6f N/m, exact: %.6f N/m (m = %d), '
+      'Eq. (11.16): %.6f N/m' % (s.a/s.b, eigvals[0], exact, m, barbero))
+rows.append(('`plate_clpt_donnell`, free edge, $a/b = 5$, $N_{xx}$',
+             eigvals[0], exact, 'exact, Leissa (1985), Eqs. (3.2)-(3.11), (3.41)'))
+rows.append(('`plate_clpt_donnell`, free edge, $a/b = 5$, $N_{xx}$',
+             eigvals[0], barbero, 'Barbero (2017), Eq. (11.16), p. 406'))
+results_table(rows)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+plate_clpt_donnell     free edge Nxx: lambda = 93.126602 N/m, exact: 93.126602 N/m (m = 1)
+plate_clpt_donnell     free edge Nyy: lambda = 213.351178 N/m, exact: 213.351178 N/m (m = 1)
+cylshell_clpt_donnell  free edge Nxx: lambda = 93.126602 N/m, exact: 93.126602 N/m (m = 1)
+cylshell_clpt_donnell  free edge Nyy: lambda = 213.351178 N/m, exact: 213.351178 N/m (m = 1)
+cylshell_clpt_sanders  free edge Nxx: lambda = 93.126602 N/m, exact: 93.126602 N/m (m = 1)
+cylshell_clpt_sanders  free edge Nyy: lambda = 213.351178 N/m, exact: 213.351178 N/m (m = 1)
+long plate a/b = 5: lambda = 32.034959 N/m, exact: 32.034959 N/m (m = 1), Eq. (11.16): 32.055040 N/m
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>quantity</p></th>
+<th class="head"><p>panels</p></th>
+<th class="head"><p>reference</p></th>
+<th class="head"><p>relative difference</p></th>
+<th class="head"><p>reference source</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, free edge, <span class="math notranslate nohighlight">\(Nxx\)</span></p></td>
+<td><p>93.1266</p></td>
+<td><p>93.1266</p></td>
+<td><p>-5.65e-15</p></td>
+<td><p>exact, Leissa (1985), Eqs. (3.2)-(3.11), (3.41)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, free edge, <span class="math notranslate nohighlight">\(Nyy\)</span></p></td>
+<td><p>213.351</p></td>
+<td><p>213.351</p></td>
+<td><p>-4.00e-15</p></td>
+<td><p>exact, Leissa (1985), Eqs. (3.2)-(3.11), (3.41)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>, free edge, <span class="math notranslate nohighlight">\(Nxx\)</span></p></td>
+<td><p>93.1266</p></td>
+<td><p>93.1266</p></td>
+<td><p>+1.48e-13</p></td>
+<td><p>exact, Leissa (1985), Eqs. (3.2)-(3.11), (3.41)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>, free edge, <span class="math notranslate nohighlight">\(Nyy\)</span></p></td>
+<td><p>213.351</p></td>
+<td><p>213.351</p></td>
+<td><p>+7.34e-13</p></td>
+<td><p>exact, Leissa (1985), Eqs. (3.2)-(3.11), (3.41)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cylshell_clpt_sanders</span></code>, free edge, <span class="math notranslate nohighlight">\(Nxx\)</span></p></td>
+<td><p>93.1266</p></td>
+<td><p>93.1266</p></td>
+<td><p>+1.45e-13</p></td>
+<td><p>exact, Leissa (1985), Eqs. (3.2)-(3.11), (3.41)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cylshell_clpt_sanders</span></code>, free edge, <span class="math notranslate nohighlight">\(Nyy\)</span></p></td>
+<td><p>213.351</p></td>
+<td><p>213.351</p></td>
+<td><p>+7.25e-13</p></td>
+<td><p>exact, Leissa (1985), Eqs. (3.2)-(3.11), (3.41)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, free edge, <span class="math notranslate nohighlight">\(a/b = 5\)</span>, <span class="math notranslate nohighlight">\(N_{xx}\)</span></p></td>
+<td><p>32.035</p></td>
+<td><p>32.035</p></td>
+<td><p>+2.66e-14</p></td>
+<td><p>exact, Leissa (1985), Eqs. (3.2)-(3.11), (3.41)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, free edge, <span class="math notranslate nohighlight">\(a/b = 5\)</span>, <span class="math notranslate nohighlight">\(N_{xx}\)</span></p></td>
+<td><p>32.035</p></td>
+<td><p>32.055</p></td>
+<td><p>-6.26e-04</p></td>
+<td><p>Barbero (2017), Eq. (11.16), p. 406</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The first buckling modes of the plate model: the SSSS plates under <span class="math notranslate nohighlight">\(N_{xx}\)</span>, cross-ply and quasi-isotropic, and the plate with the free edge, which buckles with the largest deflection along the free edge.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>plot_modes([modes[('$[0/90/90/0]_s$', 'Nxx')], modes[('$[0/90/-45/+45]_s$', 'Nxx')]],
+           ['$[0/90/90/0]_s$, SSSS, $N_{xx}$', '$[0/90/-45/+45]_s$, SSSS, $N_{xx}$'])
+plot_modes([modes[('free edge', 'Nxx')], modes[('free edge', 'Nyy')]],
+           ['free edge $y = b$, $N_{xx}$', 'free edge $x = a$, $N_{yy}$'])
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_ex_linear_buckling_9_0.png" src="../_images/notebooks_ex_linear_buckling_9_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_ex_linear_buckling_9_1.png" src="../_images/notebooks_ex_linear_buckling_9_1.png" />
+</div>
+</div>
+</section>
+<section id="Combined-loads">
+<h3>Combined loads<a class="headerlink" href="#Combined-loads" title="Link to this heading">#</a></h3>
+<p>Combined load cases are given by more than one stress resultant; the load multiplier scales all of them. Leissa (1985), Table 2.9, p. 42, lists the buckling loads computed by Chamis for simply supported (SSSS) plates under combinations of compression <span class="math notranslate nohighlight">\(N_x\)</span> and shear <span class="math notranslate nohighlight">\(N_{xy}\)</span>, with the Galerkin method and 5 by 5 sine terms (Leissa, 1985, p. 40). The isotropic aluminium plates of that table, with <span class="math notranslate nohighlight">\(E = 10 \times 10^6\)</span> psi, <span class="math notranslate nohighlight">\(\nu = 0.30\)</span> (Table 2.7, p. 41) and the bending
+stiffness <span class="math notranslate nohighlight">\(D = 810.1\)</span> lb in (Table 2.8, p. 41), which gives the thickness <span class="math notranslate nohighlight">\(h\)</span>, have a width <span class="math notranslate nohighlight">\(b = 10\)</span> in and a length <span class="math notranslate nohighlight">\(a = 5\)</span>, 10 and 20 in (the side of 10 in is loaded by <span class="math notranslate nohighlight">\(N_x\)</span>: the pure compression values are those of the closed form of the isotropic plate above). The loads of the table are <span class="math notranslate nohighlight">\(N_x/N_{cr}\)</span> and <span class="math notranslate nohighlight">\(N_{xy}/N_{cr}\)</span> in lb/in, so with <code class="docutils literal notranslate"><span class="pre">Nxx</span></code> and <code class="docutils literal notranslate"><span class="pre">Nxy</span></code> set to these ratios <span class="math notranslate nohighlight">\(\lambda = N_{cr}\)</span>; “pure” shear has <span class="math notranslate nohighlight">\(N_x/N_{cr} = -0.001\)</span> in
+the table, kept here. In-plane boundary conditions do not change <span class="math notranslate nohighlight">\(\lambda\)</span> of a flat isotropic plate.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>E_AL, NU_AL, D_AL = 10.e6, 0.30, 810.1  # psi, -, lb in; Leissa (1985), Tables 2.7, 2.8
+H_AL = (12*(1 - NU_AL**2)*D_AL/E_AL)**(1/3)
+print('thickness h = %.5f in' % H_AL)
+CHAMIS = [  # (a, b) in, (Nx/Ncr, Nxy/Ncr), Ncr in lb/in; Leissa (1985), Table 2.9
+    ((5., 10.), (-1, 0), 500), ((5., 10.), (-1, 1), 479),
+    ((5., 10.), (-0.001, 1), 2104),
+    ((10., 10.), (-1, 0), 320), ((10., 10.), (-1, 1), 277),
+    ((10., 10.), (-0.001, 1), 752),
+    ((20., 10.), (-1, 0), 320), ((20., 10.), (-1, 1), 250),
+    ((20., 10.), (-0.001, 1), 528)]
+rows = []
+for model in ('plate_clpt_donnell', 'cylshell_clpt_donnell'):
+    for (a, b), (nx, nxy), ref in CHAMIS:
+        s = Shell(model=model, a=a, b=b, r=1.e8, m=12, n=12, stack=[0.],
+                  plyt=H_AL, laminaprop=(E_AL, NU_AL))
+        s.Nxx, s.Nxy = nx, nxy
+        eigvals, eigvecs = lb(s.calc_kC(), s.calc_kG(), silent=True)
+        print('%-22s %g x %g in, Nx = %g, Nxy = %g: lambda = %.2f lb/in, '
+              'Table 2.9: %g lb/in' % (model, a, b, nx, nxy, eigvals[0], ref))
+        rows.append(('`%s`, $%g \\times %g$ in, $N_x = %g$, $N_{xy} = %g$'
+                     % (model, a, b, nx, nxy), eigvals[0], ref,
+                     'Chamis, Leissa (1985), Table 2.9, p. 42'))
+results_table(rows)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+thickness h = 0.09600 in
+plate_clpt_donnell     5 x 10 in, Nx = -1, Nxy = 0: lambda = 499.71 lb/in, Table 2.9: 500 lb/in
+plate_clpt_donnell     5 x 10 in, Nx = -1, Nxy = 1: lambda = 478.21 lb/in, Table 2.9: 479 lb/in
+plate_clpt_donnell     5 x 10 in, Nx = -0.001, Nxy = 1: lambda = 2089.98 lb/in, Table 2.9: 2104 lb/in
+plate_clpt_donnell     10 x 10 in, Nx = -1, Nxy = 0: lambda = 319.81 lb/in, Table 2.9: 320 lb/in
+plate_clpt_donnell     10 x 10 in, Nx = -1, Nxy = 1: lambda = 276.15 lb/in, Table 2.9: 277 lb/in
+plate_clpt_donnell     10 x 10 in, Nx = -0.001, Nxy = 1: lambda = 744.65 lb/in, Table 2.9: 752 lb/in
+plate_clpt_donnell     20 x 10 in, Nx = -1, Nxy = 0: lambda = 319.81 lb/in, Table 2.9: 320 lb/in
+plate_clpt_donnell     20 x 10 in, Nx = -1, Nxy = 1: lambda = 248.16 lb/in, Table 2.9: 250 lb/in
+plate_clpt_donnell     20 x 10 in, Nx = -0.001, Nxy = 1: lambda = 523.04 lb/in, Table 2.9: 528 lb/in
+cylshell_clpt_donnell  5 x 10 in, Nx = -1, Nxy = 0: lambda = 499.71 lb/in, Table 2.9: 500 lb/in
+cylshell_clpt_donnell  5 x 10 in, Nx = -1, Nxy = 1: lambda = 478.21 lb/in, Table 2.9: 479 lb/in
+cylshell_clpt_donnell  5 x 10 in, Nx = -0.001, Nxy = 1: lambda = 2089.98 lb/in, Table 2.9: 2104 lb/in
+cylshell_clpt_donnell  10 x 10 in, Nx = -1, Nxy = 0: lambda = 319.81 lb/in, Table 2.9: 320 lb/in
+cylshell_clpt_donnell  10 x 10 in, Nx = -1, Nxy = 1: lambda = 276.15 lb/in, Table 2.9: 277 lb/in
+cylshell_clpt_donnell  10 x 10 in, Nx = -0.001, Nxy = 1: lambda = 744.65 lb/in, Table 2.9: 752 lb/in
+cylshell_clpt_donnell  20 x 10 in, Nx = -1, Nxy = 0: lambda = 319.81 lb/in, Table 2.9: 320 lb/in
+cylshell_clpt_donnell  20 x 10 in, Nx = -1, Nxy = 1: lambda = 248.16 lb/in, Table 2.9: 250 lb/in
+cylshell_clpt_donnell  20 x 10 in, Nx = -0.001, Nxy = 1: lambda = 523.04 lb/in, Table 2.9: 528 lb/in
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>quantity</p></th>
+<th class="head"><p>panels</p></th>
+<th class="head"><p>reference</p></th>
+<th class="head"><p>relative difference</p></th>
+<th class="head"><p>reference source</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(5 \times 10\)</span> in, <span class="math notranslate nohighlight">\(N_x = -1\)</span>, <span class="math notranslate nohighlight">\(N_{xy} = 0\)</span></p></td>
+<td><p>499.71</p></td>
+<td><p>500</p></td>
+<td><p>-5.79e-04</p></td>
+<td><p>Chamis, Leissa (1985), Table 2.9, p. 42</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(5 \times 10\)</span> in, <span class="math notranslate nohighlight">\(N_x = -1\)</span>, <span class="math notranslate nohighlight">\(N_{xy} = 1\)</span></p></td>
+<td><p>478.212</p></td>
+<td><p>479</p></td>
+<td><p>-1.64e-03</p></td>
+<td><p>Chamis, Leissa (1985), Table 2.9, p. 42</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(5 \times 10\)</span> in, <span class="math notranslate nohighlight">\(N_x = -0.001\)</span>, <span class="math notranslate nohighlight">\(N_{xy} = 1\)</span></p></td>
+<td><p>2089.98</p></td>
+<td><p>2104</p></td>
+<td><p>-6.66e-03</p></td>
+<td><p>Chamis, Leissa (1985), Table 2.9, p. 42</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(10 \times 10\)</span> in, <span class="math notranslate nohighlight">\(N_x = -1\)</span>, <span class="math notranslate nohighlight">\(N_{xy} = 0\)</span></p></td>
+<td><p>319.815</p></td>
+<td><p>320</p></td>
+<td><p>-5.79e-04</p></td>
+<td><p>Chamis, Leissa (1985), Table 2.9, p. 42</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(10 \times 10\)</span> in, <span class="math notranslate nohighlight">\(N_x = -1\)</span>, <span class="math notranslate nohighlight">\(N_{xy} = 1\)</span></p></td>
+<td><p>276.151</p></td>
+<td><p>277</p></td>
+<td><p>-3.07e-03</p></td>
+<td><p>Chamis, Leissa (1985), Table 2.9, p. 42</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(10 \times 10\)</span> in, <span class="math notranslate nohighlight">\(N_x = -0.001\)</span>, <span class="math notranslate nohighlight">\(N_{xy} = 1\)</span></p></td>
+<td><p>744.645</p></td>
+<td><p>752</p></td>
+<td><p>-9.78e-03</p></td>
+<td><p>Chamis, Leissa (1985), Table 2.9, p. 42</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(20 \times 10\)</span> in, <span class="math notranslate nohighlight">\(N_x = -1\)</span>, <span class="math notranslate nohighlight">\(N_{xy} = 0\)</span></p></td>
+<td><p>319.815</p></td>
+<td><p>320</p></td>
+<td><p>-5.79e-04</p></td>
+<td><p>Chamis, Leissa (1985), Table 2.9, p. 42</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(20 \times 10\)</span> in, <span class="math notranslate nohighlight">\(N_x = -1\)</span>, <span class="math notranslate nohighlight">\(N_{xy} = 1\)</span></p></td>
+<td><p>248.161</p></td>
+<td><p>250</p></td>
+<td><p>-7.36e-03</p></td>
+<td><p>Chamis, Leissa (1985), Table 2.9, p. 42</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(20 \times 10\)</span> in, <span class="math notranslate nohighlight">\(N_x = -0.001\)</span>, <span class="math notranslate nohighlight">\(N_{xy} = 1\)</span></p></td>
+<td><p>523.036</p></td>
+<td><p>528</p></td>
+<td><p>-9.40e-03</p></td>
+<td><p>Chamis, Leissa (1985), Table 2.9, p. 42</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(5 \times 10\)</span> in, <span class="math notranslate nohighlight">\(N_x = -1\)</span>, <span class="math notranslate nohighlight">\(N_{xy} = 0\)</span></p></td>
+<td><p>499.71</p></td>
+<td><p>500</p></td>
+<td><p>-5.79e-04</p></td>
+<td><p>Chamis, Leissa (1985), Table 2.9, p. 42</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(5 \times 10\)</span> in, <span class="math notranslate nohighlight">\(N_x = -1\)</span>, <span class="math notranslate nohighlight">\(N_{xy} = 1\)</span></p></td>
+<td><p>478.212</p></td>
+<td><p>479</p></td>
+<td><p>-1.64e-03</p></td>
+<td><p>Chamis, Leissa (1985), Table 2.9, p. 42</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(5 \times 10\)</span> in, <span class="math notranslate nohighlight">\(N_x = -0.001\)</span>, <span class="math notranslate nohighlight">\(N_{xy} = 1\)</span></p></td>
+<td><p>2089.98</p></td>
+<td><p>2104</p></td>
+<td><p>-6.66e-03</p></td>
+<td><p>Chamis, Leissa (1985), Table 2.9, p. 42</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(10 \times 10\)</span> in, <span class="math notranslate nohighlight">\(N_x = -1\)</span>, <span class="math notranslate nohighlight">\(N_{xy} = 0\)</span></p></td>
+<td><p>319.815</p></td>
+<td><p>320</p></td>
+<td><p>-5.79e-04</p></td>
+<td><p>Chamis, Leissa (1985), Table 2.9, p. 42</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(10 \times 10\)</span> in, <span class="math notranslate nohighlight">\(N_x = -1\)</span>, <span class="math notranslate nohighlight">\(N_{xy} = 1\)</span></p></td>
+<td><p>276.151</p></td>
+<td><p>277</p></td>
+<td><p>-3.07e-03</p></td>
+<td><p>Chamis, Leissa (1985), Table 2.9, p. 42</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(10 \times 10\)</span> in, <span class="math notranslate nohighlight">\(N_x = -0.001\)</span>, <span class="math notranslate nohighlight">\(N_{xy} = 1\)</span></p></td>
+<td><p>744.645</p></td>
+<td><p>752</p></td>
+<td><p>-9.78e-03</p></td>
+<td><p>Chamis, Leissa (1985), Table 2.9, p. 42</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(20 \times 10\)</span> in, <span class="math notranslate nohighlight">\(N_x = -1\)</span>, <span class="math notranslate nohighlight">\(N_{xy} = 0\)</span></p></td>
+<td><p>319.815</p></td>
+<td><p>320</p></td>
+<td><p>-5.79e-04</p></td>
+<td><p>Chamis, Leissa (1985), Table 2.9, p. 42</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(20 \times 10\)</span> in, <span class="math notranslate nohighlight">\(N_x = -1\)</span>, <span class="math notranslate nohighlight">\(N_{xy} = 1\)</span></p></td>
+<td><p>248.161</p></td>
+<td><p>250</p></td>
+<td><p>-7.36e-03</p></td>
+<td><p>Chamis, Leissa (1985), Table 2.9, p. 42</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(20 \times 10\)</span> in, <span class="math notranslate nohighlight">\(N_x = -0.001\)</span>, <span class="math notranslate nohighlight">\(N_{xy} = 1\)</span></p></td>
+<td><p>523.036</p></td>
+<td><p>528</p></td>
+<td><p>-9.40e-03</p></td>
+<td><p>Chamis, Leissa (1985), Table 2.9, p. 42</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The values of <code class="docutils literal notranslate"><span class="pre">panels</span></code> lie up to 1% below those of the table, most for the shear loads: the Galerkin solution with 5 by 5 terms is not converged in shear, while <code class="docutils literal notranslate"><span class="pre">panels</span></code> with <span class="math notranslate nohighlight">\(12 \times 12\)</span> terms is; for pure compression, the exact value of the closed form, the table is within 0.06%.</p>
+<p>The same loads act on a curved panel: an isotropic aluminium cylindrical panel of <span class="math notranslate nohighlight">\(2 \times 1\)</span> m, radius <span class="math notranslate nohighlight">\(r = 2\)</span> m and thickness 1 mm, with Donnell’s kinematics, simply supported, under <span class="math notranslate nohighlight">\(N_{xx} = N_{xy} = -1\)</span> N/m. Leissa (1985), Figs. 10.10 to 10.19, shows combined loads on curved panels only as curves for infinitely long or clamped panels, so no published value is compared for this panel.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>s = Shell(model='cylshell_clpt_donnell', a=2., b=1., r=2., m=12, n=12,
+          stack=[0.], plyt=1e-3, laminaprop=(70e9, 0.33))
+s.Nxx = -1.
+s.Nxy = -1.
+eigvals, eigvecs = lb(s.calc_kC(), s.calc_kG(), silent=True)
+print('curved panel, first load multipliers:', np.round(eigvals[:4], 3))
+plot_modes([(s, eigvecs[:, 0])], ['curved panel, $N_{xx} = N_{xy} = -\\lambda$, first mode'])
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+curved panel, first load multipliers: [4651.652 4699.137 5531.811 5587.955]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_ex_linear_buckling_13_1.png" src="../_images/notebooks_ex_linear_buckling_13_1.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="Pre-buckling-stress-state-from-a-static-analysis">
+<h2>Pre-buckling stress state from a static analysis<a class="headerlink" href="#Pre-buckling-stress-state-from-a-static-analysis" title="Link to this heading">#</a></h2>
+<p><span class="math notranslate nohighlight">\(\boldsymbol{K}_G\)</span> can also be computed from the Ritz constants <span class="math notranslate nohighlight">\(\boldsymbol{c}_0\)</span> of a linear static solution, <code class="docutils literal notranslate"><span class="pre">Shell.calc_kG(c=c0)</span></code>, which integrates the pre-buckling stress field numerically. The stresses then follow the boundary conditions instead of being assumed constant.</p>
+<p>The plate of <span class="math notranslate nohighlight">\(8 \times 4\)</span> m with the cross-ply laminate <span class="math notranslate nohighlight">\([0/90/90/0]\)</span> is compressed by a load of 1 N/m distributed along <span class="math notranslate nohighlight">\(x = a\)</span>. The in-plane boundary conditions let the edges move: <span class="math notranslate nohighlight">\(u\)</span> is free except at <span class="math notranslate nohighlight">\(x = 0\)</span>, and <span class="math notranslate nohighlight">\(v\)</span> is constrained only along <span class="math notranslate nohighlight">\(x = 0\)</span>. The critical <span class="math notranslate nohighlight">\(N_{xx}\)</span> is computed first with a constant <span class="math notranslate nohighlight">\(N_{xx} = -1\)</span> and then with the pre-buckling state of the static solution under the same load. The laminate is specially orthotropic
+and <span class="math notranslate nohighlight">\(w\)</span> is simply supported at all edges, so both are compared with Kassapoglou (2013), Eq. (6.4). The static state is not exactly uniform: <span class="math notranslate nohighlight">\(v = 0\)</span> along <span class="math notranslate nohighlight">\(x = 0\)</span> restrains the Poisson expansion there, and the critical load from it is 0.03% lower.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def plate_8x4(model, stack=(0, 90, 90, 0)):
+    p = Shell(model=model, a=8., b=4., r=1.e8, m=8, n=9, plyt=0.125e-3,
+              stack=list(stack), laminaprop=LAMINA)
+    p.x1ur = 1
+    p.x2u = p.x2ur = 1
+    p.y1u = p.y1ur = p.y2u = p.y2ur = 1
+    p.x1v = p.x1vr = 0
+    p.x2v = p.x2vr = p.y1v = p.y1vr = p.y2v = p.y2vr = 1
+    return p
+
+
+def lb_constant_and_static(p):
+    p.Nxx = -1.
+    k0 = p.calc_kC(silent=True)
+    eig_cte, _ = lb(k0, p.calc_kG(silent=True), silent=True)
+    p.Nxx = 0.
+    p.add_distr_load_fixed_x(p.a, lambda y: -1., None, None)
+    c0 = solve(k0, p.calc_fext(silent=True), silent=True)
+    eig_static, modes = lb(k0, p.calc_kG(c=c0, silent=True), silent=True)
+    return eig_cte[0], eig_static[0], c0, modes
+
+
+import warnings
+warnings.showwarning = lambda message, category, *args, **kwargs: print(
+    '%s: %s' % (category.__name__, message))
+rows = []
+for model in ['plate_clpt_donnell', 'cylshell_clpt_donnell',
+              'cylshell_clpt_sanders', 'plate_fsdt_donnell',
+              'plate_tsdt_donnell']:
+    p = plate_8x4(model)
+    lbd_cte, lbd_static, c0, modes = lb_constant_and_static(p)
+    ref = ncr_orthotropic(p.ABD[3:6, 3:6], p.a, p.b, 'Nxx')
+    print('%-22s constant Nxx: %.5f, from the static solution: %.5f, '
+          'Eq. (6.4): %.5f N/m' % (model, lbd_cte, lbd_static, ref))
+    rows.append(('`%s`, constant $N_{xx}$' % model, lbd_cte, ref,
+                 'Kassapoglou (2013), Eq. (6.4), p. 126'))
+    rows.append(('`%s`, $N_{xx}$ from static' % model, lbd_static, ref,
+                 'Kassapoglou (2013), Eq. (6.4), p. 126'))
+results_table(rows)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+plate_clpt_donnell     constant Nxx: 1.02217, from the static solution: 1.02184, Eq. (6.4): 1.02217 N/m
+cylshell_clpt_donnell  constant Nxx: 1.02217, from the static solution: 1.02184, Eq. (6.4): 1.02217 N/m
+cylshell_clpt_sanders  constant Nxx: 1.02217, from the static solution: 1.02184, Eq. (6.4): 1.02217 N/m
+DenseFallbackWarning: Linear buckling analysis: the sparse solvers failed (eigsh() in Cayley mode: relative residual 1.54e-03 &gt; 1.0e-03 for the load multiplier 32.08508490251148; eigsh() in Cayley mode with a 10 times larger shift: relative residual 1.48e-01 &gt; 1.0e-03 for the load multiplier 40.96145381616103), using the dense solver eigh() with condensed dofs of size 42 as a last resort
+plate_fsdt_donnell     constant Nxx: 1.02217, from the static solution: 1.02184, Eq. (6.4): 1.02217 N/m
+DenseFallbackWarning: Linear buckling analysis: the sparse solvers failed (eigsh() in Cayley mode: relative residual 1.24e-03 &gt; 1.0e-03 for the load multiplier 32.85094709514503; eigsh() in Cayley mode with a 10 times larger shift: relative residual 8.60e-02 &gt; 1.0e-03 for the load multiplier 32.88827612743054), using the dense solver eigh() with condensed dofs of size 42 as a last resort
+DenseFallbackWarning: Linear buckling analysis: the sparse solvers failed (eigsh() in Cayley mode: relative residual 1.62e-03 &gt; 1.0e-03 for the load multiplier 32.08291269952469; eigsh() in Cayley mode with a 10 times larger shift: relative residual 2.50e-02 &gt; 1.0e-03 for the load multiplier 32.10715582762131), using the dense solver eigh() with condensed dofs of size 42 as a last resort
+plate_tsdt_donnell     constant Nxx: 1.02217, from the static solution: 1.02184, Eq. (6.4): 1.02217 N/m
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>quantity</p></th>
+<th class="head"><p>panels</p></th>
+<th class="head"><p>reference</p></th>
+<th class="head"><p>relative difference</p></th>
+<th class="head"><p>reference source</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, constant <span class="math notranslate nohighlight">\(N_{xx}\)</span></p></td>
+<td><p>1.02217</p></td>
+<td><p>1.02217</p></td>
+<td><p>+4.70e-08</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4), p. 126</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(N_{xx}\)</span> from static</p></td>
+<td><p>1.02184</p></td>
+<td><p>1.02217</p></td>
+<td><p>-3.27e-04</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4), p. 126</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>, constant <span class="math notranslate nohighlight">\(N_{xx}\)</span></p></td>
+<td><p>1.02217</p></td>
+<td><p>1.02217</p></td>
+<td><p>+4.72e-08</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4), p. 126</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>, <span class="math notranslate nohighlight">\(N_{xx}\)</span> from static</p></td>
+<td><p>1.02184</p></td>
+<td><p>1.02217</p></td>
+<td><p>-3.27e-04</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4), p. 126</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cylshell_clpt_sanders</span></code>, constant <span class="math notranslate nohighlight">\(N_{xx}\)</span></p></td>
+<td><p>1.02217</p></td>
+<td><p>1.02217</p></td>
+<td><p>+4.72e-08</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4), p. 126</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cylshell_clpt_sanders</span></code>, <span class="math notranslate nohighlight">\(N_{xx}\)</span> from static</p></td>
+<td><p>1.02184</p></td>
+<td><p>1.02217</p></td>
+<td><p>-3.27e-04</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4), p. 126</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_fsdt_donnell</span></code>, constant <span class="math notranslate nohighlight">\(N_{xx}\)</span></p></td>
+<td><p>1.02217</p></td>
+<td><p>1.02217</p></td>
+<td><p>-8.42e-08</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4), p. 126</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plate_fsdt_donnell</span></code>, <span class="math notranslate nohighlight">\(N_{xx}\)</span> from static</p></td>
+<td><p>1.02184</p></td>
+<td><p>1.02217</p></td>
+<td><p>-3.27e-04</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4), p. 126</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_tsdt_donnell</span></code>, constant <span class="math notranslate nohighlight">\(N_{xx}\)</span></p></td>
+<td><p>1.02217</p></td>
+<td><p>1.02217</p></td>
+<td><p>-6.40e-08</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4), p. 126</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plate_tsdt_donnell</span></code>, <span class="math notranslate nohighlight">\(N_{xx}\)</span> from static</p></td>
+<td><p>1.02184</p></td>
+<td><p>1.02217</p></td>
+<td><p>-3.27e-04</p></td>
+<td><p>Kassapoglou (2013), Eq. (6.4), p. 126</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>For some models, <code class="docutils literal notranslate"><span class="pre">structsolve.lb</span></code> may warn that its sparse eigensolvers did not reach the required accuracy, and then solves the problem with its dense solver instead; the results are not affected.</p>
+<p>With an unsymmetric laminate, <span class="math notranslate nohighlight">\(\boldsymbol{B} \neq \boldsymbol{0}\)</span>, the in-plane load of the static solution also bends the plate and changes the pre-buckling stresses, and the two pre-buckling states give different critical loads; no closed form exists then. For the laminate <span class="math notranslate nohighlight">\([0/90/90/0/-45/+45]\)</span>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>lbd_cte, lbd_static, _, _ = lb_constant_and_static(
+    plate_8x4('plate_clpt_donnell', stack=(0, 90, 90, 0, -45, +45)))
+print('constant Nxx: %.5f N/m, from the static solution: %.5f N/m (%+.2f%%)'
+      % (lbd_cte, lbd_static, 100*(lbd_static/lbd_cte - 1)))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+constant Nxx: 4.47698 N/m, from the static solution: 4.39212 N/m (-1.90%)
+</pre></div></div>
+</div>
+<p>The pre-buckling stress resultant <span class="math notranslate nohighlight">\(N_{xx}\)</span> of the static solution, and the first buckling mode computed with it, for the last model of the cross-ply loop:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>mesh, fields = p.stress(c0, gridx=101, gridy=61)
+fig, ax = plt.subplots(figsize=(5.5, 3))
+cf = ax.contourf(mesh['Xs'], mesh['Ys'], fields['Nxx'], levels=30,
+                 cmap='viridis')
+fig.colorbar(cf, ax=ax)
+ax.set_title('$N_{xx}$ (N/m) of the static solution, `%s`' % p.model)
+ax.set_aspect('equal')
+plt.show()
+plot_modes([(p, modes[:, 0])], ['first mode, $N_{xx}$ from static'])
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_ex_linear_buckling_19_0.png" src="../_images/notebooks_ex_linear_buckling_19_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_ex_linear_buckling_19_1.png" src="../_images/notebooks_ex_linear_buckling_19_1.png" />
+</div>
+</div>
+</section>
+<section id="Discussion">
+<h2>Discussion<a class="headerlink" href="#Discussion" title="Link to this heading">#</a></h2>
+<p>The isotropic plate and the specially orthotropic cross-ply plates agree with the closed forms, with a constant pre-buckling state and with the state of the static solution, for the plate models and for the cylindrical shell models with a large radius. The pre-buckling state of the static solution lowers the critical load by 1.9% for the unsymmetric laminate. The bending-twisting coupling of the quasi-isotropic laminate lowers its critical load below the approximation of Kassapoglou (2013) that
+neglects <span class="math notranslate nohighlight">\(D_{16}\)</span> and <span class="math notranslate nohighlight">\(D_{26}\)</span>. The plate with one free edge agrees with the exact solution of Leissa (1985) to the digits of the solution, and the long plate is 0.06% below the approximation of Barbero (2017). The flat plates under compression and shear agree with the Galerkin solutions listed by Leissa (1985) within 1%; the curved panel under the same loads has no tabulated reference.</p>
+</section>
+<section id="References">
+<h2>References<a class="headerlink" href="#References" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><ol class="upperalpha simple" start="19">
+<li><ol class="upperalpha simple" start="16">
+<li><p>Timoshenko and J. M. Gere, “Theory of Elastic Stability”. 2nd ed., McGraw-Hill, New York, 1961.</p></li>
+</ol>
+</li>
+</ol>
+</li>
+<li><ol class="upperalpha simple" start="3">
+<li><p>Kassapoglou, “Design and Analysis of Composite Structures: With Applications to Aerospace Structures”. 2nd ed., Wiley, Chichester, 2013. <a class="reference external" href="https://doi.org/10.1002/9781118536933">https://doi.org/10.1002/9781118536933</a>.</p></li>
+</ol>
+</li>
+<li><ol class="upperalpha simple">
+<li><ol class="upperalpha simple" start="23">
+<li><p>Leissa, “Buckling of Laminated Composite Plates and Shell Panels”. Report AFWAL-TR-85-3069, Air Force Wright Aeronautical Laboratories, Wright-Patterson Air Force Base, Ohio, 1985.</p></li>
+</ol>
+</li>
+</ol>
+</li>
+<li><ol class="upperalpha simple" start="5">
+<li><ol class="upperalpha simple" start="10">
+<li><p>Barbero, “Introduction to Composite Materials Design”. 3rd ed., CRC Press, Boca Raton, 2017. <a class="reference external" href="https://doi.org/10.1201/9781315296494">https://doi.org/10.1201/9781315296494</a>.</p></li>
+</ol>
+</li>
+</ol>
+</li>
+<li><ol class="upperalpha simple" start="19">
+<li><ol class="upperalpha simple" start="7">
+<li><ol class="upperalpha simple" start="16">
+<li><p>Castro and M. V. Donadon, “Assembly of semi-analytical models to address linear buckling and vibration of stiffened composite panels with debonding defect”. Composite Structures, 160:232-247, 2017. <a class="reference external" href="https://doi.org/10.1016/j.compstruct.2016.10.026">https://doi.org/10.1016/j.compstruct.2016.10.026</a>.</p></li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="ex_linear_static.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Linear static analysis</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="ex_frequency.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Frequency analysis</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Constant-pre-buckling-stress-state">Constant pre-buckling stress state</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Check-against-the-closed-form-solution-of-an-isotropic-plate">Check against the closed-form solution of an isotropic plate</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Laminated-plates,-simply-supported">Laminated plates, simply supported</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Plate-with-one-free-edge">Plate with one free edge</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Combined-loads">Combined loads</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Pre-buckling-stress-state-from-a-static-analysis">Pre-buckling stress state from a static analysis</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Discussion">Discussion</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#References">References</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/notebooks/ex_linear_buckling.nblink.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

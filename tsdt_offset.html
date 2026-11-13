@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Third-order shear deformation theory with a laminate offset &#8212; panels 0.15.0 documentation</title>
+    <title>Third-order shear deformation theory with a laminate offset &#8212; panels 0.16.0 documentation</title>
   
   
   
@@ -37,20 +37,22 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=ef97403f"></script>
+    <script src="_static/documentation_options.js?v=7de89ed4"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tsdt_offset';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Exact connections with the null-space method" href="multidomain_null_space.html" />
-    <link rel="prev" title="Large rotations: total-Lagrangian Kirchhoff-Love plates" href="plate_clpt_tl.html" />
+    <link rel="prev" title="Annular-sector plates" href="annular_clpt.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.15.0" />
+  <meta name="docsearch:version" content="0.16.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -118,7 +120,7 @@
   
   
   
-    <p class="title logo__title">panels 0.15.0 documentation</p>
+    <p class="title logo__title">panels 0.16.0 documentation</p>
   
 </a></div>
     
@@ -216,6 +218,34 @@
 </li>
 
 
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
 <li class=" current active">
   <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
     Third-order shear deformation theory with a laminate offset
@@ -252,92 +282,456 @@
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+  <a class="nav-link dropdown-item nav-internal" href="pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_linear_static.html">
     Linear static analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_linear_buckling.html">
     Linear buckling analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_frequency.html">
     Frequency analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_flutter.html">
     Panel flutter analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_newton_raphson.html">
     Non-linear static analysis with the Newton-Raphson method
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_arc_length.html">
     Non-linear static analysis with the arc-length methods
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_follower_pressure.html">
     Follower (hydrostatic) pressure
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_prescribed_displacements.html">
     Prescribed displacements
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_face_clamp.html">
     Clamped and face-clamped edges
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_cylinder.html">
     Cylinders modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_tstiff2d.html">
     Panels with a T-stiffener modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_wingbox.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_wingbox.html">
     Wing-box modeled as a multi-domain assembly
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_stiffpanelbay.html">
     Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
   </a>
 </li>
 
@@ -352,6 +746,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="changelog.html">
     Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="documentation_levels.html">
+    How the documentation is organised
   </a>
 </li>
 
@@ -522,6 +923,34 @@
 </li>
 
 
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="#" aria-current="page">
     Third-order shear deformation theory with a laminate offset
@@ -558,92 +987,456 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_linear_static.html">
+  <a class="nav-link nav-internal" href="pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_linear_static.html">
     Linear static analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_linear_buckling.html">
     Linear buckling analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_frequency.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_frequency.html">
     Frequency analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_flutter.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_flutter.html">
     Panel flutter analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_newton_raphson.html">
     Non-linear static analysis with the Newton-Raphson method
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_arc_length.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_arc_length.html">
     Non-linear static analysis with the arc-length methods
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_follower_pressure.html">
     Follower (hydrostatic) pressure
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_prescribed_displacements.html">
     Prescribed displacements
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_face_clamp.html">
     Clamped and face-clamped edges
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_cylinder.html">
     Cylinders modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_tstiff2d.html">
     Panels with a T-stiffener modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_multidomain_wingbox.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_wingbox.html">
     Wing-box modeled as a multi-domain assembly
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_stiffpanelbay.html">
     Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
   </a>
 </li>
 
@@ -658,6 +1451,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="changelog.html">
     Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="documentation_levels.html">
+    How the documentation is organised
   </a>
 </li>
 
@@ -849,7 +1649,9 @@ see <code class="xref py py-meth docutils literal notranslate"><span class="pre"
 require the integrals of <span class="math notranslate nohighlight">\(z^5\)</span>, which do not appear in <span class="math notranslate nohighlight">\(\zeta\)</span>. Likewise,
 the mass matrix uses the moments of the density about the mid-surface,
 <span class="math notranslate nohighlight">\(J_n = \int \rho \zeta^n d\zeta\)</span>, <span class="math notranslate nohighlight">\(n = 0, 1, 2, 3, 4, 6\)</span>, see
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kM()</span></code>.</p>
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kM()</span></code>. For free edges the Ritz spaces of the different
+offsets coincide, so that the choice of the reference surface changes
+neither a free homogeneous plate nor its natural frequencies.</p>
 </section>
 <section id="connections-at-the-reference-surface">
 <span id="tsdt-offset-connections"></span><h2>Connections at the reference surface<a class="headerlink" href="#connections-at-the-reference-surface" title="Link to this heading">#</a></h2>
@@ -869,9 +1671,11 @@ w_{,y}\right)\]</div>
 h/2\)</span> they become <span class="math notranslate nohighlight">\(\theta_x = -w_{,x}\)</span> and <span class="math notranslate nohighlight">\(\theta_y = \Phi_y - \phi_y -
 w_{,y}\)</span>. The rotations <span class="math notranslate nohighlight">\(\phi_x, \phi_y\)</span> belong to the mid-surfaces, at the
 coordinates <span class="math notranslate nohighlight">\(z = d\)</span> of each panel, and are not continuous across the
-connection of panels with different offsets. For the FSDT the rotation is
-constant through the thickness, <span class="math notranslate nohighlight">\(\theta = \phi\)</span>, and for the CLPT it is
-<span class="math notranslate nohighlight">\(-w_{,x}\)</span> and <span class="math notranslate nohighlight">\(-w_{,y}\)</span> for any offset: their connections are unchanged.</p>
+connection of panels with different offsets, where they jump by the
+transverse shear term while <span class="math notranslate nohighlight">\(\theta_x\)</span> and <span class="math notranslate nohighlight">\(\theta_y\)</span> are continuous. For
+the FSDT the rotation is constant through the thickness, <span class="math notranslate nohighlight">\(\theta =
+\phi\)</span>, and for the CLPT it is <span class="math notranslate nohighlight">\(-w_{,x}\)</span> and <span class="math notranslate nohighlight">\(-w_{,y}\)</span> for any offset:
+their connections are unchanged.</p>
 </section>
 <section id="prescribed-rotations">
 <span id="tsdt-offset-prescribed-rotations"></span><h2>Prescribed rotations<a class="headerlink" href="#prescribed-rotations" title="Link to this heading">#</a></h2>
@@ -887,30 +1691,11 @@ the terms of the transverse shear strains, and for <span class="math notranslate
 prescribed rotations are <span class="math notranslate nohighlight">\(-w_{,x}\)</span> and <span class="math notranslate nohighlight">\(\Phi_y - \phi_y - w_{,y}\)</span>. For the
 FSDT, and for the TSDT with <span class="math notranslate nohighlight">\(d = 0\)</span>, the prescribed rotations are <span class="math notranslate nohighlight">\(\phi_x\)</span>
 and <span class="math notranslate nohighlight">\(\Phi_y\)</span>, as before. The penalty method,
-<code class="docutils literal notranslate"><span class="pre">pd_method='penalty'</span></code>, does not prescribe rotations.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'model'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'plate_tsdt_donnell'</span><span class="p">,</span>
-                                   <span class="s1">'cylshell_tsdt_sanders'</span><span class="p">])</span>
-<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'kind'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'point'</span><span class="p">,</span> <span class="s1">'line'</span><span class="p">])</span>
-<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'comp'</span><span class="p">,</span> <span class="p">[</span><span class="n">PHIX</span><span class="p">,</span> <span class="n">PHIY</span><span class="p">])</span>
-<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'offset'</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.3</span><span class="o">*</span><span class="n">H</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4</span><span class="o">*</span><span class="n">H</span><span class="p">,</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">H</span><span class="p">])</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">test_prescribed_rotation_with_offset</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">comp</span><span class="p">,</span> <span class="n">offset</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""Pressure loaded panel with a prescribed rotation, at a point or</span>
-<span class="sd">    along an edge: the rotation at the reference surface evaluated from the</span>
-<span class="sd">    field is the prescribed value, not the rotation `\phi` at the</span>
-<span class="sd">    mid-surface, which differs by `\alpha \gamma` with the transverse shear</span>
-<span class="sd">    strain `\gamma \neq 0`"""</span>
-    <span class="n">p</span> <span class="o">=</span> <span class="n">_shell</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
-    <span class="n">p</span><span class="o">.</span><span class="n">add_pressure_load</span><span class="p">(</span><span class="o">-</span><span class="mf">2.e5</span><span class="p">)</span>
-    <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">_prescribe</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">comp</span><span class="p">,</span> <span class="n">THETA</span><span class="p">)</span>
-    <span class="n">md</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">([</span><span class="n">p</span><span class="p">],</span> <span class="n">conn</span><span class="o">=</span><span class="p">[],</span> <span class="n">pd_method</span><span class="o">=</span><span class="s1">'null-space'</span><span class="p">)</span>
-    <span class="n">c</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">linear_static</span><span class="p">()</span>
-    <span class="n">thx</span><span class="p">,</span> <span class="n">thy</span><span class="p">,</span> <span class="n">phix</span><span class="p">,</span> <span class="n">phiy</span> <span class="o">=</span> <span class="n">_rotations</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">)</span>
-    <span class="n">theta</span><span class="p">,</span> <span class="n">phi</span> <span class="o">=</span> <span class="p">(</span><span class="n">thx</span><span class="p">,</span> <span class="n">phix</span><span class="p">)</span> <span class="k">if</span> <span class="n">comp</span> <span class="o">==</span> <span class="n">PHIX</span> <span class="k">else</span> <span class="p">(</span><span class="n">thy</span><span class="p">,</span> <span class="n">phiy</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="o">*</span><span class="n">THETA</span><span class="p">)</span>
-    <span class="c1"># the shear strain is not zero at the prescription, phi != theta</span>
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">phi</span> <span class="o">-</span> <span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">1e-3</span><span class="o">*</span><span class="n">THETA</span>
-</pre></div>
-</div>
+<code class="docutils literal notranslate"><span class="pre">pd_method='penalty'</span></code>, does not prescribe rotations. With a rotation
+prescribed at a point or along an edge, the rotation at the reference
+surface evaluated from the fields therefore equals the prescribed value,
+whereas the rotation at the mid-surface differs from it by the transverse
+shear term.</p>
 </section>
 <section id="clamped-edges">
 <span id="tsdt-offset-clamped-edges"></span><h2>Clamped edges<a class="headerlink" href="#clamped-edges" title="Link to this heading">#</a></h2>
@@ -924,87 +1709,9 @@ edge. The face clamp, <span class="math notranslate nohighlight">\(u = 0\)</span
 w_{,x}/2\)</span> and <span class="math notranslate nohighlight">\(u = -(d/2)(1 - 4 d^2/h^2) w_{,x}\)</span>, i.e. <span class="math notranslate nohighlight">\(u(d) = 0\)</span> at the
 mid-surface and <span class="math notranslate nohighlight">\(\hat{\gamma}_{xz} = 3 w_{,x}/2\)</span>, leaving the section free
 to warp, see <a class="reference internal" href="boundary_conditions.html#boundary-conditions-face-clamp"><span class="std std-ref">Face-clamped edges</span></a>. Both clamps are
-properties of the physical section and do not depend on the offset:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_face_clamp_does_not_depend_on_the_reference_surface</span><span class="p">():</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""The faces are physical surfaces: the face-clamped homogeneous plate</span>
-<span class="sd">    gives the same deflection for the reference surface at the</span>
-<span class="sd">    mid-surface, `d = 0`, and at `d = 0.3 h` or `d = h/2`, as the planar</span>
-<span class="sd">    clamp of the flags"""</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="s1">'plate_tsdt_donnell'</span>
-    <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
-    <span class="n">res</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.3</span><span class="o">*</span><span class="n">H</span><span class="p">,</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">H</span><span class="p">):</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span>
-            <span class="n">face_clamp</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">static</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-        <span class="n">t</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
-        <span class="n">clamp_by_flags</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">'x1'</span><span class="p">)</span>
-        <span class="n">clamp_by_flags</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">'x2'</span><span class="p">)</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">ct</span> <span class="o">=</span> <span class="n">static</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
-        <span class="n">res</span><span class="p">[</span><span class="n">offset</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">fields</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">xs</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">ys</span><span class="o">.</span><span class="n">ravel</span><span class="p">())[</span><span class="s1">'w'</span><span class="p">],</span>
-                       <span class="n">fields</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">ct</span><span class="p">,</span> <span class="n">xs</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">ys</span><span class="o">.</span><span class="n">ravel</span><span class="p">())[</span><span class="s1">'w'</span><span class="p">])</span>
-    <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.3</span><span class="o">*</span><span class="n">H</span><span class="p">,</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">H</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="n">offset</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">res</span><span class="p">[</span><span class="mf">0.</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">res</span><span class="p">[</span><span class="mf">0.</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.99</span><span class="o">*</span><span class="n">res</span><span class="p">[</span><span class="mf">0.</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-</pre></div>
-</div>
-</section>
-<section id="example">
-<span id="tsdt-offset-example"></span><h2>Example<a class="headerlink" href="#example" title="Link to this heading">#</a></h2>
-<p>Two plates with the offsets <span class="math notranslate nohighlight">\(d_1 = 0\)</span> and <span class="math notranslate nohighlight">\(d_2\)</span>, connected along <span class="math notranslate nohighlight">\(x =
-x_s\)</span> with the null-space method and loaded by a pressure, have continuous
-rotations at the reference surface, whereas the rotations at the
-mid-surfaces jump across the connection:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'d2'</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.3</span><span class="o">*</span><span class="n">H</span><span class="p">,</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">H</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">H</span><span class="p">])</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">test_reference_rotation_continuous_with_different_offsets</span><span class="p">(</span><span class="n">d2</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""With the null-space method the rotations at the common reference</span>
-<span class="sd">    surface are continuous across the edge, not those at the mid-surfaces,</span>
-<span class="sd">    which differ by `-\alpha \gamma_{xz}` for `d_1 \neq d_2`"""</span>
-    <span class="n">md</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="o">=</span> <span class="n">_two_plates</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">conn_method</span><span class="o">=</span><span class="s1">'null-space'</span><span class="p">)</span>
-    <span class="n">p1</span><span class="o">.</span><span class="n">add_pressure_load</span><span class="p">(</span><span class="o">-</span><span class="mf">1.e4</span><span class="p">)</span>
-    <span class="n">p2</span><span class="o">.</span><span class="n">add_pressure_load</span><span class="p">(</span><span class="o">-</span><span class="mf">1.e4</span><span class="p">)</span>
-    <span class="n">K</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">())</span>
-    <span class="n">c</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">solve</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">md</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">calc_fext</span><span class="p">()),</span> <span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-    <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
-    <span class="n">th1x</span><span class="p">,</span> <span class="n">th1y</span><span class="p">,</span> <span class="n">phi1x</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_rotations</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">ys</span><span class="p">,</span> <span class="n">p1</span><span class="o">.</span><span class="n">a</span><span class="p">),</span> <span class="n">ys</span><span class="p">)</span>
-    <span class="n">th2x</span><span class="p">,</span> <span class="n">th2y</span><span class="p">,</span> <span class="n">phi2x</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_rotations</span><span class="p">(</span><span class="n">p2</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">ys</span><span class="p">),</span> <span class="n">ys</span><span class="p">)</span>
-    <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">th1x</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-    <span class="k">assert</span> <span class="n">scale</span> <span class="o">&gt;</span> <span class="mi">0</span>
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">th1x</span><span class="p">,</span> <span class="n">th2x</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-9</span><span class="o">*</span><span class="n">scale</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">th1y</span><span class="p">,</span> <span class="n">th2y</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-9</span><span class="o">*</span><span class="n">scale</span><span class="p">)</span>
-    <span class="c1"># the rotations at the mid-surfaces are not continuous</span>
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">phi1x</span> <span class="o">-</span> <span class="n">phi2x</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">1e-3</span><span class="o">*</span><span class="n">scale</span>
-</pre></div>
-</div>
-<p>and two plates with the same offset reproduce the single plate:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'conn_method'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'penalty'</span><span class="p">,</span> <span class="s1">'null-space'</span><span class="p">])</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">test_same_offset_split_plate_equals_single_plate</span><span class="p">(</span><span class="n">conn_method</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""Two panels with the same offset reproduce the single panel"""</span>
-    <span class="n">d</span> <span class="o">=</span> <span class="mf">0.3</span><span class="o">*</span><span class="n">H</span>
-    <span class="n">md</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="o">=</span> <span class="n">_two_plates</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">conn_method</span><span class="o">=</span><span class="n">conn_method</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">conn_method</span> <span class="o">==</span> <span class="s1">'null-space'</span><span class="p">:</span>
-        <span class="n">K</span><span class="p">,</span> <span class="n">M</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">()),</span> <span class="n">md</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">calc_kM</span><span class="p">(</span><span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">K</span><span class="p">,</span> <span class="n">M</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">(),</span> <span class="n">md</span><span class="o">.</span><span class="n">calc_kM</span><span class="p">(</span><span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">omegas</span> <span class="o">=</span> <span class="n">_frequencies</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
-    <span class="n">single</span> <span class="o">=</span> <span class="n">_plate</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="s1">'SSSS'</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
-    <span class="n">ref</span> <span class="o">=</span> <span class="n">_frequencies</span><span class="p">(</span><span class="n">single</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">(),</span> <span class="n">single</span><span class="o">.</span><span class="n">calc_kM</span><span class="p">(),</span> <span class="mi">6</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">omegas</span><span class="p">,</span> <span class="n">ref</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>For a free homogeneous plate, the choice of the reference surface does not
-change the structure, and the natural frequencies do not depend on the
-offset:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_free_plate_frequencies_do_not_depend_on_the_reference_surface</span><span class="p">():</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""A homogeneous free plate is the same structure for any choice of the</span>
-<span class="sd">    reference surface, whose Ritz spaces coincide for free edges"""</span>
-    <span class="n">f0</span> <span class="o">=</span> <span class="n">_free_plate_freqs</span><span class="p">(</span><span class="mf">0.</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.013</span><span class="p">,</span> <span class="mf">0.025</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">_free_plate_freqs</span><span class="p">(</span><span class="n">offset</span><span class="p">),</span> <span class="n">f0</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">)</span>
-</pre></div>
-</div>
+properties of the physical section and do not depend on the offset: the
+deflections of a homogeneous plate clamped either way on two opposite
+edges do not depend on the offset, and the planar clamp is the stiffer one.</p>
 </section>
 </section>
 
@@ -1019,12 +1726,12 @@ offset:</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="plate_clpt_tl.html"
+       href="annular_clpt.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Large rotations: total-Lagrangian Kirchhoff-Love plates</p>
+        <p class="prev-next-title">Annular-sector plates</p>
       </div>
     </a>
     <a class="right-next"
@@ -1060,7 +1767,6 @@ offset:</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#connections-at-the-reference-surface">Connections at the reference surface</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prescribed-rotations">Prescribed rotations</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#clamped-edges">Clamped edges</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example">Example</a></li>
 </ul>
   </nav></div>
 

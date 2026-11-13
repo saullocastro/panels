@@ -1,0 +1,4132 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Axial buckling of cylinders with integral blade stringers: Card and Jones (1966) &#8212; panels 0.16.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../_static/documentation_options.js?v=7de89ed4"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/card1966_blade_cylinder_buckling';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)" href="weller1977_blade_cylinder_buckling.html" />
+    <link rel="prev" title="Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)" href="egle1968_few_stringer_cylinder_vibration.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.16.0" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.16.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Axial-buckling-of-cylinders-with-integral-blade-stringers:-Card-and-Jones-(1966)">
+<h1>Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)<a class="headerlink" href="#Axial-buckling-of-cylinders-with-integral-blade-stringers:-Card-and-Jones-(1966)" title="Link to this heading">#</a></h1>
+<ol class="upperalpha simple" start="13">
+<li><ol class="upperalpha simple" start="6">
+<li><p>Card and R. M. Jones, <em>Experimental and theoretical results for buckling of eccentrically stiffened cylinders</em>, NASA TN D-3639, October 1966 (NTRS 19660027866).</p></li>
+</ol>
+</li>
+</ol>
+<p>Card and Jones tested in axial compression twelve longitudinally stiffened aluminium cylinders, in pairs with the stiffeners outside (external) or inside (internal) the skin. Cylinders 1 to 4 have integral rectangular (blade) stringers machined from 3/8 in plate, the configuration of this notebook; cylinders 5 to 12 have riveted Z stringers. For each cylinder their Table I gives the experimental buckling load and number of circumferential waves, and the buckling load of a smeared-stiffener
+theory for clamped and for simply supported ends (Galerkin solutions with a membrane pre-buckling state, Appendix A and Block, Card and Mikulas, NASA TN D-2960, 1965). The externally stiffened cylinders carried more than twice the load of the internally stiffened ones.</p>
+<p>This notebook models cylinders 1 to 4 with <code class="docutils literal notranslate"><span class="pre">panels</span></code>, with the skin as curved panels between the stringers and each stringer as a flat plate strip, a <code class="docutils literal notranslate"><span class="pre">MultiDomain</span></code> assembly, and compares the linear buckling loads with the test and with the smeared theory. The same assembly is used for the vibration tests of Sewall and Naumann (1968) in <code class="docutils literal notranslate"><span class="pre">sewall1968_blade_cylinder_vibration.ipynb</span></code>, through the module <code class="docutils literal notranslate"><span class="pre">blade_cylinder_utils.py</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%matplotlib inline
+
+import numpy as np
+import matplotlib.pyplot as plt
+from IPython.display import Markdown, display
+
+import blade_cylinder_utils as bu
+from blade_cylinder_utils import IN, LBF, PSI
+
+
+def pct(value, ref):
+    return 100*(value - ref)/ref
+
+
+def markdown_table(header, rows):
+    out = ['| ' + ' | '.join(header) + ' |', '|' + '---|'*len(header)]
+    out += ['| ' + ' | '.join(str(c) for c in row) + ' |' for row in rows]
+    return Markdown('\n'.join(out))
+</pre></div>
+</div>
+</div>
+<section id="Test-data">
+<h2>Test data<a class="headerlink" href="#Test-data" title="Link to this heading">#</a></h2>
+<p>Table I (p. 7) of the report, cylinders 1 to 4, all of 2024-T351 aluminium alloy with <span class="math notranslate nohighlight">\(E = 10.5 \times 10^3\)</span> ksi and <span class="math notranslate nohighlight">\(\mu = 0.32\)</span> (footnote of Table I): skin thickness <span class="math notranslate nohighlight">\(t\)</span>, length <span class="math notranslate nohighlight">\(L\)</span>, radius of the middle surface <span class="math notranslate nohighlight">\(R\)</span>, area of the stiffened cross-section <span class="math notranslate nohighlight">\(A_t\)</span> (by weighing, p. 5), experimental buckling load <span class="math notranslate nohighlight">\(\bar{P}_e\)</span>, average stress <span class="math notranslate nohighlight">\(\bar{\sigma}_e\)</span>, experimental number of circumferential waves <span class="math notranslate nohighlight">\(n_e\)</span>, and the buckling loads per unit length
+of circumference <span class="math notranslate nohighlight">\(\bar{N} = \bar{P}/(2\pi R)\)</span> of the test (<span class="math notranslate nohighlight">\(\bar{N}_e\)</span>) and of the theory for clamped (<span class="math notranslate nohighlight">\(\bar{N}_c\)</span>) and simply supported (<span class="math notranslate nohighlight">\(\bar{N}_s\)</span>) ends.</p>
+<p>The headers of the columns <span class="math notranslate nohighlight">\(\bar{N}\)</span> of Table I read kips/in. and MN/m, but the values are in lb/in and kN/m: for cylinder 1, <span class="math notranslate nohighlight">\(112.6\)</span> kips <span class="math notranslate nohighlight">\(/(2\pi \times 9.55\)</span> in<span class="math notranslate nohighlight">\() = 1877\)</span> lb/in, the printed value, and <span class="math notranslate nohighlight">\(1877\)</span> lb/in <span class="math notranslate nohighlight">\(= 328.7\)</span> kN/m, printed 329 (derived). The values in lb/in are used below.</p>
+<p>Fig. 2(b) (p. 6) gives the stringer: width 0.097 in (0.246 cm), depth 0.33 in (0.84 cm) from the stringer tip to the skin surface opposite the stringer (see below), fillet radius 0.03 in (0.08 cm), spacing 1.00 in (2.54 cm); the number of stringers is not stated, <span class="math notranslate nohighlight">\(2\pi \times 9.55/1.00 = 60.0\)</span> (derived), so 60.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>E_KSI, NU = 10.5e3, 0.32
+E = E_KSI*1e3*PSI
+R_IN = 9.55
+NSTIFF = 60
+# Fig. 2(b) (p. 6): stringer width, total depth (tip to the skin surface
+# opposite the stringer, skin included) and fillet radius, in
+WIDTH, DEPTH, FILLET = 0.097, 0.33, 0.03
+# Card and Jones (1966), Table I(a) (p. 7): side, t in, L in, A_t in^2, P_e kips,
+# sigma_e ksi, n_e, N_e, N_c, N_s lb/in (headed kips/in.)
+TABLE_I = {
+    1: ('external', 0.0283, 38.00, 3.69, 112.6, 30.5, 6, 1877, 2036, 1145),
+    2: ('internal', 0.0277, 38.00, 3.72, 48.0, 12.9, 6, 800, 997, 687),
+    3: ('external', 0.0275, 23.75, 3.70, 127.2, 34.4, 7, 2120, 2595, 1326),
+    4: ('internal', 0.0280, 23.75, 3.63, 58.0, 16.0, 6, 965, 1226, 722),
+}
+# Table I(b), SI: P_e kN, N_e, N_c, N_s kN/m (headed MN/m)
+TABLE_I_SI = {1: (500, 329, 357, 200), 2: (214, 140, 175, 120),
+              3: (566, 371, 454, 232), 4: (258, 169, 215, 127)}
+print('E = %.1f ksi = %.1f GPa (Table I(b): 72 400 MN/m^2)' % (E_KSI, E/1e9))
+rows = []
+for cyl, (side, t, L, At, Pe, se, ne, Ne, Nc, Ns) in TABLE_I.items():
+    rows.append([cyl, side, t, L, At, Pe, ne, Ne, Nc, Ns,
+                 '%.0f (%d)' % (Pe*1e3/(2*np.pi*R_IN), Ne),
+                 '%.1f (%d)' % (Ne*LBF/IN/1e3, TABLE_I_SI[cyl][1])])
+display(markdown_table(['cyl.', 'stringers', 't, in', 'L, in', 'A_t, in^2', 'P_e, kips', 'n_e',
+                        'N_e', 'N_c', 'N_s', 'P_e/(2 pi R), lb/in (N_e)', 'N_e, kN/m (SI table)'], rows))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+E = 10500.0 ksi = 72.4 GPa (Table I(b): 72 400 MN/m^2)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>cyl.</p></th>
+<th class="head"><p>stringers</p></th>
+<th class="head"><p>t, in</p></th>
+<th class="head"><p>L, in</p></th>
+<th class="head"><p>A_t, in^2</p></th>
+<th class="head"><p>P_e, kips</p></th>
+<th class="head"><p>n_e</p></th>
+<th class="head"><p>N_e</p></th>
+<th class="head"><p>N_c</p></th>
+<th class="head"><p>N_s</p></th>
+<th class="head"><p>P_e/(2 pi R), lb/in (N_e)</p></th>
+<th class="head"><p>N_e, kN/m (SI table)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>external</p></td>
+<td><p>0.0283</p></td>
+<td><p>38.0</p></td>
+<td><p>3.69</p></td>
+<td><p>112.6</p></td>
+<td><p>6</p></td>
+<td><p>1877</p></td>
+<td><p>2036</p></td>
+<td><p>1145</p></td>
+<td><p>1877 (1877)</p></td>
+<td><p>328.7 (329)</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>internal</p></td>
+<td><p>0.0277</p></td>
+<td><p>38.0</p></td>
+<td><p>3.72</p></td>
+<td><p>48.0</p></td>
+<td><p>6</p></td>
+<td><p>800</p></td>
+<td><p>997</p></td>
+<td><p>687</p></td>
+<td><p>800 (800)</p></td>
+<td><p>140.1 (140)</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>external</p></td>
+<td><p>0.0275</p></td>
+<td><p>23.75</p></td>
+<td><p>3.7</p></td>
+<td><p>127.2</p></td>
+<td><p>7</p></td>
+<td><p>2120</p></td>
+<td><p>2595</p></td>
+<td><p>1326</p></td>
+<td><p>2120 (2120)</p></td>
+<td><p>371.3 (371)</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>internal</p></td>
+<td><p>0.028</p></td>
+<td><p>23.75</p></td>
+<td><p>3.63</p></td>
+<td><p>58.0</p></td>
+<td><p>6</p></td>
+<td><p>965</p></td>
+<td><p>1226</p></td>
+<td><p>722</p></td>
+<td><p>967 (965)</p></td>
+<td><p>169.0 (169)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p><strong>Datum of the stringer height.</strong> In Fig. 2(b) (p. 6) the extension lines of the 0.33 in dimension run from the tip of the stringer to the surface of the skin opposite the stringer: 0.33 in is the total depth of the section, skin included. The stringer stands <span class="math notranslate nohighlight">\(0.33 - t\)</span> above the skin surface, and its plate in the model is this drawn rectangle, from the skin surface to the tip, of width <span class="math notranslate nohighlight">\(h_b = 0.33 - t\)</span> in. The bfsccylinder implementation of this case
+(<code class="docutils literal notranslate"><span class="pre">bfsccylinder/notebooks/card1966_stiffened_cylinder_buckling.ipynb</span></code>) reads the drawing in the same way, but its stringer plate starts at the middle surface of the skin, <span class="math notranslate nohighlight">\(0.33 - t/2\)</span> in, overlapping half of the skin thickness (column of the second table below).</p>
+<p>Two checks of this reading follow. (1) The area: the skin, <span class="math notranslate nohighlight">\(2\pi R t\)</span>, plus 60 rectangles <span class="math notranslate nohighlight">\(0.097 \times (0.33 - t)\)</span> in with two fillets each, <span class="math notranslate nohighlight">\(2 r_F^2 (1 - \pi/4)\)</span>, plus the four doubler plates of the two butt joints, <span class="math notranslate nohighlight">\(0.70 \times 0.020\)</span> in each (p. 5), is 3 % to 6 % below the area <span class="math notranslate nohighlight">\(A_t\)</span> of Table I, which was determined by weighing (p. 5; the rivets are not counted; 5 % to 7 % without the doublers, as in the bfsccylinder notebook). A stringer 0.33 in high above the
+skin surface would match <span class="math notranslate nohighlight">\(A_t\)</span> within 2 %, but (2) the theory of Card and Jones decides: their simply supported <span class="math notranslate nohighlight">\(\bar{N}_s\)</span> is the closed-form solution of Block, Card and Mikulas (1965, NASA TN D-2960, Eq. (15)) for stringers only, with the membrane pre-buckling state and the torsional stiffness <span class="math notranslate nohighlight">\(G_s J_s\)</span> of the stringers (<span class="math notranslate nohighlight">\(J\)</span> of a rectangle, symbol list of Card and Jones, p. 4). Evaluated below with the section of Fig. 2(b), it reproduces the four values
+<span class="math notranslate nohighlight">\(\bar{N}_s\)</span> of Table I within 0.2 %, and with a stringer 0.33 in high above the skin surface it is up to 10 % higher: Card and Jones used the drawn section, not <span class="math notranslate nohighlight">\(A_t\)</span>, and so does the model.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def torsion_J(ts, h):
+    # J of a rectangle ts x h (Card and Jones 1966, symbol list, p. 4)
+    return ts**3*h*(1/3 - 64/np.pi**5*ts/h*np.tanh(np.pi*h/(2*ts)))
+
+
+def section(t, side, hs, z0, plate=False, width=WIDTH):
+    # stringer rectangle width x hs starting at z0 from the skin middle surface:
+    # area, eccentricity, moment of inertia about the skin middle surface, J of the
+    # rectangle or, with plate=True, of the Kirchhoff plate strip (4 D66 hs = G J)
+    A, zc = width*hs, z0 + hs/2
+    J = hs*width**3/3 if plate else torsion_J(width, hs)
+    return A, (1 if side == 'external' else -1)*zc, width*hs**3/12 + A*zc**2, J
+
+
+def nx_ss(t, L, As, zs, Is, J, nmax=40, mmax=6, nstiff=NSTIFF):
+    # Block, Card and Mikulas (1965), Eq. (15), stringers only, isotropic skin and
+    # stringers, simply supported, membrane pre-buckling state; minimum over (m, n), lb/in
+    E_, G_ = E_KSI*1e3, E_KSI*1e3/(2*(1 + NU))
+    ds = 2*np.pi*R_IN/nstiff
+    Ex, D = E_*t/(1 - NU**2), E_*t**3/(12*(1 - NU**2))
+    best = (np.inf, None)
+    for m in range(1, mmax + 1):
+        a = m*np.pi/L
+        for n in range(nmax + 1):
+            b = n/R_IN
+            A11 = (Ex + E_*As/ds)*a**2 + G_*t*b**2
+            A22 = Ex*b**2 + G_*t*a**2
+            A12 = (NU*Ex + G_*t)*a*b
+            A13 = NU*Ex/R_IN*a + E_*As*zs/ds*a**3
+            A23 = Ex*b/R_IN
+            A33 = D*(a**2 + b**2)**2 + E_*Is/ds*a**4 + G_*J/ds*a**2*b**2 + Ex/R_IN**2
+            den = A11*A22 - A12**2
+            N = (A33 + A23*(A12*A13 - A11*A23)/den + A13*(A12*A23 - A22*A13)/den)/a**2
+            if N &lt; best[0]:
+                best = (N, (m, n))
+    return best
+
+
+A_F = 2*FILLET**2*(1 - np.pi/4)
+rows, rows_ns = [], []
+for cyl, (side, t, L, At, Pe, se, ne, Ne, Nc, Ns) in TABLE_I.items():
+    A_str = NSTIFF*(WIDTH*(DEPTH - t) + A_F)
+    A = 2*np.pi*R_IN*t + A_str + 4*0.70*0.020
+    A_alt = 2*np.pi*R_IN*t + NSTIFF*(WIDTH*DEPTH + A_F) + 4*0.70*0.020
+    rows.append([cyl, '%.3f' % (2*np.pi*R_IN*t), '%.3f' % A_str, '%.3f' % A, At,
+                 '%+.1f%%' % pct(A, At), '%+.1f%%' % pct(A_alt, At)])
+    out = [cyl, side, Ns]
+    for hs, z0, plate in ((DEPTH - t, t/2, False), (DEPTH - t, t/2, True),
+                          (DEPTH - t/2, 0., True), (DEPTH, t/2, False)):
+        N, mn = nx_ss(t, L, *section(t, side, hs, z0, plate))
+        out.append('%.0f (%d, %d), %+.1f%%' % (N, *mn, pct(N, Ns)))
+    rows_ns.append(out)
+display(markdown_table(['cyl.', 'skin, in^2', 'stringers (0.33 - t), in^2', 'total with doublers, in^2',
+                        'A_t, in^2', 'difference', 'difference with stringers 0.33 high'], rows))
+display(markdown_table(['cyl.', 'stringers', 'N_s (Table I)', 'Eq. (15), Fig. 2(b): 0.33 - t on the skin',
+                        'Eq. (15), plate of the model (0.33 - t on the skin), J = h_b t_b^3/3 of the plate strip',
+                        'Eq. (15), plate from the middle surface (0.33 - t/2, bfsccylinder), J = h_b t_b^3/3',
+                        'Eq. (15), 0.33 on the skin'], rows_ns))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>cyl.</p></th>
+<th class="head"><p>skin, in^2</p></th>
+<th class="head"><p>stringers (0.33 - t), in^2</p></th>
+<th class="head"><p>total with doublers, in^2</p></th>
+<th class="head"><p>A_t, in^2</p></th>
+<th class="head"><p>difference</p></th>
+<th class="head"><p>difference with stringers 0.33 high</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>1.698</p></td>
+<td><p>1.779</p></td>
+<td><p>3.533</p></td>
+<td><p>3.69</p></td>
+<td><p>-4.2%</p></td>
+<td><p>+0.2%</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>1.662</p></td>
+<td><p>1.783</p></td>
+<td><p>3.501</p></td>
+<td><p>3.72</p></td>
+<td><p>-5.9%</p></td>
+<td><p>-1.6%</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>1.650</p></td>
+<td><p>1.784</p></td>
+<td><p>3.490</p></td>
+<td><p>3.7</p></td>
+<td><p>-5.7%</p></td>
+<td><p>-1.4%</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>1.680</p></td>
+<td><p>1.781</p></td>
+<td><p>3.517</p></td>
+<td><p>3.63</p></td>
+<td><p>-3.1%</p></td>
+<td><p>+1.4%</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>cyl.</p></th>
+<th class="head"><p>stringers</p></th>
+<th class="head"><p>N_s (Table I)</p></th>
+<th class="head"><p>Eq. (15), Fig. 2(b): 0.33 - t on the skin</p></th>
+<th class="head"><p>Eq. (15), plate of the model (0.33 - t on the skin), J = h_b t_b^3/3
+of the plate strip</p></th>
+<th class="head"><p>Eq. (15), plate from the middle surface (0.33 - t/2, bfsccylinder),
+J = h_b t_b^3/3</p></th>
+<th class="head"><p>Eq. (15), 0.33 on the skin</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>external</p></td>
+<td><p>1145</p></td>
+<td><p>1144 (1, 6), -0.1%</p></td>
+<td><p>1173 (1, 6), +2.5%</p></td>
+<td><p>1186 (1, 6), +3.6%</p></td>
+<td><p>1221 (1, 6), +6.6%</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>internal</p></td>
+<td><p>687</p></td>
+<td><p>687 (1, 5), +0.0%</p></td>
+<td><p>707 (1, 5), +2.9%</p></td>
+<td><p>723 (1, 5), +5.3%</p></td>
+<td><p>696 (1, 5), +1.4%</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>external</p></td>
+<td><p>1326</p></td>
+<td><p>1328 (1, 7), +0.2%</p></td>
+<td><p>1368 (1, 7), +3.1%</p></td>
+<td><p>1383 (1, 7), +4.3%</p></td>
+<td><p>1460 (1, 7), +10.1%</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>internal</p></td>
+<td><p>722</p></td>
+<td><p>723 (1, 6), +0.1%</p></td>
+<td><p>752 (1, 6), +4.1%</p></td>
+<td><p>771 (1, 6), +6.8%</p></td>
+<td><p>741 (1, 6), +2.6%</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="Model">
+<h2>Model<a class="headerlink" href="#Model" title="Link to this heading">#</a></h2>
+<p><strong>Discrete stringers</strong> (see <code class="docutils literal notranslate"><span class="pre">bu.build_cylinder</span></code>). The skin between two stringers is a curved panel of the Sanders-Koiter cylindrical shell model (<code class="docutils literal notranslate"><span class="pre">cylshell_clpt_sanders</span></code>) and each stringer a flat plate strip normal to the skin, of thickness <span class="math notranslate nohighlight">\(t_b = 0.097\)</span> in and width <span class="math notranslate nohighlight">\(h_b = 0.33 - t\)</span> in, from the skin surface to the stringer tip (the drawn rectangle of Fig. 2(b), see above), connected to the skin surface with the base-flange connection <code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code> (<code class="docutils literal notranslate"><span class="pre">face='lower'</span></code>, the inner
+surface, for the internal stringers, <code class="docutils literal notranslate"><span class="pre">face='upper'</span></code> for the external ones; displacements and rotation about the stringer axis continuous) and the skin panels to each other with <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code>, both imposed exactly with <code class="docutils literal notranslate"><span class="pre">conn_method='null-space'</span></code> (Castro and Donadon 2017, <a class="reference external" href="https://doi.org/10.1016/j.compstruct.2016.10.026">https://doi.org/10.1016/j.compstruct.2016.10.026</a>). The blade stands inside or outside the skin according to the face of the skin to which it is connected; the eccentricity of the stringers, the distance
+<span class="math notranslate nohighlight">\(\bar{z} = (t + h_b)/2\)</span> of their centroid from the middle surface of the skin in the smeared theory, follows from this geometry. The plate strips do not represent the two fillets, 1.3 % of the area of the drawn stringer, <span class="math notranslate nohighlight">\(0.097 (0.33 - t) + 2 r_F^2 (1 - \pi/4)\)</span> (derived). The plate has the area, centroid and moment of inertia of the drawn rectangle and, as a Kirchhoff plate strip, the twisting stiffness <span class="math notranslate nohighlight">\(4 D_{66} h_b = G h_b t_b^3/3\)</span>, 25 % above <span class="math notranslate nohighlight">\(G J\)</span> of the drawn
+rectangle with the <span class="math notranslate nohighlight">\(J\)</span> of Card and Jones (cylinder 4, first table of the section <em>Discrete against smeared stringers</em>). Eq. (15) for the stringer of the model, with this twisting stiffness, is 2.5 % to 4.1 % above <span class="math notranslate nohighlight">\(\bar{N}_s\)</span> of Table I, and for the plate from the middle surface of the skin of the bfsccylinder implementation 3.6 % to 6.8 % above (table above).</p>
+<p>The stringers carry about half of the axial load, and the general instability of a stringer-stiffened cylinder bends them in their own plane, radially. The geometric stiffness of a plate model with the von Kármán strains contains the terms of the out-of-plane displacement only, <span class="math notranslate nohighlight">\(N_{xx} w_{,x}^2\)</span>, and would miss the destabilizing work of the stringer load <span class="math notranslate nohighlight">\(N_{xx} v_{,x}^2\)</span> on the in-plane (radial) deflection of the blade; the blades are therefore modelled with <code class="docutils literal notranslate"><span class="pre">plate_clpt_gl</span></code>, whose
+Green-Lagrange membrane strains give the in-plane terms of the geometric stiffness too, with the same linear stiffness as <code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>.</p>
+<p><strong>Symmetry.</strong> The buckling mode of a cylinder with 60 identical, equally spaced stringers is close to <span class="math notranslate nohighlight">\(w \propto \cos n\theta\)</span> times an axial shape; it is symmetric about two planes <span class="math notranslate nohighlight">\(\theta = 0\)</span> and <span class="math notranslate nohighlight">\(\theta = \pi\)</span> through the middle of a bay, and half of the cylinder, with <span class="math notranslate nohighlight">\(v = w_{,y} = 0\)</span> on these planes, contains it for every <span class="math notranslate nohighlight">\(n\)</span> (the half model is compared with the full cylinder in the notebook of Sewall and Naumann).</p>
+<p><strong>Boundary conditions and pre-buckling state.</strong> The test cylinders were potted at both ends in a low-temperature alloy, ground flat and parallel and loaded between the platens of a testing machine, with 1/4 in aluminium bulkheads held by the potting (p. 6). Four analyses are run:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>analysis</p></th>
+<th class="head"><p>ends</p></th>
+<th class="head"><p>pre-buckling state</p></th>
+<th class="head"><p>function</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>clamped, linear</p></td>
+<td><p><span class="math notranslate nohighlight">\(u = v = w = w_{,x} = 0\)</span> at <span class="math notranslate nohighlight">\(x = 0\)</span>; the same at <span class="math notranslate nohighlight">\(x = L\)</span> with the uniform shortening
+<span class="math notranslate nohighlight">\(u = -\lambda\delta\)</span> prescribed on skin and blades</p></td>
+<td><p>linear static solution, with the bending of the skin near the ends</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bu.buckling_clamped</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>SS, linear</p></td>
+<td><p><span class="math notranslate nohighlight">\(N_x = v = w = M_x = 0\)</span> at both ends, equal and opposite end loads <span class="math notranslate nohighlight">\(E t \varepsilon\)</span> (skin) and
+<span class="math notranslate nohighlight">\(E t_b \varepsilon\)</span> (blades); one point <span class="math notranslate nohighlight">\(u = 0\)</span> against the rigid translation</p></td>
+<td><p>linear static solution</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bu.buckling_ss</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>clamped, membrane</p></td>
+<td><p><span class="math notranslate nohighlight">\(u = v = w = w_{,x} = 0\)</span> at both ends</p></td>
+<td><p>membrane, <span class="math notranslate nohighlight">\(N_{xx} = -E t \varepsilon\)</span> in the skin, <span class="math notranslate nohighlight">\(-E t_b \varepsilon\)</span> in the blades</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bu.buckling_membrane</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>SS, membrane</p></td>
+<td><p>as SS, linear</p></td>
+<td><p>membrane</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bu.buckling_membrane</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The clamped and simply supported conditions are those of Card and Jones (p. 9 and 10), whose theory uses the membrane pre-buckling state; the clamped analysis with the linear pre-buckling state is closest to the test. The critical load <span class="math notranslate nohighlight">\(\bar{P}\)</span> is <span class="math notranslate nohighlight">\(\lambda\)</span> times the axial force of the reference state (for the prescribed shortening, the resultant of the reactions at <span class="math notranslate nohighlight">\(x = L\)</span>, <code class="docutils literal notranslate"><span class="pre">MultiDomain.reaction_resultant</span></code>), and <span class="math notranslate nohighlight">\(\bar{N} = \bar{P}/(2\pi R)\)</span>.</p>
+</section>
+<section id="Convergence">
+<h2>Convergence<a class="headerlink" href="#Convergence" title="Link to this heading">#</a></h2>
+<p>The number of Ritz terms is increased in four steps: <span class="math notranslate nohighlight">\(m_x\)</span> along <span class="math notranslate nohighlight">\(x\)</span> (skin and blades), <span class="math notranslate nohighlight">\(n_y\)</span> across a full skin bay, <span class="math notranslate nohighlight">\(n_b\)</span> across a blade. The table gives the critical <span class="math notranslate nohighlight">\(\bar{N}\)</span> of each analysis and its change from the previous step; the last step is used in the comparisons.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>LEVELS = [(10, 4, 4), (14, 6, 4), (18, 8, 5), (22, 10, 6)]
+ANALYSES = {
+    'clamped, linear': lambda *a: bu.buckling_clamped(*a),
+    'SS, linear': lambda *a: bu.buckling_ss(*a),
+    'clamped, membrane': lambda *a: bu.buckling_membrane(*a[:8], 'CC', *a[8:]),
+    'SS, membrane': lambda *a: bu.buckling_membrane(*a[:8], 'SS', *a[8:]),
+}
+RES = {}
+rows = []
+for cyl, (side, t, L, *_) in TABLE_I.items():
+    args = (R_IN*IN, t*IN, L*IN, E, NU, WIDTH*IN, (DEPTH - t)*IN, side)
+    for name, func in ANALYSES.items():
+        prev = None
+        for i, (mx, ny, nyb) in enumerate(LEVELS):
+            P, modes, md, skin, dt = func(*args, mx, ny, nyb)
+            N = P/LBF/(2*np.pi*R_IN)
+            RES[(cyl, name, i)] = (N, modes[0][1], modes[0][2], md if i == len(LEVELS) - 1 else None,
+                                   skin, modes[0][3],
+                                   [(lam/modes[0][0]*N, m, n) for lam, m, n, c in modes[:5]])
+            rows.append([cyl, name, '%d, %d, %d' % (mx, ny, nyb), md.get_size(), '%.1f' % dt,
+                         '%.0f' % N, '(%d, %d)' % modes[0][1:3],
+                         '-' if prev is None else '%+.2f%%' % pct(N, prev)])
+            prev = N
+display(markdown_table(['cyl.', 'analysis', 'm_x, n_y, n_b', 'dofs', 'time, s', 'N, lb/in', '(m, n)',
+                        'change'], rows))
+FINAL = len(LEVELS) - 1
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>cyl.</p></th>
+<th class="head"><p>analysis</p></th>
+<th class="head"><p>m_x, n_y, n_b</p></th>
+<th class="head"><p>dofs</p></th>
+<th class="head"><p>time, s</p></th>
+<th class="head"><p>N, lb/in</p></th>
+<th class="head"><p>(m, n)</p></th>
+<th class="head"><p>change</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>10, 4, 4</p></td>
+<td><p>7320</p></td>
+<td><p>3.3</p></td>
+<td><p>1789</p></td>
+<td><p>(2, 9)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>14, 6, 4</p></td>
+<td><p>12684</p></td>
+<td><p>6.4</p></td>
+<td><p>2004</p></td>
+<td><p>(1, 7)</p></td>
+<td><p>+12.00%</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>18.8</p></td>
+<td><p>2012</p></td>
+<td><p>(1, 7)</p></td>
+<td><p>+0.40%</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>42.8</p></td>
+<td><p>2015</p></td>
+<td><p>(1, 7)</p></td>
+<td><p>+0.12%</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>SS, linear</p></td>
+<td><p>10, 4, 4</p></td>
+<td><p>7320</p></td>
+<td><p>3.0</p></td>
+<td><p>1137</p></td>
+<td><p>(1, 6)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>SS, linear</p></td>
+<td><p>14, 6, 4</p></td>
+<td><p>12684</p></td>
+<td><p>6.1</p></td>
+<td><p>1139</p></td>
+<td><p>(1, 6)</p></td>
+<td><p>+0.21%</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>SS, linear</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>16.7</p></td>
+<td><p>1140</p></td>
+<td><p>(1, 6)</p></td>
+<td><p>+0.09%</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>SS, linear</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>42.6</p></td>
+<td><p>1140</p></td>
+<td><p>(1, 6)</p></td>
+<td><p>+0.00%</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>clamped, membrane</p></td>
+<td><p>10, 4, 4</p></td>
+<td><p>7320</p></td>
+<td><p>2.2</p></td>
+<td><p>2022</p></td>
+<td><p>(1, 7)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>clamped, membrane</p></td>
+<td><p>14, 6, 4</p></td>
+<td><p>12684</p></td>
+<td><p>3.7</p></td>
+<td><p>2016</p></td>
+<td><p>(1, 7)</p></td>
+<td><p>-0.30%</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>clamped, membrane</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>9.4</p></td>
+<td><p>2014</p></td>
+<td><p>(1, 7)</p></td>
+<td><p>-0.09%</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>clamped, membrane</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>17.7</p></td>
+<td><p>2014</p></td>
+<td><p>(1, 7)</p></td>
+<td><p>-0.04%</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>SS, membrane</p></td>
+<td><p>10, 4, 4</p></td>
+<td><p>7320</p></td>
+<td><p>2.6</p></td>
+<td><p>1129</p></td>
+<td><p>(1, 6)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>SS, membrane</p></td>
+<td><p>14, 6, 4</p></td>
+<td><p>12684</p></td>
+<td><p>4.5</p></td>
+<td><p>1127</p></td>
+<td><p>(1, 6)</p></td>
+<td><p>-0.14%</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>SS, membrane</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>10.0</p></td>
+<td><p>1126</p></td>
+<td><p>(1, 6)</p></td>
+<td><p>-0.10%</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>SS, membrane</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>19.8</p></td>
+<td><p>1126</p></td>
+<td><p>(1, 6)</p></td>
+<td><p>-0.08%</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>10, 4, 4</p></td>
+<td><p>7320</p></td>
+<td><p>3.4</p></td>
+<td><p>835</p></td>
+<td><p>(2, 8)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>14, 6, 4</p></td>
+<td><p>12684</p></td>
+<td><p>6.6</p></td>
+<td><p>968</p></td>
+<td><p>(2, 7)</p></td>
+<td><p>+15.82%</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>18.9</p></td>
+<td><p>969</p></td>
+<td><p>(2, 7)</p></td>
+<td><p>+0.20%</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>40.2</p></td>
+<td><p>969</p></td>
+<td><p>(2, 7)</p></td>
+<td><p>-0.01%</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>SS, linear</p></td>
+<td><p>10, 4, 4</p></td>
+<td><p>7320</p></td>
+<td><p>2.9</p></td>
+<td><p>651</p></td>
+<td><p>(1, 5)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>SS, linear</p></td>
+<td><p>14, 6, 4</p></td>
+<td><p>12684</p></td>
+<td><p>5.8</p></td>
+<td><p>653</p></td>
+<td><p>(1, 5)</p></td>
+<td><p>+0.31%</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>SS, linear</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>20.7</p></td>
+<td><p>653</p></td>
+<td><p>(1, 5)</p></td>
+<td><p>+0.07%</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>SS, linear</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>38.5</p></td>
+<td><p>653</p></td>
+<td><p>(1, 5)</p></td>
+<td><p>-0.00%</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>clamped, membrane</p></td>
+<td><p>10, 4, 4</p></td>
+<td><p>7320</p></td>
+<td><p>2.0</p></td>
+<td><p>969</p></td>
+<td><p>(2, 7)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>clamped, membrane</p></td>
+<td><p>14, 6, 4</p></td>
+<td><p>12684</p></td>
+<td><p>3.2</p></td>
+<td><p>966</p></td>
+<td><p>(2, 7)</p></td>
+<td><p>-0.26%</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>clamped, membrane</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>8.3</p></td>
+<td><p>966</p></td>
+<td><p>(2, 7)</p></td>
+<td><p>-0.07%</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>clamped, membrane</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>16.0</p></td>
+<td><p>965</p></td>
+<td><p>(2, 7)</p></td>
+<td><p>-0.03%</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>SS, membrane</p></td>
+<td><p>10, 4, 4</p></td>
+<td><p>7320</p></td>
+<td><p>2.3</p></td>
+<td><p>651</p></td>
+<td><p>(1, 5)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>SS, membrane</p></td>
+<td><p>14, 6, 4</p></td>
+<td><p>12684</p></td>
+<td><p>4.1</p></td>
+<td><p>651</p></td>
+<td><p>(1, 5)</p></td>
+<td><p>-0.12%</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>SS, membrane</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>11.0</p></td>
+<td><p>650</p></td>
+<td><p>(1, 5)</p></td>
+<td><p>-0.09%</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>SS, membrane</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>19.4</p></td>
+<td><p>649</p></td>
+<td><p>(1, 5)</p></td>
+<td><p>-0.07%</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>10, 4, 4</p></td>
+<td><p>7320</p></td>
+<td><p>3.3</p></td>
+<td><p>2620</p></td>
+<td><p>(1, 8)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>14, 6, 4</p></td>
+<td><p>12684</p></td>
+<td><p>6.4</p></td>
+<td><p>2614</p></td>
+<td><p>(1, 8)</p></td>
+<td><p>-0.22%</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>21.1</p></td>
+<td><p>2616</p></td>
+<td><p>(1, 8)</p></td>
+<td><p>+0.08%</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>52.1</p></td>
+<td><p>2615</p></td>
+<td><p>(1, 8)</p></td>
+<td><p>-0.02%</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>SS, linear</p></td>
+<td><p>10, 4, 4</p></td>
+<td><p>7320</p></td>
+<td><p>3.0</p></td>
+<td><p>1361</p></td>
+<td><p>(1, 7)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>SS, linear</p></td>
+<td><p>14, 6, 4</p></td>
+<td><p>12684</p></td>
+<td><p>6.6</p></td>
+<td><p>1361</p></td>
+<td><p>(1, 7)</p></td>
+<td><p>-0.03%</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>SS, linear</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>17.1</p></td>
+<td><p>1360</p></td>
+<td><p>(1, 7)</p></td>
+<td><p>-0.02%</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>SS, linear</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>41.1</p></td>
+<td><p>1360</p></td>
+<td><p>(1, 7)</p></td>
+<td><p>-0.05%</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>clamped, membrane</p></td>
+<td><p>10, 4, 4</p></td>
+<td><p>7320</p></td>
+<td><p>2.3</p></td>
+<td><p>2581</p></td>
+<td><p>(1, 8)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>clamped, membrane</p></td>
+<td><p>14, 6, 4</p></td>
+<td><p>12684</p></td>
+<td><p>4.1</p></td>
+<td><p>2570</p></td>
+<td><p>(1, 8)</p></td>
+<td><p>-0.44%</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>clamped, membrane</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>9.8</p></td>
+<td><p>2566</p></td>
+<td><p>(1, 8)</p></td>
+<td><p>-0.13%</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>clamped, membrane</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>16.7</p></td>
+<td><p>2565</p></td>
+<td><p>(1, 8)</p></td>
+<td><p>-0.06%</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>SS, membrane</p></td>
+<td><p>10, 4, 4</p></td>
+<td><p>7320</p></td>
+<td><p>2.3</p></td>
+<td><p>1329</p></td>
+<td><p>(1, 7)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>SS, membrane</p></td>
+<td><p>14, 6, 4</p></td>
+<td><p>12684</p></td>
+<td><p>4.0</p></td>
+<td><p>1325</p></td>
+<td><p>(1, 7)</p></td>
+<td><p>-0.28%</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>SS, membrane</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>8.4</p></td>
+<td><p>1323</p></td>
+<td><p>(1, 7)</p></td>
+<td><p>-0.18%</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>SS, membrane</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>17.3</p></td>
+<td><p>1321</p></td>
+<td><p>(1, 7)</p></td>
+<td><p>-0.12%</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>10, 4, 4</p></td>
+<td><p>7320</p></td>
+<td><p>3.4</p></td>
+<td><p>1210</p></td>
+<td><p>(1, 7)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>14, 6, 4</p></td>
+<td><p>12684</p></td>
+<td><p>6.2</p></td>
+<td><p>1200</p></td>
+<td><p>(1, 7)</p></td>
+<td><p>-0.89%</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>18.2</p></td>
+<td><p>1199</p></td>
+<td><p>(1, 7)</p></td>
+<td><p>-0.05%</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>42.4</p></td>
+<td><p>1199</p></td>
+<td><p>(1, 7)</p></td>
+<td><p>-0.03%</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>SS, linear</p></td>
+<td><p>10, 4, 4</p></td>
+<td><p>7320</p></td>
+<td><p>3.2</p></td>
+<td><p>706</p></td>
+<td><p>(1, 6)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>SS, linear</p></td>
+<td><p>14, 6, 4</p></td>
+<td><p>12684</p></td>
+<td><p>6.6</p></td>
+<td><p>707</p></td>
+<td><p>(1, 6)</p></td>
+<td><p>+0.03%</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>SS, linear</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>21.1</p></td>
+<td><p>706</p></td>
+<td><p>(1, 6)</p></td>
+<td><p>-0.06%</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>SS, linear</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>40.8</p></td>
+<td><p>706</p></td>
+<td><p>(1, 6)</p></td>
+<td><p>-0.06%</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>clamped, membrane</p></td>
+<td><p>10, 4, 4</p></td>
+<td><p>7320</p></td>
+<td><p>2.2</p></td>
+<td><p>1191</p></td>
+<td><p>(1, 7)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>clamped, membrane</p></td>
+<td><p>14, 6, 4</p></td>
+<td><p>12684</p></td>
+<td><p>3.5</p></td>
+<td><p>1188</p></td>
+<td><p>(1, 7)</p></td>
+<td><p>-0.30%</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>clamped, membrane</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>8.3</p></td>
+<td><p>1187</p></td>
+<td><p>(1, 7)</p></td>
+<td><p>-0.07%</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>clamped, membrane</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>16.4</p></td>
+<td><p>1186</p></td>
+<td><p>(1, 7)</p></td>
+<td><p>-0.03%</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>SS, membrane</p></td>
+<td><p>10, 4, 4</p></td>
+<td><p>7320</p></td>
+<td><p>2.3</p></td>
+<td><p>700</p></td>
+<td><p>(1, 6)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>SS, membrane</p></td>
+<td><p>14, 6, 4</p></td>
+<td><p>12684</p></td>
+<td><p>4.1</p></td>
+<td><p>698</p></td>
+<td><p>(1, 6)</p></td>
+<td><p>-0.31%</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>SS, membrane</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>9.8</p></td>
+<td><p>696</p></td>
+<td><p>(1, 6)</p></td>
+<td><p>-0.20%</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>SS, membrane</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>17.2</p></td>
+<td><p>696</p></td>
+<td><p>(1, 6)</p></td>
+<td><p>-0.13%</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="Comparison-with-the-test-and-with-the-smeared-theory">
+<h2>Comparison with the test and with the smeared theory<a class="headerlink" href="#Comparison-with-the-test-and-with-the-smeared-theory" title="Link to this heading">#</a></h2>
+<p><span class="math notranslate nohighlight">\(\bar{N}\)</span> in lb/in, the wave numbers <span class="math notranslate nohighlight">\((m, n)\)</span> of the critical mode (<span class="math notranslate nohighlight">\(m\)</span> axial half-waves, <code class="docutils literal notranslate"><span class="pre">bu.classify</span></code>), and the relative differences: the clamped analyses against the experimental <span class="math notranslate nohighlight">\(\bar{N}_e\)</span> and the clamped theory <span class="math notranslate nohighlight">\(\bar{N}_c\)</span>, the simply supported ones against <span class="math notranslate nohighlight">\(\bar{N}_s\)</span>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rows = []
+for cyl, (side, t, L, At, Pe, se, ne, Ne, Nc, Ns) in TABLE_I.items():
+    r = {name: RES[(cyl, name, FINAL)] for name in ANALYSES}
+    cl, cm, sl, sm = (r['clamped, linear'], r['clamped, membrane'], r['SS, linear'], r['SS, membrane'])
+    rows.append([cyl, side, '%d (n = %d)' % (Ne, ne),
+                 '%.0f (%d, %d)' % cl[:3], '%+.1f%%' % pct(cl[0], Ne), '%+.1f%%' % pct(cl[0], Nc),
+                 Nc, '%.0f (%d, %d)' % cm[:3], '%+.1f%%' % pct(cm[0], Nc),
+                 Ns, '%.0f (%d, %d)' % sl[:3], '%+.1f%%' % pct(sl[0], Ns),
+                 '%.0f (%d, %d)' % sm[:3], '%+.1f%%' % pct(sm[0], Ns)])
+display(markdown_table(['cyl.', 'stringers', 'test N_e', 'clamped, linear', 'vs N_e', 'vs N_c',
+                        'N_c (theory)', 'clamped, membrane', 'vs N_c', 'N_s (theory)', 'SS, linear', 'vs N_s',
+                        'SS, membrane', 'vs N_s'], rows))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>cyl.</p></th>
+<th class="head"><p>stringers</p></th>
+<th class="head"><p>test N_e</p></th>
+<th class="head"><p>clamped, linear</p></th>
+<th class="head"><p>vs N_e</p></th>
+<th class="head"><p>vs N_c</p></th>
+<th class="head"><p>N_c (theory)</p></th>
+<th class="head"><p>clamped, membrane</p></th>
+<th class="head"><p>vs N_c</p></th>
+<th class="head"><p>N_s (theory)</p></th>
+<th class="head"><p>SS, linear</p></th>
+<th class="head"><p>vs N_s</p></th>
+<th class="head"><p>SS, membrane</p></th>
+<th class="head"><p>vs N_s</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>external</p></td>
+<td><p>1877 (n = 6)</p></td>
+<td><p>2015 (1, 7)</p></td>
+<td><p>+7.3%</p></td>
+<td><p>-1.0%</p></td>
+<td><p>2036</p></td>
+<td><p>2014 (1, 7)</p></td>
+<td><p>-1.1%</p></td>
+<td><p>1145</p></td>
+<td><p>1140 (1, 6)</p></td>
+<td><p>-0.4%</p></td>
+<td><p>1126 (1, 6)</p></td>
+<td><p>-1.7%</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>internal</p></td>
+<td><p>800 (n = 6)</p></td>
+<td><p>969 (2, 7)</p></td>
+<td><p>+21.2%</p></td>
+<td><p>-2.8%</p></td>
+<td><p>997</p></td>
+<td><p>965 (2, 7)</p></td>
+<td><p>-3.2%</p></td>
+<td><p>687</p></td>
+<td><p>653 (1, 5)</p></td>
+<td><p>-4.9%</p></td>
+<td><p>649 (1, 5)</p></td>
+<td><p>-5.5%</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>external</p></td>
+<td><p>2120 (n = 7)</p></td>
+<td><p>2615 (1, 8)</p></td>
+<td><p>+23.4%</p></td>
+<td><p>+0.8%</p></td>
+<td><p>2595</p></td>
+<td><p>2565 (1, 8)</p></td>
+<td><p>-1.2%</p></td>
+<td><p>1326</p></td>
+<td><p>1360 (1, 7)</p></td>
+<td><p>+2.5%</p></td>
+<td><p>1321 (1, 7)</p></td>
+<td><p>-0.4%</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>internal</p></td>
+<td><p>965 (n = 6)</p></td>
+<td><p>1199 (1, 7)</p></td>
+<td><p>+24.2%</p></td>
+<td><p>-2.2%</p></td>
+<td><p>1226</p></td>
+<td><p>1186 (1, 7)</p></td>
+<td><p>-3.2%</p></td>
+<td><p>722</p></td>
+<td><p>706 (1, 6)</p></td>
+<td><p>-2.2%</p></td>
+<td><p>696 (1, 6)</p></td>
+<td><p>-3.7%</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p><strong>The bfsccylinder implementation of this case</strong> (<code class="docutils literal notranslate"><span class="pre">bfsccylinder/notebooks/card1966_stiffened_cylinder_buckling.ipynb</span></code>: a sector of one stringer pitch with cyclic symmetry, the skin with <code class="docutils literal notranslate"><span class="pre">BFSCCylinderSanders</span></code> and each stringer with <code class="docutils literal notranslate"><span class="pre">BFSCPlate2D</span></code> from the middle surface of the skin to the tip, of height <span class="math notranslate nohighlight">\(0.33 - t/2\)</span> in, overlapping half of the skin thickness, where the plate of this notebook starts at the skin surface, <span class="math notranslate nohighlight">\(0.33 - t\)</span> in) gives the critical loads below (lb/in, the
+values of its comparison table, finest mesh); the relative difference is panels against bfsccylinder. Eq. (15) for the plate from the middle surface is 1.1 % to 2.6 % above that for the plate of this notebook, most for the internal cylinders 2 and 4 (table of the section <em>Test data</em>).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># bfsccylinder, notebooks/card1966_stiffened_cylinder_buckling.ipynb, table of the
+# section "Comparison with the theory and the tests of Card and Jones" (lb/in):
+# membrane clamped, membrane simply supported, linear pre-buckling clamped
+BFSC = {1: (2035, 1144, 2037), 2: (994, 669, 998), 3: (2588, 1350, 2640), 4: (1219, 723, 1232)}
+rows = []
+for cyl, (Nc_b, Ns_b, Nl_b) in BFSC.items():
+    r = {name: RES[(cyl, name, FINAL)][0] for name in ANALYSES}
+    rows.append([cyl, TABLE_I[cyl][0],
+                 '%.0f / %d, %+.1f%%' % (r['clamped, membrane'], Nc_b, pct(r['clamped, membrane'], Nc_b)),
+                 '%.0f / %d, %+.1f%%' % (r['SS, membrane'], Ns_b, pct(r['SS, membrane'], Ns_b)),
+                 '%.0f / %d, %+.1f%%' % (r['clamped, linear'], Nl_b, pct(r['clamped, linear'], Nl_b))])
+display(markdown_table(['cyl.', 'stringers', 'clamped, membrane: panels / bfsc', 'SS, membrane: panels / bfsc',
+                        'clamped, linear: panels / bfsc'], rows))
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>cyl.</p></th>
+<th class="head"><p>stringers</p></th>
+<th class="head"><p>clamped, membrane: panels / bfsc</p></th>
+<th class="head"><p>SS, membrane: panels / bfsc</p></th>
+<th class="head"><p>clamped, linear: panels / bfsc</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>external</p></td>
+<td><p>2014 / 2035, -1.0%</p></td>
+<td><p>1126 / 1144, -1.6%</p></td>
+<td><p>2015 / 2037, -1.1%</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>internal</p></td>
+<td><p>965 / 994, -2.9%</p></td>
+<td><p>649 / 669, -2.9%</p></td>
+<td><p>969 / 998, -2.9%</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>external</p></td>
+<td><p>2565 / 2588, -0.9%</p></td>
+<td><p>1321 / 1350, -2.1%</p></td>
+<td><p>2615 / 2640, -0.9%</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>internal</p></td>
+<td><p>1186 / 1219, -2.7%</p></td>
+<td><p>696 / 723, -3.8%</p></td>
+<td><p>1199 / 1232, -2.7%</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p><strong>Test against theory.</strong> Card and Jones found the experimental loads between 70 and 95 % of their clamped theory (p. 11). The ratios of the test to the clamped analyses of <code class="docutils literal notranslate"><span class="pre">panels</span></code>, and the ratio of the external to the internal cylinder of the same length:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rows = []
+for cyl, (side, t, L, At, Pe, se, ne, Ne, Nc, Ns) in TABLE_I.items():
+    rows.append([cyl, side, '%.2f' % (Ne/Nc), '%.2f' % (Ne/RES[(cyl, 'clamped, linear', FINAL)][0]),
+                 '%.2f' % (Ne/RES[(cyl, 'clamped, membrane', FINAL)][0])])
+display(markdown_table(['cyl.', 'stringers', 'N_e/N_c', 'N_e/panels clamped, linear',
+                        'N_e/panels clamped, membrane'], rows))
+rows = []
+for ext, inn in ((1, 2), (3, 4)):
+    rows.append(['%d/%d' % (ext, inn), '%.2f' % (TABLE_I[ext][7]/TABLE_I[inn][7]),
+                 '%.2f' % (TABLE_I[ext][8]/TABLE_I[inn][8]),
+                 '%.2f' % (RES[(ext, 'clamped, linear', FINAL)][0]/RES[(inn, 'clamped, linear', FINAL)][0])])
+display(markdown_table(['cylinders', 'test', 'clamped theory', 'panels clamped, linear'], rows))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>cyl.</p></th>
+<th class="head"><p>stringers</p></th>
+<th class="head"><p>N_e/N_c</p></th>
+<th class="head"><p>N_e/panels clamped, linear</p></th>
+<th class="head"><p>N_e/panels clamped, membrane</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>external</p></td>
+<td><p>0.92</p></td>
+<td><p>0.93</p></td>
+<td><p>0.93</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>internal</p></td>
+<td><p>0.80</p></td>
+<td><p>0.83</p></td>
+<td><p>0.83</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>external</p></td>
+<td><p>0.82</p></td>
+<td><p>0.81</p></td>
+<td><p>0.83</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>internal</p></td>
+<td><p>0.79</p></td>
+<td><p>0.80</p></td>
+<td><p>0.81</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>cylinders</p></th>
+<th class="head"><p>test</p></th>
+<th class="head"><p>clamped theory</p></th>
+<th class="head"><p>panels clamped, linear</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1/2</p></td>
+<td><p>2.35</p></td>
+<td><p>2.04</p></td>
+<td><p>2.08</p></td>
+</tr>
+<tr class="row-odd"><td><p>3/4</p></td>
+<td><p>2.20</p></td>
+<td><p>2.12</p></td>
+<td><p>2.18</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p><strong>Neighbouring modes.</strong> The five lowest buckling loads <span class="math notranslate nohighlight">\(\bar{N}\)</span> (lb/in) of the analyses with the linear pre-buckling state, with their <span class="math notranslate nohighlight">\((m, n)\)</span>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rows = []
+for cyl in TABLE_I:
+    for name in ('clamped, linear', 'SS, linear'):
+        rows.append([cyl, name] + ['%.0f (%d, %d)' % mode for mode in RES[(cyl, name, FINAL)][6]])
+display(markdown_table(['cyl.', 'analysis', '1', '2', '3', '4', '5'], rows))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>cyl.</p></th>
+<th class="head"><p>analysis</p></th>
+<th class="head"><p>1</p></th>
+<th class="head"><p>2</p></th>
+<th class="head"><p>3</p></th>
+<th class="head"><p>4</p></th>
+<th class="head"><p>5</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>2015 (1, 7)</p></td>
+<td><p>2148 (1, 6)</p></td>
+<td><p>2150 (1, 8)</p></td>
+<td><p>2191 (2, 8)</p></td>
+<td><p>2196 (2, 9)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>SS, linear</p></td>
+<td><p>1140 (1, 6)</p></td>
+<td><p>1165 (1, 5)</p></td>
+<td><p>1467 (1, 7)</p></td>
+<td><p>1595 (2, 8)</p></td>
+<td><p>1632 (2, 7)</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>969 (2, 7)</p></td>
+<td><p>978 (2, 8)</p></td>
+<td><p>1009 (1, 6)</p></td>
+<td><p>1016 (1, 7)</p></td>
+<td><p>1071 (3, 8)</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>SS, linear</p></td>
+<td><p>653 (1, 5)</p></td>
+<td><p>727 (2, 7)</p></td>
+<td><p>740 (1, 6)</p></td>
+<td><p>811 (2, 6)</p></td>
+<td><p>838 (2, 8)</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>2615 (1, 8)</p></td>
+<td><p>2637 (1, 9)</p></td>
+<td><p>2808 (1, 7)</p></td>
+<td><p>2810 (1, 10)</p></td>
+<td><p>3072 (1, 11)</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>SS, linear</p></td>
+<td><p>1360 (1, 7)</p></td>
+<td><p>1477 (1, 8)</p></td>
+<td><p>1487 (1, 6)</p></td>
+<td><p>1794 (1, 9)</p></td>
+<td><p>2007 (1, 5)</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>clamped, linear</p></td>
+<td><p>1199 (1, 7)</p></td>
+<td><p>1226 (1, 8)</p></td>
+<td><p>1414 (1, 9)</p></td>
+<td><p>1439 (2, 8)</p></td>
+<td><p>1441 (2, 9)</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>SS, linear</p></td>
+<td><p>706 (1, 6)</p></td>
+<td><p>749 (1, 7)</p></td>
+<td><p>947 (2, 8)</p></td>
+<td><p>980 (1, 5)</p></td>
+<td><p>987 (1, 8)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig, ax = plt.subplots(figsize=(9, 4))
+names = ['test', 'clamped theory', 'panels clamped, linear', 'panels clamped, membrane',
+         'SS theory', 'panels SS, linear', 'panels SS, membrane']
+width = 0.11
+for k, name in enumerate(names):
+    vals = []
+    for cyl, row in TABLE_I.items():
+        if name == 'test':
+            vals.append(row[7])
+        elif name == 'clamped theory':
+            vals.append(row[8])
+        elif name == 'SS theory':
+            vals.append(row[9])
+        else:
+            vals.append(RES[(cyl, name[7:], FINAL)][0])
+    ax.bar(np.arange(1, 5) + (k - 3)*width, vals, width, label=name)
+ax.set_xticks(range(1, 5))
+ax.set_xticklabels(['%d (%s)' % (cyl, row[0]) for cyl, row in TABLE_I.items()])
+ax.set_ylabel(r'$\bar{N}$, lb/in')
+ax.legend(fontsize=8, ncol=2)
+ax.grid(axis='y', alpha=0.3)
+plt.tight_layout()
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_card1966_blade_cylinder_buckling_17_0.png" src="../_images/notebooks_card1966_blade_cylinder_buckling_17_0.png" />
+</div>
+</div>
+</section>
+<section id="Buckling-modes">
+<h2>Buckling modes<a class="headerlink" href="#Buckling-modes" title="Link to this heading">#</a></h2>
+<p>Normal displacement <span class="math notranslate nohighlight">\(w\)</span> of the skin of the half cylinder, unrolled, for the critical mode of the clamped analysis with the linear pre-buckling state; the dots mark the stringers.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig, axes = plt.subplots(1, 4, figsize=(15, 4.5))
+for ax, (cyl, row) in zip(axes, TABLE_I.items()):
+    N, m, n, md, skin, c, _ = RES[(cyl, 'clamped, linear', FINAL)]
+    x, th, w = bu.skin_w(md, c, skin, R_IN*IN)
+    ax.pcolormesh(np.degrees(th), x/IN, (w/np.abs(w).max()).T, cmap='RdBu_r', shading='auto', vmin=-1, vmax=1)
+    ax.plot(np.degrees((np.arange(NSTIFF//2) + 0.5)*2*np.pi/NSTIFF), np.zeros(NSTIFF//2), 'k.', ms=3)
+    ax.set_title('cylinder %d (%s): (m, n) = (%d, %d)' % (cyl, row[0], m, n), fontsize=9)
+    ax.set_xlabel(r'$\theta$, deg')
+axes[0].set_ylabel('x, in')
+plt.tight_layout()
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_card1966_blade_cylinder_buckling_19_0.png" src="../_images/notebooks_card1966_blade_cylinder_buckling_19_0.png" />
+</div>
+</div>
+</section>
+<section id="Discrete-against-smeared-stringers:-reference-section-and-stringer-spacing">
+<h2>Discrete against smeared stringers: reference section and stringer spacing<a class="headerlink" href="#Discrete-against-smeared-stringers:-reference-section-and-stringer-spacing" title="Link to this heading">#</a></h2>
+<p>The simply supported analysis with the membrane pre-buckling state and Eq. (15) of Block, Card and Mikulas (1965) hold the skin edges alike and use the same pre-buckling state (bullet <em>Edge conditions</em> of the discussion), so that their difference comes from the stringers: from the section given to the smeared theory, and from the way the two models represent the stringers. This section separates the two at the spacing of the tests and then varies the spacing.</p>
+<p><strong>The section on each side.</strong> The first table evaluates Eq. (15) for cylinder 4 with the drawn section of Fig. 2(b) (0.33 in deep including the skin, <span class="math notranslate nohighlight">\(J\)</span> of a rectangle of Card and Jones), with the plate strip of the model (the same rectangle, from the skin surface, <span class="math notranslate nohighlight">\(h_b = 0.33 - t\)</span>, with the twisting stiffness <span class="math notranslate nohighlight">\(G h_b t_b^3/3\)</span> of a Kirchhoff plate strip), with this plate strip and <span class="math notranslate nohighlight">\(J = 0\)</span>, and with the plate strip of the bfsccylinder implementation (from the middle
+surface of the skin, <span class="math notranslate nohighlight">\(0.33 - t/2\)</span>). The second table puts three discrete loads against the two references: the simply supported analysis with the membrane state of this notebook, the regression value of the panels test of this case (<code class="docutils literal notranslate"><span class="pre">tests/multidomain/test_cylinder_blade_stiffened.py</span></code>: half of the length with symmetry conditions at <span class="math notranslate nohighlight">\(L/2\)</span>, <span class="math notranslate nohighlight">\(8 \times 6\)</span> terms), and the bfsccylinder implementation (<code class="docutils literal notranslate"><span class="pre">bfsccylinder/notebooks/card1966_stiffened_cylinder_buckling.ipynb</span></code>). The plate
+strip of the model and the drawn section differ only by <span class="math notranslate nohighlight">\(J\)</span>. The bfsccylinder load is for its own plate strip, so that both its columns compare different sections; against Eq. (15) for its plate strip it is 6.3 % lower (722.7 against 771.2 lb/in in the bfsccylinder notebook).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>t4, L4, side4, Ns4 = TABLE_I[4][1], TABLE_I[4][2], TABLE_I[4][0], TABLE_I[4][9]
+# the plate strip of the model is the drawn rectangle, from the skin surface to the tip
+HB4 = DEPTH - t4
+drawn4 = section(t4, side4, HB4, t4/2)
+plate4 = section(t4, side4, HB4, t4/2, plate=True)
+# the plate strip of bfsccylinder, from the middle surface of the skin to the tip
+mid4 = section(t4, side4, DEPTH - t4/2, 0., plate=True)
+SECTIONS4 = {
+    'Fig. 2(b), J of Card and Jones': drawn4,
+    'plate strip, J = h_b t_b^3/3 (the model)': plate4,
+    'plate strip, J = 0': plate4[:3] + (0.,),
+    'plate strip from the middle surface (0.33 - t/2, bfsccylinder), J = h_b t_b^3/3': mid4,
+}
+SMEARED4 = {name: nx_ss(t4, L4, *s) for name, s in SECTIONS4.items()}
+display(markdown_table(['cylinder 4, section', 'A_s, in^2', 'z_s, in', 'I_os, in^4', 'J, in^4',
+                        'Eq. (15), lb/in (m, n)', 'vs N_s'],
+                       [[name, '%.5f' % s[0], '%.4f' % s[1], '%.5e' % s[2], '%.4e' % s[3],
+                         '%.1f (%d, %d)' % (SMEARED4[name][0], *SMEARED4[name][1]),
+                         '%+.1f%%' % pct(SMEARED4[name][0], Ns4)] for name, s in SECTIONS4.items()]))
+S_DRAWN = SMEARED4['Fig. 2(b), J of Card and Jones'][0]
+S_PLATE = SMEARED4['plate strip, J = h_b t_b^3/3 (the model)'][0]
+S_MID = SMEARED4['plate strip from the middle surface (0.33 - t/2, bfsccylinder), J = h_b t_b^3/3'][0]
+print('plate strip against Fig. 2(b) (the twisting stiffness only): %+.1f %%; plate strip from the '
+      'middle surface against the plate strip from the skin surface: %+.1f %%'
+      % (pct(S_PLATE, S_DRAWN), pct(S_MID, S_PLATE)))
+# discrete values of the simply supported analysis with the membrane state, cylinder 4
+N_PANELS = RES[(4, 'SS, membrane', FINAL)][0]
+# regression value of tests/multidomain/test_cylinder_blade_stiffened.py (half length
+# with symmetry at L/2), 122984.6 N/m
+N_TEST = 122984.6*IN/LBF
+N_BFSC = BFSC[4][1]
+display(markdown_table(['discrete model', 'N, lb/in', 'vs Eq. (15), plate strip with J = h_b t_b^3/3',
+                        'vs Eq. (15), Fig. 2(b)', 'vs N_s'],
+                       [[name, '%.1f' % N, '%+.1f%%' % pct(N, S_PLATE), '%+.1f%%' % pct(N, S_DRAWN),
+                         '%+.1f%%' % pct(N, Ns4)]
+                        for name, N in (('panels, this notebook', N_PANELS),
+                                        ('panels, test (half length)', N_TEST),
+                                        ('bfsccylinder notebook (plate from the middle surface)', N_BFSC))]))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>cylinder 4, section</p></th>
+<th class="head"><p>A_s, in^2</p></th>
+<th class="head"><p>z_s, in</p></th>
+<th class="head"><p>I_os, in^4</p></th>
+<th class="head"><p>J, in^4</p></th>
+<th class="head"><p>Eq. (15), lb/in (m, n)</p></th>
+<th class="head"><p>vs N_s</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Fig. 2(b), J of Card and Jones</p></td>
+<td><p>0.02929</p></td>
+<td><p>-0.1650</p></td>
+<td><p>1.02017e-03</p></td>
+<td><p>7.3363e-05</p></td>
+<td><p>722.8 (1, 6)</p></td>
+<td><p>+0.1%</p></td>
+</tr>
+<tr class="row-odd"><td><p>plate strip, J = h_b t_b^3/3 (the model)</p></td>
+<td><p>0.02929</p></td>
+<td><p>-0.1650</p></td>
+<td><p>1.02017e-03</p></td>
+<td><p>9.1876e-05</p></td>
+<td><p>751.9 (1, 6)</p></td>
+<td><p>+4.1%</p></td>
+</tr>
+<tr class="row-even"><td><p>plate strip, J = 0</p></td>
+<td><p>0.02929</p></td>
+<td><p>-0.1650</p></td>
+<td><p>1.02017e-03</p></td>
+<td><p>0.0000e+00</p></td>
+<td><p>601.8 (1, 7)</p></td>
+<td><p>-16.6%</p></td>
+</tr>
+<tr class="row-odd"><td><p>plate strip from the middle surface (0.33 - t/2, bfsccylinder), J =
+h_b t_b^3/3</p></td>
+<td><p>0.03065</p></td>
+<td><p>-0.1580</p></td>
+<td><p>1.02026e-03</p></td>
+<td><p>9.6135e-05</p></td>
+<td><p>771.2 (1, 6)</p></td>
+<td><p>+6.8%</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+plate strip against Fig. 2(b) (the twisting stiffness only): +4.0 %; plate strip from the middle surface against the plate strip from the skin surface: +2.6 %
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>discrete model</p></th>
+<th class="head"><p>N, lb/in</p></th>
+<th class="head"><p>vs Eq. (15), plate strip with J = h_b t_b^3/3</p></th>
+<th class="head"><p>vs Eq. (15), Fig. 2(b)</p></th>
+<th class="head"><p>vs N_s</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>panels, this notebook</p></td>
+<td><p>695.5</p></td>
+<td><p>-7.5%</p></td>
+<td><p>-3.8%</p></td>
+<td><p>-3.7%</p></td>
+</tr>
+<tr class="row-odd"><td><p>panels, test (half length)</p></td>
+<td><p>702.3</p></td>
+<td><p>-6.6%</p></td>
+<td><p>-2.8%</p></td>
+<td><p>-2.7%</p></td>
+</tr>
+<tr class="row-even"><td><p>bfsccylinder notebook (plate from the middle surface)</p></td>
+<td><p>723.0</p></td>
+<td><p>-3.8%</p></td>
+<td><p>+0.0%</p></td>
+<td><p>+0.1%</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p><strong>Separating the differences at the spacing of the tests.</strong> For the same section, the discrete model differs from Eq. (15) in three respects, each of which <code class="docutils literal notranslate"><span class="pre">bu.buckling_membrane</span></code> can switch off:</p>
+<ul class="simple">
+<li><p>the kinematics of the skin: Sanders-Koiter (<code class="docutils literal notranslate"><span class="pre">cylshell_clpt_sanders</span></code>) in the model, “the usual Donnell-type assumptions” in the smeared theory (Block, Card and Mikulas 1965, p. 5); <code class="docutils literal notranslate"><span class="pre">skin_model='cylshell_clpt_donnell'</span></code> gives the Donnell skin;</p></li>
+<li><p>the load term of the stringers: in Eq. (9) of Block, Card and Mikulas (p. 8) the change in potential energy of the load is <span class="math notranslate nohighlight">\(\bar{N}_x w_{,x}^2\)</span>, with <span class="math notranslate nohighlight">\(\bar{N}_x\)</span> “obtained by considering the shell and stringers to be loaded with a uniform normal stress”, so that the stringer load acts on the radial displacement only. The blades of <code class="docutils literal notranslate"><span class="pre">plate_clpt_gl</span></code> carry their load <span class="math notranslate nohighlight">\(N_{xx}\)</span> on the three displacements of the blade: the radial one (<code class="docutils literal notranslate"><span class="pre">v</span></code> of the blade), the axial one, and the
+out-of-plane one (<code class="docutils literal notranslate"><span class="pre">w</span></code> of the blade), which is the circumferential displacement of the stringer section: the circumferential displacement of the skin at the root plus the rotation of the section times the distance from the skin. <code class="docutils literal notranslate"><span class="pre">blade_lateral_kG=False</span></code> removes this last term (“lateral term” below) from the geometric stiffness of the blades;</p></li>
+<li><p>the twisting of the stringers: Eq. (6) of Block, Card and Mikulas (p. 7) adds the energy <span class="math notranslate nohighlight">\(G_s J_s w_{,xy}^2/d\)</span> “as an approximation”, for a stringer that “twists in a fashion so that its angle of twist is equal to the angle of twist of the shell”, and averages it over the circumference, “hence, discreteness of the stringers is ignored” (p. 7); each blade of the model twists as a plate strip whose root follows the rotation of the skin. <code class="docutils literal notranslate"><span class="pre">blade_D66_factor=0</span></code> removes the twisting stiffness
+of the blades; these models are compared with Eq. (15) with <span class="math notranslate nohighlight">\(J = 0\)</span>.</p></li>
+</ul>
+<p>The simply supported ends of the blades hold only their radial displacement; <code class="docutils literal notranslate"><span class="pre">bc='SSW'</span></code> also holds their circumferential displacement along the end edges, as the stringer ends of the bfsccylinder implementation do. Each model is computed with the two finest numbers of terms of the convergence study.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>DON = 'cylshell_clpt_donnell'
+VARIANTS = [
+    ('Sanders skin (the model above)', dict(), 'plate strip, J = h_b t_b^3/3 (the model)'),
+    ('Donnell skin', dict(skin_model=DON), 'plate strip, J = h_b t_b^3/3 (the model)'),
+    ('Donnell skin, no lateral term', dict(skin_model=DON, blade_lateral_kG=False),
+     'plate strip, J = h_b t_b^3/3 (the model)'),
+    ('Donnell skin, no lateral term, blade ends held circumferentially',
+     dict(skin_model=DON, blade_lateral_kG=False, bc='SSW'), 'plate strip, J = h_b t_b^3/3 (the model)'),
+    ('Sanders skin, no twisting', dict(blade_D66_factor=0.), 'plate strip, J = 0'),
+    ('Donnell skin, no twisting', dict(skin_model=DON, blade_D66_factor=0.), 'plate strip, J = 0'),
+    ('Donnell skin, no twisting, no lateral term',
+     dict(skin_model=DON, blade_D66_factor=0., blade_lateral_kG=False), 'plate strip, J = 0'),
+]
+
+
+def cyl4_ss(nstiff, level, bc='SS', **kw):
+    # cylinder 4, simply supported, membrane state; blades of constant height HB4
+    # and thickness WIDTH*60/nstiff; lowest general mode (m &lt;= 3, n &lt;= 12) and lowest mode
+    tb = WIDTH*NSTIFF/nstiff
+    P, modes, md, skin, dt = bu.buckling_membrane(R_IN*IN, t4*IN, L4*IN, E, NU, tb*IN, HB4*IN,
+                                                  side4, bc, *level, nstiff=nstiff, **kw)
+    N = P/LBF/(2*np.pi*R_IN)
+    allm = [(lam/modes[0][0]*N, m, n) for lam, m, n, c in modes]
+    general = [mode for mode in allm if mode[1] &lt;= 3 and mode[2] &lt;= 12]
+    return general[0], allm[0], md.get_size(), dt
+
+
+AT60 = {}
+rows = []
+for name, kw, ref in VARIANTS:
+    prev = None
+    for level in LEVELS[-2:]:
+        gen, low, size, dt = cyl4_ss(NSTIFF, level, **kw)
+        AT60[name] = gen
+        rows.append([name, '%d, %d, %d' % level, size, '%.0f' % dt, '%.1f (%d, %d)' % gen,
+                     '-' if prev is None else '%+.2f%%' % pct(gen[0], prev),
+                     '%.1f' % SMEARED4[ref][0], '%+.1f%%' % pct(gen[0], SMEARED4[ref][0])])
+        prev = gen[0]
+display(markdown_table(['discrete model, cylinder 4, SS, membrane', 'm_x, n_y, n_b', 'dofs', 'time, s',
+                        'N, lb/in (m, n)', 'change', 'Eq. (15), same section', 'difference'], rows))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>discrete model, cylinder 4, SS, membrane</p></th>
+<th class="head"><p>m_x, n_y, n_b</p></th>
+<th class="head"><p>dofs</p></th>
+<th class="head"><p>time, s</p></th>
+<th class="head"><p>N, lb/in (m, n)</p></th>
+<th class="head"><p>change</p></th>
+<th class="head"><p>Eq. (15), same section</p></th>
+<th class="head"><p>difference</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Sanders skin (the model above)</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>10</p></td>
+<td><p>696.4 (1, 6)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>751.9</p></td>
+<td><p>-7.4%</p></td>
+</tr>
+<tr class="row-odd"><td><p>Sanders skin (the model above)</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>18</p></td>
+<td><p>695.5 (1, 6)</p></td>
+<td><p>-0.13%</p></td>
+<td><p>751.9</p></td>
+<td><p>-7.5%</p></td>
+</tr>
+<tr class="row-even"><td><p>Donnell skin</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>10</p></td>
+<td><p>707.3 (1, 6)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>751.9</p></td>
+<td><p>-5.9%</p></td>
+</tr>
+<tr class="row-odd"><td><p>Donnell skin</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>17</p></td>
+<td><p>706.4 (1, 6)</p></td>
+<td><p>-0.13%</p></td>
+<td><p>751.9</p></td>
+<td><p>-6.0%</p></td>
+</tr>
+<tr class="row-even"><td><p>Donnell skin, no lateral term</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>10</p></td>
+<td><p>733.2 (1, 6)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>751.9</p></td>
+<td><p>-2.5%</p></td>
+</tr>
+<tr class="row-odd"><td><p>Donnell skin, no lateral term</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>18</p></td>
+<td><p>732.1 (1, 6)</p></td>
+<td><p>-0.15%</p></td>
+<td><p>751.9</p></td>
+<td><p>-2.6%</p></td>
+</tr>
+<tr class="row-even"><td><p>Donnell skin, no lateral term, blade ends held
+circumferentially</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>12</p></td>
+<td><p>740.0 (1, 6)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>751.9</p></td>
+<td><p>-1.6%</p></td>
+</tr>
+<tr class="row-odd"><td><p>Donnell skin, no lateral term, blade ends held
+circumferentially</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>19</p></td>
+<td><p>740.0 (1, 6)</p></td>
+<td><p>-0.00%</p></td>
+<td><p>751.9</p></td>
+<td><p>-1.6%</p></td>
+</tr>
+<tr class="row-even"><td><p>Sanders skin, no twisting</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>12</p></td>
+<td><p>565.7 (1, 7)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>601.8</p></td>
+<td><p>-6.0%</p></td>
+</tr>
+<tr class="row-odd"><td><p>Sanders skin, no twisting</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>22</p></td>
+<td><p>565.7 (1, 7)</p></td>
+<td><p>-0.00%</p></td>
+<td><p>601.8</p></td>
+<td><p>-6.0%</p></td>
+</tr>
+<tr class="row-even"><td><p>Donnell skin, no twisting</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>12</p></td>
+<td><p>580.3 (1, 7)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>601.8</p></td>
+<td><p>-3.6%</p></td>
+</tr>
+<tr class="row-odd"><td><p>Donnell skin, no twisting</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>21</p></td>
+<td><p>580.3 (1, 7)</p></td>
+<td><p>-0.00%</p></td>
+<td><p>601.8</p></td>
+<td><p>-3.6%</p></td>
+</tr>
+<tr class="row-even"><td><p>Donnell skin, no twisting, no lateral term</p></td>
+<td><p>18, 8, 5</p></td>
+<td><p>21060</p></td>
+<td><p>11</p></td>
+<td><p>601.9 (1, 7)</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>601.8</p></td>
+<td><p>+0.0%</p></td>
+</tr>
+<tr class="row-odd"><td><p>Donnell skin, no twisting, no lateral term</p></td>
+<td><p>22, 10, 6</p></td>
+<td><p>31680</p></td>
+<td><p>19</p></td>
+<td><p>601.9 (1, 7)</p></td>
+<td><p>-0.00%</p></td>
+<td><p>601.8</p></td>
+<td><p>+0.0%</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p><strong>Stringer spacing.</strong> The number of stringers <span class="math notranslate nohighlight">\(n_s\)</span> of cylinder 4 is varied from 30 to 240, from twice to a quarter of the spacing <span class="math notranslate nohighlight">\(b = 2\pi R/n_s = 1.00\)</span> in of the tests, at a constant total stringer area: the blade keeps its height <span class="math notranslate nohighlight">\(h_b = 0.33 - t\)</span>, and its thickness is <span class="math notranslate nohighlight">\(t_b = 0.097 \times 60/n_s\)</span> in. The stringer terms of Eq. (15) per unit circumference, <span class="math notranslate nohighlight">\(E A_s/d\)</span>, <span class="math notranslate nohighlight">\(E A_s \bar{z}_s/d\)</span> and <span class="math notranslate nohighlight">\(E I_{os}/d\)</span> (<span class="math notranslate nohighlight">\(d = b\)</span>, the stringer spacing), are then
+the same at every point, and only the twisting term <span class="math notranslate nohighlight">\(G J/d\)</span> changes, with <span class="math notranslate nohighlight">\(J = h_b t_b^3/3\)</span>, as <span class="math notranslate nohighlight">\(b^2\)</span>. The smeared theory and the discrete model use the same plate strip at every point. The spacing is given as <span class="math notranslate nohighlight">\(b/\sqrt{R t}\)</span> and as <span class="math notranslate nohighlight">\(Z_b = b^2 \sqrt{1 - \nu^2}/(R t)\)</span>, the curvature parameter that Batdorf (1947, Fig. 11 and p. 11) uses for a curved panel of width <span class="math notranslate nohighlight">\(b\)</span>, here the skin between two stringers. Four models of the previous table are computed at each
+point with the two finest numbers of terms (the change between them is given); the lowest general-instability mode (at most three axial half-waves, <span class="math notranslate nohighlight">\(n \le 12\)</span>) is compared with the minimum of Eq. (15) over <span class="math notranslate nohighlight">\((m, n)\)</span>, and the lowest mode of the model is given where it is another one.</p>
+<ol class="upperalpha simple" start="19">
+<li><ol class="upperalpha simple" start="2">
+<li><p>Batdorf, <em>A simplified method of elastic-stability analysis for thin cylindrical shells</em>, NACA Report 874, 1947 (NTRS 19930091945).</p></li>
+</ol>
+</li>
+</ol>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>NS_STUDY = [30, 40, 60, 90, 120, 180, 240]
+STUDY_VARIANTS = VARIANTS[:3] + VARIANTS[-1:]
+SPACING = {}
+rows = []
+for ns in NS_STUDY:
+    tb = WIDTH*NSTIFF/ns
+    b = 2*np.pi*R_IN/ns
+    sp = section(t4, side4, HB4, t4/2, plate=True, width=tb)
+    sm = {'plate strip, J = h_b t_b^3/3 (the model)': nx_ss(t4, L4, *sp, nstiff=ns),
+          'plate strip, J = 0': nx_ss(t4, L4, *sp[:3], 0., nstiff=ns)}
+    SPACING[(ns, 'smeared')] = sm
+    for name, kw, ref in STUDY_VARIANTS:
+        prev = None
+        for level in LEVELS[-2:]:
+            gen, low, size, dt = cyl4_ss(ns, level, **kw)
+            change = '-' if prev is None else '%+.2f%%' % pct(gen[0], prev)
+            prev = gen[0]
+        SPACING[(ns, name)] = gen
+        rows.append([ns, '%.3f' % b, '%.2f' % (b/np.sqrt(R_IN*t4)),
+                     '%.2f' % (b**2/(R_IN*t4)*np.sqrt(1 - NU**2)), '%.4f' % tb, name,
+                     '%.1f (%d, %d)' % gen, change,
+                     '%.1f (%d, %d)' % (sm[ref][0], *sm[ref][1]), '%.3f' % (gen[0]/sm[ref][0]),
+                     '-' if low == gen else '%.1f (%d, %d)' % low])
+display(markdown_table(['n_s', 'b, in', 'b/sqrt(R t)', 'Z_b', 't_b, in', 'discrete model',
+                        'N, lb/in (m, n)', 'change, last level', 'Eq. (15), same section',
+                        'discrete/smeared', 'lowest mode if not general'], rows))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>n_s</p></th>
+<th class="head"><p>b, in</p></th>
+<th class="head"><p>b/sqrt(R t)</p></th>
+<th class="head"><p>Z_b</p></th>
+<th class="head"><p>t_b, in</p></th>
+<th class="head"><p>discrete model</p></th>
+<th class="head"><p>N, lb/in (m, n)</p></th>
+<th class="head"><p>change, last level</p></th>
+<th class="head"><p>Eq. (15), same section</p></th>
+<th class="head"><p>discrete/smeared</p></th>
+<th class="head"><p>lowest mode if not general</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>30</p></td>
+<td><p>2.000</p></td>
+<td><p>3.87</p></td>
+<td><p>14.17</p></td>
+<td><p>0.1940</p></td>
+<td><p>Sanders skin (the model above)</p></td>
+<td><p>903.3 (1, 6)</p></td>
+<td><p>-0.34%</p></td>
+<td><p>1184.6 (1, 6)</p></td>
+<td><p>0.763</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>30</p></td>
+<td><p>2.000</p></td>
+<td><p>3.87</p></td>
+<td><p>14.17</p></td>
+<td><p>0.1940</p></td>
+<td><p>Donnell skin</p></td>
+<td><p>914.2 (1, 6)</p></td>
+<td><p>-0.33%</p></td>
+<td><p>1184.6 (1, 6)</p></td>
+<td><p>0.772</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>30</p></td>
+<td><p>2.000</p></td>
+<td><p>3.87</p></td>
+<td><p>14.17</p></td>
+<td><p>0.1940</p></td>
+<td><p>Donnell skin, no lateral term</p></td>
+<td><p>939.1 (1, 6)</p></td>
+<td><p>-0.34%</p></td>
+<td><p>1184.6 (1, 6)</p></td>
+<td><p>0.793</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>30</p></td>
+<td><p>2.000</p></td>
+<td><p>3.87</p></td>
+<td><p>14.17</p></td>
+<td><p>0.1940</p></td>
+<td><p>Donnell skin, no twisting, no lateral term</p></td>
+<td><p>600.6 (1, 7)</p></td>
+<td><p>-0.00%</p></td>
+<td><p>601.8 (1, 7)</p></td>
+<td><p>0.998</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>40</p></td>
+<td><p>1.500</p></td>
+<td><p>2.90</p></td>
+<td><p>7.97</p></td>
+<td><p>0.1455</p></td>
+<td><p>Sanders skin (the model above)</p></td>
+<td><p>817.2 (1, 6)</p></td>
+<td><p>-0.30%</p></td>
+<td><p>932.2 (1, 6)</p></td>
+<td><p>0.877</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>40</p></td>
+<td><p>1.500</p></td>
+<td><p>2.90</p></td>
+<td><p>7.97</p></td>
+<td><p>0.1455</p></td>
+<td><p>Donnell skin</p></td>
+<td><p>828.1 (1, 6)</p></td>
+<td><p>-0.30%</p></td>
+<td><p>932.2 (1, 6)</p></td>
+<td><p>0.888</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>40</p></td>
+<td><p>1.500</p></td>
+<td><p>2.90</p></td>
+<td><p>7.97</p></td>
+<td><p>0.1455</p></td>
+<td><p>Donnell skin, no lateral term</p></td>
+<td><p>855.8 (1, 6)</p></td>
+<td><p>-0.32%</p></td>
+<td><p>932.2 (1, 6)</p></td>
+<td><p>0.918</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>40</p></td>
+<td><p>1.500</p></td>
+<td><p>2.90</p></td>
+<td><p>7.97</p></td>
+<td><p>0.1455</p></td>
+<td><p>Donnell skin, no twisting, no lateral term</p></td>
+<td><p>601.8 (1, 7)</p></td>
+<td><p>-0.00%</p></td>
+<td><p>601.8 (1, 7)</p></td>
+<td><p>1.000</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>60</p></td>
+<td><p>1.000</p></td>
+<td><p>1.93</p></td>
+<td><p>3.54</p></td>
+<td><p>0.0970</p></td>
+<td><p>Sanders skin (the model above)</p></td>
+<td><p>695.5 (1, 6)</p></td>
+<td><p>-0.13%</p></td>
+<td><p>751.9 (1, 6)</p></td>
+<td><p>0.925</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>60</p></td>
+<td><p>1.000</p></td>
+<td><p>1.93</p></td>
+<td><p>3.54</p></td>
+<td><p>0.0970</p></td>
+<td><p>Donnell skin</p></td>
+<td><p>706.4 (1, 6)</p></td>
+<td><p>-0.13%</p></td>
+<td><p>751.9 (1, 6)</p></td>
+<td><p>0.940</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>60</p></td>
+<td><p>1.000</p></td>
+<td><p>1.93</p></td>
+<td><p>3.54</p></td>
+<td><p>0.0970</p></td>
+<td><p>Donnell skin, no lateral term</p></td>
+<td><p>732.1 (1, 6)</p></td>
+<td><p>-0.15%</p></td>
+<td><p>751.9 (1, 6)</p></td>
+<td><p>0.974</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>60</p></td>
+<td><p>1.000</p></td>
+<td><p>1.93</p></td>
+<td><p>3.54</p></td>
+<td><p>0.0970</p></td>
+<td><p>Donnell skin, no twisting, no lateral term</p></td>
+<td><p>601.9 (1, 7)</p></td>
+<td><p>-0.00%</p></td>
+<td><p>601.8 (1, 7)</p></td>
+<td><p>1.000</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>90</p></td>
+<td><p>0.667</p></td>
+<td><p>1.29</p></td>
+<td><p>1.57</p></td>
+<td><p>0.0647</p></td>
+<td><p>Sanders skin (the model above)</p></td>
+<td><p>630.1 (1, 6)</p></td>
+<td><p>-0.03%</p></td>
+<td><p>671.8 (1, 6)</p></td>
+<td><p>0.938</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>90</p></td>
+<td><p>0.667</p></td>
+<td><p>1.29</p></td>
+<td><p>1.57</p></td>
+<td><p>0.0647</p></td>
+<td><p>Donnell skin</p></td>
+<td><p>641.0 (1, 6)</p></td>
+<td><p>-0.03%</p></td>
+<td><p>671.8 (1, 6)</p></td>
+<td><p>0.954</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>90</p></td>
+<td><p>0.667</p></td>
+<td><p>1.29</p></td>
+<td><p>1.57</p></td>
+<td><p>0.0647</p></td>
+<td><p>Donnell skin, no lateral term</p></td>
+<td><p>664.9 (1, 6)</p></td>
+<td><p>-0.04%</p></td>
+<td><p>671.8 (1, 6)</p></td>
+<td><p>0.990</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>90</p></td>
+<td><p>0.667</p></td>
+<td><p>1.29</p></td>
+<td><p>1.57</p></td>
+<td><p>0.0647</p></td>
+<td><p>Donnell skin, no twisting, no lateral term</p></td>
+<td><p>601.9 (1, 7)</p></td>
+<td><p>-0.00%</p></td>
+<td><p>601.8 (1, 7)</p></td>
+<td><p>1.000</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>120</p></td>
+<td><p>0.500</p></td>
+<td><p>0.97</p></td>
+<td><p>0.89</p></td>
+<td><p>0.0485</p></td>
+<td><p>Sanders skin (the model above)</p></td>
+<td><p>606.1 (1, 6)</p></td>
+<td><p>-0.01%</p></td>
+<td><p>643.7 (1, 6)</p></td>
+<td><p>0.942</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>120</p></td>
+<td><p>0.500</p></td>
+<td><p>0.97</p></td>
+<td><p>0.89</p></td>
+<td><p>0.0485</p></td>
+<td><p>Donnell skin</p></td>
+<td><p>617.0 (1, 6)</p></td>
+<td><p>-0.01%</p></td>
+<td><p>643.7 (1, 6)</p></td>
+<td><p>0.958</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>120</p></td>
+<td><p>0.500</p></td>
+<td><p>0.97</p></td>
+<td><p>0.89</p></td>
+<td><p>0.0485</p></td>
+<td><p>Donnell skin, no lateral term</p></td>
+<td><p>640.2 (1, 6)</p></td>
+<td><p>-0.02%</p></td>
+<td><p>643.7 (1, 6)</p></td>
+<td><p>0.995</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>120</p></td>
+<td><p>0.500</p></td>
+<td><p>0.97</p></td>
+<td><p>0.89</p></td>
+<td><p>0.0485</p></td>
+<td><p>Donnell skin, no twisting, no lateral term</p></td>
+<td><p>601.8 (1, 7)</p></td>
+<td><p>-0.00%</p></td>
+<td><p>601.8 (1, 7)</p></td>
+<td><p>1.000</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>180</p></td>
+<td><p>0.333</p></td>
+<td><p>0.64</p></td>
+<td><p>0.39</p></td>
+<td><p>0.0323</p></td>
+<td><p>Sanders skin (the model above)</p></td>
+<td><p>585.4 (1, 7)</p></td>
+<td><p>-0.00%</p></td>
+<td><p>623.6 (1, 7)</p></td>
+<td><p>0.939</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>180</p></td>
+<td><p>0.333</p></td>
+<td><p>0.64</p></td>
+<td><p>0.39</p></td>
+<td><p>0.0323</p></td>
+<td><p>Donnell skin</p></td>
+<td><p>599.5 (1, 6)</p></td>
+<td><p>-0.00%</p></td>
+<td><p>623.6 (1, 7)</p></td>
+<td><p>0.961</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>180</p></td>
+<td><p>0.333</p></td>
+<td><p>0.64</p></td>
+<td><p>0.39</p></td>
+<td><p>0.0323</p></td>
+<td><p>Donnell skin, no lateral term</p></td>
+<td><p>622.0 (1, 7)</p></td>
+<td><p>-0.01%</p></td>
+<td><p>623.6 (1, 7)</p></td>
+<td><p>0.997</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>180</p></td>
+<td><p>0.333</p></td>
+<td><p>0.64</p></td>
+<td><p>0.39</p></td>
+<td><p>0.0323</p></td>
+<td><p>Donnell skin, no twisting, no lateral term</p></td>
+<td><p>601.8 (1, 7)</p></td>
+<td><p>-0.00%</p></td>
+<td><p>601.8 (1, 7)</p></td>
+<td><p>1.000</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>240</p></td>
+<td><p>0.250</p></td>
+<td><p>0.48</p></td>
+<td><p>0.22</p></td>
+<td><p>0.0243</p></td>
+<td><p>Sanders skin (the model above)</p></td>
+<td><p>576.8 (1, 7)</p></td>
+<td><p>-0.00%</p></td>
+<td><p>614.1 (1, 7)</p></td>
+<td><p>0.939</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>240</p></td>
+<td><p>0.250</p></td>
+<td><p>0.48</p></td>
+<td><p>0.22</p></td>
+<td><p>0.0243</p></td>
+<td><p>Donnell skin</p></td>
+<td><p>591.4 (1, 7)</p></td>
+<td><p>-0.00%</p></td>
+<td><p>614.1 (1, 7)</p></td>
+<td><p>0.963</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>240</p></td>
+<td><p>0.250</p></td>
+<td><p>0.48</p></td>
+<td><p>0.22</p></td>
+<td><p>0.0243</p></td>
+<td><p>Donnell skin, no lateral term</p></td>
+<td><p>613.2 (1, 7)</p></td>
+<td><p>-0.00%</p></td>
+<td><p>614.1 (1, 7)</p></td>
+<td><p>0.998</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>240</p></td>
+<td><p>0.250</p></td>
+<td><p>0.48</p></td>
+<td><p>0.22</p></td>
+<td><p>0.0243</p></td>
+<td><p>Donnell skin, no twisting, no lateral term</p></td>
+<td><p>601.8 (1, 7)</p></td>
+<td><p>-0.00%</p></td>
+<td><p>601.8 (1, 7)</p></td>
+<td><p>1.000</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig, ax = plt.subplots(figsize=(7, 4))
+xs = [2*np.pi*R_IN/ns/np.sqrt(R_IN*t4) for ns in NS_STUDY]
+for (name, kw, ref), style in zip(STUDY_VARIANTS, ['o-', 's-', '^-', 'v--']):
+    ax.plot(xs, [SPACING[(ns, name)][0]/SPACING[(ns, 'smeared')][ref][0] for ns in NS_STUDY],
+            style, label=name)
+ax.axvline(1.00/np.sqrt(R_IN*t4), color='k', lw=0.8, ls=':', label='Card and Jones, b = 1.00 in')
+ax.axhline(1., color='k', lw=0.5)
+ax.set_xlabel(r'stringer spacing $b/\sqrt{R t}$')
+ax.set_ylabel('discrete / smeared (same section)')
+ax.legend(fontsize=8)
+ax.grid(alpha=0.3)
+plt.tight_layout()
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_card1966_blade_cylinder_buckling_26_0.png" src="../_images/notebooks_card1966_blade_cylinder_buckling_26_0.png" />
+</div>
+</div>
+<p><strong>What the two tables establish</strong> (cylinder 4, simply supported ends, membrane pre-buckling state):</p>
+<ul class="simple">
+<li><p><em>Reference section.</em> The plate strip of the model is the drawn rectangle of Fig. 2(b) and differs from the section of Card and Jones only by its twisting stiffness: <span class="math notranslate nohighlight">\(J\)</span> of the Kirchhoff plate strip is 25 % above that of the rectangle and raises Eq. (15) by 4.0 % (751.9 against 722.8 lb/in). The -7.5 % of this notebook (-6.6 % of the test) is measured against the same section; against the drawn section with the <span class="math notranslate nohighlight">\(J\)</span> of Card and Jones it is -3.8 % (-2.8 % for the test). The plate of
+the bfsccylinder implementation, from the middle surface of the skin, raises Eq. (15) by a further 2.6 % (771.2 lb/in); the +0.0 % of the bfsccylinder notebook against the drawn section compares different sections, the 6.7 % of its section over the drawn one offsetting the differences of the models.</p></li>
+<li><p><em>Same section, spacing of the tests.</em> The -7.5 % is the sum of three parts: the Sanders skin against the Donnell skin of the theory (695.5 against 706.4 lb/in, -1.5 %), the lateral term (706.4 against 732.1 lb/in, -3.5 %) and the twisting of the blades (732.1 against 751.9 lb/in, -2.6 %; -1.6 % with the blade ends held circumferentially). Without the twisting stiffness on both sides, with the Donnell skin and without the lateral term, the discrete model reproduces Eq. (15) to 0.02 % (601.9
+against 601.8 lb/in).</p></li>
+<li><p><em>Spacing.</em> From <span class="math notranslate nohighlight">\(b/\sqrt{R t}\)</span> = 0.48 to 3.87 at constant stringer area, the model without twisting stiffness, with the Donnell skin and without the lateral term, stays within 0.2 % of Eq. (15) with <span class="math notranslate nohighlight">\(J = 0\)</span>: over this range the discreteness of the stringers does not change the bending and extension part of the smeared theory. The lateral term (-2.7 % to -3.6 %) and the Sanders skin (-1.2 % to -2.5 %) change little with the spacing. The twisting part grows with the spacing: the
+Donnell model without the lateral term is 0.2 % below Eq. (15) at a quarter of the spacing of the tests, 0.3 % at a third, 0.5 % at half, 1.0 % at two thirds, 2.6 % at their spacing, 8.2 % at 1.5 times and 20.7 % at twice the spacing, where the twisting stiffness of the thick blade (<span class="math notranslate nohighlight">\(t_b/h_b = 0.64\)</span>) doubles the smeared load (1184.6 against 601.8 lb/in with <span class="math notranslate nohighlight">\(J = 0\)</span>). The model of this notebook is therefore 5.8 % to 6.2 % below Eq. (15) for spacings up to two thirds of that of the
+tests, 7.5 % at the spacing of the tests, 12.3 % at 1.5 times and 23.7 % at twice. In the bfsccylinder implementation of this study (<code class="docutils literal notranslate"><span class="pre">bfsccylinder/notebooks/card1966_stiffened_cylinder_buckling.ipynb</span></code>, same cylinder and spacings, its stringer plate from the middle surface of the skin, compared with Eq. (15) for that plate) the model without twisting stiffness, with the Donnell skin and without the lateral term is 0.2 % to 0.4 % above Eq. (15) at every spacing (the change of its last mesh
+refinement is about 0.5 %), the lateral term is -2.7 % to -3.8 %, the Sanders skin -2.0 % to -3.2 %, and the twisting part -0.3 % at the spacing of the tests (its stringer ends are held circumferentially), -4.7 % at 1.5 times and -18 % at twice; its model is 6.3 % below Eq. (15) for its section at the spacing of the tests (722.7 against 771.2 lb/in) and 5.4 % to 5.6 % below at the closer spacings.</p></li>
+</ul>
+</section>
+<section id="Discussion">
+<h2>Discussion<a class="headerlink" href="#Discussion" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Convergence.</strong> With the last two numbers of terms the critical loads change by less than 0.15 %. With the coarsest model the clamped analysis with the linear pre-buckling state of the long cylinders 1 and 2 (<span class="math notranslate nohighlight">\(L/R = 4\)</span>) has too few axial terms for the boundary layers at the ends and is 12 % and 16 % low.</p></li>
+<li><p><strong>Section of the stringers.</strong> Fig. 2(b) (p. 6) dimensions the total depth of the section, 0.33 in from the stringer tip to the skin surface opposite the stringer; the plate strips of the model are the drawn rectangles, from the skin surface to the tip, <span class="math notranslate nohighlight">\(h_b = 0.33 - t\)</span> in, without the fillets. With this section the simply supported smeared solution of Block, Card and Mikulas (1965, Eq. (15)) reproduces the four <span class="math notranslate nohighlight">\(\bar{N}_s\)</span> of Card and Jones within 0.2 % (table of the section <em>Test
+data</em>): their theory used the drawn section. The area <span class="math notranslate nohighlight">\(A_t\)</span> of Table I, by weighing, is 3 % to 6 % larger than this section with the doublers of the butt joints; the report does not explain the difference (the rivets of the joints are not counted), which is not part of the theory and is not modelled. With a stringer 0.33 in high above the skin surface Eq. (15) would be up to 10 % above <span class="math notranslate nohighlight">\(\bar{N}_s\)</span>, most for the external stringers, whose eccentricity raises the load most.</p></li>
+<li><p><strong>Smeared theory.</strong> With the assumptions of Card and Jones (membrane pre-buckling state, clamped or simply supported ends), <code class="docutils literal notranslate"><span class="pre">panels</span></code> is 1.1 % to 3.2 % below their clamped theory <span class="math notranslate nohighlight">\(\bar{N}_c\)</span> for the four cylinders and 0.4 % to 5.5 % below the simply supported <span class="math notranslate nohighlight">\(\bar{N}_s\)</span>. These theoretical values are for the drawn section of Fig. 2(b) with the <span class="math notranslate nohighlight">\(J\)</span> of a rectangle; the plate strip of the model has the same area, eccentricity and moment of inertia, and the twisting stiffness of
+a Kirchhoff plate strip, 25 % above, which raises Eq. (15) by 2.5 % to 4.1 %. Against Eq. (15) for the plate strip, the same section, the simply supported load of cylinder 4 is 7.5 % lower; the section <em>Discrete against smeared stringers</em> splits this into the Sanders skin against the Donnell skin of the theory (-1.5 %), the work of the blade load on the circumferential displacement of the stringer section, which Eq. (9) of Block, Card and Mikulas leaves out (-3.5 %), and the twisting of the
+discrete blades against the term <span class="math notranslate nohighlight">\(G_s J_s w_{,xy}^2/d\)</span> of the theory (-2.6 %, -1.6 % with the blade ends held circumferentially). With the same section, without twisting stiffness, with the Donnell skin and without that load term, the discrete model reproduces Eq. (15) within 0.2 % for stringer spacings from a quarter to twice that of the tests (<span class="math notranslate nohighlight">\(b/\sqrt{R t}\)</span> = 0.48 to 3.87); only the twisting part depends on the spacing, from -0.2 % at the closest spacing to -20.7 % at twice the
+spacing of the tests. The torsional stiffness <span class="math notranslate nohighlight">\(G_s J_s\)</span> raises the loads of these integral cylinders by 10 % to 20 % (Card and Jones, p. 11).</p></li>
+<li><p><strong>Other stringers, measured the same way.</strong> The notebooks <a class="reference internal" href="weller1977_blade_cylinder_buckling.html"><span class="doc">weller1977_blade_cylinder_buckling.ipynb</span></a> and <a class="reference internal" href="peterson1959_blade_cylinder_buckling.html"><span class="doc">peterson1959_blade_cylinder_buckling.ipynb</span></a> give the gap as here: the simply supported analysis with the membrane pre-buckling state (Sanders-Koiter skin, <code class="docutils literal notranslate"><span class="pre">plate_clpt_gl</span></code> blades with the lateral term, blade ends held radially only) against Eq. (15) of Block, Card and Mikulas for the same plate
+strip with the same twisting stiffness, there the <span class="math notranslate nohighlight">\(G J\)</span> of the stringer of the source (<span class="math notranslate nohighlight">\(D_{66}\)</span> of the blades scaled to it) instead of that of the Kirchhoff plate strip. The external integral rectangular stringers of the shells AS-34 and AS-35 of Weller and Singer (T. Weller and J. Singer, <em>Experimental studies on the buckling under axial compression of integrally stringer-stiffened circular cylindrical shells</em>, J. Appl. Mech. 44(4) (1977) 721-730,
+<a class="reference external" href="https://doi.org/10.1115/1.3424163">https://doi.org/10.1115/1.3424163</a>), at <span class="math notranslate nohighlight">\(b/\sqrt{R t} = 1.6\)</span>, give -1.6 % and -1.7 % (-2.8 % and -2.9 % with the twisting stiffness of the plate strip); the riveted Z stringers of cylinders 5 to 12 of Card and Jones, at <span class="math notranslate nohighlight">\(b/\sqrt{R t} = 1.57\)</span> and with two different equivalent blades, -1.6 % to -2.8 % outside and -4.1 % to -6.7 % inside the skin. These blades stand on the skin only. The same Z stringers modelled as three plates, the attached flange bonded to the skin, the web and the
+free flange (<a class="reference internal" href="peterson1959_blade_cylinder_buckling.html"><span class="doc">peterson1959_blade_cylinder_buckling.ipynb</span></a>), are instead 4.4 % to 17.1 % above Eq. (15) for the section of the Z itself, simply supported (4.5 % to 17.2 % in the bfsccylinder implementation); without the attached flange they are 6.0 % to 11.2 % below it, with the sign of the blades. The attached flange doubles the skin thickness over 29 % of the pitch, a circumferential stiffening of the skin that the smeared theory, which treats
+the stringer as a beam, does not contain: for a stringer with a flange on the skin the discrete model is above the smeared theory, and the gaps of the blades measure the discreteness of the stringer alone. The -7.5 % of the internal cylinder 4 at <span class="math notranslate nohighlight">\(b/\sqrt{R t} = 1.93\)</span> (-6.6 % in the test) is slightly larger than the gaps of the internal Z stringers; the external stringers lose 1.6 % to 2.8 %. Where the skin between the stringers buckles first (shells AS-27 of Weller and Singer, Koiter
+parameter <span class="math notranslate nohighlight">\(\theta\)</span> = 0.79 to 0.81, <span class="math notranslate nohighlight">\(b/\sqrt{R t}\)</span> = 2.7 to 2.8) the discrete model buckles locally, one half-wave of skin per bay, 21.0 % to 27.8 % below the general instability of Eq. (15), a mode that the smeared theory does not contain. The bfsccylinder implementations of these cases give -1.2 % (AS-34, AS-35), -1.4 % to -2.7 % and -3.8 % to -6.6 % (Z, external and internal) and -18.5 % to -25.6 % (AS-27), and -6.3 % for cylinder 4 (against Eq. (15) for its plate from the middle
+surface of the skin).</p></li>
+<li><p><strong>The bfsccylinder implementation of this case</strong>, with the same end conditions and its stringer plate from the middle surface of the skin (<span class="math notranslate nohighlight">\(0.33 - t/2\)</span> in, overlapping half of the skin thickness), gives critical loads above those of <code class="docutils literal notranslate"><span class="pre">panels</span></code>: <code class="docutils literal notranslate"><span class="pre">panels</span></code> is 0.9 % to 2.9 % below for the clamped analyses and 1.6 % to 3.8 % below for the simply supported analysis (table above), while bfsccylinder reproduces <span class="math notranslate nohighlight">\(\bar{N}_c\)</span> within 0.6 % and <span class="math notranslate nohighlight">\(\bar{N}_s\)</span> within 2.7 %. Most of this
+difference is the section: Eq. (15) for the plate from the middle surface is 1.1 % to 2.6 % above that for the plate of this notebook, most for the internal cylinders 2 and 4, as are the differences of the discrete loads. Both use Sanders-type kinematics for the skin and plate stringers tied to the skin with the rotation about the stringer axis continuous; they differ also in the discretization (Ritz series against BFSC finite elements with cyclic symmetry), in the geometric stiffness of the
+blades (<code class="docutils literal notranslate"><span class="pre">plate_clpt_gl</span></code> includes the term <span class="math notranslate nohighlight">\(N_{xx} u_{,x}^2\)</span>) and, for the simply supported ends, in the stringer ends, which bfsccylinder also restrains circumferentially. Each against Eq. (15) for its own plate strip of cylinder 4, the bfsccylinder model is 6.3 % below (722.7 against 771.2 lb/in) and this one 7.5 % (695.5 against 751.9 lb/in); both split the same way (section <em>Discrete against smeared stringers</em>), into -2.4 %, -3.7 % and -0.3 % there (Sanders skin, lateral term,
+twisting) and -1.5 %, -3.5 % and -2.6 % here (-1.6 % with the blade ends held circumferentially as there).</p></li>
+<li><p><strong>Pre-buckling state.</strong> The linear static pre-buckling state, with the bending of the skin near the restrained ends, raises the critical load by less than 0.1 % (cylinder 1, clamped) to 3 % (cylinder 3, simply supported) above the membrane state, in line with the conclusion of Card and Jones that a membrane pre-buckling state is sufficient for assessing the eccentricity effect (p. 11).</p></li>
+<li><p><strong>Edge conditions (Almroth 1966).</strong> B. O. Almroth, <em>Influence of edge conditions on the stability of axially compressed cylindrical shells</em>, AIAA Journal 4(1) (1966) 134-140, <a class="reference external" href="https://doi.org/10.2514/3.3396">https://doi.org/10.2514/3.3396</a>, computed the classical buckling load of axially compressed unstiffened isotropic cylinders (Donnell equations) for eight sets of edge conditions (Eq. (9), p. 135). The paper treats no stiffeners, discrete or smeared, and gives no value for the difference between them; it bears on the
+comparison with the smeared theory only through the edges of the skin. With the membrane pre-buckling state, simple supports with <span class="math notranslate nohighlight">\(v = 0\)</span>, with either <span class="math notranslate nohighlight">\(u = 0\)</span> or <span class="math notranslate nohighlight">\(N_x = 0\)</span> (his cases S1 and S2), give a load “equal to or insignificantly higher than the classical buckling load” (p. 138), and only edges free in the circumferential direction, <span class="math notranslate nohighlight">\(N_{xy} = 0\)</span> (S3 and S4), lower it, to about one half (Table 2, p. 137). The simply supported analysis with the membrane state and
+Eq. (15) both hold <span class="math notranslate nohighlight">\(v = w = 0\)</span> with <span class="math notranslate nohighlight">\(N_x = 0\)</span> at the edges of the skin, so these edge conditions do not explain their difference, which for cylinder 4 is -7.5 % against Eq. (15) for the plate strip of the model (696 against 752 lb/in) and is split in the section <em>Discrete against smeared stringers</em> (bullet <em>Smeared theory</em>). With the bending at restrained edges in the pre-buckling state (his “rigorous prebuckling analysis”) Almroth’s loads fall to 0.80 to 0.88 of the classical
+value for these simple supports and to 0.86 to 0.93 for clamped edges (Table 2, modes of <span class="math notranslate nohighlight">\(n\)</span> = 8 to 88 waves), a reduction he finds too small to explain the difference between theory and tests, which he expects initial imperfections to explain (pp. 139-140); the stiffened cylinders here, buckling with <span class="math notranslate nohighlight">\(n\)</span> = 5 to 8, gain up to 3 % from the linear pre-buckling state instead (previous bullet).</p></li>
+<li><p><strong>Boundary conditions.</strong> The clamped loads are 1.5 to 1.9 times the simply supported ones. The test loads lie between the two and are 1.2 to 1.6 times the simply supported analysis of <code class="docutils literal notranslate"><span class="pre">panels</span></code> although imperfections can only lower them, which is why Card and Jones concluded that the test cylinders were more nearly clamped than simply supported (p. 11). The axial restraint of the clamped ends, with <span class="math notranslate nohighlight">\(u\)</span> prescribed on the whole end section, contributes to the difference between the two
+conditions (Appendix B of the report).</p></li>
+<li><p><strong>Test against analysis.</strong> The test loads are 80 % to 93 % of the clamped analysis of <code class="docutils literal notranslate"><span class="pre">panels</span></code>, and 79 % to 92 % of the clamped theory of the report (Card and Jones give 70 % to 95 % for all twelve cylinders). Linear buckling of the perfect cylinder is an upper bound: the test loads are reduced by the initial imperfections, to which axially compressed cylinders are sensitive (the external cylinders buckled with a loud report and large diamond-shaped buckles, p. 8), by the two butt joints per
+cylinder with riveted doubler plates (p. 5), by the potting of the ends in a soft alloy, which is not a perfect clamp, and by the scatter of the skin thickness (<span class="math notranslate nohighlight">\(\pm 8\)</span> % of the average, p. 5).</p></li>
+<li><p><strong>External against internal stringers.</strong> The ratio of the external to the internal cylinder of the same length is 2.08 and 2.18 in <code class="docutils literal notranslate"><span class="pre">panels</span></code>, 2.04 and 2.12 in the clamped theory, and 2.35 and 2.20 in the tests: the discrete model reproduces the eccentricity effect that motivated the tests.</p></li>
+<li><p><strong>Wave numbers.</strong> The clamped analysis gives one more circumferential wave than the tests (<span class="math notranslate nohighlight">\(n = 7\)</span>, 7, 8, 7 against 6, 6, 7, 6); the measured <span class="math notranslate nohighlight">\(n\)</span> is a neighbouring mode, 7 % (cylinders 1 and 3) and 4 % (cylinder 2, mode <span class="math notranslate nohighlight">\((1, 6)\)</span>) above the critical load, and more than 20 % for cylinder 4 (table above). The simply supported analysis gives the measured <span class="math notranslate nohighlight">\(n\)</span> for cylinders 1, 3 and 4. Imperfections and the actual end restraint can select a neighbouring mode. Cylinder 1
+developed two tiers of buckles in the test (p. 8); in <code class="docutils literal notranslate"><span class="pre">panels</span></code> its lowest mode with two axial half-waves, <span class="math notranslate nohighlight">\((m, n) = (2, 8)\)</span>, is 9 % above the critical one. The critical mode of cylinder 2 has two axial half-waves in both analyses with clamped ends, as in the bfsccylinder implementation.</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="egle1968_few_stringer_cylinder_vibration.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="weller1977_blade_cylinder_buckling.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Test-data">Test data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Model">Model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Convergence">Convergence</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Comparison-with-the-test-and-with-the-smeared-theory">Comparison with the test and with the smeared theory</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Buckling-modes">Buckling modes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Discrete-against-smeared-stringers:-reference-section-and-stringer-spacing">Discrete against smeared stringers: reference section and stringer spacing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Discussion">Discussion</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/notebooks/card1966_blade_cylinder_buckling.nblink.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

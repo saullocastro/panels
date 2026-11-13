@@ -1,0 +1,2206 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>DCB benchmark: Alfano and Crisfield (2001) &#8212; panels 0.16.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../_static/documentation_options.js?v=7de89ed4"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/dcb_alfano2001';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="DCB benchmark: Camanho, Dávila and de Moura (2003)" href="dcb_camanho2003.html" />
+    <link rel="prev" title="Annular webs of ring frames connected to cylinders" href="annular_webs_on_cylinders.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.16.0" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.16.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">DCB benchmark: Alfano and Crisfield (2001)</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="DCB-benchmark:-Alfano-and-Crisfield-(2001)">
+<h1>DCB benchmark: Alfano and Crisfield (2001)<a class="headerlink" href="#DCB-benchmark:-Alfano-and-Crisfield-(2001)" title="Link to this heading">#</a></h1>
+<ol class="upperalpha simple" start="7">
+<li><p>Alfano and M. A. Crisfield, <em>Finite element interface models for the delamination analysis of laminated composites: mechanical and computational issues</em>, Int. J. Numer. Meth. Engng 2001; 50(7):1701-1736, <a class="reference external" href="https://doi.org/10.1002/nme.93">https://doi.org/10.1002/nme.93</a>.</p></li>
+</ol>
+<p>DCB cases of Section 5.1:</p>
+<ul class="simple">
+<li><p>Fig. 11, Table I: DCB of <span class="math notranslate nohighlight">\(L = 100\)</span> mm, <span class="math notranslate nohighlight">\(a_0 = 30\)</span> mm, total thickness <span class="math notranslate nohighlight">\(h = 3\)</span> mm (arms of 1.5 mm), width 20 mm, far end clamped, 2D plane strain. Interface model (Fig. 12, mesh 4x400 Q8 with 280 INT6, <span class="math notranslate nohighlight">\(t_o = 57\)</span> MPa), virtual crack closure (VCC, Fig. 12) and a low strength <span class="math notranslate nohighlight">\(t_o = 1.7\)</span> MPa (Fig. 15a, mesh 4x100 Q8 with 70 INT6, tangent predictor).</p></li>
+<li><p>Table II, Fig. 23: XAS-913C DCB of width 30 mm, same geometry otherwise, interface model and experiments of Robinson and Song (1993).</p></li>
+<li><p>Fig. 22: isotropic DCB (<span class="math notranslate nohighlight">\(E = 210\)</span> GPa, <span class="math notranslate nohighlight">\(\nu = 0.3\)</span>) compared with an analytical solution. The interface parameters are not given for this case, so it is only listed.</p></li>
+</ul>
+<p><strong>Conventions.</strong> The paper plots the reaction <span class="math notranslate nohighlight">\(R\)</span> at the loaded point against the displacement <span class="math notranslate nohighlight">\(u\)</span> of each arm, the two arms moving <span class="math notranslate nohighlight">\(\pm u\)</span>. Here all curves are given against the opening <span class="math notranslate nohighlight">\(\delta = 2u\)</span>.</p>
+<p><strong>Digitised data.</strong> The curves were read from the figures of the paper by eye, with an estimated uncertainty of <span class="math notranslate nohighlight">\(\pm 0.05\)</span> mm in <span class="math notranslate nohighlight">\(u\)</span> (<span class="math notranslate nohighlight">\(\pm 0.1\)</span> mm in <span class="math notranslate nohighlight">\(\delta\)</span>) and <span class="math notranslate nohighlight">\(\pm 2\)</span> N in <span class="math notranslate nohighlight">\(R\)</span>. Only the peak loads read from the figures are used in the comparison of peak values; the analytical LEFM curves below are exact and serve as a second reference.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%matplotlib inline
+import os
+import sys
+
+import numpy as np
+import matplotlib.pyplot as plt
+from IPython.display import Markdown, display
+
+sys.path.insert(0, os.path.abspath('.'))
+import dcb_utils as du
+
+# True runs panels and saves the results in RESULTS, False loads them
+RERUN = True
+RESULTS = 'results'
+<br/></pre></div>
+</div>
+</div>
+<section id="FE-based-DCB-cases">
+<h2>FE-based DCB cases<a class="headerlink" href="#FE-based-DCB-cases" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>u2d = lambda u: 2*np.asarray(u, dtype=float)
+
+tableI = dict(E1=135300., E2=9000., nu12=0.24, G12=5200., h=1.5, b=20.,
+              L=100., a0=30., G1c=0.28)
+
+fe_cases = {
+    'TableI_to57': dict(tableI, tau_o=57., k_o=57./1e-7,
+        label='Table I, $t_o$ = 57 MPa',
+        source='Fig. 11, Table I, Fig. 12 (delta_o = 1e-7 mm)',
+        model='2D plane strain, 4x400 Q8 + 280 INT6, quadratic arc length',
+        curves={
+            'interface model (Fig. 12)': (u2d([0, 1.0, 1.5, 2.0, 3.0, 4.0, 4.8]),
+                                          np.array([0, 61.5, 52., 44., 35., 30.5, 28.])),
+            'VCC (Fig. 12)': (u2d([0, 1.0, 2.0, 4.0, 6.0, 8.0, 9.0, 10.0, 11.5]),
+                              np.array([0, 61., 44., 30., 25., 22., 22.5, 24.5, 28.])),
+        },
+        notes='The rise of the VCC curve after u = 8 mm is caused by the clamped far end.'),
+    'TableI_to1.7': dict(tableI, tau_o=1.7, k_o=1.7/1e-7,
+        label='Table I, $t_o$ = 1.7 MPa',
+        source='Fig. 15a (tangent predictor, 37 increments)',
+        model='2D plane strain, 4x100 Q8 + 70 INT6',
+        curves={
+            'interface model (Fig. 15a)': (u2d([0, 0.5, 0.9, 1.2, 1.45, 2.0, 3.0, 4.0, 6.0, 8.0, 10.0]),
+                                           np.array([0, 24., 37., 45., 49.5, 46., 39., 33.5, 27., 23., 23.5])),
+        },
+        notes='Low strength: long process zone, too compliant before the peak (Section 5.1).'),
+    'TableII_XAS913C': dict(E1=126000., E2=7500., nu12=0.263, G12=4981., h=1.5,
+        b=30., L=100., a0=30., G1c=0.281, tau_o=57., k_o=57./1e-6,
+        label='Table II, XAS-913C',
+        source='Table II, Fig. 23 (delta_o = 1e-6 mm)',
+        model='2D plane strain interface model',
+        curves={
+            'interface model (Fig. 23)': (u2d([0, 1.1, 1.5, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]),
+                                          np.array([0, 90., 80., 70., 58., 49., 43., 39., 36.])),
+        }),
+    'isotropic': dict(E=2.1e5, nu=0.3, h=1.5, b=20., L=100., a0=30.,
+        label='isotropic', source='Fig. 22',
+        model='4x400 Q4 and Q4M + 70 INT4, compared with an analytical solution',
+        curves={},
+        notes='G_c and t_o not stated for this case: not simulated.'),
+}
+<br/></pre></div>
+</div>
+</div>
+</section>
+<section id="Experimental-DCB-tests">
+<h2>Experimental DCB tests<a class="headerlink" href="#Experimental-DCB-tests" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>exp_tests = {
+    'XAS913C_Robinson_Song_1993': dict(
+        fe_case='TableII_XAS913C',
+        source='Robinson and Song (1993), J. Compos. Mater. 26:1554-1577, as plotted in Fig. 23',
+        curves={
+            'experiment (Fig. 23)': (u2d([1.35, 1.65, 1.95, 2.55, 3.0, 3.5, 4.2, 4.75, 5.4, 6.1]),
+                                     np.array([88., 74., 69., 59., 55., 51., 43., 39., 39., 34.])),
+        },
+        notes='Only points on the propagation branch are plotted in the paper.'),
+}
+<br/></pre></div>
+</div>
+</div>
+</section>
+<section id="panels-model">
+<h2>panels model<a class="headerlink" href="#panels-model" title="Link to this heading">#</a></h2>
+<p>The DCB is modelled with <code class="docutils literal notranslate"><span class="pre">dcb_utils.solve_dcb</span></code>: CLPT panels, far end clamped, arm tips opened symmetrically to <span class="math notranslate nohighlight">\(\pm\delta/2\)</span> by prescribed displacements, a cohesive domain (<code class="docutils literal notranslate"><span class="pre">SB_TSL</span></code>, bilinear law) ahead of the initial crack front and a perfect bond (<code class="docutils literal notranslate"><span class="pre">SB</span></code>) over the rest of the bonded region. The load is the reaction of the prescribed displacement.</p>
+<p>Discretisation, from the <a class="reference internal" href="dcb_mode_I_convergence_study.html"><span class="doc">convergence study</span></a> on the DCB of Tijs et al. (2022), <span class="math notranslate nohighlight">\(L\)</span> = 100 mm, <span class="math notranslate nohighlight">\(a_0\)</span> = 48 mm, with <span class="math notranslate nohighlight">\(k_o = 10^5\)</span> and <span class="math notranslate nohighlight">\(2\times10^5\)</span> N/mm<span class="math notranslate nohighlight">\(^3\)</span> and a cohesive domain of 24 mm (<code class="docutils literal notranslate"><span class="pre">dcb_utils.discretize</span></code>):</p>
+<ul class="simple">
+<li><p>terms along <span class="math notranslate nohighlight">\(x\)</span> of the cohesive domain: <span class="math notranslate nohighlight">\(m_{tsl} = 1.25\,\lambda L_{tsl}\)</span>, at most 25, with <span class="math notranslate nohighlight">\(\lambda = (k_o/2D_{11})^{1/4}\)</span> the decay rate of the opening ahead of the process zone; the loads are converged to 0.1% from <span class="math notranslate nohighlight">\(1.0\,\lambda L_{tsl}\)</span>;</p></li>
+<li><p>Gauss points along <span class="math notranslate nohighlight">\(x\)</span>: <span class="math notranslate nohighlight">\(n_x = 10\,L_{tsl}/l_{cz}\)</span>, i.e. 10 points per cohesive zone length <span class="math notranslate nohighlight">\(l_{cz} = 0.88\,E_2 G_{Ic}/\tau_o^2\)</span> (Turon et al. 2007), with which the loads are within 0.02% of the converged ones (0.1-0.2% with 7 points), but not less than <span class="math notranslate nohighlight">\(4 m_{tsl}\)</span>, rounded up to a multiple of 10;</p></li>
+<li><p>the cohesive domain covers the crack growth up to the last opening plus a margin of <span class="math notranslate nohighlight">\(3 l_{cz} + 8/\lambda\)</span> for the process zone and the decaying opening ahead of it (beams on an elastic foundation, Kanninen 1973); the opening range is limited so that <span class="math notranslate nohighlight">\(L_{tsl}\)</span> stays below the length resolved with 25 terms.</p></li>
+</ul>
+<p>The penalty stiffness is <span class="math notranslate nohighlight">\(k_o = 10^5\)</span> N/mm<span class="math notranslate nohighlight">\(^3\)</span> unless stated otherwise. Turon et al. (2007, Fig. 9) show that the load-displacement curve of the DCB does not change for <span class="math notranslate nohighlight">\(k_o \geq 10^4\)</span> N/mm<span class="math notranslate nohighlight">\(^3\)</span>, and a lower <span class="math notranslate nohighlight">\(k_o\)</span> gives a longer decay length <span class="math notranslate nohighlight">\(1/\lambda\)</span>, which the Ritz basis resolves with fewer terms.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def setup(case, k_o=1.e5, growth_max=None, n_steps=60, margin_factor=1.):
+    """Cohesive domain, discretisation and openings of a panels run"""
+    c = dict(case)
+    c['k_o'] = k_o
+    lam, lcz, L_max = du.resolution(c)
+    margin = margin_factor*du.margin(lam, lcz)
+    L_avail = c['L'] - c['a0']
+    growth = min(L_max, L_avail) - margin
+    if growth_max is not None:
+        growth = min(growth, growth_max)
+    L_tsl = min(growth + margin, L_avail)
+    c = du.discretize(c, L_tsl)
+    # opening when the crack front of panels reaches a0 + growth, LEFM of
+    # the model: crack front + process zone l_cz + 1/lambda (Kanninen 1973)
+    delta_max = du.opening_at_crack_length(c, c['a0'] + growth, lam, lcz)
+    openings = np.linspace(delta_max/n_steps, delta_max, n_steps)
+    print(f"{case.get('label', '')}: lambda={lam:.3f} 1/mm, lcz={lcz:.2f} mm, "
+          f"L_tsl={c['L_tsl']:.1f} mm, m_tsl={c['m_tsl']}, nx={c['nx']}, "
+          f"delta_max={delta_max:.2f} mm")
+    return c, openings
+<br/></pre></div>
+</div>
+</div>
+<p>Run the two cases with the nominal strength, Table I with <span class="math notranslate nohighlight">\(t_o\)</span> = 57 MPa and Table II (XAS-913C), with the discretisation and the openings given by <code class="docutils literal notranslate"><span class="pre">setup</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>runs = {}
+for key in ['TableI_to57', 'TableII_XAS913C']:
+    case, openings = setup(fe_cases[key])
+    runs[key] = (case, du.run_or_load(case, openings, f'{RESULTS}/alfano2001_{key}.npz',
+                                      rerun=RERUN))
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Table I, $t_o$ = 57 MPa: lambda=1.070 1/mm, lcz=0.68 mm, L_tsl=18.7 mm, m_tsl=25, nx=280, delta_max=3.00 mm
+Table II, XAS-913C: lambda=1.089 1/mm, lcz=0.57 mm, L_tsl=18.4 mm, m_tsl=25, nx=330, delta_max=3.12 mm
+</pre></div></div>
+</div>
+<p>The low strength case, <span class="math notranslate nohighlight">\(t_o = 1.7\)</span> MPa, has a process zone of the order of the specimen length (slender-body estimate <span class="math notranslate nohighlight">\((E_1 G_c/t_o^2)^{1/4} h^{3/4} \approx 15\)</span> mm, Yang and Cox 2005), so the cohesive domain covers the whole bonded length, <span class="math notranslate nohighlight">\(L_{tsl} = 70\)</span> mm. With <span class="math notranslate nohighlight">\(k_o = 10^5\)</span> N/mm<span class="math notranslate nohighlight">\(^3\)</span> the rule <span class="math notranslate nohighlight">\(m_{tsl} = 1.25\,\lambda L_{tsl}\)</span> of the <a class="reference internal" href="dcb_mode_I_convergence_study.html"><span class="doc">convergence study</span></a> asks for 94 terms, more than the 30 Bardell functions of panels.
+The case is therefore run with <span class="math notranslate nohighlight">\(k_o = 10^3\)</span> N/mm<span class="math notranslate nohighlight">\(^3\)</span>, for which 30 terms meet the rule and <span class="math notranslate nohighlight">\(n_x = 4 m_{tsl} = 120\)</span> points meet the second rule. The damage onset <span class="math notranslate nohighlight">\(\Delta_o = t_o/k_o = 1.7\times10^{-3}\)</span> mm stays far below the separation at failure <span class="math notranslate nohighlight">\(\Delta_f = 2G_c/t_o = 0.33\)</span> mm, so the softening branch, which governs this case, hardly changes; Alfano and Crisfield also scaled the penalty stiffness with the strength. A second run with <span class="math notranslate nohighlight">\(k_o = 10^5\)</span>
+N/mm<span class="math notranslate nohighlight">\(^3\)</span> and the same 30 terms (<span class="math notranslate nohighlight">\(0.4\,\lambda L_{tsl}\)</span>) shows the effect of <span class="math notranslate nohighlight">\(k_o\)</span>. The runs go up to an opening of 4 mm (the peak of Fig. 15a is at 2.9 mm); almost every integration point is damaged, which makes each increment expensive.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># the cohesive domain covers the whole bonded length; with k_o = 1e3 N/mm3
+# the rules of the convergence study are met with 30 terms (see above)
+L_tsl = fe_cases['TableI_to1.7']['L'] - fe_cases['TableI_to1.7']['a0']
+case = du.discretize(dict(fe_cases['TableI_to1.7'], k_o=1.e3), L_tsl, m_max=30)
+lam, lcz, _ = du.resolution(case)
+print(f"{case['label']}: lambda={lam:.3f} 1/mm, lcz={lcz:.1f} mm, L_tsl={case['L_tsl']:.1f} mm, "
+      f"m_tsl={case['m_tsl']} ({case['m_tsl']/(lam*L_tsl):.2f} lambda L_tsl), nx={case['nx']}")
+openings = np.linspace(0.1, 4., 40)  # past the peak of Fig. 15a, delta = 2.9 mm
+runs['TableI_to1.7'] = (case, du.run_or_load(case, openings,
+                        f'{RESULTS}/alfano2001_TableI_to1.7.npz', rerun=RERUN))
+# the same discretisation with k_o = 1e5 N/mm3, to show the effect of k_o
+case_K = dict(case, k_o=1.e5)
+runs['TableI_to1.7_K1e5'] = (case_K, du.run_or_load(case_K, openings,
+                             f'{RESULTS}/alfano2001_TableI_to1.7_K1e5.npz', rerun=RERUN))
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Table I, $t_o$ = 1.7 MPa: lambda=0.338 1/mm, lcz=767.3 mm, L_tsl=70.0 mm, m_tsl=30 (1.27 lambda L_tsl), nx=120
+WARNING: SB_TSL: 30 terms along x over 70 give 0.40 terms per decay length 1/lambda = 0.935, below 1.0; recommended m = 1.25*lambda*a = 93.6, see panels.multidomain.connections.tsl_discretization
+</pre></div></div>
+</div>
+</section>
+<section id="Comparison">
+<h2>Comparison<a class="headerlink" href="#Comparison" title="Link to this heading">#</a></h2>
+<p>The tables give, for every curve, the initial stiffness <span class="math notranslate nohighlight">\(K_0\)</span>, the peak load <span class="math notranslate nohighlight">\(P_{max}\)</span> and the opening <span class="math notranslate nohighlight">\(\delta\)</span> at the peak, and the relative differences of each row to the reference named in the column, <span class="math notranslate nohighlight">\((x - x_{ref})/x_{ref}\)</span>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def compare(key, exp_key=None, extra=()):
+    """``extra``: keys of other runs of the same case, e.g. another k_o"""
+    fe = fe_cases[key]
+    case, res = runs[key]
+    rows = dict(fe['curves'])
+    if exp_key is not None:
+        rows.update(exp_tests[exp_key]['curves'])
+    rows['panels'] = (np.concatenate(([0.], res['delta'])), np.concatenate(([0.], res['P'])))
+    for k in extra:
+        c, r = runs[k]
+        rows[f"panels, $k_o$ = {c['k_o']:.0e} N/mm3"] = (np.concatenate(([0.], r['delta'])),
+                                                        np.concatenate(([0.], r['P'])))
+    for corr, name in ((False, 'LEFM, simple beam theory'), (True, 'LEFM, corrected beam theory')):
+        rows[name] = du.lefm_curve(fe, a_max=fe['a0'] + 60, corrected=corr)
+    refs = [k for k in fe['curves']][:1]
+    display(Markdown(f"### {fe['label']}\n\n" + du.markdown_table(rows, ref=refs + ['panels'])))
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    style = {k: dict(ls='none', marker='o', mfc='none') for k in rows if 'experiment' in k}
+    style.update({k: dict(ls='--', lw=1) for k in rows if 'LEFM' in k})
+    style.update({k: dict(marker='s', ms=3) for k in fe['curves']})
+    style['panels'] = dict(lw=2, color='k')
+    style.update({k: dict(lw=1.5, ls='--', color='0.5') for k in rows if k.startswith('panels, ')})
+    du.plot_curves(ax, rows, style)
+    ax.set_xlim(0, max(res['delta'].max()*1.3, 4))
+    ax.set_title(fe['label'])
+    plt.show()
+    print(f"panels: {len(res['delta'])} openings, {res['failed']} bisections, "
+          f"crack growth {res['a'][-1] - fe['a0']:.1f} mm, "
+          f"share of the load carried by the cohesive domain at the peak: "
+          f"{res['P_traction'][np.argmax(res['P'])]/res['P'].max():.3f}")
+
+compare('TableI_to57')
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<section id="Table-I,-t_o-=-57-MPa">
+<h3>Table I, <span class="math notranslate nohighlight">\(t_o\)</span> = 57 MPa<a class="headerlink" href="#Table-I,-t_o-=-57-MPa" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>curve</p></th>
+<th class="head"><p>K0 (N/mm)</p></th>
+<th class="head"><p>Pmax (N)</p></th>
+<th class="head"><p>delta at Pmax (mm)</p></th>
+<th class="head"><p>dK0, dPmax, d(delta) vs interface model (Fig. 12)</p></th>
+<th class="head"><p>dK0, dPmax, d(delta) vs panels</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>interface model (Fig. 12)</p></td>
+<td><p>30.75</p></td>
+<td><p>61.5</p></td>
+<td><p>2.00</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>-19.3%, -4.6%, +8.0%</p></td>
+</tr>
+<tr class="row-odd"><td><p>VCC (Fig. 12)</p></td>
+<td><p>30.50</p></td>
+<td><p>61.0</p></td>
+<td><p>2.00</p></td>
+<td><p>-0.8%, -0.8%, +0.0%</p></td>
+<td><p>-20.0%, -5.4%, +8.0%</p></td>
+</tr>
+<tr class="row-even"><td><p>panels</p></td>
+<td><p>38.12</p></td>
+<td><p>64.5</p></td>
+<td><p>1.85</p></td>
+<td><p>+24.0%, +4.8%, -7.4%</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>LEFM, simple beam theory</p></td>
+<td><p>42.44</p></td>
+<td><p>68.9</p></td>
+<td><p>1.62</p></td>
+<td><p>+38.0%, +12.1%, -18.8%</p></td>
+<td><p>+11.3%, +7.0%, -12.3%</p></td>
+</tr>
+<tr class="row-even"><td><p>LEFM, corrected beam theory</p></td>
+<td><p>32.62</p></td>
+<td><p>63.2</p></td>
+<td><p>1.94</p></td>
+<td><p>+6.1%, +2.7%, -3.2%</p></td>
+<td><p>-14.4%, -2.0%, +4.6%</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_dcb_alfano2001_13_1.png" src="../_images/notebooks_dcb_alfano2001_13_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+panels: 60 openings, 0 bisections, crack growth 9.0 mm, share of the load carried by the cohesive domain at the peak: 1.000
+</pre></div></div>
+</div>
+<p>Table I with the low strength <span class="math notranslate nohighlight">\(t_o\)</span> = 1.7 MPa, with both penalty stiffnesses.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>compare('TableI_to1.7', extra=['TableI_to1.7_K1e5'])
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<section id="Table-I,-t_o-=-1.7-MPa">
+<h3>Table I, <span class="math notranslate nohighlight">\(t_o\)</span> = 1.7 MPa<a class="headerlink" href="#Table-I,-t_o-=-1.7-MPa" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>curve</p></th>
+<th class="head"><p>K0 (N/mm)</p></th>
+<th class="head"><p>Pmax (N)</p></th>
+<th class="head"><p>delta at Pmax (mm)</p></th>
+<th class="head"><p>dK0, dPmax, d(delta) vs interface model (Fig. 15a)</p></th>
+<th class="head"><p>dK0, dPmax, d(delta) vs panels</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>interface model (Fig. 15a)</p></td>
+<td><p>24.00</p></td>
+<td><p>49.5</p></td>
+<td><p>2.90</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>-2.3%, -2.5%, +0.0%</p></td>
+</tr>
+<tr class="row-odd"><td><p>panels</p></td>
+<td><p>24.56</p></td>
+<td><p>50.8</p></td>
+<td><p>2.90</p></td>
+<td><p>+2.3%, +2.6%, +0.0%</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>panels, <span class="math notranslate nohighlight">\(k_o\)</span> = 1e+05 N/mm3</p></td>
+<td><p>24.76</p></td>
+<td><p>50.8</p></td>
+<td><p>2.90</p></td>
+<td><p>+3.1%, +2.7%, +0.0%</p></td>
+<td><p>+0.8%, +0.1%, +0.0%</p></td>
+</tr>
+<tr class="row-odd"><td><p>LEFM, simple beam theory</p></td>
+<td><p>42.44</p></td>
+<td><p>68.9</p></td>
+<td><p>1.62</p></td>
+<td><p>+76.8%, +39.3%, -44.0%</p></td>
+<td><p>+72.8%, +35.8%, -44.0%</p></td>
+</tr>
+<tr class="row-even"><td><p>LEFM, corrected beam theory</p></td>
+<td><p>32.62</p></td>
+<td><p>63.2</p></td>
+<td><p>1.94</p></td>
+<td><p>+35.9%, +27.6%, -33.2%</p></td>
+<td><p>+32.8%, +24.4%, -33.2%</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_dcb_alfano2001_15_1.png" src="../_images/notebooks_dcb_alfano2001_15_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+panels: 40 openings, 0 bisections, crack growth 6.0 mm, share of the load carried by the cohesive domain at the peak: 1.000
+</pre></div></div>
+</div>
+<p>Table II, XAS-913C, with the experiments of Robinson and Song (1993).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>compare('TableII_XAS913C', 'XAS913C_Robinson_Song_1993')
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<section id="Table-II,-XAS-913C">
+<h3>Table II, XAS-913C<a class="headerlink" href="#Table-II,-XAS-913C" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>curve</p></th>
+<th class="head"><p>K0 (N/mm)</p></th>
+<th class="head"><p>Pmax (N)</p></th>
+<th class="head"><p>delta at Pmax (mm)</p></th>
+<th class="head"><p>dK0, dPmax, d(delta) vs interface model (Fig. 23)</p></th>
+<th class="head"><p>dK0, dPmax, d(delta) vs panels</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>interface model (Fig. 23)</p></td>
+<td><p>40.91</p></td>
+<td><p>90.0</p></td>
+<td><p>2.20</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>-23.5%, -3.8%, +17.6%</p></td>
+</tr>
+<tr class="row-odd"><td><p>experiment (Fig. 23)</p></td>
+<td><p>32.59</p></td>
+<td><p>88.0</p></td>
+<td><p>2.70</p></td>
+<td><p>-20.3%, -2.2%, +22.7%</p></td>
+<td><p>-39.0%, -5.9%, +44.3%</p></td>
+</tr>
+<tr class="row-even"><td><p>panels</p></td>
+<td><p>53.46</p></td>
+<td><p>93.6</p></td>
+<td><p>1.87</p></td>
+<td><p>+30.7%, +4.0%, -15.0%</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>LEFM, simple beam theory</p></td>
+<td><p>59.31</p></td>
+<td><p>100.0</p></td>
+<td><p>1.69</p></td>
+<td><p>+45.0%, +11.1%, -23.4%</p></td>
+<td><p>+10.9%, +6.9%, -9.9%</p></td>
+</tr>
+<tr class="row-even"><td><p>LEFM, corrected beam theory</p></td>
+<td><p>45.62</p></td>
+<td><p>91.6</p></td>
+<td><p>2.01</p></td>
+<td><p>+11.5%, +1.8%, -8.7%</p></td>
+<td><p>-14.7%, -2.1%, +7.3%</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_dcb_alfano2001_17_1.png" src="../_images/notebooks_dcb_alfano2001_17_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+panels: 60 openings, 0 bisections, crack growth 9.1 mm, share of the load carried by the cohesive domain at the peak: 1.000
+</pre></div></div>
+</div>
+<p><strong>Remarks.</strong></p>
+<ul class="simple">
+<li><p>The penalty stiffness of the paper, <span class="math notranslate nohighlight">\(k_o = t_o/\delta_o\)</span> with <span class="math notranslate nohighlight">\(\delta_o = 10^{-7}\)</span> or <span class="math notranslate nohighlight">\(10^{-6}\)</span> mm, is replaced by <span class="math notranslate nohighlight">\(10^5\)</span> N/mm<span class="math notranslate nohighlight">\(^3\)</span>, and by <span class="math notranslate nohighlight">\(10^3\)</span> N/mm<span class="math notranslate nohighlight">\(^3\)</span> for <span class="math notranslate nohighlight">\(t_o\)</span> = 1.7 MPa (see above).</p></li>
+<li><p>The paper uses 2D plane strain continuum elements, which include transverse shear and the local deformation at the crack tip; the corrected beam theory reproduces these effects for a DCB. panels uses CLPT plates with a width of 20 or 30 mm and free edges.</p></li>
+<li><p>The digitised curves are approximate; compare peak loads within the reading uncertainty of about 2 N.</p></li>
+</ul>
+</section>
+<section id="Discussion">
+<h2>Discussion<a class="headerlink" href="#Discussion" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Table I, :math:`t_o` = 57 MPa.</strong> panels predicts 64.5 N at an opening of 1.85 mm (<span class="math notranslate nohighlight">\(u\)</span> = 0.93 mm), 4.8% above the interface model of the paper (about 61.5 N, Fig. 12) and 2.1% above the corrected beam theory (63.2 N). After the peak panels follows the LEFM propagation branch: 50.7 N, 0.04% below it, at the last opening, <span class="math notranslate nohighlight">\(\delta\)</span> = 3.00 mm.</p></li>
+<li><p><strong>Table I, :math:`t_o` = 1.7 MPa.</strong> With the low strength the process zone is of the order of the specimen length and the response departs from LEFM: the peak of the interface model (about 49.5 N at <span class="math notranslate nohighlight">\(\delta \approx\)</span> 2.9 mm) is 22% below the corrected beam theory. panels reproduces it with <span class="math notranslate nohighlight">\(k_o = 10^3\)</span> N/mm<span class="math notranslate nohighlight">\(^3\)</span>: 50.8 N at <span class="math notranslate nohighlight">\(\delta\)</span> = 2.9 mm (+2.6%), with the same initial stiffness (+2.3%). This case tests the cohesive zone model itself rather than its LEFM limit. With
+<span class="math notranslate nohighlight">\(k_o = 10^5\)</span> N/mm<span class="math notranslate nohighlight">\(^3\)</span> and the same 30 terms, 0.4 <span class="math notranslate nohighlight">\(\lambda L_{tsl}\)</span>, the peak is the same within 0.1% and the curves differ by at most 0.7% of the peak, but the traction integral departs from the reaction by up to 1.5%, against less than <span class="math notranslate nohighlight">\(10^{-5}\)</span> with <span class="math notranslate nohighlight">\(k_o = 10^3\)</span> N/mm<span class="math notranslate nohighlight">\(^3\)</span>, the sign of a basis too coarse for the shorter decay length.</p></li>
+<li><p><strong>XAS-913C.</strong> panels predicts 93.6 N at 1.87 mm, 4.0% above the interface model (about 90 N) and 2.1% above the corrected beam theory (91.6 N). Only points after the peak were published for the experiments: panels is 10% below the first point, at <span class="math notranslate nohighlight">\(\delta\)</span> = 2.7 mm, and the propagation branch of the corrected beam theory, which panels follows to 0.1%, is 3.4% below the second, at <span class="math notranslate nohighlight">\(\delta\)</span> = 3.3 mm, beyond the last opening (3.12 mm), which is consistent with fibre bridging raising
+the measured propagation load.</p></li>
+<li><p><strong>Initial stiffness.</strong> panels is 14-17% stiffer than the corrected beam theory for the nominal strength cases (38.2 against 32.6 N/mm for Table I). The CLPT arms have no transverse shear deformation, and the root rotation comes only from the elastic foundation of the cohesive interface. The same difference is quantified with measured compliances in <code class="docutils literal notranslate"><span class="pre">dcb_lecinana2023.ipynb</span></code> and <code class="docutils literal notranslate"><span class="pre">dcb_tijs2023_phd.ipynb</span></code>.</p></li>
+<li><p><strong>Robustness.</strong> All runs converged at every opening without bisection. The low strength case is expensive, because almost every integration point is damaged and the damaged-points update covers the whole cohesive domain; it was run up to an opening of 4 mm.</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="annular_webs_on_cylinders.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Annular webs of ring frames connected to cylinders</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="dcb_camanho2003.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">DCB benchmark: Camanho, Dávila and de Moura (2003)</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#FE-based-DCB-cases">FE-based DCB cases</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Experimental-DCB-tests">Experimental DCB tests</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#panels-model">panels model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Comparison">Comparison</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Discussion">Discussion</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/notebooks/dcb_alfano2001.nblink.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

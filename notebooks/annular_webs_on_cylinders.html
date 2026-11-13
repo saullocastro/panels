@@ -1,0 +1,2537 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Annular webs of ring frames connected to cylinders &#8212; panels 0.16.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../_static/documentation_options.js?v=7de89ed4"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/annular_webs_on_cylinders';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="DCB benchmark: Alfano and Crisfield (2001)" href="dcb_alfano2001.html" />
+    <link rel="prev" title="Thick annular plates: shear deformation theories against exact and Ritz solutions" href="thick_annular_plates.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.16.0" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.16.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Annular webs of ring frames connected to cylinders</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Annular-webs-of-ring-frames-connected-to-cylinders">
+<h1>Annular webs of ring frames connected to cylinders<a class="headerlink" href="#Annular-webs-of-ring-frames-connected-to-cylinders" title="Link to this heading">#</a></h1>
+<p>A ring frame is modelled with an annular web, an annular-sector model of panels, connected to a cylinder with <code class="docutils literal notranslate"><span class="pre">'BFxcte'</span></code>. When the cylinder is clamped at the station of the connection, the connection alone clamps the connected edge of the web (the web itself has free edges), and the lowest frequencies of the assembly must be those of the annulus clamped on that edge and free on the other, known exactly from the frequency equation of Leissa [1]. This notebook makes that comparison for:</p>
+<ol class="arabic simple">
+<li><p>a web at the reference surface of the cylinder, at its clamped end;</p></li>
+<li><p>internal frames, the outer edge of the web on the inner surface of the cylinder (<code class="docutils literal notranslate"><span class="pre">face='lower'</span></code>), for cylinders with the Sanders-Koiter and with the Donnell kinematics, and for a web and a cylinder of the first-order shear deformation theory (FSDT);</p></li>
+<li><p>an external frame, the inner edge of the web on the outer surface (<code class="docutils literal notranslate"><span class="pre">face='upper'</span></code>), against the annulus clamped inside and free outside;</p></li>
+<li><p>webs of the third-order shear deformation theory (TSDT) on a TSDT cylinder;</p></li>
+<li><p>webs and cylinders of different shear deformation theories (FSDT and TSDT);</p></li>
+<li><p>a total-Lagrangian TSDT web on the inner surface of a total-Lagrangian TSDT cylinder;</p></li>
+</ol>
+<p>each with the null-space and with the penalty connection. Section 7 compares an internal frame on a cylinder described by its inner surface, with an offset, and by its mid-surface, with <code class="docutils literal notranslate"><span class="pre">face='lower'</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import time
+
+import numpy as np
+from scipy.integrate import solve_ivp
+from scipy.optimize import brentq
+from scipy.special import iv, ivp, jv, jvp, kv, kvp, yv, yvp
+from structsolve import Analysis, freq, lb
+
+import panels
+from panels import modelDB
+from panels.shell import Shell
+from panels.multidomain import MultiDomain
+
+print('panels', panels.__version__)
+T_START = time.time()
+
+
+def print_table(rows, headers):
+    cols = list(zip(*([headers] + [[str(c) for c in r] for r in rows])))
+    widths = [max(len(c) for c in col) for col in cols]
+    fmt = '  '.join('%%%ds' % w for w in widths)
+    print(fmt % tuple(headers))
+    print('  '.join('-'*w for w in widths))
+    for r in rows:
+        print(fmt % tuple(str(c) for c in r))
+
+
+def rel(value, ref):
+    # relative difference in per cent
+    return 100.*(value - ref)/ref
+
+
+def largest(diffs, bound):
+    # largest absolute relative difference (%) against a bound (%)
+    worst = np.max(np.abs(diffs))
+    return 'largest |diff| = %.4f %%, %s the bound of %g %%' % (
+        worst, 'below' if worst &lt;= bound else 'ABOVE', bound)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+panels 0.15.0
+</pre></div></div>
+</div>
+<section id="Connection">
+<h2>Connection<a class="headerlink" href="#Connection" title="Link to this heading">#</a></h2>
+<p>With <code class="docutils literal notranslate"><span class="pre">dict(p1=cylinder,</span> <span class="pre">p2=web,</span> <span class="pre">func='BFxcte',</span> <span class="pre">xcte1=x_f,</span> <span class="pre">xcte2=0)</span></code> the connection imposes <span class="math notranslate nohighlight">\(u_{cyl} = w_{web}\)</span>, <span class="math notranslate nohighlight">\(v_{cyl} = v_{web}\)</span>, <span class="math notranslate nohighlight">\(w_{cyl} = -u_{web}\)</span> and the continuity of the rotation about the circumferential axis, <span class="math notranslate nohighlight">\(w_{cyl,x} = w_{web,x}\)</span>, at the station <span class="math notranslate nohighlight">\(x_f\)</span> of the cylinder and the edge <code class="docutils literal notranslate"><span class="pre">xcte2</span></code> of the web. With <code class="docutils literal notranslate"><span class="pre">face='lower'</span></code> or <code class="docutils literal notranslate"><span class="pre">face='upper'</span></code> the displacements of the cylinder are those of its inner or outer surface, <span class="math notranslate nohighlight">\(z_f = d \mp h/2\)</span> in the
+coordinate <span class="math notranslate nohighlight">\(z\)</span> of the cylinder (<span class="math notranslate nohighlight">\(d\)</span> the offset of the laminate), with the Kirchhoff-Love kinematics,</p>
+<div class="math notranslate nohighlight">
+\[u(z_f) = u - z_f w_{,x}, \qquad v(z_f) = \left(1 + \frac{z_f}{r}\right) v - z_f w_{,y}\]</div>
+<p>the term <span class="math notranslate nohighlight">\(z_f v/r\)</span> being that of the Sanders-Koiter kinematics, used by default whatever the model of the cylinder (and omitted with <code class="docutils literal notranslate"><span class="pre">kinematics='model'</span></code> for a Donnell cylinder). At a clamped end of the cylinder all of them vanish, which clamps the connected edge of the web.</p>
+<p>With the shear deformation theories the rotation connected is that of the normal, <span class="math notranslate nohighlight">\(\theta_x = \partial u/\partial z\)</span>, on each side, following its own model: <span class="math notranslate nohighlight">\(\theta_x = \phi_x\)</span> at every <span class="math notranslate nohighlight">\(z\)</span> of an FSDT cylinder and at the reference surface of an FSDT web; at the reference surface of a TSDT cylinder or web without offset, <span class="math notranslate nohighlight">\(\theta_x = \phi_x\)</span>, and at a face of a TSDT cylinder <span class="math notranslate nohighlight">\(\theta_x = -w_{,x}\)</span>, where the transverse shear strain of the TSDT vanishes. The
+displacements at a face are those of the model of the cylinder, <span class="math notranslate nohighlight">\(u(z) = u + z \phi_x\)</span> for the FSDT, with the cubic terms of the TSDT, and <span class="math notranslate nohighlight">\(v(z)\)</span> with the Sanders-Koiter term <span class="math notranslate nohighlight">\(z v/r\)</span> by default.</p>
+</section>
+<section id="Model">
+<h2>Model<a class="headerlink" href="#Model" title="Link to this heading">#</a></h2>
+<p>The cylinder is made of two half cylinders of length <span class="math notranslate nohighlight">\(0.5 r\)</span>, closed with <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code>, and the web of two half annuli, also closed with <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code>; each half web is connected to a half cylinder. Each field is a Ritz series of Bardell’s hierarchical functions [2]: <span class="math notranslate nohighlight">\(m = 8\)</span>, <span class="math notranslate nohighlight">\(n = 12\)</span> terms for the half cylinders and <span class="math notranslate nohighlight">\(m = 10\)</span>, <span class="math notranslate nohighlight">\(n = 12\)</span> for the half webs. Isotropic material, <span class="math notranslate nohighlight">\(h = 10^{-3} r\)</span>, the ratio of the inner to the outer radius of the web
+<span class="math notranslate nohighlight">\(\beta = 0.4\)</span>; the cylinder is clamped at both ends, and its lowest frequencies are well above those of the web, so that the lowest modes of the assembly are those of the web for <span class="math notranslate nohighlight">\(n = 0, 1, 1, 2, 2\)</span> nodal diameters.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>E, NU, H, RHO = 70e9, 1/3, 1e-3, 2700.
+R = 1.
+D = E*H**3/(12*(1 - NU**2))
+BETA = 0.4
+FIELDS = ('u', 'v', 'w', 'phix', 'phiy')
+WEB = 'annular_clpt_donnell'
+CYL = 'cylshell_clpt_sanders'
+CYL_DONNELL = 'cylshell_clpt_donnell'
+TSDT_WEBS = sorted(k for k in modelDB.db if k.startswith('annular_tsdt_'))
+
+
+def _fields(p):
+    return FIELDS[:modelDB.db[p.model]['dofs']]
+
+
+def _free(p):
+    for f in _fields(p):
+        for e in ('x1', 'x2', 'y1', 'y2'):
+            setattr(p, e + f, 1)
+            setattr(p, e + f + 'r', 1)
+
+
+def cylinder(r, length, offset=0., clamped=True, h=H, m=8, n=12, model=CYL):
+    # half cylinder of reference radius r, its ends x = 0, L clamped or free
+    c = Shell(model=model, a=length, b=np.pi*r, r=r, m=m, n=n, plyt=h, stack=[0],
+              laminaprop=(E, NU), rho=RHO, offset=offset)
+    _free(c)
+    if clamped:
+        for e in ('x1', 'x2'):
+            for f in _fields(c):
+                setattr(c, e + f, 0)
+            for f in 'uvw':
+                setattr(c, e + f + 'r', 0)
+    return c
+
+
+def web(r_outer, r_inner, h=H, m=10, n=12, model=WEB):
+    # half annulus, free edges
+    w = Shell(model=model, a=r_outer - r_inner, b=np.pi*r_outer, r=r_outer, m=m, n=n, plyt=h,
+              stack=[0], laminaprop=(E, NU), rho=RHO)
+    _free(w)
+    return w
+
+
+def assembly(cyls, webs, conn_web, conn_method):
+    # two half cylinders and two half webs closed with 'SSycte', each web connected to its
+    # cylinder by conn_web(cylinder, web)
+    conn = []
+    for p1, p2 in (cyls, webs):
+        conn += [dict(p1=p1, p2=p2, func='SSycte', ycte1=p1.b, ycte2=0),
+                 dict(p1=p1, p2=p2, func='SSycte', ycte1=0, ycte2=p2.b)]
+    for c, w in zip(cyls, webs):
+        conn.append(conn_web(c, w))
+    return MultiDomain(cyls + webs, conn, conn_method=conn_method)
+
+
+def lambda2(md_, r_outer, num=8):
+    # lambda^2 = omega r_o^2 sqrt(rho h/D), sorted
+    K = md_.reduce(md_.calc_kC(silent=True))
+    M = md_.reduce(md_.calc_kM(silent=True))
+    eigvals, _ = freq(K, M, sparse_solver=False, silent=True, num_eigvalues=num)
+    return np.sort(np.sqrt(-eigvals.real))*r_outer**2*np.sqrt(RHO*H/D)
+
+
+def compare(rows, diffs, label, l2, ref):
+    # rows of the five lowest lambda^2 against ref for n = 0, 1, 1, 2, 2
+    for n, v, r in zip((0, 1, 1, 2, 2), l2[:5], np.asarray(ref)[[0, 1, 1, 2, 2]]):
+        diffs.append(rel(v, r))
+        rows.append(label + [n, '%.5f' % r, '%.5f' % v, '%+.5f' % diffs[-1]])
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Reference-roots">
+<h2>Reference roots<a class="headerlink" href="#Reference-roots" title="Link to this heading">#</a></h2>
+<p>With <span class="math notranslate nohighlight">\(w = W(\rho) \cos n\theta\)</span> the free vibration of a Kirchhoff plate has the solution <span class="math notranslate nohighlight">\(W = A J_n(k\rho) + B Y_n(k\rho) + C I_n(k\rho) + D K_n(k\rho)\)</span>, [1], Eq. (1.17), with <span class="math notranslate nohighlight">\(k^4 = \rho_m h \omega^2/D\)</span>. The frequency equation of the annulus with <span class="math notranslate nohighlight">\(W = W' = 0\)</span> at the clamped edge and the bending moment and the Kelvin-Kirchhoff edge reaction of Leissa’s Eqs. (1.11)-(1.13) zero at the free edge is the <span class="math notranslate nohighlight">\(4 \times 4\)</span> determinant of <code class="docutils literal notranslate"><span class="pre">det_annulus</span></code>, whose roots are the
+frequency parameters <span class="math notranslate nohighlight">\(\lambda^2 = \omega r_o^2 \sqrt{\rho_m h/D}\)</span>, <span class="math notranslate nohighlight">\(r_o\)</span> the outer radius of the web. For <span class="math notranslate nohighlight">\(\nu = 1/3\)</span> and <span class="math notranslate nohighlight">\(\beta = 0.4\)</span>, <code class="docutils literal notranslate"><span class="pre">EXACT</span></code> (clamped outside, free inside) and <code class="docutils literal notranslate"><span class="pre">EXACT_INNER</span></code> (clamped inside, free outside) are the reference values, to six digits:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def det_annulus(lam2, n, beta, nu, clamped='outer'):
+    # determinant of the frequency equation of the annulus of outer radius 1 and inner radius
+    # beta, clamped on the edge `clamped` ('outer' or 'inner') and free on the other
+    k = np.sqrt(lam2)
+    rc, rf = (1., beta) if clamped == 'outer' else (beta, 1.)
+    cols = []
+    for f, fp in ((jv, jvp), (yv, yvp), (iv, ivp), (kv, kvp)):
+        W0, W1c = f(n, k*rc), k*fp(n, k*rc, 1)
+        W, W1, W2, W3 = (f(n, k*rf), k*fp(n, k*rf, 1), k**2*fp(n, k*rf, 2),
+                         k**3*fp(n, k*rf, 3))
+        b = rf
+        M = W2 + nu*(W1/b - n**2*W/b**2)
+        V = (W3 + W2/b - W1/b**2 - n**2*W1/b**2 + 2*n**2*W/b**3
+             - (1 - nu)*n**2/b**2*(W1 - W/b))
+        col = np.array([W0, W1c, M, V])
+        cols.append(col/np.abs(col).max())
+    return np.linalg.det(np.array(cols).T)
+
+
+def exact_lambda2(n, beta, guess, nu, clamped='outer'):
+    # root of the frequency equation between 0.9 and 1.1 times `guess`
+    return brentq(det_annulus, 0.9*guess, 1.1*guess, args=(n, beta, nu, clamped))
+
+
+EXACT = (13.5004, 19.3892, 31.3384)          # clamped outside, n = 0, 1, 2
+EXACT_INNER = (9.07188, 9.12934, 10.3655)    # clamped inside, n = 0, 1, 2
+LEISSA_T221 = (13.54, 19.80, 31.34)          # [1] Table 2.21, clamped outside
+rows = []
+for n in range(3):
+    ro = exact_lambda2(n, BETA, EXACT[n], NU, 'outer')
+    ri = exact_lambda2(n, BETA, EXACT_INNER[n], NU, 'inner')
+    rows.append([n, '%.6f' % ro, EXACT[n], LEISSA_T221[n], '%.6f' % ri, EXACT_INNER[n]])
+print_table(rows, ['n', 'root, clamped outside', 'EXACT', 'Table 2.21 [1]',
+                   'root, clamped inside', 'EXACT_INNER'])
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+n  root, clamped outside    EXACT  Table 2.21 [1]  root, clamped inside  EXACT_INNER
+-  ---------------------  -------  --------------  --------------------  -----------
+0              13.500426  13.5004           13.54              9.071882      9.07188
+1              19.389229  19.3892            19.8              9.129338      9.12934
+2              31.338359  31.3384           31.34             10.365540      10.3655
+</pre></div></div>
+</div>
+<p>Leissa’s Table 2.21 (<span class="math notranslate nohighlight">\(\nu = 1/3\)</span>, from Vogel and Skinner, his ref. 2.42) gives 13.54, 19.80 and 31.34 for the annulus clamped outside. For the annulus clamped inside, Leissa’s Table 2.31 gives the ratios <span class="math notranslate nohighlight">\(\beta\)</span> of Southwell (his ref. 2.37) at which <span class="math notranslate nohighlight">\(\lambda^2\)</span> takes given values, <span class="math notranslate nohighlight">\(\nu = 0.3\)</span>; the roots of the frequency equation are at these ratios to within 0.006 in the range <span class="math notranslate nohighlight">\(\beta = 0.27\)</span> to <span class="math notranslate nohighlight">\(0.65\)</span>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>SOUTHWELL = ((0, 6.25, 0.276), (0, 25.0, 0.642), (1, 9.00, 0.397), (1, 21.2, 0.603),
+             (1, 25.0, 0.634), (2, 9.00, 0.349), (2, 16.0, 0.522), (3, 25.0, 0.59))
+rows = []
+for n, lam2, beta in SOUTHWELL:
+    root = brentq(lambda b: det_annulus(lam2, n, b, 0.3, 'inner'), beta - 0.03, beta + 0.03)
+    rows.append([n, lam2, beta, '%.4f' % root, '%+.4f' % (root - beta)])
+print_table(rows, ['n', 'lambda^2', 'beta, Table 2.31 [1]', 'root', 'difference'])
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+n  lambda^2  beta, Table 2.31 [1]    root  difference
+-  --------  --------------------  ------  ----------
+0      6.25                 0.276  0.2764     +0.0004
+0      25.0                 0.642  0.6368     -0.0052
+1       9.0                 0.397  0.3963     -0.0007
+1      21.2                 0.603  0.6025     -0.0005
+1      25.0                 0.634  0.6335     -0.0005
+2       9.0                 0.349  0.3478     -0.0012
+2      16.0                 0.522  0.5218     -0.0002
+3      25.0                  0.59  0.5904     +0.0004
+</pre></div></div>
+</div>
+<p>Leissa’s Table 2.29 (<span class="math notranslate nohighlight">\(\nu = 1/3\)</span>, from his ref. 2.42) gives 7.036, 9.096 and 10.37 for <span class="math notranslate nohighlight">\(\beta = 0.4\)</span>: its <span class="math notranslate nohighlight">\(n = 0\)</span> value differs from the root, 9.07188, and from the trend of Table 2.31, and is not used.</p>
+</section>
+<section id="1.-Web-at-the-clamped-end-of-the-cylinder,-reference-surface">
+<h2>1. Web at the clamped end of the cylinder, reference surface<a class="headerlink" href="#1.-Web-at-the-clamped-end-of-the-cylinder,-reference-surface" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">annular_clpt_donnell</span></code> web of outer radius <span class="math notranslate nohighlight">\(r_o = r\)</span> on <code class="docutils literal notranslate"><span class="pre">cylshell_clpt_sanders</span></code>, connected at <span class="math notranslate nohighlight">\(x = 0\)</span> without <code class="docutils literal notranslate"><span class="pre">'face'</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rows, diffs = {}, {}
+for method in ('null-space', 'penalty'):
+    rows[method], diffs[method] = [], []
+    cyls = [cylinder(R, 0.5*R) for _ in range(2)]
+    webs = [web(R, BETA*R) for _ in range(2)]
+    md_ = assembly(cyls, webs, lambda c, w: dict(p1=c, p2=w, func='BFxcte', xcte1=0, xcte2=0),
+                   method)
+    compare(rows[method], diffs[method], [method], lambda2(md_, R), EXACT)
+print_table(rows['null-space'] + rows['penalty'],
+            ['conn_method', 'n', 'EXACT', 'panels', 'diff (%)'])
+print('null-space:', largest(diffs['null-space'], 1e-3))
+print('penalty:   ', largest(diffs['penalty'], 0.5))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+conn_method  n     EXACT    panels  diff (%)
+-----------  -  --------  --------  --------
+ null-space  0  13.50040  13.50042  +0.00013
+ null-space  1  19.38920  19.38922  +0.00008
+ null-space  1  19.38920  19.38922  +0.00008
+ null-space  2  31.33840  31.33833  -0.00023
+ null-space  2  31.33840  31.33833  -0.00023
+    penalty  0  13.50040  13.45889  -0.30746
+    penalty  1  19.38920  19.33566  -0.27611
+    penalty  1  19.38920  19.34673  -0.21906
+    penalty  2  31.33840  31.25040  -0.28079
+    penalty  2  31.33840  31.27900  -0.18954
+null-space: largest |diff| = 0.0002 %, below the bound of 0.001 %
+penalty:    largest |diff| = 0.3075 %, below the bound of 0.5 %
+</pre></div></div>
+</div>
+</section>
+<section id="2.-Internal-frames,-outer-edge-of-the-web-on-the-inner-surface">
+<h2>2. Internal frames, outer edge of the web on the inner surface<a class="headerlink" href="#2.-Internal-frames,-outer-edge-of-the-web-on-the-inner-surface" title="Link to this heading">#</a></h2>
+<p>The web has <span class="math notranslate nohighlight">\(r_o = r - h/2\)</span> and is connected with <code class="docutils literal notranslate"><span class="pre">face='lower'</span></code>; the cylinder has the Sanders-Koiter kinematics (<code class="docutils literal notranslate"><span class="pre">cylshell_clpt_sanders</span></code>) or the Donnell kinematics (<code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>), the face following the Sanders-Koiter kinematics by default:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rows, diffs = [], {'null-space': [], 'penalty': []}
+r_o = R - H/2
+for model in (CYL, CYL_DONNELL):
+    for method in ('null-space', 'penalty'):
+        cyls = [cylinder(R, 0.5*R, model=model) for _ in range(2)]
+        webs = [web(r_o, BETA*r_o) for _ in range(2)]
+        md_ = assembly(cyls, webs, lambda c, w: dict(p1=c, p2=w, func='BFxcte', xcte1=0,
+                       xcte2=0, face='lower'), method)
+        compare(rows, diffs[method], [model, method], lambda2(md_, r_o), EXACT)
+print_table(rows, ['cylinder', 'conn_method', 'n', 'EXACT', 'panels', 'diff (%)'])
+print('null-space:', largest(diffs['null-space'], 1e-3))
+print('penalty:   ', largest(diffs['penalty'], 0.5))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+             cylinder  conn_method  n     EXACT    panels  diff (%)
+---------------------  -----------  -  --------  --------  --------
+cylshell_clpt_sanders   null-space  0  13.50040  13.50042  +0.00013
+cylshell_clpt_sanders   null-space  1  19.38920  19.38922  +0.00008
+cylshell_clpt_sanders   null-space  1  19.38920  19.38922  +0.00008
+cylshell_clpt_sanders   null-space  2  31.33840  31.33833  -0.00023
+cylshell_clpt_sanders   null-space  2  31.33840  31.33833  -0.00023
+cylshell_clpt_sanders      penalty  0  13.50040  13.45889  -0.30747
+cylshell_clpt_sanders      penalty  1  19.38920  19.33566  -0.27614
+cylshell_clpt_sanders      penalty  1  19.38920  19.34673  -0.21906
+cylshell_clpt_sanders      penalty  2  31.33840  31.25039  -0.28084
+cylshell_clpt_sanders      penalty  2  31.33840  31.27900  -0.18954
+cylshell_clpt_donnell   null-space  0  13.50040  13.50042  +0.00013
+cylshell_clpt_donnell   null-space  1  19.38920  19.38922  +0.00008
+cylshell_clpt_donnell   null-space  1  19.38920  19.38922  +0.00008
+cylshell_clpt_donnell   null-space  2  31.33840  31.33833  -0.00023
+cylshell_clpt_donnell   null-space  2  31.33840  31.33833  -0.00023
+cylshell_clpt_donnell      penalty  0  13.50040  13.45889  -0.30747
+cylshell_clpt_donnell      penalty  1  19.38920  19.33566  -0.27614
+cylshell_clpt_donnell      penalty  1  19.38920  19.34673  -0.21906
+cylshell_clpt_donnell      penalty  2  31.33840  31.25039  -0.28084
+cylshell_clpt_donnell      penalty  2  31.33840  31.27900  -0.18954
+null-space: largest |diff| = 0.0002 %, below the bound of 0.001 %
+penalty:    largest |diff| = 0.3075 %, below the bound of 0.5 %
+</pre></div></div>
+</div>
+<p><strong>FSDT web on an FSDT cylinder.</strong> <code class="docutils literal notranslate"><span class="pre">annular_fsdt_donnell</span></code> web on the inner surface of a <code class="docutils literal notranslate"><span class="pre">cylshell_fsdt_sanders</span></code> cylinder of length <span class="math notranslate nohighlight">\(0.5 r\)</span> clamped at <span class="math notranslate nohighlight">\(x = 0\)</span> only, <span class="math notranslate nohighlight">\(\nu = 0.3\)</span>, the default shear correction of panels, <span class="math notranslate nohighlight">\(h/r_o = 0.001\)</span>; the reference is the root of the frequency equation for <span class="math notranslate nohighlight">\(\nu = 0.3\)</span>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def fsdt_internal_frame(method, h=1e-3, beta=0.4, nu=0.3):
+    r_o = R - h/2
+    cyls, webs = [], []
+    for _ in range(2):
+        c = Shell(model='cylshell_fsdt_sanders', a=0.5*R, b=np.pi*R, r=R, m=8, n=12, plyt=h,
+                  stack=[0], laminaprop=(E, nu), rho=RHO)
+        _free(c)
+        for f in FIELDS:
+            setattr(c, 'x1' + f, 0)
+        cyls.append(c)
+        w = Shell(model='annular_fsdt_donnell', a=r_o*(1 - beta), b=np.pi*r_o, r=r_o, m=10,
+                  n=12, plyt=h, stack=[0], laminaprop=(E, nu), rho=RHO)
+        _free(w)
+        webs.append(w)
+    md_ = assembly(cyls, webs, lambda c, w: dict(p1=c, p2=w, func='BFxcte', xcte1=0, xcte2=0,
+                   face='lower'), method)
+    K = md_.reduce(md_.calc_kC(silent=True))
+    M = md_.reduce(md_.calc_kM(silent=True))
+    eigvals, _ = freq(K, M, sparse_solver=False, silent=True, num_eigvalues=8)
+    Dh = E*h**3/(12*(1 - nu**2))
+    return np.sort(np.sqrt(-eigvals.real))*r_o**2*np.sqrt(RHO*h/Dh)
+
+
+ROOT_03 = [exact_lambda2(n, 0.4, g, 0.3) for n, g in enumerate(LEISSA_T221)]
+rows, diffs = [], {'null-space': [], 'penalty': []}
+for method in ('null-space', 'penalty'):
+    compare(rows, diffs[method], [method], fsdt_internal_frame(method), ROOT_03)
+print_table(rows, ['conn_method', 'n', 'root, nu = 0.3', 'panels', 'diff (%)'])
+print('null-space:', largest(diffs['null-space'], 0.01))
+print('penalty:   ', largest(diffs['penalty'], 0.5))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/saullogiovanip/align2026/runs/w10TWnb-20261112-142430/tmp/ipykernel_41929/3663607461.py:21: RuntimeWarning: invalid value encountered in sqrt
+  return np.sort(np.sqrt(-eigvals.real))*r_o**2*np.sqrt(RHO*h/Dh)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+conn_method  n  root, nu = 0.3    panels  diff (%)
+-----------  -  --------------  --------  --------
+ null-space  0        13.60272  13.60267  -0.00032
+ null-space  1        19.59426  19.59380  -0.00236
+ null-space  1        19.59426  19.59380  -0.00236
+ null-space  2        31.53468  31.53401  -0.00210
+ null-space  2        31.53468  31.53401  -0.00210
+    penalty  0        13.60272  13.56306  -0.29152
+    penalty  1        19.59426  19.54802  -0.23599
+    penalty  1        19.59426  19.55069  -0.22235
+    penalty  2        31.53468  31.46652  -0.21612
+    penalty  2        31.53468  31.47354  -0.19385
+null-space: largest |diff| = 0.0024 %, below the bound of 0.01 %
+penalty:    largest |diff| = 0.2915 %, below the bound of 0.5 %
+</pre></div></div>
+</div>
+</section>
+<section id="3.-External-frame,-inner-edge-of-the-web-on-the-outer-surface">
+<h2>3. External frame, inner edge of the web on the outer surface<a class="headerlink" href="#3.-External-frame,-inner-edge-of-the-web-on-the-outer-surface" title="Link to this heading">#</a></h2>
+<p>The web has the inner radius <span class="math notranslate nohighlight">\(r_i = r + h/2\)</span> and the outer radius <span class="math notranslate nohighlight">\(r_o = r_i/\beta\)</span>; its inner edge, <code class="docutils literal notranslate"><span class="pre">xcte2=web.a</span></code>, is connected with <code class="docutils literal notranslate"><span class="pre">face='upper'</span></code> at the clamped end of a <code class="docutils literal notranslate"><span class="pre">cylshell_clpt_sanders</span></code> cylinder. The reference is the annulus clamped inside and free outside:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rows, diffs = [], {'null-space': [], 'penalty': []}
+r_i = R + H/2
+r_o = r_i/BETA
+for method in ('null-space', 'penalty'):
+    cyls = [cylinder(R, 0.5*R) for _ in range(2)]
+    webs = [web(r_o, r_i) for _ in range(2)]
+    md_ = assembly(cyls, webs, lambda c, w: dict(p1=c, p2=w, func='BFxcte', xcte1=0,
+                   xcte2=w.a, face='upper'), method)
+    compare(rows, diffs[method], [method], lambda2(md_, r_o), EXACT_INNER)
+print_table(rows, ['conn_method', 'n', 'EXACT_INNER', 'panels', 'diff (%)'])
+print('null-space:', largest(diffs['null-space'], 1e-3))
+print('penalty:   ', largest(diffs['penalty'], 0.5))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+conn_method  n  EXACT_INNER    panels  diff (%)
+-----------  -  -----------  --------  --------
+ null-space  0      9.07188   9.07188  +0.00002
+ null-space  1      9.12934   9.12934  -0.00003
+ null-space  1      9.12934   9.12934  -0.00003
+ null-space  2     10.36550  10.36554  +0.00038
+ null-space  2     10.36550  10.36554  +0.00038
+    penalty  0      9.07188   9.05877  -0.14455
+    penalty  1      9.12934   9.11482  -0.15908
+    penalty  1      9.12934   9.11662  -0.13929
+    penalty  2     10.36550  10.35187  -0.13153
+    penalty  2     10.36550  10.35279  -0.12263
+null-space: largest |diff| = 0.0004 %, below the bound of 0.001 %
+penalty:    largest |diff| = 0.1591 %, below the bound of 0.5 %
+</pre></div></div>
+</div>
+</section>
+<section id="4.-TSDT-webs-on-a-TSDT-cylinder">
+<h2>4. TSDT webs on a TSDT cylinder<a class="headerlink" href="#4.-TSDT-webs-on-a-TSDT-cylinder" title="Link to this heading">#</a></h2>
+<p>The webs of the three <code class="docutils literal notranslate"><span class="pre">annular_tsdt_*</span></code> models on <code class="docutils literal notranslate"><span class="pre">cylshell_tsdt_sanders</span></code>, <span class="math notranslate nohighlight">\(h/r_o = 0.001\)</span>, their outer edge on the reference surface of the cylinder (no <code class="docutils literal notranslate"><span class="pre">'face'</span></code>, <span class="math notranslate nohighlight">\(r_o = r\)</span>) or on its inner surface (<code class="docutils literal notranslate"><span class="pre">face='lower'</span></code>, <span class="math notranslate nohighlight">\(r_o = r - h/2\)</span>):</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rows, diffs = [], {'null-space': [], 'penalty': []}
+for model in TSDT_WEBS:
+    for face in (None, 'lower'):
+        for method in ('null-space', 'penalty'):
+            r_o = R if face is None else R - H/2
+            cyls = [cylinder(R, 0.5*R, model='cylshell_tsdt_sanders') for _ in range(2)]
+            webs = [web(r_o, BETA*r_o, model=model) for _ in range(2)]
+            md_ = assembly(cyls, webs, lambda c, w: dict(p1=c, p2=w, func='BFxcte', xcte1=0,
+                           xcte2=0, face=face), method)
+            compare(rows, diffs[method], [model, str(face), method], lambda2(md_, r_o), EXACT)
+print_table(rows, ['web', 'face', 'conn_method', 'n', 'EXACT', 'panels', 'diff (%)'])
+print('null-space:', largest(diffs['null-space'], 0.01))
+print('penalty:   ', largest(diffs['penalty'], 0.5))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/saullogiovanip/align2026/runs/w10TWnb-20261112-142430/tmp/ipykernel_41929/1533956406.py:62: RuntimeWarning: invalid value encountered in sqrt
+  return np.sort(np.sqrt(-eigvals.real))*r_outer**2*np.sqrt(RHO*H/D)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+                 web   face  conn_method  n     EXACT    panels  diff (%)
+--------------------  -----  -----------  -  --------  --------  --------
+annular_tsdt_donnell   None   null-space  0  13.50040  13.50024  -0.00118
+annular_tsdt_donnell   None   null-space  1  19.38920  19.38861  -0.00304
+annular_tsdt_donnell   None   null-space  1  19.38920  19.38861  -0.00304
+annular_tsdt_donnell   None   null-space  2  31.33840  31.33743  -0.00309
+annular_tsdt_donnell   None   null-space  2  31.33840  31.33743  -0.00309
+annular_tsdt_donnell   None      penalty  0  13.50040  13.46106  -0.29137
+annular_tsdt_donnell   None      penalty  1  19.38920  19.34395  -0.23339
+annular_tsdt_donnell   None      penalty  1  19.38920  19.34606  -0.22247
+annular_tsdt_donnell   None      penalty  2  31.33840  31.27240  -0.21059
+annular_tsdt_donnell   None      penalty  2  31.33840  31.27802  -0.19266
+annular_tsdt_donnell  lower   null-space  0  13.50040  13.50024  -0.00118
+annular_tsdt_donnell  lower   null-space  1  19.38920  19.38861  -0.00304
+annular_tsdt_donnell  lower   null-space  1  19.38920  19.38861  -0.00304
+annular_tsdt_donnell  lower   null-space  2  31.33840  31.33743  -0.00309
+annular_tsdt_donnell  lower   null-space  2  31.33840  31.33743  -0.00309
+annular_tsdt_donnell  lower      penalty  0  13.50040  13.46106  -0.29137
+annular_tsdt_donnell  lower      penalty  1  19.38920  19.34395  -0.23340
+annular_tsdt_donnell  lower      penalty  1  19.38920  19.34606  -0.22247
+annular_tsdt_donnell  lower      penalty  2  31.33840  31.27240  -0.21061
+annular_tsdt_donnell  lower      penalty  2  31.33840  31.27802  -0.19266
+     annular_tsdt_gl   None   null-space  0  13.50040  13.50024  -0.00118
+     annular_tsdt_gl   None   null-space  1  19.38920  19.38861  -0.00304
+     annular_tsdt_gl   None   null-space  1  19.38920  19.38861  -0.00304
+     annular_tsdt_gl   None   null-space  2  31.33840  31.33743  -0.00309
+     annular_tsdt_gl   None   null-space  2  31.33840  31.33743  -0.00309
+     annular_tsdt_gl   None      penalty  0  13.50040  13.46106  -0.29137
+     annular_tsdt_gl   None      penalty  1  19.38920  19.34395  -0.23339
+     annular_tsdt_gl   None      penalty  1  19.38920  19.34606  -0.22247
+     annular_tsdt_gl   None      penalty  2  31.33840  31.27240  -0.21059
+     annular_tsdt_gl   None      penalty  2  31.33840  31.27802  -0.19266
+     annular_tsdt_gl  lower   null-space  0  13.50040  13.50024  -0.00118
+     annular_tsdt_gl  lower   null-space  1  19.38920  19.38861  -0.00304
+     annular_tsdt_gl  lower   null-space  1  19.38920  19.38861  -0.00304
+     annular_tsdt_gl  lower   null-space  2  31.33840  31.33743  -0.00309
+     annular_tsdt_gl  lower   null-space  2  31.33840  31.33743  -0.00309
+     annular_tsdt_gl  lower      penalty  0  13.50040  13.46106  -0.29137
+     annular_tsdt_gl  lower      penalty  1  19.38920  19.34395  -0.23340
+     annular_tsdt_gl  lower      penalty  1  19.38920  19.34606  -0.22247
+     annular_tsdt_gl  lower      penalty  2  31.33840  31.27240  -0.21061
+     annular_tsdt_gl  lower      penalty  2  31.33840  31.27802  -0.19266
+     annular_tsdt_tl   None   null-space  0  13.50040  13.50024  -0.00118
+     annular_tsdt_tl   None   null-space  1  19.38920  19.38861  -0.00304
+     annular_tsdt_tl   None   null-space  1  19.38920  19.38861  -0.00304
+     annular_tsdt_tl   None   null-space  2  31.33840  31.33743  -0.00309
+     annular_tsdt_tl   None   null-space  2  31.33840  31.33743  -0.00309
+     annular_tsdt_tl   None      penalty  0  13.50040  13.46106  -0.29137
+     annular_tsdt_tl   None      penalty  1  19.38920  19.34395  -0.23339
+     annular_tsdt_tl   None      penalty  1  19.38920  19.34606  -0.22247
+     annular_tsdt_tl   None      penalty  2  31.33840  31.27240  -0.21059
+     annular_tsdt_tl   None      penalty  2  31.33840  31.27802  -0.19266
+     annular_tsdt_tl  lower   null-space  0  13.50040  13.50024  -0.00118
+     annular_tsdt_tl  lower   null-space  1  19.38920  19.38861  -0.00304
+     annular_tsdt_tl  lower   null-space  1  19.38920  19.38861  -0.00304
+     annular_tsdt_tl  lower   null-space  2  31.33840  31.33743  -0.00309
+     annular_tsdt_tl  lower   null-space  2  31.33840  31.33743  -0.00309
+     annular_tsdt_tl  lower      penalty  0  13.50040  13.46106  -0.29137
+     annular_tsdt_tl  lower      penalty  1  19.38920  19.34395  -0.23339
+     annular_tsdt_tl  lower      penalty  1  19.38920  19.34606  -0.22247
+     annular_tsdt_tl  lower      penalty  2  31.33840  31.27240  -0.21061
+     annular_tsdt_tl  lower      penalty  2  31.33840  31.27802  -0.19267
+null-space: largest |diff| = 0.0031 %, below the bound of 0.01 %
+penalty:    largest |diff| = 0.2914 %, below the bound of 0.5 %
+</pre></div></div>
+</div>
+</section>
+<section id="5.-Webs-and-cylinders-of-different-shear-deformation-theories">
+<h2>5. Webs and cylinders of different shear deformation theories<a class="headerlink" href="#5.-Webs-and-cylinders-of-different-shear-deformation-theories" title="Link to this heading">#</a></h2>
+<p>Both theories have the 5 DOFs <span class="math notranslate nohighlight">\(u, v, w, \phi_x, \phi_y\)</span> per term. An <code class="docutils literal notranslate"><span class="pre">annular_fsdt_donnell</span></code> web on a <code class="docutils literal notranslate"><span class="pre">cylshell_tsdt_sanders</span></code> cylinder and an <code class="docutils literal notranslate"><span class="pre">annular_tsdt_donnell</span></code> web on a <code class="docutils literal notranslate"><span class="pre">cylshell_fsdt_sanders</span></code> cylinder, at the reference surface and at the inner face:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>MIXED = [('cylshell_tsdt_sanders', 'annular_fsdt_donnell'),
+         ('cylshell_fsdt_sanders', 'annular_tsdt_donnell')]
+rows, diffs = [], {'null-space': [], 'penalty': []}
+for cyl, wmodel in MIXED:
+    for face in (None, 'lower'):
+        for method in ('null-space', 'penalty'):
+            r_o = R if face is None else R - H/2
+            cyls = [cylinder(R, 0.5*R, model=cyl) for _ in range(2)]
+            webs = [web(r_o, BETA*r_o, model=wmodel) for _ in range(2)]
+            md_ = assembly(cyls, webs, lambda c, w: dict(p1=c, p2=w, func='BFxcte', xcte1=0,
+                           xcte2=0, face=face), method)
+            compare(rows, diffs[method], [cyl, wmodel, str(face), method], lambda2(md_, r_o),
+                    EXACT)
+print_table(rows, ['cylinder', 'web', 'face', 'conn_method', 'n', 'EXACT', 'panels',
+                   'diff (%)'])
+print('null-space:', largest(diffs['null-space'], 0.01))
+print('penalty:   ', largest(diffs['penalty'], 0.5))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/saullogiovanip/align2026/runs/w10TWnb-20261112-142430/tmp/ipykernel_41929/1533956406.py:62: RuntimeWarning: invalid value encountered in sqrt
+  return np.sort(np.sqrt(-eigvals.real))*r_outer**2*np.sqrt(RHO*H/D)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+             cylinder                   web   face  conn_method  n     EXACT    panels  diff (%)
+---------------------  --------------------  -----  -----------  -  --------  --------  --------
+cylshell_tsdt_sanders  annular_fsdt_donnell   None   null-space  0  13.50040  13.50038  -0.00013
+cylshell_tsdt_sanders  annular_fsdt_donnell   None   null-space  1  19.38920  19.38876  -0.00225
+cylshell_tsdt_sanders  annular_fsdt_donnell   None   null-space  1  19.38920  19.38876  -0.00225
+cylshell_tsdt_sanders  annular_fsdt_donnell   None   null-space  2  31.33840  31.33766  -0.00236
+cylshell_tsdt_sanders  annular_fsdt_donnell   None   null-space  2  31.33840  31.33766  -0.00236
+cylshell_tsdt_sanders  annular_fsdt_donnell   None      penalty  0  13.50040  13.46104  -0.29156
+cylshell_tsdt_sanders  annular_fsdt_donnell   None      penalty  1  19.38920  19.34351  -0.23567
+cylshell_tsdt_sanders  annular_fsdt_donnell   None      penalty  1  19.38920  19.34622  -0.22169
+cylshell_tsdt_sanders  annular_fsdt_donnell   None      penalty  2  31.33840  31.27105  -0.21491
+cylshell_tsdt_sanders  annular_fsdt_donnell   None      penalty  2  31.33840  31.27825  -0.19195
+cylshell_tsdt_sanders  annular_fsdt_donnell  lower   null-space  0  13.50040  13.50038  -0.00014
+cylshell_tsdt_sanders  annular_fsdt_donnell  lower   null-space  1  19.38920  19.38876  -0.00225
+cylshell_tsdt_sanders  annular_fsdt_donnell  lower   null-space  1  19.38920  19.38876  -0.00225
+cylshell_tsdt_sanders  annular_fsdt_donnell  lower   null-space  2  31.33840  31.33766  -0.00236
+cylshell_tsdt_sanders  annular_fsdt_donnell  lower   null-space  2  31.33840  31.33766  -0.00236
+cylshell_tsdt_sanders  annular_fsdt_donnell  lower      penalty  0  13.50040  13.46104  -0.29156
+cylshell_tsdt_sanders  annular_fsdt_donnell  lower      penalty  1  19.38920  19.34350  -0.23568
+cylshell_tsdt_sanders  annular_fsdt_donnell  lower      penalty  1  19.38920  19.34622  -0.22169
+cylshell_tsdt_sanders  annular_fsdt_donnell  lower      penalty  2  31.33840  31.27105  -0.21492
+cylshell_tsdt_sanders  annular_fsdt_donnell  lower      penalty  2  31.33840  31.27825  -0.19195
+cylshell_fsdt_sanders  annular_tsdt_donnell   None   null-space  0  13.50040  13.50024  -0.00118
+cylshell_fsdt_sanders  annular_tsdt_donnell   None   null-space  1  19.38920  19.38861  -0.00304
+cylshell_fsdt_sanders  annular_tsdt_donnell   None   null-space  1  19.38920  19.38861  -0.00304
+cylshell_fsdt_sanders  annular_tsdt_donnell   None   null-space  2  31.33840  31.33743  -0.00309
+cylshell_fsdt_sanders  annular_tsdt_donnell   None   null-space  2  31.33840  31.33743  -0.00309
+cylshell_fsdt_sanders  annular_tsdt_donnell   None      penalty  0  13.50040  13.46106  -0.29137
+cylshell_fsdt_sanders  annular_tsdt_donnell   None      penalty  1  19.38920  19.34395  -0.23339
+cylshell_fsdt_sanders  annular_tsdt_donnell   None      penalty  1  19.38920  19.34607  -0.22247
+cylshell_fsdt_sanders  annular_tsdt_donnell   None      penalty  2  31.33840  31.27240  -0.21060
+cylshell_fsdt_sanders  annular_tsdt_donnell   None      penalty  2  31.33840  31.27802  -0.19266
+cylshell_fsdt_sanders  annular_tsdt_donnell  lower   null-space  0  13.50040  13.50024  -0.00118
+cylshell_fsdt_sanders  annular_tsdt_donnell  lower   null-space  1  19.38920  19.38861  -0.00304
+cylshell_fsdt_sanders  annular_tsdt_donnell  lower   null-space  1  19.38920  19.38861  -0.00304
+cylshell_fsdt_sanders  annular_tsdt_donnell  lower   null-space  2  31.33840  31.33743  -0.00309
+cylshell_fsdt_sanders  annular_tsdt_donnell  lower   null-space  2  31.33840  31.33743  -0.00309
+cylshell_fsdt_sanders  annular_tsdt_donnell  lower      penalty  0  13.50040  13.46106  -0.29138
+cylshell_fsdt_sanders  annular_tsdt_donnell  lower      penalty  1  19.38920  19.34395  -0.23340
+cylshell_fsdt_sanders  annular_tsdt_donnell  lower      penalty  1  19.38920  19.34606  -0.22247
+cylshell_fsdt_sanders  annular_tsdt_donnell  lower      penalty  2  31.33840  31.27240  -0.21061
+cylshell_fsdt_sanders  annular_tsdt_donnell  lower      penalty  2  31.33840  31.27802  -0.19267
+null-space: largest |diff| = 0.0031 %, below the bound of 0.01 %
+penalty:    largest |diff| = 0.2916 %, below the bound of 0.5 %
+</pre></div></div>
+</div>
+</section>
+<section id="6.-Total-Lagrangian-TSDT-web-on-a-total-Lagrangian-TSDT-cylinder">
+<h2>6. Total-Lagrangian TSDT web on a total-Lagrangian TSDT cylinder<a class="headerlink" href="#6.-Total-Lagrangian-TSDT-web-on-a-total-Lagrangian-TSDT-cylinder" title="Link to this heading">#</a></h2>
+<p>An <code class="docutils literal notranslate"><span class="pre">annular_tsdt_tl</span></code> web, <span class="math notranslate nohighlight">\(h/r_o = 0.001\)</span>, its outer edge on the inner surface (<code class="docutils literal notranslate"><span class="pre">face='lower'</span></code>, <span class="math notranslate nohighlight">\(r_o = r - h/2\)</span>) of a <code class="docutils literal notranslate"><span class="pre">cylshell_tsdt_tl</span></code> cylinder clamped at <span class="math notranslate nohighlight">\(x = 0\)</span>, against the roots of the annulus clamped outside and free inside, with the bounds of section 4. At zero displacements the stiffness and mass matrices of <code class="docutils literal notranslate"><span class="pre">cylshell_tsdt_tl</span></code> are those of <code class="docutils literal notranslate"><span class="pre">cylshell_tsdt_sanders</span></code>, and those of <code class="docutils literal notranslate"><span class="pre">annular_tsdt_tl</span></code> those of <code class="docutils literal notranslate"><span class="pre">annular_tsdt_gl</span></code> with the same Gauss-Legendre
+points (the default numbers of points of the two web models differ):</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rows, diffs = [], {'null-space': [], 'penalty': []}
+r_o = R - H/2
+for method in ('null-space', 'penalty'):
+    cyls = [cylinder(R, 0.5*R, model='cylshell_tsdt_tl') for _ in range(2)]
+    webs = [web(r_o, BETA*r_o, model='annular_tsdt_tl') for _ in range(2)]
+    md_ = assembly(cyls, webs, lambda c, w: dict(p1=c, p2=w, func='BFxcte', xcte1=0, xcte2=0,
+                   face='lower'), method)
+    compare(rows, diffs[method], [method], lambda2(md_, r_o), EXACT)
+print_table(rows, ['conn_method', 'n', 'EXACT', 'panels', 'diff (%)'])
+print('null-space:', largest(diffs['null-space'], 0.01))
+print('penalty:   ', largest(diffs['penalty'], 0.5))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/saullogiovanip/align2026/runs/w10TWnb-20261112-142430/tmp/ipykernel_41929/1533956406.py:62: RuntimeWarning: invalid value encountered in sqrt
+  return np.sort(np.sqrt(-eigvals.real))*r_outer**2*np.sqrt(RHO*H/D)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+conn_method  n     EXACT    panels  diff (%)
+-----------  -  --------  --------  --------
+ null-space  0  13.50040  13.50024  -0.00118
+ null-space  1  19.38920  19.38861  -0.00304
+ null-space  1  19.38920  19.38861  -0.00304
+ null-space  2  31.33840  31.33743  -0.00309
+ null-space  2  31.33840  31.33743  -0.00309
+    penalty  0  13.50040  13.46106  -0.29137
+    penalty  1  19.38920  19.34395  -0.23339
+    penalty  1  19.38920  19.34606  -0.22247
+    penalty  2  31.33840  31.27240  -0.21061
+    penalty  2  31.33840  31.27802  -0.19267
+null-space: largest |diff| = 0.0031 %, below the bound of 0.01 %
+penalty:    largest |diff| = 0.2914 %, below the bound of 0.5 %
+</pre></div></div>
+</div>
+</section>
+<section id="7.-Inner-surface:-offset-reference-surface-or-mid-surface-with-'face'">
+<h2>7. Inner surface: offset reference surface or mid-surface with <code class="docutils literal notranslate"><span class="pre">'face'</span></code><a class="headerlink" href="#7.-Inner-surface:-offset-reference-surface-or-mid-surface-with-'face'" title="Link to this heading">#</a></h2>
+<p>With the reference surface of the cylinder at its inner face, offset <span class="math notranslate nohighlight">\(d = h/2\)</span>, the inner face is <span class="math notranslate nohighlight">\(z_f = 0\)</span> and the face connection is the connection at the reference surface. The same cylinder described with its mid-surface, radius <span class="math notranslate nohighlight">\(r + h/2\)</span> and <span class="math notranslate nohighlight">\(d = 0\)</span>, connected at its lower face, differs only by the thin-shell approximations of the laminate offset. A web of outer radius <span class="math notranslate nohighlight">\(r\)</span> and inner radius <span class="math notranslate nohighlight">\(0.8 r\)</span> (height <span class="math notranslate nohighlight">\(0.2 r\)</span>) is connected at mid-length of a
+simply supported cylinder of length <span class="math notranslate nohighlight">\(0.5 r\)</span> (<span class="math notranslate nohighlight">\(v = w = 0\)</span> at both ends, <span class="math notranslate nohighlight">\(u = 0\)</span> at <span class="math notranslate nohighlight">\(x = 0\)</span>), <span class="math notranslate nohighlight">\(m = 10\)</span> for the half cylinders and <span class="math notranslate nohighlight">\(m = 8\)</span> for the half webs, in three ways:</p>
+<ul class="simple">
+<li><ol class="loweralpha simple">
+<li><p>cylinder of radius <span class="math notranslate nohighlight">\(r\)</span> with offset <span class="math notranslate nohighlight">\(h/2\)</span>, no <code class="docutils literal notranslate"><span class="pre">'face'</span></code>;</p></li>
+</ol>
+</li>
+<li><ol class="loweralpha simple" start="2">
+<li><p>cylinder of radius <span class="math notranslate nohighlight">\(r + h/2\)</span> without offset, <code class="docutils literal notranslate"><span class="pre">face='lower'</span></code>;</p></li>
+</ol>
+</li>
+<li><ol class="loweralpha simple" start="3">
+<li><p>cylinder of radius <span class="math notranslate nohighlight">\(r + h/2\)</span> without offset, the web attached to its mid-surface, its outer radius larger by <span class="math notranslate nohighlight">\(h/2\)</span>.</p></li>
+</ol>
+</li>
+</ul>
+<p>The eight lowest frequencies of (b) and (c) relative to those of (a), for <span class="math notranslate nohighlight">\(h/r = 0.002\)</span> and <span class="math notranslate nohighlight">\(0.02\)</span> with the null-space method and for <span class="math notranslate nohighlight">\(h/r = 0.002\)</span> with the penalty method:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def offset_cases(h, method):
+    length, beta = 0.5*R, 0.8
+    out = []
+    for r, offset, face, r_web in ((R, h/2, None, R), (R + h/2, 0., 'lower', R),
+                                   (R + h/2, 0., None, R + h/2)):
+        cyls = [cylinder(r, length, offset=offset, clamped=False, h=h, m=10) for _ in range(2)]
+        for c in cyls:
+            for e in ('x1', 'x2'):
+                setattr(c, e + 'v', 0)
+                setattr(c, e + 'w', 0)
+            c.x1u = 0
+        webs = [web(r_web, beta*R, h=h, m=8) for _ in range(2)]
+        md_ = assembly(cyls, webs, lambda c, w: dict(p1=c, p2=w, func='BFxcte',
+                       xcte1=length/2, xcte2=0, face=face), method)
+        out.append(lambda2(md_, R, num=10)[:8])
+    return out
+
+
+for h, method in ((2e-3, 'null-space'), (2e-2, 'null-space'), (2e-3, 'penalty')):
+    a_, b_, c_ = offset_cases(h, method)
+    rows = [[k + 1, '%.5f' % a_[k], '%+.5f' % rel(b_[k], a_[k]), '%+.3f' % rel(c_[k], a_[k])]
+            for k in range(8)]
+    print('h/r = %g, %s' % (h, method))
+    print_table(rows, ['mode', '(a) lambda^2', '(b) vs (a) (%)', '(c) vs (a) (%)'])
+    print('(b) vs (a): largest |diff| = %.2e %%; (c) vs (a): largest |diff| = %.2f %%'
+          % (np.abs(rel(b_, a_)).max(), np.abs(rel(c_, a_)).max()))
+    print()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+h/r = 0.002, null-space
+mode  (a) lambda^2  (b) vs (a) (%)  (c) vs (a) (%)
+----  ------------  --------------  --------------
+   1     182.83007        +0.00134          -0.937
+   2     185.82651        +0.00121          -0.920
+   3     185.82651        +0.00121          -0.920
+   4     194.73475        +0.00092          -0.875
+   5     194.73475        +0.00092          -0.875
+   6     209.35049        +0.00063          -0.810
+   7     209.35050        +0.00063          -0.810
+   8     229.43282        +0.00045          -0.736
+(b) vs (a): largest |diff| = 1.34e-03 %; (c) vs (a): largest |diff| = 0.94 %
+
+h/r = 0.02, null-space
+mode  (a) lambda^2  (b) vs (a) (%)  (c) vs (a) (%)
+----  ------------  --------------  --------------
+   1    1500.48183        +1.34097          -5.094
+   2    1531.74379        +1.20748          -5.029
+   3    1531.74379        +1.20748          -5.029
+   4    1623.51836        +0.90162          -4.808
+   5    1623.51836        +0.90162          -4.808
+   6    1771.69137        +0.57818          -4.424
+   7    1771.69144        +0.57818          -4.424
+   8    1972.34701        +0.32938          -3.921
+(b) vs (a): largest |diff| = 1.34e+00 %; (c) vs (a): largest |diff| = 5.09 %
+
+h/r = 0.002, penalty
+mode  (a) lambda^2  (b) vs (a) (%)  (c) vs (a) (%)
+----  ------------  --------------  --------------
+   1     180.70424        -0.68170          -1.607
+   2     183.69900        -0.66867          -1.577
+   3     183.70992        -0.66962          -1.578
+   4     192.61694        -0.63420          -1.497
+   5     192.62859        -0.63508          -1.498
+   6     207.24161        -0.58525          -1.383
+   7     207.25698        -0.58606          -1.384
+   8     227.33102        -0.52993          -1.255
+(b) vs (a): largest |diff| = 6.82e-01 %; (c) vs (a): largest |diff| = 1.61 %
+
+</pre></div></div>
+</div>
+<p>Here <span class="math notranslate nohighlight">\(\lambda^2\)</span> is normalised with <span class="math notranslate nohighlight">\(D\)</span> of <span class="math notranslate nohighlight">\(h = 10^{-3} r\)</span> and the radius <span class="math notranslate nohighlight">\(r\)</span>; only the ratios matter.</p>
+</section>
+<section id="8.-Discussion">
+<h2>8. Discussion<a class="headerlink" href="#8.-Discussion" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>The null-space connection reproduces the roots of the frequency equation of the annulus to <span class="math notranslate nohighlight">\(4 \times 10^{-4}\)</span> % for the webs of the classical plate theory, whether the web is connected at the reference surface of the cylinder (section 1), on its inner surface (section 2) or on its outer surface (section 3), for the Sanders-Koiter and the Donnell cylinders alike: the clamped end of the cylinder clamps the connected edge of the web exactly, and <span class="math notranslate nohighlight">\(m = 10\)</span>, <span class="math notranslate nohighlight">\(n = 12\)</span> terms converge
+the five lowest frequencies.</p></li>
+<li><p>The webs of the shear deformation theories, <span class="math notranslate nohighlight">\(h/r_o = 0.001\)</span>, give values lower than the roots of the classical theory by at most <span class="math notranslate nohighlight">\(3.1 \times 10^{-3}\)</span> % (sections 2, 4, 5 and 6), the effect of the transverse shear; the three <code class="docutils literal notranslate"><span class="pre">annular_tsdt_*</span></code> models give the same values, since the <code class="docutils literal notranslate"><span class="pre">gl</span></code> and <code class="docutils literal notranslate"><span class="pre">tl</span></code> kernels reduce to the linear ones at zero displacements, and the result does not depend on the theory of the cylinder (FSDT or TSDT) nor on the face, because at a clamped end every
+connected quantity of the cylinder vanishes. The total-Lagrangian web on the total-Lagrangian cylinder (section 6) gives the values of the same web on <code class="docutils literal notranslate"><span class="pre">cylshell_tsdt_sanders</span></code> (section 4) to the printed digits.</p></li>
+<li><p>The penalty connection, with the default penalty constants, gives values 0.12 % to 0.31 % lower than the roots: the edge of the web is clamped through finite penalty springs.</p></li>
+<li><p>Section 7: modelling the cylinder by its mid-surface with <code class="docutils literal notranslate"><span class="pre">face='lower'</span></code> agrees with the cylinder whose reference surface is its inner face to <span class="math notranslate nohighlight">\(1.3 \times 10^{-3}\)</span> % for <span class="math notranslate nohighlight">\(h/r = 0.002\)</span> with the null space; for <span class="math notranslate nohighlight">\(h/r = 0.02\)</span> the difference grows to 1.3 %, the thin-shell approximation of the laminate offset. Attaching the web to the mid-surface instead, its outer radius larger by <span class="math notranslate nohighlight">\(h/2\)</span>, lowers the frequencies by 0.9 % (<span class="math notranslate nohighlight">\(h/r = 0.002\)</span>) and 5.1 % (<span class="math notranslate nohighlight">\(h/r = 0.02\)</span>).
+With the penalty method the two descriptions differ by 0.7 %, because the default penalty constants depend on the stiffness of the laminate about its reference surface, which the offset changes.</p></li>
+</ul>
+<p>The test suite checks these connections with small webs (<span class="math notranslate nohighlight">\(m = 4\)</span>, <span class="math notranslate nohighlight">\(n = 6\)</span>) against the same webs clamped directly on the connected edge, the total-Lagrangian web on the total-Lagrangian cylinder included, and the CLPT cases of sections 1 to 3 against the roots.</p>
+</section>
+<section id="References">
+<h2>References<a class="headerlink" href="#References" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Leissa, A. W., <em>Vibration of Plates</em>, NASA SP-160, 1969, Eqs. (1.11)-(1.13) and (1.17), p. 2, Table 2.21, p. 23, and Tables 2.29 and 2.31, pp. 28-29.</p></li>
+<li><p>Castro, S. G. P., and Donadon, M. V., “Assembly of semi-analytical models to address linear buckling and vibration of stiffened composite panels with debonding defect”, Composite Structures, Vol. 160, 2017, pp. 232-247. <a class="reference external" href="https://doi.org/10.1016/j.compstruct.2016.10.026">https://doi.org/10.1016/j.compstruct.2016.10.026</a></p></li>
+</ol>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print('total run time: %.1f min' % ((time.time() - T_START)/60))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+total run time: 38.3 min
+</pre></div></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="thick_annular_plates.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Thick annular plates: shear deformation theories against exact and Ritz solutions</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="dcb_alfano2001.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">DCB benchmark: Alfano and Crisfield (2001)</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Connection">Connection</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Model">Model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Reference-roots">Reference roots</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#1.-Web-at-the-clamped-end-of-the-cylinder,-reference-surface">1. Web at the clamped end of the cylinder, reference surface</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#2.-Internal-frames,-outer-edge-of-the-web-on-the-inner-surface">2. Internal frames, outer edge of the web on the inner surface</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#3.-External-frame,-inner-edge-of-the-web-on-the-outer-surface">3. External frame, inner edge of the web on the outer surface</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#4.-TSDT-webs-on-a-TSDT-cylinder">4. TSDT webs on a TSDT cylinder</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#5.-Webs-and-cylinders-of-different-shear-deformation-theories">5. Webs and cylinders of different shear deformation theories</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#6.-Total-Lagrangian-TSDT-web-on-a-total-Lagrangian-TSDT-cylinder">6. Total-Lagrangian TSDT web on a total-Lagrangian TSDT cylinder</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#7.-Inner-surface:-offset-reference-surface-or-mid-surface-with-'face'">7. Inner surface: offset reference surface or mid-surface with <code class="docutils literal notranslate"><span class="pre">'face'</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#8.-Discussion">8. Discussion</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#References">References</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/notebooks/annular_webs_on_cylinders.nblink.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,2332 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Thick annular plates: shear deformation theories against exact and Ritz solutions &#8212; panels 0.16.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../_static/documentation_options.js?v=7de89ed4"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/thick_annular_plates';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Annular webs of ring frames connected to cylinders" href="annular_webs_on_cylinders.html" />
+    <link rel="prev" title="Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)" href="majumdar1971_annular_compression.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.16.0" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.16.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Thick annular plates: shear deformation theories against exact and Ritz solutions</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Thick-annular-plates:-shear-deformation-theories-against-exact-and-Ritz-solutions">
+<h1>Thick annular plates: shear deformation theories against exact and Ritz solutions<a class="headerlink" href="#Thick-annular-plates:-shear-deformation-theories-against-exact-and-Ritz-solutions" title="Link to this heading">#</a></h1>
+<p>The annular-sector models of panels with transverse shear, <code class="docutils literal notranslate"><span class="pre">annular_fsdt_*</span></code> (first-order shear deformation theory, FSDT) and <code class="docutils literal notranslate"><span class="pre">annular_tsdt_*</span></code> (Reddy’s third-order theory, TSDT), are compared here with three sources on thick isotropic annuli:</p>
+<ol class="arabic simple">
+<li><p>Bagheri, Kiani and Eslami [1]: buckling torques of moderately thick annuli, FSDT without a shear correction factor, by the differential quadrature method;</p></li>
+<li><p>Bisadi, Es’haghi, Rokni and Ilkhani [2]: exact natural frequencies of annuli with Reddy’s TSDT, for free, clamped, hard and soft simply supported edges;</p></li>
+<li><p>Dozio [3]: Ritz natural frequencies of annuli with the FSDT and the shear correction factor <span class="math notranslate nohighlight">\(5/6\)</span>.</p></li>
+</ol>
+<p>Section 1 shows, for [1], the buckling torques with the shear correction factor 1, which reproduces the paper, beside those with the default of panels, <code class="docutils literal notranslate"><span class="pre">fsdt_shear_correction</span> <span class="pre">=</span> <span class="pre">'rohwer'</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import time
+
+import numpy as np
+from structsolve import freq
+
+import panels
+from panels.shell import Shell
+from panels.multidomain import MultiDomain
+
+print('panels', panels.__version__)
+T_START = time.time()
+
+
+def print_table(rows, headers):
+    cols = list(zip(*([headers] + [[str(c) for c in r] for r in rows])))
+    widths = [max(len(c) for c in col) for col in cols]
+    fmt = '  '.join('%%%ds' % w for w in widths)
+    print(fmt % tuple(headers))
+    print('  '.join('-'*w for w in widths))
+    for r in rows:
+        print(fmt % tuple(str(c) for c in r))
+
+
+def rel(value, ref):
+    # relative difference in per cent
+    return 100.*(value - ref)/ref
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+panels 0.15.0
+</pre></div></div>
+</div>
+<section id="Model">
+<h2>Model<a class="headerlink" href="#Model" title="Link to this heading">#</a></h2>
+<p>A full annulus of outer radius <span class="math notranslate nohighlight">\(a\)</span> and inner radius <span class="math notranslate nohighlight">\(b = R a\)</span> is made of two half annuli whose free radial edges are connected with <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code>, so that modes with any number <span class="math notranslate nohighlight">\(p\)</span> of nodal diameters are represented. In the coordinates of the annular sector, <span class="math notranslate nohighlight">\(x = a - \rho\)</span> runs from the outer edge (<span class="math notranslate nohighlight">\(x = 0\)</span>, edge <code class="docutils literal notranslate"><span class="pre">x1</span></code>) inwards to the inner edge (edge <code class="docutils literal notranslate"><span class="pre">x2</span></code>), and <span class="math notranslate nohighlight">\(y\)</span> is the arc length of the outer edge; the rotations <span class="math notranslate nohighlight">\(\phi_x\)</span>, <span class="math notranslate nohighlight">\(\phi_y\)</span> are the
+rotations <span class="math notranslate nohighlight">\(\psi_\rho\)</span>, <span class="math notranslate nohighlight">\(\psi_\theta\)</span> of the sources up to the sign of <span class="math notranslate nohighlight">\(\phi_x\)</span>. Each field is a Ritz series of Bardell’s hierarchical functions, <span class="math notranslate nohighlight">\(m\)</span> terms along the radius and <span class="math notranslate nohighlight">\(n\)</span> along each half circumference [4]. The material is isotropic, one layer, <span class="math notranslate nohighlight">\(\nu = 0.3\)</span>; the results are dimensionless and do not depend on <span class="math notranslate nohighlight">\(E\)</span>, <span class="math notranslate nohighlight">\(\rho\)</span> or <span class="math notranslate nohighlight">\(a\)</span>.</p>
+<p>The edges, named inner-outer as in the sources, fix the following fields of panels:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>edge</p></th>
+<th class="head"><p>TSDT [2]</p></th>
+<th class="head"><p>FSDT [1], [3]</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>free (F)</p></td>
+<td><p>none</p></td>
+<td><p>none</p></td>
+</tr>
+<tr class="row-odd"><td><p>clamped (C)</p></td>
+<td><p><span class="math notranslate nohighlight">\(u, v, w, w_{,x}, \phi_x, \phi_y\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(u, v, w, \phi_x, \phi_y\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>hard simply supported (<span class="math notranslate nohighlight">\(S_h\)</span>, S)</p></td>
+<td><p><span class="math notranslate nohighlight">\(v, w, \phi_y\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(v, w, \phi_y\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>soft simply supported (<span class="math notranslate nohighlight">\(S_s\)</span>)</p></td>
+<td><p><span class="math notranslate nohighlight">\(w\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(w\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The TSDT has the slope <span class="math notranslate nohighlight">\(w_{,x}\)</span> as a degree of freedom of the edge ([2], Eq. (50)); the FSDT does not, and fixing <span class="math notranslate nohighlight">\(w_{,x}\)</span> there would over-constrain a clamped edge. For the frequencies, the in-plane conditions matter only for the in-plane modes: for one isotropic layer without offset, the in-plane displacements <span class="math notranslate nohighlight">\(u, v\)</span> are uncoupled from <span class="math notranslate nohighlight">\(w, \phi_x, \phi_y\)</span>.</p>
+<p>The frequency parameter of [2] and [3] is <span class="math notranslate nohighlight">\(\beta = \omega a^2 \sqrt{\rho h/D}\)</span>, with <span class="math notranslate nohighlight">\(D = E h^3/(12 (1 - \nu^2))\)</span>. The modes with <span class="math notranslate nohighlight">\(p \ge 1\)</span> come in pairs of equal frequencies, merged below; the count of each frequency (1 or 2) tells <span class="math notranslate nohighlight">\(p = 0\)</span> from <span class="math notranslate nohighlight">\(p \ge 1\)</span>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>E, NU, RHO = 70e9, 0.3, 2700.
+A = 1.
+FIELDS = ('u', 'v', 'w', 'phix', 'phiy')
+EDGES = {
+    'tsdt': {'F': (), 'C': FIELDS + ('wr',), 'Sh': ('v', 'w', 'phiy'), 'Ss': ('w',)},
+    'fsdt': {'F': (), 'C': FIELDS, 'Sh': ('v', 'w', 'phiy'), 'Ss': ('w',)},
+    }
+EDGES['fsdt']['S'] = EDGES['fsdt']['Sh']
+
+
+def annulus(model, R, delta, inner, outer, m, n, shear=None, inplane=None):
+    # full annulus of two half annuli; inplane fixes u, v on the given edges
+    family = 'tsdt' if 'tsdt' in model else 'fsdt'
+    halves = []
+    for _ in range(2):
+        s = Shell(model=model, a=A*(1 - R), b=np.pi*A, r=A, m=m, n=n,
+                  plyt=delta*A, stack=[0], laminaprop=(E, NU), rho=RHO)
+        if shear is not None:
+            s.fsdt_shear_correction = shear
+        for e in ('x1', 'x2', 'y1', 'y2'):
+            for f in FIELDS:
+                setattr(s, e + f, 1)
+                setattr(s, e + f + 'r', 1)
+        for e, kind in (('x1', outer), ('x2', inner)):
+            for f in EDGES[family][kind]:
+                setattr(s, e + f, 0)
+        halves.append(s)
+    p1, p2 = halves
+    conn = [dict(p1=p1, p2=p2, func='SSycte', ycte1=p1.b, ycte2=0),
+            dict(p1=p1, p2=p2, func='SSycte', ycte1=0, ycte2=p2.b)]
+    return MultiDomain([p1, p2], conn)
+
+
+def frequencies(md, delta, family='all', num=80):
+    # beta of the modes of the family 'transverse' (w, phix, phiy dominate the Ritz
+    # constants), 'inplane' or 'all', rigid-body modes excluded, pairs merged
+    K = md.reduce(md.calc_kC(silent=True))
+    M = md.reduce(md.calc_kM(silent=True))
+    eigvals, eigvecs = freq(K, M, sparse_solver=False, silent=True, num_eigvalues=num,
+                            symmetric=True, max_dense_size=10000)
+    h = delta*A
+    D = E*h**3/(12*(1 - NU**2))
+    beta = np.sqrt(np.abs(eigvals))*A**2*np.sqrt(RHO*h/D)
+    phi = md.expand(eigvecs)
+    transverse = np.zeros(phi.shape[0], dtype=bool)
+    for p in md.panels:
+        for field in (2, 3, 4):
+            transverse[p.col_start + field:p.col_end:5] = True
+    frac = np.linalg.norm(phi[transverse], axis=0)/np.linalg.norm(phi, axis=0)
+    keep = np.isfinite(beta) &amp; (beta &gt; 0.1)
+    if family == 'transverse':
+        keep &amp;= frac &gt; 0.5
+    elif family == 'inplane':
+        keep &amp;= frac &lt; 0.5
+    beta = np.sort(beta[keep])
+    values, count = [], []
+    for b in beta:
+        if values and b/values[-1] - 1 &lt; 1e-4:
+            count[-1] += 1
+        else:
+            values.append(b)
+            count.append(1)
+    return np.array(values), np.array(count)
+</pre></div>
+</div>
+</div>
+</section>
+<section id="1.-Buckling-torque-of-moderately-thick-annuli-(Bagheri,-Kiani-and-Eslami-2019)">
+<h2>1. Buckling torque of moderately thick annuli (Bagheri, Kiani and Eslami 2019)<a class="headerlink" href="#1.-Buckling-torque-of-moderately-thick-annuli-(Bagheri,-Kiani-and-Eslami-2019)" title="Link to this heading">#</a></h2>
+<p>A torque <span class="math notranslate nohighlight">\(T\)</span> on the outer edge, reacted on the inner edge, gives the membrane state <span class="math notranslate nohighlight">\(N_{\rho\theta} = T/(2 \pi \rho^2)\)</span>, <span class="math notranslate nohighlight">\(N_{\rho\rho} = N_{\theta\theta} = 0\)</span> ([1], Eqs. (10) and (12)). It is applied as the tangential force per unit length <span class="math notranslate nohighlight">\(q = T/(2 \pi a^2)\)</span> on the outer edge, the inner edge fixed in its plane (<span class="math notranslate nohighlight">\(u = v = 0\)</span>); <code class="docutils literal notranslate"><span class="pre">MultiDomain.linear_buckling</span></code> computes the linear static state and the least buckling load. The critical torque is
+<span class="math notranslate nohighlight">\(\tau = T/(2 \pi D)\)</span> ([1], Eq. (26)). Here the simply supported edge (S) of [1] is the hard one, <span class="math notranslate nohighlight">\(w = \phi_y = 0\)</span> ([1], Eq. (11)).</p>
+<p>[1] uses the transverse shear stiffness <span class="math notranslate nohighlight">\(A_{44} = A_{55} = G h\)</span> without a shear correction factor (its Eq. (7)): <code class="docutils literal notranslate"><span class="pre">fsdt_shear_correction</span> <span class="pre">=</span> <span class="pre">1</span></code> reproduces its Table 2. The default of panels, <code class="docutils literal notranslate"><span class="pre">'rohwer'</span></code>, the method of Rohwer for the transverse shear stiffness of laminates, gives the factor printed below for the homogeneous plate:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>s = Shell(model='annular_fsdt_donnell', a=0.7, b=np.pi, r=1., m=4, n=4, plyt=0.1, stack=[0],
+          laminaprop=(E, NU), rho=RHO)
+G = E/(2*(1 + NU))
+print('transverse shear stiffness / (G h), rohwer:', np.diag(s.ABD)[6:]/(G*0.1))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+transverse shear stiffness / (G h), rohwer: [0.83333333 0.83333333]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def tau(beta, inner, outer, delta, shear, m=12, n=16):
+    D = E*(delta*A)**3/(12*(1 - NU**2))
+    T = 2*np.pi*D
+    flags = {'C': (0, 0, 0), 'S': (0, 1, 0), 'F': (1, 1, 1)}   # w, phix, phiy
+    halves = []
+    for _ in range(2):
+        s = Shell(model='annular_fsdt_donnell', a=A*(1 - beta), b=np.pi*A, r=A, m=m, n=n,
+                  plyt=delta*A, stack=[0], laminaprop=(E, NU), rho=RHO)
+        s.fsdt_shear_correction = shear
+        for e in ('x1', 'x2', 'y1', 'y2'):
+            for f in FIELDS:
+                setattr(s, e + f, 1)
+                setattr(s, e + f + 'r', 1)
+        s.x1w, s.x1phix, s.x1phiy = flags[outer]
+        s.x2w, s.x2phix, s.x2phiy = flags[inner]
+        s.x2u = s.x2v = 0
+        s.add_distr_load_fixed_x(0., funcy=lambda y: T/(2*np.pi*A**2) + 0*y)
+        halves.append(s)
+    p1, p2 = halves
+    conn = [dict(p1=p1, p2=p2, func='SSycte', ycte1=p1.b, ycte2=0),
+            dict(p1=p1, p2=p2, func='SSycte', ycte1=0, ycte2=p2.b)]
+    eigvals, _ = MultiDomain([p1, p2], conn).linear_buckling(num_eigvalues=6, silent=True)
+    return np.abs(eigvals).min()
+
+
+print('convergence, C-C, h/a = 0.10, beta = 0.5, shear correction 1')
+rows = []
+for m, n in [(8, 12), (10, 14), (12, 16), (14, 18)]:
+    rows.append([m, n, '%.4f' % tau(0.5, 'C', 'C', 0.10, 1.)])
+print_table(rows, ['m', 'n', 'tau'])
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+convergence, C-C, h/a = 0.10, beta = 0.5, shear correction 1
+ m   n      tau
+--  --  -------
+ 8  12  98.4361
+10  14  98.4361
+12  16  98.4361
+14  18  98.4361
+</pre></div></div>
+</div>
+<p>Table 2 of [1], edges inner-outer, <span class="math notranslate nohighlight">\(\beta = b/a\)</span> (here the ratio of the radii): <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">1</span></code> is panels with the shear correction factor 1, as in [1]; <code class="docutils literal notranslate"><span class="pre">rohwer</span></code> with the default of panels. Each column has its difference from [1]; the last column is the effect of the shear correction factor alone.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>BAGHERI = {   # [1] Table 2, tau for beta = 0.3 and 0.5
+    (('C', 'C'), 0.05): (53.758, 150.414), (('C', 'C'), 0.10): (39.261, 98.436),
+    (('S', 'S'), 0.05): (34.976, 100.749), (('S', 'S'), 0.10): (29.912, 79.632),
+    (('C', 'F'), 0.05): (12.215, 33.524), (('C', 'F'), 0.10): (11.030, 29.174),
+    (('F', 'C'), 0.05): (9.904, 29.607), (('F', 'C'), 0.10): (8.877, 25.626),
+    }
+rows = []
+for (edges, delta), refs in BAGHERI.items():
+    for beta, ref in zip((0.3, 0.5), refs):
+        t1 = tau(beta, *edges, delta, 1.)
+        tr = tau(beta, *edges, delta, 'rohwer')
+        rows.append(['-'.join(edges), '%.2f' % delta, beta, '%.3f' % ref, '%.3f' % t1,
+                     '%+.3f' % rel(t1, ref), '%.3f' % tr, '%+.2f' % rel(tr, ref),
+                     '%+.2f' % rel(tr, t1)])
+print_table(rows, ['edges', 'h/a', 'beta', 'tau [1]', 'k = 1', 'diff (%)', 'rohwer',
+                   'diff (%)', 'rohwer vs k = 1 (%)'])
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+edges   h/a  beta  tau [1]    k = 1  diff (%)   rohwer  diff (%)  rohwer vs k = 1 (%)
+-----  ----  ----  -------  -------  --------  -------  --------  -------------------
+  C-C  0.05   0.3   53.758   53.760    +0.005   52.421     -2.49                -2.49
+  C-C  0.05   0.5  150.414  150.415    +0.001  145.088     -3.54                -3.54
+  C-C  0.10   0.3   39.261   39.262    +0.002   36.699     -6.53                -6.53
+  C-C  0.10   0.5   98.436   98.436    +0.000   90.368     -8.20                -8.20
+  S-S  0.05   0.3   34.976   34.976    -0.000   34.584     -1.12                -1.12
+  S-S  0.05   0.5  100.749  100.749    +0.000   98.990     -1.75                -1.75
+  S-S  0.10   0.3   29.912   29.912    +0.001   28.804     -3.70                -3.71
+  S-S  0.10   0.5   79.632   79.632    +0.000   75.433     -5.27                -5.27
+  C-F  0.05   0.3   12.215   12.216    +0.008   12.122     -0.76                -0.77
+  C-F  0.05   0.5   33.524   33.524    +0.000   33.165     -1.07                -1.07
+  C-F  0.10   0.3   11.030   11.030    +0.002   10.773     -2.33                -2.33
+  C-F  0.10   0.5   29.174   29.174    -0.000   28.273     -3.09                -3.09
+  F-C  0.05   0.3    9.904    9.908    +0.038    9.820     -0.84                -0.88
+  F-C  0.05   0.5   29.607   29.608    +0.002   29.273     -1.13                -1.13
+  F-C  0.10   0.3    8.877    8.877    +0.003    8.660     -2.45                -2.45
+  F-C  0.10   0.5   25.626   25.625    -0.002   24.801     -3.22                -3.22
+</pre></div></div>
+</div>
+</section>
+<section id="2.-Natural-frequencies-with-Reddy's-TSDT-(Bisadi-et-al.-2012)">
+<h2>2. Natural frequencies with Reddy’s TSDT (Bisadi et al. 2012)<a class="headerlink" href="#2.-Natural-frequencies-with-Reddy's-TSDT-(Bisadi-et-al.-2012)" title="Link to this heading">#</a></h2>
+<p>[2] solves exactly the equations of motion of Reddy’s TSDT for the transverse vibration of an isotropic annulus, with the rotary and higher-order inertia, and tabulates <span class="math notranslate nohighlight">\(\beta\)</span> by <span class="math notranslate nohighlight">\((p, s)\)</span>, <span class="math notranslate nohighlight">\(p\)</span> the number of nodal diameters and <span class="math notranslate nohighlight">\(s\)</span> the radial order, for <span class="math notranslate nohighlight">\(R = b/a\)</span> and <span class="math notranslate nohighlight">\(\delta = h/a\)</span>. The model <code class="docutils literal notranslate"><span class="pre">annular_tsdt_donnell</span></code> has the same displacement field (Reddy’s, about the mid-surface) and its consistent mass matrix; only the transverse family of modes is compared.</p>
+<p><strong>Convergence.</strong> The clamped edges converge most slowly, as the TSDT clamps the slope <span class="math notranslate nohighlight">\(w_{,x}\)</span> in addition to the rotations; the slowest is the clamped inner edge of radius <span class="math notranslate nohighlight">\(0.1 a\)</span>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>MESHES = [(10, 12), (14, 16), (16, 20), (18, 22)]
+for case in [('C', 'C', 0.1, 0.1), ('C', 'C', 0.2, 0.2), ('Sh', 'Sh', 0.2, 0.2)]:
+    inner, outer, R, delta = case
+    rows = []
+    for m, n in MESHES:
+        v, c = frequencies(annulus('annular_tsdt_donnell', R, delta, inner, outer, m, n),
+                           delta, 'transverse')
+        rows.append([m, n] + ['%.4f' % b for b in v[:6]])
+    print('%s-%s, R = %.1f, h/a = %.1f' % case)
+    print_table(rows, ['m', 'n'] + ['beta_%d' % (i + 1) for i in range(6)])
+    print()
+M_FIN, N_FIN = 16, 20
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+C-C, R = 0.1, h/a = 0.1
+ m   n   beta_1   beta_2   beta_3   beta_4   beta_5   beta_6
+--  --  -------  -------  -------  -------  -------  -------
+10  12  24.8565  26.1706  33.3278  46.0369  60.9508  63.1101
+14  16  24.7639  26.0566  33.2452  45.9798  60.8685  62.7539
+16  20  24.7484  26.0383  33.2324  45.9703  60.8547  62.6947
+18  22  24.7406  26.0292  33.2262  45.9658  60.8481  62.6657
+
+C-C, R = 0.2, h/a = 0.2
+ m   n   beta_1   beta_2   beta_3   beta_4   beta_5   beta_6
+--  --  -------  -------  -------  -------  -------  -------
+10  12  24.9452  25.9055  30.0598  37.8795  47.7121  55.6101
+14  16  24.8281  25.7896  29.9594  37.7972  47.6284  55.3435
+16  20  24.8195  25.7812  29.9523  37.7916  47.6230  55.3263
+18  22  24.8175  25.7792  29.9506  37.7903  47.6218  55.3225
+
+Sh-Sh, R = 0.2, h/a = 0.2
+ m   n   beta_1   beta_2   beta_3   beta_4   beta_5   beta_6
+--  --  -------  -------  -------  -------  -------  -------
+10  12  14.7124  16.7693  23.0985  32.3675  42.8742  46.0566
+14  16  14.7123  16.7693  23.0984  32.3674  42.8740  46.0564
+16  20  14.7123  16.7693  23.0984  32.3674  42.8740  46.0564
+18  22  14.7123  16.7693  23.0984  32.3674  42.8740  46.0564
+
+</pre></div></div>
+</div>
+<p><strong>Axisymmetric modes, Table 5 of [2].</strong> <span class="math notranslate nohighlight">\(R = 0.1\)</span>, <span class="math notranslate nohighlight">\(\delta = 0.1\)</span>, all nine combinations of free, hard simply supported and clamped edges; <span class="math notranslate nohighlight">\((0, 0)\)</span> and <span class="math notranslate nohighlight">\((0, 1)\)</span> are the two lowest single frequencies of the transverse family. [2] lists beside them the exact FSDT values of Irie, Yamada and Takagi [5], which do not include the shear correction factor used; panels with <code class="docutils literal notranslate"><span class="pre">annular_fsdt_donnell</span></code> is shown for the factors <span class="math notranslate nohighlight">\(5/6\)</span> and <span class="math notranslate nohighlight">\(\pi^2/12\)</span> as a sensitivity (with
+<span class="math notranslate nohighlight">\(m = 14\)</span>, <span class="math notranslate nohighlight">\(n = 16\)</span>: without the slope <span class="math notranslate nohighlight">\(w_{,x}\)</span> at a clamped edge the FSDT converges faster, see Section 3).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>BISADI_T5 = {   # [2] Table 5, (inner, outer): (0,0) and (0,1), HSDT and FSDT [5]
+    ('C', 'C'): ((24.7343, 62.6432), (24.63, 62.14)),
+    ('C', 'Sh'): ((16.6235, 52.3407), (16.57, 52.06)),
+    ('C', 'F'): ((4.15336, 23.2065), (4.15, 23.12)),
+    ('Sh', 'C'): ((21.2294, 57.1018), (21.20, 56.91)),
+    ('Sh', 'Sh'): ((13.8817, 46.9999), (13.87, 46.95)),
+    ('Sh', 'F'): ((3.40091, 19.7975), (3.40, 19.79)),
+    ('F', 'C'): ((9.90133, 36.3963), (9.90, 36.33)),
+    ('F', 'Sh'): ((4.81445, 28.0500), (4.81, 28.04)),
+    ('F', 'F'): ((8.64765, 35.9696), (8.65, 35.95)),
+    }
+rows = []
+for (inner, outer), (hsdt, fsdt) in BISADI_T5.items():
+    v, c = frequencies(annulus('annular_tsdt_donnell', 0.1, 0.1, inner, outer, M_FIN, N_FIN),
+                       0.1, 'transverse')
+    tsdt = v[c == 1][:2]
+    f = {}
+    for k in (5/6, np.pi**2/12):
+        v, c = frequencies(annulus('annular_fsdt_donnell', 0.1, 0.1, inner, outer, 14, 16,
+                                   shear=k), 0.1, 'transverse')
+        f[k] = v[c == 1][:2]
+    for i, mode in enumerate(('(0,0)', '(0,1)')):
+        rows.append(['%s-%s' % (inner, outer), mode, hsdt[i], '%.4f' % tsdt[i],
+                     '%+.3f' % rel(tsdt[i], hsdt[i]), fsdt[i],
+                     '%.3f' % f[5/6][i], '%+.2f' % rel(f[5/6][i], fsdt[i]),
+                     '%.3f' % f[np.pi**2/12][i], '%+.2f' % rel(f[np.pi**2/12][i], fsdt[i])])
+print_table(rows, ['edges', '(p,s)', 'TSDT [2]', 'panels TSDT', 'diff (%)', 'FSDT [5]',
+                   'k = 5/6', 'diff (%)', 'k = pi^2/12', 'diff (%)'])
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+edges  (p,s)  TSDT [2]  panels TSDT  diff (%)  FSDT [5]  k = 5/6  diff (%)  k = pi^2/12  diff (%)
+-----  -----  --------  -----------  --------  --------  -------  --------  -----------  --------
+  C-C  (0,0)   24.7343      24.7484    +0.057     24.63   24.657     +0.11       24.629     -0.00
+  C-C  (0,1)   62.6432      62.6947    +0.082     62.14   62.257     +0.19       62.140     -0.00
+ C-Sh  (0,0)   16.6235      16.6300    +0.039     16.57   16.588     +0.11       16.575     +0.03
+ C-Sh  (0,1)   52.3407      52.3782    +0.072     52.06   52.130     +0.13       52.056     -0.01
+  C-F  (0,0)   4.15336       4.1538    +0.010      4.15    4.151     +0.02        4.150     -0.00
+  C-F  (0,1)   23.2065      23.2177    +0.048     23.12   23.145     +0.11       23.124     +0.02
+ Sh-C  (0,0)   21.2294      21.2305    +0.005      21.2   21.216     +0.08       21.200     -0.00
+ Sh-C  (0,1)   57.1018      57.1110    +0.016     56.91   56.993     +0.15       56.912     +0.00
+Sh-Sh  (0,0)   13.8817      13.8817    -0.000     13.87   13.881     +0.08       13.874     +0.03
+Sh-Sh  (0,1)   46.9999      46.9999    -0.000     46.95   46.991     +0.09       46.947     -0.01
+ Sh-F  (0,0)   3.40091       3.4009    -0.000       3.4    3.401     +0.03        3.400     +0.01
+ Sh-F  (0,1)   19.7975      19.7975    -0.000     19.79   19.796     +0.03       19.786     -0.02
+  F-C  (0,0)   9.90133       9.9015    +0.002       9.9    9.899     -0.01        9.896     -0.04
+  F-C  (0,1)   36.3963      36.3998    +0.010     36.33   36.358     +0.08       36.328     -0.01
+ F-Sh  (0,0)   4.81445       4.8145    +0.000      4.81    4.814     +0.09        4.814     +0.09
+ F-Sh  (0,1)     28.05      28.0500    -0.000     28.04   28.049     +0.03       28.037     -0.01
+  F-F  (0,0)   8.64765       8.6477    +0.000      8.65    8.648     -0.03        8.647     -0.04
+  F-F  (0,1)   35.9696      35.9696    +0.000     35.95   35.968     +0.05       35.951     +0.00
+</pre></div></div>
+</div>
+<p><strong>The eight lowest frequencies, Tables 6 to 9 of [2].</strong> Selected thick annuli with every kind of edge; the count of each frequency is 1 for <span class="math notranslate nohighlight">\(p = 0\)</span> and 2 otherwise:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>BISADI_EIGHT = {   # [2] Tables 6-9, (inner, outer, R, delta): beta and (p, s)
+    ('C', 'C', 0.2, 0.2): ((24.817, 25.7787, 29.9502, 37.79, 47.6215, 55.3217, 56.8944, 58.1922),
+                           ('0,0', '1,0', '2,0', '3,0', '4,0', '0,1', '1,1', '5,0')),
+    ('C', 'F', 0.2, 0.2): ((4.22136, 4.82685, 5.76949, 11.3957, 18.8497, 24.1187, 25.8523, 27.3118),
+                           ('1,0', '0,0', '2,0', '3,0', '4,0', '0,1', '1,1', '5,0')),
+    ('Ss', 'Ss', 0.4, 0.1): ((26.7123, 28.1832, 32.9288, 41.3253, 53.0778, 67.4162, 83.5587,
+                              93.7523),
+                             ('0,0', '1,0', '2,0', '3,0', '4,0', '5,0', '6,0', '0,1')),
+    ('Sh', 'Sh', 0.2, 0.2): ((14.7123, 16.7693, 23.0984, 32.3674, 42.874, 46.0564, 48.2819,
+                              53.8528),
+                             ('0,0', '1,0', '2,0', '3,0', '4,0', '0,1', '1,1', '5,0')),
+    ('F', 'F', 0.2, 0.3): ((4.62924, 7.55348, 10.3689, 14.6343, 16.6936, 23.417, 23.7821, 28.8167),
+                           ('2,0', '0,0', '3,0', '1,0', '4,0', '5,0', '2,1', '0,1')),
+    ('F', 'Sh', 0.4, 0.2): ((4.62418, 10.3882, 19.6467, 30.1333, 37.5164, 40.1593, 41.4177,
+                             47.4932),
+                            ('0,0', '1,0', '2,0', '3,0', '0,1', '1,1', '4,0', '2,1')),
+    }
+for (inner, outer, R, delta), (ref, modes) in BISADI_EIGHT.items():
+    v, c = frequencies(annulus('annular_tsdt_donnell', R, delta, inner, outer, M_FIN, N_FIN),
+                       delta, 'transverse')
+    rows = [[modes[i], ref[i], '%.4f' % v[i], '%+.4f' % rel(v[i], ref[i]), c[i]]
+            for i in range(8)]
+    print('%s-%s, R = %.1f, h/a = %.1f' % (inner, outer, R, delta))
+    print_table(rows, ['(p,s) [2]', 'beta [2]', 'panels', 'diff (%)', 'count'])
+    print()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+C-C, R = 0.2, h/a = 0.2
+(p,s) [2]  beta [2]   panels  diff (%)  count
+---------  --------  -------  --------  -----
+      0,0    24.817  24.8195   +0.0101      1
+      1,0   25.7787  25.7812   +0.0096      2
+      2,0   29.9502  29.9523   +0.0069      2
+      3,0     37.79  37.7916   +0.0042      2
+      4,0   47.6215  47.6230   +0.0031      2
+      0,1   55.3217  55.3263   +0.0083      1
+      1,1   56.8944  56.8987   +0.0075      2
+      5,0   58.1922  58.1938   +0.0028      2
+
+C-F, R = 0.2, h/a = 0.2
+(p,s) [2]  beta [2]   panels  diff (%)  count
+---------  --------  -------  --------  -----
+      1,0   4.22136   4.2215   +0.0038      2
+      0,0   4.82685   4.8269   +0.0018      1
+      2,0   5.76949   5.7696   +0.0022      2
+      3,0   11.3957  11.3957   -0.0002      2
+      4,0   18.8497  18.8497   +0.0002      2
+      0,1   24.1187  24.1205   +0.0075      1
+      1,1   25.8523  25.8539   +0.0063      2
+      5,0   27.3118  27.3118   -0.0001      2
+
+Ss-Ss, R = 0.4, h/a = 0.1
+(p,s) [2]  beta [2]   panels  diff (%)  count
+---------  --------  -------  --------  -----
+      0,0   26.7123  26.7123   +0.0002      1
+      1,0   28.1832  28.1832   -0.0000      2
+      2,0   32.9288  32.9288   +0.0001      2
+      3,0   41.3253  41.3253   +0.0001      2
+      4,0   53.0778  53.0778   +0.0000      2
+      5,0   67.4162  67.4162   -0.0000      2
+      6,0   83.5587  83.5587   -0.0000      2
+      0,1   93.7523  93.7523   +0.0000      1
+
+Sh-Sh, R = 0.2, h/a = 0.2
+(p,s) [2]  beta [2]   panels  diff (%)  count
+---------  --------  -------  --------  -----
+      0,0   14.7123  14.7123   +0.0002      1
+      1,0   16.7693  16.7693   -0.0001      2
+      2,0   23.0984  23.0984   -0.0000      2
+      3,0   32.3674  32.3674   +0.0001      2
+      4,0    42.874  42.8740   -0.0001      2
+      0,1   46.0564  46.0564   +0.0001      1
+      1,1   48.2819  48.2819   -0.0001      2
+      5,0   53.8528  53.8528   -0.0001      2
+
+F-F, R = 0.2, h/a = 0.3
+(p,s) [2]  beta [2]   panels  diff (%)  count
+---------  --------  -------  --------  -----
+      2,0   4.62924   4.6292   +0.0001      2
+      0,0   7.55348   7.5535   +0.0000      1
+      3,0   10.3689  10.3689   -0.0003      2
+      1,0   14.6343  14.6343   -0.0002      2
+      4,0   16.6936  16.6936   +0.0000      2
+      5,0    23.417  23.4170   -0.0000      2
+      2,1   23.7821  23.7821   -0.0001      2
+      0,1   28.8167  28.8168   +0.0002      1
+
+F-Sh, R = 0.4, h/a = 0.2
+(p,s) [2]  beta [2]   panels  diff (%)  count
+---------  --------  -------  --------  -----
+      0,0   4.62418   4.6242   +0.0000      1
+      1,0   10.3882  10.3882   -0.0003      2
+      2,0   19.6467  19.6467   -0.0002      2
+      3,0   30.1333  30.1333   +0.0001      2
+      0,1   37.5164  37.5164   +0.0000      1
+      1,1   40.1593  40.1593   -0.0001      2
+      4,0   41.4177  41.4177   -0.0001      2
+      2,1   47.4932  47.4932   -0.0000      2
+
+</pre></div></div>
+</div>
+</section>
+<section id="3.-Natural-frequencies-with-the-FSDT-(Dozio-2015)">
+<h2>3. Natural frequencies with the FSDT (Dozio 2015)<a class="headerlink" href="#3.-Natural-frequencies-with-the-FSDT-(Dozio-2015)" title="Link to this heading">#</a></h2>
+<p>[3], Table 5, gives the eight lowest <span class="math notranslate nohighlight">\(\beta\)</span> of annuli with <span class="math notranslate nohighlight">\(R = 0.3\)</span> and <span class="math notranslate nohighlight">\(h/a = 0.2\)</span> for a first-order theory obtained from its HOT<span class="math notranslate nohighlight">\(_1\)</span> model with the transverse normal stress set to zero and the shear correction factor <span class="math notranslate nohighlight">\(5/6\)</span> (its Eq. (30)), for the edges free-hard simply supported (FS), free-free (FF), free-clamped (FC) and clamped-clamped (CC); its simply supported edge fixes <span class="math notranslate nohighlight">\(v\)</span> and <span class="math notranslate nohighlight">\(w\)</span> and the rotation <span class="math notranslate nohighlight">\(\phi_y\)</span>, its clamped edge all the
+displacements ([3], Table 1). The model is <code class="docutils literal notranslate"><span class="pre">annular_fsdt_donnell</span></code> with <code class="docutils literal notranslate"><span class="pre">fsdt_shear_correction</span> <span class="pre">=</span> <span class="pre">5/6</span></code>. [3] includes the in-plane torsional mode, <span class="math notranslate nohighlight">\(p = 0\)</span>; the table below lists the modes of both families of panels, the transverse family marked <code class="docutils literal notranslate"><span class="pre">T</span></code>, the in-plane one <code class="docutils literal notranslate"><span class="pre">I</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>DOZIO = {   # [3] Table 5, (inner, outer)
+    ('F', 'S'): (4.5328, 11.205, 12.711, 15.875, 20.740, 27.931, 30.530, 31.301),
+    ('F', 'F'): (4.6160, 7.8878, 11.126, 15.146, 15.659, 18.778, 26.674, 27.279),
+    ('F', 'C'): (10.365, 15.895, 25.384, 35.763, 36.860, 39.424, 40.534, 43.901),
+    ('C', 'C'): (30.146, 30.878, 33.775, 39.638, 47.999, 48.220, 52.997, 57.793),
+    }
+for (inner, outer), ref in DOZIO.items():
+    md_ = annulus('annular_fsdt_donnell', 0.3, 0.2, inner, outer, M_FIN, N_FIN, shear=5/6)
+    vt, ct = frequencies(md_, 0.2, 'transverse')
+    vi, ci = frequencies(md_, 0.2, 'inplane')
+    allm = sorted([(b, 'T', k) for b, k in zip(vt, ct)] + [(b, 'I', k) for b, k in zip(vi, ci)])
+    rows = []
+    j = 0
+    for b, fam, k in allm:
+        if j &gt;= len(ref) or b &gt; 1.02*ref[-1]:
+            break
+        if abs(b/ref[j] - 1) &lt; 2e-3:
+            rows.append([j + 1, ref[j], '%.4f' % b, '%+.4f' % rel(b, ref[j]), fam, k])
+            j += 1
+        else:
+            rows.append(['', '', '%.4f' % b, 'not in [3]', fam, k])
+    print('%s%s' % (inner, outer))
+    print_table(rows, ['mode [3]', 'beta [3]', 'panels', 'diff (%)', 'family', 'count'])
+    print()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+FS
+mode [3]  beta [3]   panels  diff (%)  family  count
+--------  --------  -------  --------  ------  -----
+       1    4.5328   4.5328   +0.0000       T      1
+       2    11.205  11.2051   +0.0013       T      2
+       3    12.711  12.7107   -0.0021       I      2
+       4    15.875  15.8746   -0.0027       I      2
+       5     20.74  20.7402   +0.0010       T      2
+       6    27.931  27.9309   -0.0002       I      1
+       7     30.53  30.5300   -0.0001       T      1
+       8    31.301  31.3012   +0.0007       T      2
+
+FF
+mode [3]  beta [3]   panels  diff (%)  family  count
+--------  --------  -------  --------  ------  -----
+       1     4.616   4.6160   +0.0003       T      2
+       2    7.8878   7.8878   -0.0002       T      1
+       3    11.126  11.1257   -0.0027       T      2
+       4    15.146  15.1458   -0.0011       T      2
+       5    15.659  15.6594   +0.0023       I      2
+       6    18.778  18.7783   +0.0015       T      2
+       7    26.674  26.6744   +0.0015       T      2
+       8    27.279  27.2790   +0.0001       T      2
+
+FC
+mode [3]  beta [3]   panels    diff (%)  family  count
+--------  --------  -------  ----------  ------  -----
+       1    10.365  10.3645     -0.0045       T      1
+       2    15.895  15.8954     +0.0023       T      2
+       3    25.384  25.3842     +0.0008       T      2
+       4    35.763  35.7631     +0.0004       T      2
+       5     36.86  36.8597     -0.0007       T      1
+       6    39.424  39.4235     -0.0012       I      2
+                    40.2940  not in [3]       T      2
+       7    40.534  40.5341     +0.0002       I      1
+       8    43.901  43.9008     -0.0004       I      2
+
+CC
+mode [3]  beta [3]   panels  diff (%)  family  count
+--------  --------  -------  --------  ------  -----
+       1    30.146  30.1458   -0.0005       T      1
+       2    30.878  30.8782   +0.0007       T      2
+       3    33.775  33.7745   -0.0015       T      2
+       4    39.638  39.6378   -0.0004       T      2
+       5    47.999  47.9986   -0.0008       T      2
+       6     48.22  48.2199   -0.0003       I      1
+       7    52.997  52.9966   -0.0007       I      2
+       8    57.793  57.7927   -0.0005       T      2
+
+</pre></div></div>
+</div>
+</section>
+<section id="4.-Discussion">
+<h2>4. Discussion<a class="headerlink" href="#4.-Discussion" title="Link to this heading">#</a></h2>
+<p><strong>Bagheri et al. [1].</strong> With the shear correction factor 1 of [1], panels reproduces the 16 buckling torques of its Table 2 within 0.04 % (0.01 % except F-C, <span class="math notranslate nohighlight">\(h/a = 0.05\)</span>, <span class="math notranslate nohighlight">\(\beta = 0.3\)</span>), converged for <span class="math notranslate nohighlight">\(m = 8\)</span>, <span class="math notranslate nohighlight">\(n = 12\)</span> in the case shown. The default of panels, <code class="docutils literal notranslate"><span class="pre">'rohwer'</span></code>, gives the factor <span class="math notranslate nohighlight">\(5/6\)</span> for the homogeneous plate, and torques lower by 0.8 % (<span class="math notranslate nohighlight">\(h/a = 0.05\)</span>, edges C-F and F-C) to 8.2 % (<span class="math notranslate nohighlight">\(h/a =
+0.10\)</span>, C-C, <span class="math notranslate nohighlight">\(\beta = 0.5\)</span>): the more the transverse shear lowers the torque, the thicker and the more restrained the plate, the larger the effect of the factor. The values of [1] are those of a plate without a shear correction, stiffer in transverse shear than the homogeneous plate.</p>
+<p><strong>Bisadi et al. [2], TSDT.</strong> The Ritz solution approaches the exact one from above. Without a clamped edge, panels reproduces the tabulated values to their last digit (within 0.0003 %) with <span class="math notranslate nohighlight">\(m = 16\)</span>, <span class="math notranslate nohighlight">\(n = 20\)</span>, the modes in the order of [2] and with the count expected from <span class="math notranslate nohighlight">\(p\)</span>. A clamped edge, where the TSDT fixes <span class="math notranslate nohighlight">\(w_{,x}\)</span> besides the rotations, converges more slowly: up to 0.01 % for <span class="math notranslate nohighlight">\(R = 0.2\)</span>, and 0.06 % to 0.08 % for the clamped inner edge of radius <span class="math notranslate nohighlight">\(0.1 a\)</span>
+(Table 5), still decreasing with <span class="math notranslate nohighlight">\(m\)</span> and <span class="math notranslate nohighlight">\(n\)</span>. The thin annuli of the tests of <code class="docutils literal notranslate"><span class="pre">annular_tsdt_*</span></code> reproduce the classical plate; these tables check the thick range, <span class="math notranslate nohighlight">\(h/a\)</span> up to 0.3, for all four kinds of edge.</p>
+<p><strong>Irie et al. [5], FSDT.</strong> [2] reprints the exact FSDT values of [5] without its shear correction factor. <code class="docutils literal notranslate"><span class="pre">annular_fsdt_donnell</span></code> with <span class="math notranslate nohighlight">\(\pi^2/12\)</span> reproduces them within 0.04 % (0.09 % for F-<span class="math notranslate nohighlight">\(S_h\)</span>, <span class="math notranslate nohighlight">\((0, 0)\)</span>, 4.81 in [5]), whereas <span class="math notranslate nohighlight">\(5/6\)</span> gives up to 0.19 % more: the values of [5] are consistent with <span class="math notranslate nohighlight">\(\pi^2/12\)</span>. The TSDT frequencies are above the FSDT ones by up to 0.8 % here, as [2] notes.</p>
+<p><strong>Dozio [3], FSDT.</strong> With the shear correction <span class="math notranslate nohighlight">\(5/6\)</span>, panels reproduces the 32 tabulated values within 0.005 %, transverse and in-plane modes alike, including the in-plane torsional mode <span class="math notranslate nohighlight">\(p = 0\)</span> of the annuli with a clamped edge. One mode of panels is not in Table 5 of [3]: for the annulus free inside and clamped outside, a transverse pair at <span class="math notranslate nohighlight">\(\beta = 40.294\)</span>, one nodal diameter, second radial order, between the sixth and the seventh values of [3]; <code class="docutils literal notranslate"><span class="pre">annular_tsdt_donnell</span></code> has
+the same mode at 40.720. The lists of the 3-D Ritz solutions reprinted in [3], Table 4, for the same annulus do not have it either; the reason is not known.</p>
+</section>
+<section id="References">
+<h2>References<a class="headerlink" href="#References" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Bagheri, H., Kiani, Y., and Eslami, M. R., “Buckling of moderately thick annular plates subjected to torque”, Archive of Mechanical Engineering, Vol. 66, No. 2, 2019, pp. 209-227, Eqs. (7), (10)-(12) and (26), Table 2. <a class="reference external" href="https://doi.org/10.24425/ame.2019.128445">https://doi.org/10.24425/ame.2019.128445</a></p></li>
+<li><p>Bisadi, H., Es’haghi, M., Rokni, H., and Ilkhani, M., “Benchmark solution for transverse vibration of annular Reddy plates”, International Journal of Mechanical Sciences, Vol. 56, 2012, pp. 35-49, Eqs. (47)-(50), Tables 5-9. <a class="reference external" href="https://doi.org/10.1016/j.ijmecsci.2011.12.007">https://doi.org/10.1016/j.ijmecsci.2011.12.007</a></p></li>
+<li><p>Dozio, L., “Refined 2-D theories for free vibration analysis of annular plates: Unified Ritz formulation and numerical assessment”, Computers and Structures, Vol. 147, 2015, pp. 250-258, Eq. (30), Tables 1 and 5. <a class="reference external" href="https://doi.org/10.1016/j.compstruc.2014.10.015">https://doi.org/10.1016/j.compstruc.2014.10.015</a></p></li>
+<li><p>Castro, S. G. P., and Donadon, M. V., “Assembly of semi-analytical models to address linear buckling and vibration of stiffened composite panels with debonding defect”, Composite Structures, Vol. 160, 2017, pp. 232-247. <a class="reference external" href="https://doi.org/10.1016/j.compstruct.2016.10.026">https://doi.org/10.1016/j.compstruct.2016.10.026</a></p></li>
+<li><p>Irie, T., Yamada, G., and Takagi, K., “Natural frequencies of thick annular plates”, Journal of Applied Mechanics, Vol. 49, 1982, pp. 633-638, as reprinted in [2], Table 5. <a class="reference external" href="https://doi.org/10.1115/1.3162539">https://doi.org/10.1115/1.3162539</a></p></li>
+</ol>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print('total run time: %.1f min' % ((time.time() - T_START)/60))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+total run time: 47.5 min
+</pre></div></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="majumdar1971_annular_compression.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="annular_webs_on_cylinders.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Annular webs of ring frames connected to cylinders</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Model">Model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#1.-Buckling-torque-of-moderately-thick-annuli-(Bagheri,-Kiani-and-Eslami-2019)">1. Buckling torque of moderately thick annuli (Bagheri, Kiani and Eslami 2019)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#2.-Natural-frequencies-with-Reddy's-TSDT-(Bisadi-et-al.-2012)">2. Natural frequencies with Reddy’s TSDT (Bisadi et al. 2012)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#3.-Natural-frequencies-with-the-FSDT-(Dozio-2015)">3. Natural frequencies with the FSDT (Dozio 2015)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#4.-Discussion">4. Discussion</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#References">References</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/notebooks/thick_annular_plates.nblink.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

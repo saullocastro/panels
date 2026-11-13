@@ -1,0 +1,2825 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Reproducing Stamatelos &amp; Labeas (2023) with panels.multidomain.MultiDomain &#8212; panels 0.16.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../_static/documentation_options.js?v=7de89ed4"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/stamatelos_labeas_2023_multidomain';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)" href="sewall1968_blade_cylinder_vibration.html" />
+    <link rel="prev" title="Reproducing Stamatelos &amp; Labeas (2023) with panels" href="stamatelos_labeas_2023.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.16.0" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.16.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_gl.html">
+    Large rotations: plates with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plate_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_wingbox.html">
+    Wing-box modeled as a multi-domain assembly
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../documentation_levels.html">
+    How the documentation is organised
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Reproducing Stamatelos &amp; Labeas (2023) with <code class="docutils literal notranslate"><span class="pre">panels.multidomain.MultiDomain</span></code></span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Reproducing-Stamatelos-&amp;-Labeas-(2023)-with-panels.multidomain.MultiDomain">
+<h1>Reproducing Stamatelos &amp; Labeas (2023) with <code class="docutils literal notranslate"><span class="pre">panels.multidomain.MultiDomain</span></code><a class="headerlink" href="#Reproducing-Stamatelos-&-Labeas-(2023)-with-panels.multidomain.MultiDomain" title="Link to this heading">#</a></h1>
+<p><strong>Paper.</strong> D. G. Stamatelos, G. N. Labeas, <em>Buckling Analysis of Laminated Stiffened Plates with Material Anisotropy Using the Rayleigh-Ritz Approach</em>, <strong>Computation</strong> 2023, 11, 110. <a class="reference external" href="https://doi.org/10.3390/computation11060110">doi:10.3390/computation11060110</a></p>
+<p>This notebook is the <code class="docutils literal notranslate"><span class="pre">MultiDomain</span></code> counterpart of <code class="docutils literal notranslate"><span class="pre">stamatelos_labeas_2023.ipynb</span></code>. That notebook models the plate with a single <code class="docutils literal notranslate"><span class="pre">Shell</span></code> domain and every blade with the beam formulation of <code class="docutils literal notranslate"><span class="pre">BladeStiff1D</span></code>. Here the structure is assembled from several <code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code> domains, connected by penalty springs, and every connection strategy of <code class="docutils literal notranslate"><span class="pre">MultiDomain.get_kC_conn()</span></code> is exercised:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>connection</p></th>
+<th class="head"><p>used for</p></th>
+<th class="head"><p>paper item</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code></p></td>
+<td><p>skin split in strips along <code class="docutils literal notranslate"><span class="pre">y</span></code></p></td>
+<td><p>Table 3, Figure 7</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code></p></td>
+<td><p>skin split in strips along <code class="docutils literal notranslate"><span class="pre">x</span></code></p></td>
+<td><p>Table 2</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code></p></td>
+<td><p>blade as a plate domain standing on the skin</p></td>
+<td><p>Tables 4 and 5, Figures 5 to 8</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">'BFxcte'</span></code></p></td>
+<td><p>the same stiffened plate rotated by 90 degrees</p></td>
+<td><p>Tables 4 and 5</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'SB'</span></code>, <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code></p></td>
+<td><p>unsymmetric skin split in two bonded sub-laminates</p></td>
+<td><p>Table 3</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Each result is compared three ways: against the paper, against the single-domain <code class="docutils literal notranslate"><span class="pre">StiffPanelBay</span></code> model of the companion notebook, and between the <code class="docutils literal notranslate"><span class="pre">MultiDomain</span></code> variants themselves.</p>
+<section id="Read-this-first">
+<h2>Read this first<a class="headerlink" href="#Read-this-first" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>The published values, laminates and single-domain helpers are <strong>imported</strong> from <code class="docutils literal notranslate"><span class="pre">tests/tests_stiffpanelbay/test_stamatelos_labeas_2023.py</span></code>, so this notebook, the companion notebook and both test modules share one source of truth. The remarks of the companion notebook on the paper itself (Table 2 against Figure 7, the missing absolute scale of Section 3.1.2, the Table 5 triangular entry) apply unchanged and are not repeated here.</p></li>
+<li><p>Tables 3, 4 and 5 are compared through the <strong>same single factor</strong> calibrated on mode (1, 1) of Table 3 with the single-domain model. Nothing is re-fitted for <code class="docutils literal notranslate"><span class="pre">MultiDomain</span></code>.</p></li>
+<li><p>The penalty constants default to <code class="docutils literal notranslate"><span class="pre">calc_kt_kr()</span></code>. For these thin skins the default rotation penalty is soft and leaves a converged error of about 2 %. Where more digits are wanted, the penalties are raised by <code class="docutils literal notranslate"><span class="pre">PENALTY_FACTOR</span></code> through the keys <code class="docutils literal notranslate"><span class="pre">'kt'</span></code> and <code class="docutils literal notranslate"><span class="pre">'kr'</span></code> of the connection dictionaries. Section 3 quantifies this.</p></li>
+<li><p>The flange of <code class="docutils literal notranslate"><span class="pre">BladeStiff1D</span></code> has the torsional stiffness <code class="docutils literal notranslate"><span class="pre">GJ</span> <span class="pre">=</span> <span class="pre">4</span> <span class="pre">bf</span> <span class="pre">D66</span></code> of the flange laminate, and <code class="docutils literal notranslate"><span class="pre">'SB'</span></code> connects the faces in contact with the kinematics of each sub-laminate.</p></li>
+</ul>
+<p>The same checks run as unit tests in <code class="docutils literal notranslate"><span class="pre">tests/multidomain/test_stamatelos_labeas_2023_multidomain.py</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import os
+%matplotlib inline
+import sys
+import time
+sys.path.append('..')          # run this notebook from the repository
+sys.path.append(os.path.join('..', 'tests', 'tests_stiffpanelbay'))
+
+import numpy as np
+import matplotlib.pyplot as plt
+from numpy.polynomial.legendre import leggauss
+from scipy.sparse import coo_matrix, csr_matrix
+
+import panels.bardell as bardell
+from panels.shell import Shell
+from panels.multidomain import MultiDomain
+from panels.multidomain.connections import calc_kt_kr
+from composites import laminated_plate
+from structsolve import lb
+from functools import partial
+
+# the connections are the penalty stiffnesses studied here; the default of
+# MultiDomain, the null-space method, is compared in conn_method_comparison.ipynb
+MultiDomain = partial(MultiDomain, conn_method='penalty')
+
+# single source of truth: published values, laminates and the single-domain model
+import test_stamatelos_labeas_2023 as spb
+from test_stamatelos_labeas_2023 import (PAPER, LAMINATES, PLY_T,
+        LAMINAPROP_311, A_311, B_311, LAMINAPROP_312, STACK_312, T_312, A_312,
+        B_312, H_321, A_322, B_322, N_STIFF_322, STIFF_STACK_322)
+
+np.set_printoptions(precision=5, suppress=True)
+plt.rcParams.update({'figure.dpi': 110, 'font.size': 9, 'axes.grid': True,
+                     'grid.alpha': 0.3, 'axes.spines.top': False,
+                     'axes.spines.right': False})
+T0 = time.time()
+</pre></div>
+</div>
+</div>
+</section>
+<section id="1.-Helper-functions">
+<h2>1. Helper functions<a class="headerlink" href="#1.-Helper-functions" title="Link to this heading">#</a></h2>
+<p><strong>Domains.</strong> Every skin strip, blade and sub-laminate is a simply supported <code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code> <code class="docutils literal notranslate"><span class="pre">Shell</span></code>. An edge that is connected to another domain is <em>released</em> (<code class="docutils literal notranslate"><span class="pre">u</span> <span class="pre">=</span> <span class="pre">v</span> <span class="pre">=</span> <span class="pre">w</span></code> free), because the connection is then what enforces compatibility.</p>
+<p><strong>Linearly varying load.</strong> Eq. (18) of the paper, <span class="math notranslate nohighlight">\(N_x(y) = N_x\,(1 - \varphi\,y/b)\)</span>, is integrated per domain with the Bardell functions, with the weight evaluated at the <em>global</em> <code class="docutils literal notranslate"><span class="pre">y</span></code> of the domain, <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">=</span> <span class="pre">y0</span> <span class="pre">+</span> <span class="pre">b_domain</span> <span class="pre">(1</span> <span class="pre">+</span> <span class="pre">eta)/2</span></code>. For a single domain this is exactly the <code class="docutils literal notranslate"><span class="pre">kG_linear</span></code> of the companion notebook; for the rotated model (<code class="docutils literal notranslate"><span class="pre">direction='y'</span></code>) the same load acts as <span class="math notranslate nohighlight">\(N_y(x)\)</span>.</p>
+<p><strong>Blade as a plate.</strong> The <code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code> connection ties the blade root to the skin <em>mid-surface</em>, so the blade domain is extended by <code class="docutils literal notranslate"><span class="pre">t_skin/2</span></code> to reach the same tip as a blade of height <code class="docutils literal notranslate"><span class="pre">h</span></code> standing on the skin surface, which is the geometry of the paper and of <code class="docutils literal notranslate"><span class="pre">BladeStiff1D</span></code>. The blade ends are simply supported but free to move along the blade axis: forcing <code class="docutils literal notranslate"><span class="pre">u</span> <span class="pre">=</span> <span class="pre">0</span></code> over the whole height would clamp the blade against bending, which the skin does not do.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>PENALTY_FACTOR = 100.
+
+
+def plate(a, b, stack, m, n, laminaprop=LAMINAPROP_312, **kwargs):
+    # Simply supported plate domain, as in spb.make_skin
+    return Shell(a=a, b=b, r=None, stack=stack, plyt=PLY_T,
+                 laminaprop=laminaprop, rho=1600., model='plate_clpt_donnell',
+                 m=m, n=n, **kwargs)
+
+
+def release(p, *edges):
+    # Free the three translations of the given edges (rotations are already free)
+    for edge in edges:
+        for dof in ('u', 'v', 'w'):
+            setattr(p, edge + dof, 1.)
+
+
+def penalties(p1, p2, connection_type, factor):
+    # Connection keys 'kt' and 'kr', scaled from the calc_kt_kr() defaults
+    kt, kr = calc_kt_kr(p1, p2, connection_type)
+    return dict(kt=factor*kt, kr=factor*kr)
+
+
+def kG_linear(p, N, phi, s0, s_total, size, direction='x', npts=80):
+    # kG of one domain for N*(1 - phi*s/s_total), s = y (direction='x') or x ('y')
+    m, n, a, b = p.m, p.n, p.a, p.b
+    xi, wt = leggauss(npts)
+    if direction == 'x':
+        f_xi = np.array([bardell.calc_vec_fp(x, p.x1w, p.x1wr, p.x2w, p.x2wr)[:m]
+                        for x in xi])
+        fy = np.array([bardell.calc_vec_f(e, p.y1w, p.y1wr, p.y2w, p.y2wr)[:n]
+                       for e in xi])
+        Fx = (f_xi.T*wt) @ f_xi
+        Fy = (fy.T*(wt*(1. - phi*(s0 + b*(1. + xi)/2.)/s_total))) @ fy
+        scale = b/a
+    else:
+        fx = np.array([bardell.calc_vec_f(x, p.x1w, p.x1wr, p.x2w, p.x2wr)[:m]
+                       for x in xi])
+        g_eta = np.array([bardell.calc_vec_fp(e, p.y1w, p.y1wr, p.y2w, p.y2wr)[:n]
+                        for e in xi])
+        Fx = (fx.T*(wt*(1. - phi*(s0 + a*(1. + xi)/2.)/s_total))) @ fx
+        Fy = (g_eta.T*wt) @ g_eta
+        scale = a/b
+    blk = N*scale*np.einsum('ik,jl-&gt;jilk', Fx, Fy).reshape(m*n, m*n)
+    idx = p.row_start + 3*np.arange(m*n) + 2          # w is the 3rd dof
+    rows, cols = np.meshgrid(idx, idx, indexing='ij')
+    return coo_matrix((blk.ravel(), (rows.ravel(), cols.ravel())),
+                      shape=(size, size)).tocsr()
+
+
+def buckling(md, kG, num_eigvalues=6, c=None):
+    kC = md.calc_kC(c=c, silent=True)
+    return lb(csr_matrix(kC), csr_matrix(kG), silent=True,
+              num_eigvalues=num_eigvalues)
+
+
+def strips(a, b, stack, nstrip, m, n, along, factor, laminaprop=LAMINAPROP_312):
+    # Skin split in nstrip equal strips, connected with 'SSycte' or 'SSxcte'
+    if along == 'y':
+        edges = np.linspace(0, b, nstrip + 1)
+        skins = [plate(a, y2 - y1, stack, m, n, laminaprop, x0=0., y0=y1,
+                       group='skin') for y1, y2 in zip(edges[:-1], edges[1:])]
+        conn = [dict(p1=p1, p2=p2, func='SSycte', ycte1=p1.b, ycte2=0.,
+                     **penalties(p1, p2, 'ycte', factor))
+                for p1, p2 in zip(skins[:-1], skins[1:])]
+        for p1, p2 in zip(skins[:-1], skins[1:]):
+            release(p1, 'y2')
+            release(p2, 'y1')
+    else:
+        edges = np.linspace(0, a, nstrip + 1)
+        skins = [plate(x2 - x1, b, stack, m, n, laminaprop, x0=x1, y0=0.,
+                       group='skin') for x1, x2 in zip(edges[:-1], edges[1:])]
+        conn = [dict(p1=p1, p2=p2, func='SSxcte', xcte1=p1.a, xcte2=0.,
+                     **penalties(p1, p2, 'xcte', factor))
+                for p1, p2 in zip(skins[:-1], skins[1:])]
+        for p1, p2 in zip(skins[:-1], skins[1:]):
+            release(p1, 'x2')
+            release(p2, 'x1')
+    return skins, conn
+
+
+def blade(length, height, stack, m, n, along, laminaprop=LAMINAPROP_312,
+          t_skin=T_312):
+    # Blade as a plate domain, attached by its edge y = 0 ('x') or x = 0 ('y')
+    h = height + t_skin/2
+    if along == 'x':
+        f = plate(length, h, stack, m, n, laminaprop, x0=0., y0=0., group='blade')
+        release(f, 'y1', 'y2')
+        f.x1u = f.x2u = 1.
+    else:
+        f = plate(h, length, stack, m, n, laminaprop, x0=0., y0=0., group='blade')
+        release(f, 'x1', 'x2')
+        f.y1v = f.y2v = 1.
+    return f
+
+
+def rotate(stack):
+    return [theta + 90 for theta in stack]
+
+
+def plot_md_mode(ax, md, c, title, group='skin', blade_ys=(), gridx=80,
+                 gridy=30):
+    # w of all domains of a group, in global coordinates, normalised to max|w| = 1
+    ps = [p for p in md.panels if p.group == group]
+    res = md.uvw(c, group=group, gridx=gridx, gridy=gridy)
+    lim = max(np.abs(w).max() for w in res['w'])
+    levels = np.linspace(-1, 1, 22)
+    for p, x, y, w in zip(ps, res['x'], res['y'], res['w']):
+        cs = ax.contourf((x + p.x0)*1e3, (y + p.y0)*1e3, w/lim, levels=levels,
+                         cmap='RdBu_r')
+    for y in blade_ys:
+        ax.axhline(y*1e3, color='k', lw=1.2, ls='--')
+    ax.set_aspect('equal')
+    ax.set_title(title, fontsize=9)
+    ax.set_xlabel('x [mm]')
+    ax.set_ylabel('y [mm]')
+    ax.grid(False)
+    return cs
+
+
+def pct(value, reference):
+    if reference is None or reference == 0:
+        return np.nan
+    return 100.*(value/reference - 1.)
+
+
+def show(rows, header):
+    widths = [max(len(header[i]), max(len(str(r[i])) for r in rows)) + 2
+              for i in range(len(header))]
+    line = ''.join(h.rjust(w) for h, w in zip(header, widths))
+    print(line)
+    print('-'*len(line))
+    for r in rows:
+        print(''.join(str(c).rjust(w) for c, w in zip(r, widths)))
+</pre></div>
+</div>
+</div>
+</section>
+<section id="2.-The-load-helper-and-the-scale-factor">
+<h2>2. The load helper and the scale factor<a class="headerlink" href="#2.-The-load-helper-and-the-scale-factor" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">kG_linear</span></code> placed at the rows of a single domain at <code class="docutils literal notranslate"><span class="pre">(x0,</span> <span class="pre">y0)</span> <span class="pre">=</span> <span class="pre">(0,</span> <span class="pre">0)</span></code> must be the matrix of the companion notebook. The scale factor of Tables 3 to 5 is then taken from the single-domain model, exactly as in the companion notebook.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>p = plate(A_312, B_312, STACK_312, 16, 16)
+p.row_start = 0
+size = p.get_size()
+err = 0.
+for phi in (0., 1.):
+    k_md = kG_linear(p, -1., phi, 0., B_312, size).toarray()
+    k_sd = spb.kG_linear(spb.make_skin(A_312, B_312, STACK_312, PLY_T,
+                                       LAMINAPROP_312), -1., phi).toarray()
+    err = max(err, np.abs(k_md - k_sd).max()/np.abs(k_sd).max())
+print('kG_linear per domain vs single-domain helper: max rel. diff = %.2e' % err)
+
+SCALE, EV_SD_T3 = spb.table3_scale()
+print('scale factor of Table 3, from the single-domain model: %.5f' % SCALE)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+kG_linear per domain vs single-domain helper: max rel. diff = 1.37e-16
+scale factor of Table 3, from the single-domain model: 4.73840
+</pre></div></div>
+</div>
+</section>
+<section id="3.-'SSycte'-and-'SSxcte'---penalty-stiffness-and-convergence">
+<h2>3. <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code> and <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code> - penalty stiffness and convergence<a class="headerlink" href="#3.-'SSycte'-and-'SSxcte'---penalty-stiffness-and-convergence" title="Link to this heading">#</a></h2>
+<p>The Section 3.1.2 plate under the triangular load is split in three equal strips, first along <code class="docutils literal notranslate"><span class="pre">y</span></code> (<code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code>, connections parallel to the load) then along <code class="docutils literal notranslate"><span class="pre">x</span></code> (<code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code>, connections across the load). The split models must recover the single-domain eigenvalues. Penalty methods are always too flexible, so the error must be negative and shrink as the penalties grow.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>skin_sd = spb.make_skin(A_312, B_312, STACK_312, PLY_T, LAMINAPROP_312)
+ref_sd, _ = spb.buckling(skin_sd, phi=1.)
+
+factors = (0.1, 1., 10., 100., 1000.)
+res_pen = {}
+for along, (m, n) in (('y', (12, 8)), ('x', (8, 12))):
+    for factor in factors:
+        skins, conn = strips(A_312, B_312, STACK_312, 3, m, n, along, factor)
+        mdom = MultiDomain(skins, conn)
+        size = mdom.get_size()
+        kG = sum(kG_linear(p, -1., 1., p.y0, B_312, size) for p in skins)
+        ev, _ = buckling(mdom, kG)
+        res_pen[(along, factor)] = ev
+
+print('3 strips, triangular load: per cent difference to the single domain')
+rows = []
+for along, func in (('y', 'SSycte'), ('x', 'SSxcte')):
+    for factor in factors:
+        ev = res_pen[(along, factor)]
+        rows.append([func, '%g' % factor] + ['%+.4f' % pct(ev[i], ref_sd[i])
+                                             for i in range(3)])
+show(rows, ['connection', 'kt, kr x', 'mode 1', 'mode 2', 'mode 3'])
+
+s1, s2 = strips(A_312, B_312, STACK_312, 3, 12, 8, 'y', 1.)[0][:2]
+kt, kr = calc_kt_kr(s1, s2, 'ycte')
+print('\ncalc_kt_kr defaults for these strips: kt = %.3e N/m^2, kr = %.3e N' % (kt, kr))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+3 strips, triangular load: per cent difference to the single domain
+  connection  kt, kr x    mode 1   mode 2   mode 3
+--------------------------------------------------
+      SSycte       0.1  -15.6134  -4.8098  -2.3246
+      SSycte         1   -2.0113  -0.6163  -0.2951
+      SSycte        10   -0.2071  -0.0634  -0.0302
+      SSycte       100   -0.0208  -0.0064  -0.0029
+      SSycte      1000   -0.0020  -0.0006  -0.0002
+      SSxcte       0.1   -7.1922  -5.4370  -0.0175
+      SSxcte         1   -0.3287  -0.9886  -0.0019
+      SSxcte        10   -0.0331  -0.0992  -0.0002
+      SSxcte       100   -0.0033  -0.0099  +0.0000
+      SSxcte      1000   -0.0003  -0.0010  +0.0000
+
+calc_kt_kr defaults for these strips: kt = 4.860e+10 N/m^2, kr = 7.937e+02 N
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print("'SSycte', 3 strips, penalties x %g: convergence in the number of terms"
+      % PENALTY_FACTOR)
+rows = []
+for m, n in ((8, 6), (10, 6), (12, 8), (14, 8), (16, 10)):
+    skins, conn = strips(A_312, B_312, STACK_312, 3, m, n, 'y', PENALTY_FACTOR)
+    mdom = MultiDomain(skins, conn)
+    size = mdom.get_size()
+    kG = sum(kG_linear(p, -1., 1., p.y0, B_312, size) for p in skins)
+    ev, _ = buckling(mdom, kG)
+    rows.append(['%d x %d' % (m, n), size] +
+                ['%+.4f' % pct(ev[i], ref_sd[i]) for i in range(3)])
+show(rows, ['m x n', 'dofs', 'mode 1 %', 'mode 2 %', 'mode 3 %'])
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&#39;SSycte&#39;, 3 strips, penalties x 100: convergence in the number of terms
+    m x n  dofs  mode 1 %  mode 2 %  mode 3 %
+---------------------------------------------
+    8 x 6   432   -0.0207   -0.0041   +2.0637
+   10 x 6   540   -0.0207   -0.0063   +0.0302
+   12 x 8   864   -0.0208   -0.0064   -0.0029
+   14 x 8  1008   -0.0208   -0.0064   -0.0030
+  16 x 10  1440   -0.0208   -0.0064   -0.0030
+</pre></div></div>
+</div>
+</section>
+<section id="4.-Section-3.1.1-/-Table-2---three-'SSxcte'-strips-across-the-load">
+<h2>4. Section 3.1.1 / Table 2 - three <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code> strips across the load<a class="headerlink" href="#4.-Section-3.1.1-/-Table-2---three-'SSxcte'-strips-across-the-load" title="Link to this heading">#</a></h2>
+<p>The five laminates of Table 2, <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">254</span> <span class="pre">mm</span></code>, uniform load, <strong>loaded edges clamped</strong> (the companion notebook shows this is the boundary condition that makes Table 2 consistent with Lagace). The skin is split in three strips across the loading direction, so the connections carry the full compressive load, and the clamped rotations sit on the outer edges of the first and last strips.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>res_t2 = {}
+for name, stack in LAMINATES.items():
+    skin = spb.make_skin(A_311, B_311, stack, PLY_T, LAMINAPROP_311,
+                         clamped_loaded_edges=True)
+    ref, _ = spb.buckling(skin)
+    skins, conn = strips(A_311, B_311, stack, 3, 8, 12, 'x', PENALTY_FACTOR,
+                         laminaprop=LAMINAPROP_311)
+    skins[0].x1wr = 0.
+    skins[-1].x2wr = 0.
+    mdom = MultiDomain(skins, conn)
+    size = mdom.get_size()
+    kG = sum(kG_linear(p, -1., 0., 0., B_311, size) for p in skins)
+    ev, evec = buckling(mdom, kG)
+    res_t2[name] = dict(Nxx=ev[0]/1e3, sd=ref[0]/1e3, md=mdom, evec=evec)
+
+rows = []
+for name in LAMINATES:
+    r, ref = res_t2[name], PAPER['table2'][name]
+    rows.append([name, '%.3f' % r['Nxx'], '%.3f' % r['sd'],
+                 '%+.3f' % pct(r['Nxx'], r['sd']), '%.3f' % ref['rr'],
+                 '%+.1f' % pct(r['Nxx'], ref['rr']), '%.3f' % ref['lagace_rr'],
+                 '%+.1f' % pct(r['Nxx'], ref['lagace_rr'])])
+show(rows, ['lamination', 'MultiDomain', 'single dom.', 'diff %',
+            'paper R-R', 'diff %', 'Lagace R-R', 'diff %'])
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+                lamination  MultiDomain  single dom.  diff %  paper R-R  diff %  Lagace R-R  diff %
+---------------------------------------------------------------------------------------------------
+               [0_3/90_3]s       27.150       27.152  -0.006     26.475    +2.6      27.150    +0.0
+       [0_3/90_3/0_3/90_3]       17.256       17.257  -0.004     17.514    -1.5      20.439   -15.6
+   [0_2/45_2/0_2/45_2/0_2]       15.943       15.943  -0.005     22.789   -30.0      18.389   -13.3
+  [0_2/45_2/0_2/-45_2/0_2]       15.027       15.028  -0.005     20.426   -26.4      17.770   -15.4
+                [0_6/60_6]       12.110       12.110  +0.001     17.788   -31.9      18.000   -32.7
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig, axes = plt.subplots(1, 2, figsize=(9, 3.6), constrained_layout=True)
+for ax, name in zip(axes, ['[0_2/45_2/0_2/-45_2/0_2]', '[0_6/60_6]']):
+    r = res_t2[name]
+    cs = plot_md_mode(ax, r['md'], r['evec'][:, 0],
+                      '%s\nNxx_cr = %.3f N/mm' % (name, r['Nxx']), gridx=40,
+                      gridy=60)
+    for p in r['md'].panels[1:]:
+        ax.axvline(p.x0*1e3, color='0.4', lw=0.8, ls=':')
+fig.suptitle("Figures 3 and 4 with three 'SSxcte' strips (dotted: connections)")
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_stamatelos_labeas_2023_multidomain_11_0.png" src="../_images/notebooks_stamatelos_labeas_2023_multidomain_11_0.png" />
+</div>
+</div>
+</section>
+<section id="5.-Section-3.1.2-/-Table-3---three-'SSycte'-strips,-triangular-load">
+<h2>5. Section 3.1.2 / Table 3 - three <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code> strips, triangular load<a class="headerlink" href="#5.-Section-3.1.2-/-Table-3---three-'SSycte'-strips,-triangular-load" title="Link to this heading">#</a></h2>
+<p>The scale factor is the one of section 2, calibrated on the single-domain model. The split model is not re-fitted, so mode (1, 1) is itself a check.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>skins, conn = strips(A_312, B_312, STACK_312, 3, 12, 8, 'y', PENALTY_FACTOR)
+md_t3 = MultiDomain(skins, conn)
+size = md_t3.get_size()
+kG = sum(kG_linear(p, -1., 1., p.y0, B_312, size) for p in skins)
+ev_t3, evec_t3 = buckling(md_t3, kG)
+
+rows = []
+for i, mode in enumerate(['(1, 1)', '(2, 1)', '(3, 1)']):
+    ref = PAPER['table3'][mode]
+    v = ev_t3[i]/1e3*SCALE
+    v_sd = EV_SD_T3[i]/1e3*SCALE
+    rows.append([mode, '%.3f' % v, '%.3f' % v_sd, '%+.3f' % pct(v, v_sd),
+                 '%.3f' % ref['rr'], '%+.2f' % pct(v, ref['rr']),
+                 '%.3f' % ref['fe'], '%+.1f' % pct(v, ref['fe'])])
+show(rows, ['mode (m, n)', 'MultiDomain', 'single dom.', 'diff %',
+            'paper R-R', 'diff %', 'paper FE', 'diff %'])
+
+fig, axes = plt.subplots(1, 3, figsize=(12, 3.0), constrained_layout=True)
+for i, ax in enumerate(axes):
+    plot_md_mode(ax, md_t3, evec_t3[:, i],
+                 'mode %d: Nxx_cr = %.3f N/mm' % (i + 1, ev_t3[i]/1e3*SCALE))
+    for p in md_t3.panels[1:]:
+        ax.axhline(p.y0*1e3, color='0.4', lw=0.8, ls=':')
+fig.suptitle("Table 3 with three 'SSycte' strips (dotted: connections)")
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+  mode (m, n)  MultiDomain  single dom.  diff %  paper R-R  diff %  paper FE  diff %
+------------------------------------------------------------------------------------
+       (1, 1)       67.735       67.749  -0.021     67.749   -0.02    59.476   +13.9
+       (2, 1)       69.440       69.444  -0.006     69.298   +0.20    65.803    +5.5
+       (3, 1)      112.961      112.964  -0.003    113.310   -0.31   108.266    +4.3
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_stamatelos_labeas_2023_multidomain_13_1.png" src="../_images/notebooks_stamatelos_labeas_2023_multidomain_13_1.png" />
+</div>
+</div>
+<section id="The-same-skin-as-two-bonded-sub-laminates:-'SB'-and-'SB_TSL'">
+<h3>The same skin as two bonded sub-laminates: <code class="docutils literal notranslate"><span class="pre">'SB'</span></code> and <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code><a class="headerlink" href="#The-same-skin-as-two-bonded-sub-laminates:-'SB'-and-'SB_TSL'" title="Link to this heading">#</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">[0/90/90/0/0]</span></code> skin of Table 3 is unsymmetric, so its buckling load depends on the bending-extension coupling <code class="docutils literal notranslate"><span class="pre">B</span></code>. Here it is split through the thickness into a bottom <code class="docutils literal notranslate"><span class="pre">[0/90]</span></code> and a top <code class="docutils literal notranslate"><span class="pre">[90/0/0]</span></code> domain, bonded over their whole area. Each sub-laminate alone has a different <code class="docutils literal notranslate"><span class="pre">B</span></code>, so the monolithic <code class="docutils literal notranslate"><span class="pre">B</span></code> can only be rebuilt by the connection, which ties the displacements of the faces in contact, each at its distance from the mid-surface of its sub-laminate. The split skin is simply
+supported with <code class="docutils literal notranslate"><span class="pre">u</span> <span class="pre">=</span> <span class="pre">v</span> <span class="pre">=</span> <span class="pre">0</span></code> on the mid-surface of the top part, so the monolithic reference is given the same reference surface with <code class="docutils literal notranslate"><span class="pre">offset</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code> is the traction-separation-law version of the same connection, evaluated for a pristine interface (zero separation, stiffness <code class="docutils literal notranslate"><span class="pre">k_o</span></code> everywhere). The order of the two domains in the assembly must not matter.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>N_BOTTOM = 2            # plies of the bottom sub-laminate, stack[0] is at -z
+M_SB = N_SB = 12
+
+
+def sb_split(func, order, kt=None):
+    top = plate(A_312, B_312, STACK_312[N_BOTTOM:], M_SB, N_SB, x0=0., y0=0.,
+                group='top')
+    bot = plate(A_312, B_312, STACK_312[:N_BOTTOM], M_SB, N_SB, x0=0., y0=0.,
+                group='bottom')
+    release(bot, 'x1', 'x2', 'y1', 'y2')    # the bottom only follows the top
+    if kt is None:
+        kt = PENALTY_FACTOR*calc_kt_kr(top, bot, 'bot-top')[0]
+    if func == 'SB':
+        conn = [dict(p1=top, p2=bot, func='SB', kt=kt)]
+    else:
+        conn = [dict(p1=top, p2=bot, func='SB_TSL', tsl_type='bilinear',
+                     k_o=kt, tau_o=1e30, G1c=1e30, nr_x_gauss=2*M_SB,
+                     nr_y_gauss=2*N_SB)]
+    mdom = MultiDomain([top, bot] if order == 'top first' else [bot, top],
+                       conn)
+    size = mdom.get_size()
+    c = np.zeros(size) if func == 'SB_TSL' else None
+    kG = kG_linear(top, -1., 1., 0., B_312, size)   # w is common to both
+    ev, _ = buckling(mdom, kG, num_eigvalues=4, c=c)
+    return ev
+
+
+def sb_monolithic(offset=True):
+    h_bottom = N_BOTTOM*PLY_T
+    mono = plate(A_312, B_312, STACK_312, M_SB, N_SB,
+                 offset=-h_bottom/2 if offset else 0.)
+    mono.row_start = 0
+    size = mono.get_size()
+    ev, _ = lb(mono.calc_kC(silent=True),
+               kG_linear(mono, -1., 1., 0., B_312, size), silent=True,
+               num_eigvalues=4)
+    return ev
+
+
+ev_mono = sb_monolithic()
+rows = [['monolithic, offset', '-'] + ['%.4f' % (e/1e3) for e in ev_mono[:3]]
+        + ['-']]
+res_sb = {}
+for func in ('SB', 'SB_TSL'):
+    for order in ('top first', 'bottom first'):
+        ev = sb_split(func, order)
+        res_sb[(func, order)] = ev
+        rows.append([func, order] + ['%.4f' % (e/1e3) for e in ev[:3]]
+                    + ['%+.3f' % pct(ev[0], ev_mono[0])])
+print('triangular load, raw N/mm (not scaled):')
+show(rows, ['model', 'order', 'mode 1', 'mode 2', 'mode 3', 'mode 1 diff %'])
+
+ev_mid = sb_monolithic(offset=False)
+print('\nfor reference, the monolithic skin supported on its own mid-surface:'
+      ' mode 1 = %.4f N/mm' % (ev_mid[0]/1e3))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+triangular load, raw N/mm (not scaled):
+               model         order   mode 1   mode 2   mode 3  mode 1 diff %
+----------------------------------------------------------------------------
+  monolithic, offset             -  17.3172  24.1725  25.7686              -
+                  SB     top first  17.3086  24.1616  25.7500         -0.050
+                  SB  bottom first  17.3086  24.1616  25.7500         -0.050
+              SB_TSL     top first  17.3086  24.1616  25.7500         -0.050
+              SB_TSL  bottom first  17.3086  24.1616  25.7500         -0.050
+
+for reference, the monolithic skin supported on its own mid-surface: mode 1 = 14.2979 N/mm
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="6.-Sections-3.2.1-/-Tables-4-and-5---one-blade-as-a-plate-domain">
+<h2>6. Sections 3.2.1 / Tables 4 and 5 - one blade as a plate domain<a class="headerlink" href="#6.-Sections-3.2.1-/-Tables-4-and-5---one-blade-as-a-plate-domain" title="Link to this heading">#</a></h2>
+<p>One blade of height <code class="docutils literal notranslate"><span class="pre">h</span> <span class="pre">=</span> <span class="pre">9</span> <span class="pre">t_skin</span></code> and the lamination of the skin stands at mid-width. Three <code class="docutils literal notranslate"><span class="pre">MultiDomain</span></code> models of the same structure are built:</p>
+<ul class="simple">
+<li><p><strong>edge</strong>: two skin strips joined by <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code>, the blade attached with <code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code> to their common edge;</p></li>
+<li><p><strong>interior</strong>: a single skin domain, the blade attached with <code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code> along the line <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">=</span> <span class="pre">b/2</span></code>, in the interior of the skin domain;</p></li>
+<li><p><strong>rotated</strong>: the <em>edge</em> model rotated by 90 degrees (<code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code> and <code class="docutils literal notranslate"><span class="pre">'BFxcte'</span></code>, ply angles + 90, load along <code class="docutils literal notranslate"><span class="pre">y</span></code>), which must reproduce <em>edge</em> to machine precision.</p></li>
+</ul>
+<p>For Table 5 the blade is loaded per Eq. (8), with the axial force of the beam of the companion model, <code class="docutils literal notranslate"><span class="pre">E1</span> <span class="pre">h</span></code>, spread over the height of the plate domain, so both models carry the same blade load.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def blade_axial_load(load_blade):
+    # Blade Nxx per unit skin Nxx, the paper's Eq. (8)
+    if not load_blade:
+        return 0.
+    skin = spb.make_skin(A_312, B_312, STACK_312, PLY_T, LAMINAPROP_312)
+    st = spb.add_stiffeners(skin, 1, H_321, STACK_312, PLY_T,
+                            LAMINAPROP_312)[0]
+    Et_skin = spb.Et_reduced(STACK_312, PLY_T, LAMINAPROP_312)
+    return -st.E1*H_321/Et_skin/(H_321 + T_312/2)
+
+
+def single_blade(variant, phi, load_blade, factor=1.):
+    if variant == 'rotated':
+        skins, conn = strips(B_312, A_312, rotate(STACK_312), 2, 10, 12,
+                             along='x', factor=factor)
+        f = blade(A_312, H_321, rotate(STACK_312), 6, 12, along='y')
+        conn.append(dict(p1=skins[0], p2=f, func='BFxcte', xcte1=skins[0].a,
+                         xcte2=0., **penalties(skins[0], f, 'xcte', factor)))
+        f.Nyy = blade_axial_load(load_blade)
+    else:
+        if variant == 'edge':
+            skins, conn = strips(A_312, B_312, STACK_312, 2, 12, 10, along='y',
+                                 factor=factor)
+            ycte1 = skins[0].b
+        else:
+            skins = [plate(A_312, B_312, STACK_312, 16, 16, x0=0., y0=0.,
+                           group='skin')]
+            conn = []
+            ycte1 = B_312/2
+        f = blade(A_312, H_321, STACK_312, 12, 6, along='x')
+        conn.append(dict(p1=skins[0], p2=f, func='BFycte', ycte1=ycte1,
+                         ycte2=0., **penalties(skins[0], f, 'ycte', factor)))
+        f.Nxx = blade_axial_load(load_blade)
+    mdom = MultiDomain(skins + [f], conn)
+    size = mdom.get_size()
+    if variant == 'rotated':
+        kG = sum(kG_linear(p, -1., phi, p.x0, B_312, size, direction='y')
+                 for p in skins)
+    else:
+        kG = sum(kG_linear(p, -1., phi, p.y0, B_312, size) for p in skins)
+    kG = kG + f.calc_kG(size=size, row0=f.row_start, col0=f.col_start,
+                        silent=True, finalize=True)
+    ev, evec = buckling(mdom, kG)
+    return ev, evec, mdom
+
+
+print('blade Nxx per unit skin Nxx when loaded (Eq. 8): %.4f'
+      % blade_axial_load(True))
+
+CASES = [('table4', 'uniform'), ('table4', 'triangular'),
+         ('table5', 'uniform'), ('table5', 'triangular')]
+res_t45 = {}
+for table, load in CASES:
+    phi = 0. if load == 'uniform' else 1.
+    loaded = table == 'table5'
+    skin = spb.make_skin(A_312, B_312, STACK_312, PLY_T, LAMINAPROP_312)
+    sts = spb.add_stiffeners(skin, 1, H_321, STACK_312, PLY_T, LAMINAPROP_312)
+    ref, _ = spb.buckling(skin, sts, phi=phi, loaded_stiffeners=loaded,
+                          Et_skin=spb.Et_reduced(STACK_312, PLY_T,
+                                                 LAMINAPROP_312))
+    r = dict(sd=ref[0]/1e3*SCALE)
+    for variant, factor in (('edge', 1.), ('interior', 1.),
+                            ('rotated', 1.), ('edge', PENALTY_FACTOR)):
+        ev, evec, mdom = single_blade(variant, phi, loaded, factor)
+        r[(variant, factor)] = dict(Nxx=ev[0]/1e3*SCALE, ev=ev, evec=evec,
+                                    md=mdom)
+    res_t45[(table, load)] = r
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+blade Nxx per unit skin Nxx when loaded (Eq. 8): -0.9435
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print('Nx_cr in N/mm (x SCALE), blade as a plate, default penalties:')
+rows = []
+for table, load in CASES:
+    r, ref = res_t45[(table, load)], PAPER[table][load]
+    e, i = r[('edge', 1.)]['Nxx'], r[('interior', 1.)]['Nxx']
+    rows.append(['%s / %s' % (table[-1], load), '%.2f' % e, '%.2f' % i,
+                 '%.2f' % r['sd'], '%.2f' % ref['rr'],
+                 '%+.1f' % pct(e, ref['rr']), '%+.1f' % pct(i, ref['rr']),
+                 '%.3f' % ref['fe'], '%+.1f' % pct(e, ref['fe']),
+                 '%+.1f' % pct(e, r['sd'])])
+show(rows, ['Table / load', 'edge', 'interior', 'BladeStiff1D', 'paper R-R',
+            'edge %', 'interior %', 'paper FE', 'edge %', 'edge vs 1D %'])
+
+print("\n'BFxcte' (rotated) vs 'BFycte' (edge), first three eigenvalues,"
+      " and the effect of penalties x %g:" % PENALTY_FACTOR)
+rows = []
+for table, load in CASES:
+    r = res_t45[(table, load)]
+    ev_e, ev_r = r[('edge', 1.)]['ev'], r[('rotated', 1.)]['ev']
+    e100 = r[('edge', PENALTY_FACTOR)]['Nxx']
+    rows.append(['%s / %s' % (table[-1], load),
+                 '%.2e' % np.abs(ev_r[:3]/ev_e[:3] - 1).max(),
+                 '%.2f' % e100, '%+.2f' % pct(e100, r[('edge', 1.)]['Nxx']),
+                 '%+.1f' % pct(e100, PAPER[table][load]['rr']),
+                 '%+.1f' % pct(e100, r['sd'])])
+show(rows, ['Table / load', 'max |rotated/edge - 1|', 'edge x100',
+            'vs edge x1 %', 'vs paper R-R %', 'vs BladeStiff1D %'])
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Nx_cr in N/mm (x SCALE), blade as a plate, default penalties:
+    Table / load    edge  interior  BladeStiff1D  paper R-R  edge %  interior %  paper FE  edge %  edge vs 1D %
+---------------------------------------------------------------------------------------------------------------
+     4 / uniform  119.62    119.78        119.01     119.60    +0.0        +0.2   116.265    +2.9          +0.5
+  4 / triangular  178.33    179.45        179.21     172.92    +3.1        +3.8   171.755    +3.8          -0.5
+     5 / uniform  117.84    117.90        119.01     118.45    -0.5        -0.5   112.542    +4.7          -1.0
+  5 / triangular  175.78    176.89        179.19     184.05    -4.5        -3.9   168.747    +4.2          -1.9
+
+&#39;BFxcte&#39; (rotated) vs &#39;BFycte&#39; (edge), first three eigenvalues, and the effect of penalties x 100:
+    Table / load  max |rotated/edge - 1|  edge x100  vs edge x1 %  vs paper R-R %  vs BladeStiff1D %
+----------------------------------------------------------------------------------------------------
+     4 / uniform                1.06e-10     119.75         +0.11            +0.1               +0.6
+  4 / triangular                2.62e-10     179.11         +0.44            +3.6               -0.1
+     5 / uniform                1.65e-10     117.89         +0.04            -0.5               -0.9
+  5 / triangular                3.14e-10     176.58         +0.46            -4.1               -1.5
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print('w of the skin along the blade line, normalised by max|w| over the skin:')
+for key in CASES:
+    d = res_t45[key][('edge', 1.)]
+    res = d['md'].uvw(d['evec'][:, 0], group='skin', gridx=60, gridy=30)
+    wmax = max(np.abs(w).max() for w in res['w'])
+    w_line = np.abs(res['w'][0][-1, :]).max()        # y = b/2, strip 1
+    print('  %-22s %.4f' % ('%s / %s' % key, w_line/wmax))
+
+fig, axes = plt.subplots(2, 2, figsize=(9.5, 6.4), constrained_layout=True)
+for ax, (table, load) in zip(axes.ravel(), CASES):
+    d = res_t45[(table, load)][('edge', 1.)]
+    plot_md_mode(ax, d['md'], d['evec'][:, 0],
+                 'Table %s, %s skin load\nNxx_cr = %.2f N/mm'
+                 % (table[-1], load, d['Nxx']), blade_ys=[B_312/2])
+fig.suptitle("Figures 5 and 6: 'SSycte' + 'BFycte', blade at mid-width (dashed)")
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+w of the skin along the blade line, normalised by max|w| over the skin:
+  table4 / uniform       0.0037
+  table4 / triangular    0.0302
+  table5 / uniform       0.0037
+  table5 / triangular    0.0294
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_stamatelos_labeas_2023_multidomain_19_1.png" src="../_images/notebooks_stamatelos_labeas_2023_multidomain_19_1.png" />
+</div>
+</div>
+</section>
+<section id="7.-Section-3.2.2-/-Figure-7---ten-plate-domain-blades">
+<h2>7. Section 3.2.2 / Figure 7 - ten plate-domain blades<a class="headerlink" href="#7.-Section-3.2.2-/-Figure-7---ten-plate-domain-blades" title="Link to this heading">#</a></h2>
+<p>Simply supported 500 mm square plates, the five laminations of Table 2, ten equidistant <code class="docutils literal notranslate"><span class="pre">[0/90]s</span></code> blades of 0.536 mm thickness. The skin is split in eleven <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code> strips and each blade is attached with <code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code> to the common edge of two strips, so the model has 21 domains. The blade height is swept from 0 to 9 mm and <code class="docutils literal notranslate"><span class="pre">P_cr</span> <span class="pre">=</span> <span class="pre">Nx_cr</span> <span class="pre">b</span></code> is compared with the ten <code class="docutils literal notranslate"><span class="pre">BladeStiff1D</span></code> beams of the companion notebook, which use 16 x 16 terms on a single skin domain, and with the published end
+points of each curve. Penalties are raised by <code class="docutils literal notranslate"><span class="pre">PENALTY_FACTOR</span></code>.</p>
+<p>The companion notebook explains why the abscissa of Figure 7 is ambiguous; the comparison is again made against the blade height.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def figure7(stack, height, m=12, n=6, mf=12, nf=4, factor=PENALTY_FACTOR):
+    t_skin = len(stack)*PLY_T
+    skins, conn = strips(A_322, B_322, stack, N_STIFF_322 + 1, m, n, 'y',
+                         factor, laminaprop=LAMINAPROP_311)
+    blades = []
+    if height &gt; 0:
+        for p in skins[:-1]:
+            f = blade(A_322, height, STIFF_STACK_322, mf, nf, 'x',
+                      laminaprop=LAMINAPROP_311, t_skin=t_skin)
+            conn.append(dict(p1=p, p2=f, func='BFycte', ycte1=p.b, ycte2=0.,
+                             **penalties(p, f, 'ycte', factor)))
+            blades.append(f)
+    mdom = MultiDomain(skins + blades, conn)
+    size = mdom.get_size()
+    kG = sum(kG_linear(p, -1., 0., p.y0, B_322, size) for p in skins)
+    ev, evec = buckling(mdom, kG, num_eigvalues=4)
+    return ev[0]*B_322, evec, mdom
+
+
+heights = np.linspace(0., 9.e-3, 10)
+res_f7 = {}
+t = time.time()
+for name, stack in LAMINATES.items():
+    P_md, P_sd, modes = [], [], {}
+    for h in heights:
+        P, evec, mdom = figure7(stack, h)
+        P_md.append(P)
+        if h == heights[-1]:
+            modes = dict(evec=evec, md=mdom)
+        skin = spb.make_skin(A_322, B_322, stack, PLY_T, LAMINAPROP_311)
+        sts = () if h == 0. else spb.add_stiffeners(
+            skin, N_STIFF_322, h, STIFF_STACK_322, PLY_T, LAMINAPROP_311)
+        ev, _ = spb.buckling(skin, sts)
+        P_sd.append(ev[0]*B_322)
+    res_f7[name] = dict(P_md=np.array(P_md), P_sd=np.array(P_sd), mode=modes)
+print('Figure 7 sweep: %.0f s' % (time.time() - t))
+
+print('\nP_cr [N], MultiDomain / BladeStiff1D, per cent difference:')
+rows = []
+for name in LAMINATES:
+    d = res_f7[name]
+    rows.append([name] + ['%+.1f' % pct(a, b) for a, b in zip(d['P_md'],
+                                                               d['P_sd'])])
+show(rows, ['lamination'] + ['h=%.0f' % (h*1e3) for h in heights])
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+DenseFallbackWarning: Linear buckling analysis: the sparse solvers failed (eigsh() in Cayley mode: relative residual 2.22e-02 &gt; 1.0e-03 for the load multiplier 8881.442328866315; eigsh() in Cayley mode with a 10 times larger shift: relative residual 2.22e-02 &gt; 1.0e-03 for the load multiplier 8881.442328866315), using the dense solver eigh() with condensed dofs of size 640 as a last resort
+  ev, evec = buckling(mdom, kG, num_eigvalues=4)
+DenseFallbackWarning: Linear buckling analysis: the sparse solvers failed (eigsh() in Cayley mode: relative residual 1.36e-02 &gt; 1.0e-03 for the load multiplier 7774.25206922058; eigsh() in Cayley mode with a 10 times larger shift: relative residual 1.36e-02 &gt; 1.0e-03 for the load multiplier 7774.25206922058), using the dense solver eigh() with condensed dofs of size 640 as a last resort
+  ev, evec = buckling(mdom, kG, num_eigvalues=4)
+DenseFallbackWarning: Linear buckling analysis: the sparse solvers failed (eigsh() in Cayley mode: relative residual 6.90e-03 &gt; 1.0e-03 for the load multiplier 8583.839706413368; eigsh() in Cayley mode with a 10 times larger shift: relative residual 6.90e-03 &gt; 1.0e-03 for the load multiplier 8583.839706413368), using the dense solver eigh() with condensed dofs of size 640 as a last resort
+  ev, evec = buckling(mdom, kG, num_eigvalues=4)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Figure 7 sweep: 64 s
+
+P_cr [N], MultiDomain / BladeStiff1D, per cent difference:
+                lamination   h=0   h=1   h=2   h=3   h=4   h=5   h=6   h=7   h=8   h=9
+--------------------------------------------------------------------------------------
+               [0_3/90_3]s  -0.0  +0.2  +0.2  +0.2  +0.1  -0.1  -0.3  -0.6  -0.9  -1.3
+       [0_3/90_3/0_3/90_3]  -0.0  +0.2  +0.2  +0.2  +0.1  -0.1  -0.3  -0.6  -0.9  -1.3
+   [0_2/45_2/0_2/45_2/0_2]  -0.0  +0.2  +0.2  +0.2  +0.1  -0.1  -0.3  -0.6  -0.9  -1.3
+  [0_2/45_2/0_2/-45_2/0_2]  -0.0  +0.2  +0.2  +0.2  +0.1  -0.1  -0.3  -0.6  -0.9  -1.3
+                [0_6/60_6]  -0.0  +0.2  +0.1  -0.1  -0.3  -0.5  -0.7  -0.9  -1.2  -1.6
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>rows = []
+for name in LAMINATES:
+    d, ref = res_f7[name], PAPER['figure7'][name]
+    rows.append([name, '%.0f' % d['P_md'][0], '%.0f' % d['P_sd'][0],
+                 '%.0f' % ref['P0_rr'], '%+.0f' % pct(d['P_md'][0], ref['P0_rr']),
+                 '%.0f' % ref['P0_fe'], '%+.0f' % pct(d['P_md'][0], ref['P0_fe']),
+                 '%.2f' % (np.interp(ref['Pmax_rr'], d['P_md'], heights)*1e3),
+                 '%.2f' % (np.interp(ref['Pmax_rr'], d['P_sd'], heights)*1e3)])
+show(rows, ['lamination', 'MD P0', '1D P0', 'Fig.7 R-R', 'diff %', 'Fig.7 FE',
+            'diff %', 'MD h at Pmax', '1D h at Pmax'])
+print('\nP0: unstiffened intercept, no calibration of any kind.')
+print('h at Pmax: blade height at which each model reaches the paper R-R value')
+print('quoted at the stiff end of the curve.')
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+                lamination  MD P0  1D P0  Fig.7 R-R  diff %  Fig.7 FE  diff %  MD h at Pmax  1D h at Pmax
+---------------------------------------------------------------------------------------------------------
+               [0_3/90_3]s   1172   1172       1200      -2      1200      -2          6.22          6.20
+       [0_3/90_3/0_3/90_3]   1143   1143       1120      +2      1080      +6          6.04          6.03
+   [0_2/45_2/0_2/45_2/0_2]    746    746        660     +13       660     +13          5.14          5.14
+  [0_2/45_2/0_2/-45_2/0_2]    718    718        665      +8       660      +9          5.02          5.02
+                [0_6/60_6]   1037   1037       1120      -7       840     +23          5.08          5.07
+
+P0: unstiffened intercept, no calibration of any kind.
+h at Pmax: blade height at which each model reaches the paper R-R value
+quoted at the stiff end of the curve.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig, axes = plt.subplots(2, 3, figsize=(12.5, 7.0), constrained_layout=True)
+labels = '(a) (b) (c) (d) (e)'.split()
+for ax, lab, name in zip(axes.ravel(), labels, LAMINATES):
+    d, ref = res_f7[name], PAPER['figure7'][name]
+    ax.plot(heights*1e3, d['P_md'], '-o', ms=3.5, color='C0',
+            label='MultiDomain, plate blades')
+    ax.plot(heights*1e3, d['P_sd'], '--s', ms=3, color='C1', mfc='none',
+            label='StiffPanelBay, BladeStiff1D')
+    ax.axhline(ref['P0_rr'], color='C3', ls='--', lw=1,
+               label='paper R-R, 0 % and 100 %')
+    ax.axhline(ref['Pmax_rr'], color='C3', ls='--', lw=1)
+    ax.axhline(ref['P0_fe'], color='k', ls=':', lw=1,
+               label='paper FE, 0 % and 100 %')
+    ax.axhline(ref['Pmax_fe'], color='k', ls=':', lw=1)
+    ax.set_title('%s %s' % (lab, name), fontsize=9)
+    ax.set_xlabel('blade height h [mm]')
+    ax.set_ylabel('P_cr [N]')
+    ax.legend(fontsize=6.5, loc='upper left')
+axes.ravel()[-1].axis('off')
+fig.suptitle('Figure 7: critical load vs blade height, 500 mm square plate, '
+             '10 blades')
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_stamatelos_labeas_2023_multidomain_23_0.png" src="../_images/notebooks_stamatelos_labeas_2023_multidomain_23_0.png" />
+</div>
+</div>
+<section id="Figure-8---modes-of-the-stiffest-configuration">
+<h3>Figure 8 - modes of the stiffest configuration<a class="headerlink" href="#Figure-8---modes-of-the-stiffest-configuration" title="Link to this heading">#</a></h3>
+<p>The skin deflection of the 21-domain model at <code class="docutils literal notranslate"><span class="pre">h</span> <span class="pre">=</span> <span class="pre">9</span> <span class="pre">mm</span></code>, blades dashed.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig, axes = plt.subplots(1, 2, figsize=(10, 4.0), constrained_layout=True)
+for ax, name in zip(axes, ['[0_2/45_2/0_2/45_2/0_2]', '[0_6/60_6]']):
+    d = res_f7[name]
+    mdom = d['mode']['md']
+    plot_md_mode(ax, mdom, d['mode']['evec'][:, 0],
+                 '%s\nh = %.1f mm,  P_cr = %.0f N'
+                 % (name, heights[-1]*1e3, d['P_md'][-1]),
+                 blade_ys=[p.y0 for p in mdom.panels
+                           if p.group == 'skin'][1:], gridx=60, gridy=10)
+fig.suptitle('Figure 8: 11 skin strips + 10 plate blades')
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_stamatelos_labeas_2023_multidomain_25_0.png" src="../_images/notebooks_stamatelos_labeas_2023_multidomain_25_0.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="8.-Summary">
+<h2>8. Summary<a class="headerlink" href="#8.-Summary" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print('=' * 86)
+print('MULTIDOMAIN REPRODUCTION SUMMARY'.center(86))
+print('=' * 86)
+rows = []
+for name in LAMINATES:
+    r, ref = res_t2[name], PAPER['table2'][name]
+    rows.append(['T2  ' + name, "3 x 'SSxcte'", '%.3f' % r['Nxx'],
+                 '%.3f' % ref['rr'], '%+.1f%%' % pct(r['Nxx'], ref['rr']),
+                 '%+.3f%%' % pct(r['Nxx'], r['sd'])])
+for i, mode in enumerate(['(1, 1)', '(2, 1)', '(3, 1)']):
+    ref = PAPER['table3'][mode]
+    v = ev_t3[i]/1e3*SCALE
+    rows.append(['T3  mode ' + mode, "3 x 'SSycte'", '%.3f' % v,
+                 '%.3f' % ref['rr'], '%+.2f%%' % pct(v, ref['rr']),
+                 '%+.3f%%' % pct(ev_t3[i], EV_SD_T3[i])])
+for func in ('SB', 'SB_TSL'):
+    v = res_sb[(func, 'top first')][0]
+    # supported on the mid-surface of the top part: not the paper's case
+    rows.append(['T3  skin, bonded halves', "'%s'" % func,
+                 '%.3f' % (v/1e3*SCALE), '-', '-',
+                 '%+.3f%%' % pct(v, ev_mono[0])])
+for table, load in CASES:
+    r, ref = res_t45[(table, load)], PAPER[table][load]
+    v = r[('edge', 1.)]['Nxx']
+    rows.append(['T%s  %s' % (table[-1], load), "'BFycte'", '%.2f' % v,
+                 '%.2f' % ref['rr'], '%+.1f%%' % pct(v, ref['rr']),
+                 '%+.1f%%' % pct(v, r['sd'])])
+for name in LAMINATES:
+    d, ref = res_f7[name], PAPER['figure7'][name]
+    rows.append(['F7  %s, 0%%' % name, "11 x 'SSycte'", '%.0f' % d['P_md'][0],
+                 '%.0f' % ref['P0_rr'], '%+.0f%%' % pct(d['P_md'][0], ref['P0_rr']),
+                 '%+.2f%%' % pct(d['P_md'][0], d['P_sd'][0])])
+show(rows, ['paper item', 'connection', 'MultiDomain', 'paper R-R', 'vs R-R',
+            'vs single dom.'])
+print()
+print('T2 in N/mm, loaded edges clamped. T3-T5 in N/mm with the single factor')
+print('calibrated on T3 (1,1) with the single-domain model. F7 in N, no calibration.')
+print("'vs single dom.' is against StiffPanelBay: the single Shell for T2 and T3,")
+print('the monolithic laminate for SB, and BladeStiff1D for T4, T5 and F7.')
+print('The SB skin is supported on the mid-surface of its top part, a different')
+print('boundary condition from Table 3, so it is compared with the monolithic')
+print('laminate only.')
+print('\nnotebook run time: %.0f s' % (time.time() - T0))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+======================================================================================
+                           MULTIDOMAIN REPRODUCTION SUMMARY
+======================================================================================
+                        paper item     connection  MultiDomain  paper R-R  vs R-R  vs single dom.
+-------------------------------------------------------------------------------------------------
+                   T2  [0_3/90_3]s   3 x &#39;SSxcte&#39;       27.150     26.475   +2.6%         -0.006%
+           T2  [0_3/90_3/0_3/90_3]   3 x &#39;SSxcte&#39;       17.256     17.514   -1.5%         -0.004%
+       T2  [0_2/45_2/0_2/45_2/0_2]   3 x &#39;SSxcte&#39;       15.943     22.789  -30.0%         -0.005%
+      T2  [0_2/45_2/0_2/-45_2/0_2]   3 x &#39;SSxcte&#39;       15.027     20.426  -26.4%         -0.005%
+                    T2  [0_6/60_6]   3 x &#39;SSxcte&#39;       12.110     17.788  -31.9%         +0.001%
+                   T3  mode (1, 1)   3 x &#39;SSycte&#39;       67.735     67.749  -0.02%         -0.021%
+                   T3  mode (2, 1)   3 x &#39;SSycte&#39;       69.440     69.298  +0.20%         -0.006%
+                   T3  mode (3, 1)   3 x &#39;SSycte&#39;      112.961    113.310  -0.31%         -0.003%
+           T3  skin, bonded halves           &#39;SB&#39;       82.015          -       -         -0.050%
+           T3  skin, bonded halves       &#39;SB_TSL&#39;       82.015          -       -         -0.050%
+                       T4  uniform       &#39;BFycte&#39;       119.62     119.60   +0.0%           +0.5%
+                    T4  triangular       &#39;BFycte&#39;       178.33     172.92   +3.1%           -0.5%
+                       T5  uniform       &#39;BFycte&#39;       117.84     118.45   -0.5%           -1.0%
+                    T5  triangular       &#39;BFycte&#39;       175.78     184.05   -4.5%           -1.9%
+               F7  [0_3/90_3]s, 0%  11 x &#39;SSycte&#39;         1172       1200     -2%          -0.01%
+       F7  [0_3/90_3/0_3/90_3], 0%  11 x &#39;SSycte&#39;         1143       1120     +2%          -0.02%
+   F7  [0_2/45_2/0_2/45_2/0_2], 0%  11 x &#39;SSycte&#39;          746        660    +13%          -0.01%
+  F7  [0_2/45_2/0_2/-45_2/0_2], 0%  11 x &#39;SSycte&#39;          718        665     +8%          -0.01%
+                F7  [0_6/60_6], 0%  11 x &#39;SSycte&#39;         1037       1120     -7%          -0.00%
+
+T2 in N/mm, loaded edges clamped. T3-T5 in N/mm with the single factor
+calibrated on T3 (1,1) with the single-domain model. F7 in N, no calibration.
+&#39;vs single dom.&#39; is against StiffPanelBay: the single Shell for T2 and T3,
+the monolithic laminate for SB, and BladeStiff1D for T4, T5 and F7.
+The SB skin is supported on the mid-surface of its top part, a different
+boundary condition from Table 3, so it is compared with the monolithic
+laminate only.
+
+notebook run time: 88 s
+</pre></div></div>
+</div>
+<section id="What-reproduces,-and-how-well">
+<h3>What reproduces, and how well<a class="headerlink" href="#What-reproduces,-and-how-well" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>paper item</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">MultiDomain</span></code> model</p></th>
+<th class="head"><p>vs paper R-R</p></th>
+<th class="head"><p>vs single domain / <code class="docutils literal notranslate"><span class="pre">BladeStiff1D</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Table 2, five laminates</p></td>
+<td><p>3 <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code> strips</p></td>
+<td><p>same as single domain (+2.6 % to -31.9 %)</p></td>
+<td><p><strong>within 0.006 %</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>Table 3, all three modes</p></td>
+<td><p>3 <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code> strips</p></td>
+<td><p><strong>-0.02 % / +0.20 % / -0.31 %</strong></p></td>
+<td><p><strong>within 0.021 %</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Table 3 skin, through the thickness</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">'SB'</span></code> and <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code></p></td>
+<td><p>not comparable (see section 5)</p></td>
+<td><p><strong>-0.050 %</strong>, both orders</p></td>
+</tr>
+<tr class="row-odd"><td><p>Table 4</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code> + <code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code></p></td>
+<td><p><strong>+0.0 % / +3.1 %</strong></p></td>
+<td><p>+0.5 % / -0.5 %</p></td>
+</tr>
+<tr class="row-even"><td><p>Table 5</p></td>
+<td><p>idem</p></td>
+<td><p><strong>-0.5 % / -4.5 %</strong></p></td>
+<td><p>-1.0 % / -1.9 %</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tables 4 and 5, rotated</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code> + <code class="docutils literal notranslate"><span class="pre">'BFxcte'</span></code></p></td>
+<td><p>identical to <code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code></p></td>
+<td><p>rotated vs edge within <strong>4.2e-10</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Figure 7, unstiffened intercepts</p></td>
+<td><p>11 <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code> strips</p></td>
+<td><p><strong>-7 % to +13 %</strong>, no calibration</p></td>
+<td><p>within 0.02 %</p></td>
+</tr>
+<tr class="row-odd"><td><p>Figure 7, <code class="docutils literal notranslate"><span class="pre">h</span></code> = 1 to 9 mm</p></td>
+<td><p>11 strips + 10 <code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code> blades</p></td>
+<td><p>same as <code class="docutils literal notranslate"><span class="pre">BladeStiff1D</span></code></p></td>
+<td><p><strong>+0.2 % to -1.6 %</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Skin connections.</strong> With the penalties raised by <code class="docutils literal notranslate"><span class="pre">PENALTY_FACTOR</span> <span class="pre">=</span> <span class="pre">100</span></code>, <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code> and <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code> recover the single domain to four or five significant digits, and 12 x 8 terms per strip are converged. With the default <code class="docutils literal notranslate"><span class="pre">calc_kt_kr()</span></code> values the error is about -2 % for strips joined along the load (<code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code>, mode 1) and -1 % across it (<code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code>, mode 2). It falls linearly with the penalty factor, which shows that the rotation penalty <code class="docutils literal notranslate"><span class="pre">kr</span></code> governs it for these thin skins. The
+error is always negative, as a penalty method must give.</p>
+<p><strong>Bonded sub-laminates.</strong> <code class="docutils literal notranslate"><span class="pre">'SB'</span></code> and <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code> rebuild the bending-extension coupling of the unsymmetric <code class="docutils literal notranslate"><span class="pre">[0/90/90/0/0]</span></code> skin from two sub-laminates with different <code class="docutils literal notranslate"><span class="pre">B</span></code>, through the offset of their mid-surfaces, to 0.05 % and independently of the assembly order.</p>
+<p><strong>Blade as a plate.</strong> Tables 4 and 5 stay within 4.5 % of the paper with the same factor, calibrated on a different table, and <code class="docutils literal notranslate"><span class="pre">BladeStiff1D</span></code> within 3.6 %. The plate blade is between 1.9 % softer and 0.5 % stiffer than the beam with the default penalties, and between 1.5 % softer and 0.6 % stiffer with the penalties raised by <code class="docutils literal notranslate"><span class="pre">PENALTY_FACTOR</span></code>. In the uniform-load case both are within 0.5 % of the paper’s R-R values (+0.0 % and -0.5 % for the plate, -0.5 % and +0.5 % for the beam). The
+differences between the plate and the beam are:</p>
+<ul class="simple">
+<li><p>the plate blade can twist and bend laterally, and its root rotation is tied to the skin by <code class="docutils literal notranslate"><span class="pre">kr</span></code>, whereas the beam of <code class="docutils literal notranslate"><span class="pre">BladeStiff1D</span></code> follows the skin deflection, its twist following the skin rotation <code class="docutils literal notranslate"><span class="pre">w,y</span></code>;</p></li>
+<li><p>the node on the blade line that <code class="docutils literal notranslate"><span class="pre">BladeStiff1D</span></code> enforces exactly is only approximate here: <code class="docutils literal notranslate"><span class="pre">w/max|w|</span></code> on the blade line is 0.004 for the uniform load and 0.03 for the triangular one, where the mode concentrates in the more heavily loaded half (Figures 5 and 6). For the same reason the loaded blade lowers the uniform-load result slightly (119.62 to 117.84 N/mm), in the direction the paper also reports (119.60 to 118.45). The beam gives no change at all.</p></li>
+</ul>
+<p>Attaching the blade at a strip edge or along an interior line of a single skin domain gives the same result to within 0.6 %.</p>
+<p><strong>Ten blades.</strong> In the global mode of Figure 7 the plate blades bend with the skin, and the two blade models agree within 1.6 % over the whole sweep, while <code class="docutils literal notranslate"><span class="pre">P_cr</span></code> grows five times. The plate model becomes slightly softer than the beam for tall blades, where the blade’s own shear and lateral-torsional flexibility start to count. The heights at which each model reaches the paper’s 100 % value agree to 0.02 mm. The conclusions of the companion notebook on the stiffened branch of Figure 7
+therefore do not depend on the blade formulation.</p>
+</section>
+<section id="Reproducing-this-notebook">
+<h3>Reproducing this notebook<a class="headerlink" href="#Reproducing-this-notebook" title="Link to this heading">#</a></h3>
+<p>All of the above is checked as unit tests in <code class="docutils literal notranslate"><span class="pre">tests/multidomain/test_stamatelos_labeas_2023_multidomain.py</span></code>, which imports the same <code class="docutils literal notranslate"><span class="pre">PAPER</span></code> dictionary as <code class="docutils literal notranslate"><span class="pre">tests/tests_stiffpanelbay/test_stamatelos_labeas_2023.py</span></code>. The notebook runs in a few minutes, most of it in the Figure 7 sweep.</p>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="stamatelos_labeas_2023.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Reproducing Stamatelos &amp; Labeas (2023) with <code class="docutils literal notranslate"><span class="pre">panels</span></code></p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="sewall1968_blade_cylinder_vibration.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Read-this-first">Read this first</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#1.-Helper-functions">1. Helper functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#2.-The-load-helper-and-the-scale-factor">2. The load helper and the scale factor</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#3.-'SSycte'-and-'SSxcte'---penalty-stiffness-and-convergence">3. <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code> and <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code> - penalty stiffness and convergence</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#4.-Section-3.1.1-/-Table-2---three-'SSxcte'-strips-across-the-load">4. Section 3.1.1 / Table 2 - three <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code> strips across the load</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#5.-Section-3.1.2-/-Table-3---three-'SSycte'-strips,-triangular-load">5. Section 3.1.2 / Table 3 - three <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code> strips, triangular load</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#The-same-skin-as-two-bonded-sub-laminates:-'SB'-and-'SB_TSL'">The same skin as two bonded sub-laminates: <code class="docutils literal notranslate"><span class="pre">'SB'</span></code> and <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#6.-Sections-3.2.1-/-Tables-4-and-5---one-blade-as-a-plate-domain">6. Sections 3.2.1 / Tables 4 and 5 - one blade as a plate domain</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#7.-Section-3.2.2-/-Figure-7---ten-plate-domain-blades">7. Section 3.2.2 / Figure 7 - ten plate-domain blades</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Figure-8---modes-of-the-stiffest-configuration">Figure 8 - modes of the stiffest configuration</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#8.-Summary">8. Summary</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#What-reproduces,-and-how-well">What reproduces, and how well</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Reproducing-this-notebook">Reproducing this notebook</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/notebooks/stamatelos_labeas_2023_multidomain.nblink.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

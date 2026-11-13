@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Large rotations: total-Lagrangian Kirchhoff-Love plates &#8212; panels 0.15.0 documentation</title>
+    <title>Large rotations: total-Lagrangian Kirchhoff-Love plates &#8212; panels 0.16.0 documentation</title>
   
   
   
@@ -37,20 +37,22 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=ef97403f"></script>
+    <script src="_static/documentation_options.js?v=7de89ed4"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'plate_clpt_tl';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Third-order shear deformation theory with a laminate offset" href="tsdt_offset.html" />
+    <link rel="next" title="Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells" href="cylshell_clpt_tl.html" />
     <link rel="prev" title="Large rotations: plates with Green-Lagrange membrane strains" href="plate_clpt_gl.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.15.0" />
+  <meta name="docsearch:version" content="0.16.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -118,7 +120,7 @@
   
   
   
-    <p class="title logo__title">panels 0.15.0 documentation</p>
+    <p class="title logo__title">panels 0.16.0 documentation</p>
   
 </a></div>
     
@@ -217,6 +219,34 @@
 
 
 <li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="tsdt_offset.html">
     Third-order shear deformation theory with a laminate offset
   </a>
@@ -252,92 +282,456 @@
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+  <a class="nav-link dropdown-item nav-internal" href="pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_linear_static.html">
     Linear static analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_linear_buckling.html">
     Linear buckling analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_frequency.html">
     Frequency analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_flutter.html">
     Panel flutter analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_newton_raphson.html">
     Non-linear static analysis with the Newton-Raphson method
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_arc_length.html">
     Non-linear static analysis with the arc-length methods
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_follower_pressure.html">
     Follower (hydrostatic) pressure
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_prescribed_displacements.html">
     Prescribed displacements
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_face_clamp.html">
     Clamped and face-clamped edges
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_cylinder.html">
     Cylinders modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_tstiff2d.html">
     Panels with a T-stiffener modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_wingbox.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_wingbox.html">
     Wing-box modeled as a multi-domain assembly
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_stiffpanelbay.html">
     Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
   </a>
 </li>
 
@@ -352,6 +746,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="changelog.html">
     Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="documentation_levels.html">
+    How the documentation is organised
   </a>
 </li>
 
@@ -523,6 +924,34 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="tsdt_offset.html">
     Third-order shear deformation theory with a laminate offset
   </a>
@@ -558,92 +987,456 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_linear_static.html">
+  <a class="nav-link nav-internal" href="pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_linear_static.html">
     Linear static analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_linear_buckling.html">
     Linear buckling analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_frequency.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_frequency.html">
     Frequency analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_flutter.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_flutter.html">
     Panel flutter analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_newton_raphson.html">
     Non-linear static analysis with the Newton-Raphson method
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_arc_length.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_arc_length.html">
     Non-linear static analysis with the arc-length methods
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_follower_pressure.html">
     Follower (hydrostatic) pressure
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_prescribed_displacements.html">
     Prescribed displacements
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_face_clamp.html">
     Clamped and face-clamped edges
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_cylinder.html">
     Cylinders modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_tstiff2d.html">
     Panels with a T-stiffener modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_multidomain_wingbox.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_wingbox.html">
     Wing-box modeled as a multi-domain assembly
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_stiffpanelbay.html">
     Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
   </a>
 </li>
 
@@ -658,6 +1451,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="changelog.html">
     Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="documentation_levels.html">
+    How the documentation is organised
   </a>
 </li>
 
@@ -775,11 +1575,9 @@ local frame. All its strains are then invariant under any rigid rotation of
 any deformed state: a bending deformation carried through a large rotation,
 e.g. a local buckle of a skin of a wing box bent by a large rotation, keeps
 its bending energy, which <code class="docutils literal notranslate"><span class="pre">'plate_clpt_gl'</span></code> multiplies by <span class="math notranslate nohighlight">\(\cos^2\theta\)</span>.
-The derivation, with SymPy, is in
-<code class="docutils literal notranslate"><span class="pre">theory/shells/plate_clpt_tl/plate_clpt_tl.py</span></code>, with the note
-<code class="docutils literal notranslate"><span class="pre">plate_clpt_tl.md</span></code>, and <code class="docutils literal notranslate"><span class="pre">write_pyx.py</span></code> generates
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.models.plate_clpt_tl_num</span></code> with the helpers of the generator of
-<code class="docutils literal notranslate"><span class="pre">'plate_clpt_gl'</span></code>.</p>
+The kernels <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.models.plate_clpt_tl_num</span></code> are generated from a
+symbolic derivation with SymPy of the strains below, with the helpers of
+the generator of <code class="docutils literal notranslate"><span class="pre">'plate_clpt_gl'</span></code>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><strong>Integration points: exact by default, a faster option.</strong> By default
@@ -797,9 +1595,9 @@ this model exactly but are enough in practice, at about half the cost:</p>
 </pre></div>
 </div>
 <p>With them, the internal forces of a plate with displacement gradients of
-order 0.5 differ by 3e-13, and the tip deflections of the wing box under
-a follower tip force by less than 0.01 mm up to 500 N, in 138 s against
-288 s, see <a class="reference internal" href="#wing-box-under-a-follower-tip-force">Wing box under a follower tip force</a>. Assigning <code class="docutils literal notranslate"><span class="pre">None</span></code> to
+order 0.5 differ by 3e-13, and the tip deflections of the wing box of
+<a class="reference internal" href="plate_clpt_gl.html#plate-clpt-gl"><span class="std std-ref">Large rotations: plates with Green-Lagrange membrane strains</span></a> under a follower tip force by less than 0.01 mm up
+to 500 N. Assigning <code class="docutils literal notranslate"><span class="pre">None</span></code> to
 <code class="docutils literal notranslate"><span class="pre">nx</span></code> and <code class="docutils literal notranslate"><span class="pre">ny</span></code> restores the exact default.</p>
 </div>
 <section id="kinematics">
@@ -818,7 +1616,10 @@ w_{,x} u_{,y} - (1 + u_{,x}) w_{,y},\;
 <p>with <span class="math notranslate nohighlight">\(\boldsymbol{u}_{,xx} = (u_{,xx}, v_{,xx}, w_{,xx})\)</span> and so on. The
 linear part is that of <code class="docutils literal notranslate"><span class="pre">'plate_clpt_donnell'</span></code>, and the quadratic part of
 <span class="math notranslate nohighlight">\(\kappa_{xx}\)</span> is <span class="math notranslate nohighlight">\(w_{,x} u_{,xx} + w_{,y} v_{,xx} - (u_{,x} + v_{,y})
-w_{,xx}\)</span>. For a rotation <span class="math notranslate nohighlight">\(\boldsymbol{X} \to \boldsymbol{R} \boldsymbol{X}\)</span>
+w_{,xx}\)</span>, of the order of the membrane strain times the curvature, so that
+for moderate deflections the response differs from that of
+<code class="docutils literal notranslate"><span class="pre">'plate_clpt_gl'</span></code> by a relative amount of the order of the membrane
+strain. For a rotation <span class="math notranslate nohighlight">\(\boldsymbol{X} \to \boldsymbol{R} \boldsymbol{X}\)</span>
 of a deformed state, <span class="math notranslate nohighlight">\(\boldsymbol{a} \to \boldsymbol{R} \boldsymbol{a}\)</span> and
 <span class="math notranslate nohighlight">\(\boldsymbol{u}_{,\alpha\beta} \to \boldsymbol{R}
 \boldsymbol{u}_{,\alpha\beta}\)</span>, so the curvatures do not change.</p>
@@ -878,199 +1679,31 @@ six of the highest functions and carry little weight: with the 15 points of
 is a cheaper choice in practice. <code class="xref py py-func docutils literal notranslate"><span class="pre">clpt_field.fstrain()</span></code> gives the
 curvatures of the deformed normal.</p>
 </section>
-<section id="verification">
-<h2>Verification<a class="headerlink" href="#verification" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">tests/tests_shell/test_plate_clpt_tl.py</span></code>:</p>
-<ul class="simple">
-<li><p>rigid rotations of 0.1 to 1 rad of a free plate, in plane, out of plane and
-about an oblique axis, give zero strains, curvatures and internal forces;</p></li>
-<li><p>a bent plate rotated rigidly by 0.5 and 1 rad keeps its strains and its
-bending energy to 1e-8, whereas the bending energy of <code class="docutils literal notranslate"><span class="pre">'plate_clpt_gl'</span></code>
-is multiplied by <span class="math notranslate nohighlight">\(\cos^2\theta\)</span> (0.77 and 0.29);</p></li>
-<li><p>the tangent stiffness and <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kTv()</span></code> are the central
-differences of <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_fint()</span></code> at a state rotated by 1 rad;</p></li>
-<li><p>a cantilever strip, <code class="docutils literal notranslate"><span class="pre">L</span> <span class="pre">=</span> <span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">0.04</span></code>, <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">2e-3</span></code>, under a tip
-force of constant direction bent out of plane follows the inextensible
-elastica to 1e-4 at <span class="math notranslate nohighlight">\(P L^2/EI = 1\)</span> and <span class="math notranslate nohighlight">\(3\)</span> (tip rotations of 0.46 and
-1.0 rad), <span class="math notranslate nohighlight">\(w = 0.30172 L\)</span> and <span class="math notranslate nohighlight">\(0.6033 L\)</span>, where <code class="docutils literal notranslate"><span class="pre">'plate_clpt_gl'</span></code> follows
-the linear beam, <span class="math notranslate nohighlight">\(w = L/3\)</span> at <span class="math notranslate nohighlight">\(P L^2/EI = 1\)</span>; bent in its plane it follows
-the elastica as <code class="docutils literal notranslate"><span class="pre">'plate_clpt_gl'</span></code>;</p></li>
-<li><p>for a simply supported plate under pressure with centre deflections of
-1.1, 3.4 and 11 times the thickness, the deflection is smaller than that
-of <code class="docutils literal notranslate"><span class="pre">'plate_clpt_gl'</span></code> by 2e-5, 1.1e-4 and 1.3e-3, the order of the
-membrane strain.</p></li>
-</ul>
-</section>
-<section id="cantilever-strip-rolled-into-a-circle-by-an-end-moment">
-<h2>Cantilever strip rolled into a circle by an end moment<a class="headerlink" href="#cantilever-strip-rolled-into-a-circle-by-an-end-moment" title="Link to this heading">#</a></h2>
-<p>Benchmark 3.2 of <a class="reference internal" href="ref.html#sze2004benchmarks" id="id1"><span>[sze2004Benchmarks]</span></a> (Fig. 3a, p. 1556): a strip clamped
-at one end, <span class="math notranslate nohighlight">\(L = 12\)</span>, <span class="math notranslate nohighlight">\(b = 1\)</span>, <span class="math notranslate nohighlight">\(h = 0.1\)</span>, <span class="math notranslate nohighlight">\(E = 1.2 \times 10^6\)</span>, <span class="math notranslate nohighlight">\(\nu =
-0\)</span>, under an end moment <span class="math notranslate nohighlight">\(M\)</span> up to <span class="math notranslate nohighlight">\(M_{max} = 2 \pi M_o\)</span>, <span class="math notranslate nohighlight">\(M_o = EI/L =
-25/3\)</span>, which rolls it into a full circle. The exact solution of the
-inextensible beam (p. 1555) is the arc of curvature <span class="math notranslate nohighlight">\(M/EI\)</span>, with the tip at</p>
-<div class="math notranslate nohighlight">
-\[\frac{U}{L} = \frac{\sin\theta}{\theta} - 1, \qquad
-\frac{W}{L} = \frac{1 - \cos\theta}{\theta}, \qquad
-\theta = \frac{M L}{E I} = 2 \pi \frac{M}{M_{max}}\]</div>
-<p>tabulated as “Exact” in Table 3a (p. 1557). panels has no applied moments;
-<code class="docutils literal notranslate"><span class="pre">tests/tests_shell/test_plate_clpt_tl_end_moment.py</span></code> applies the moment
-as a conservative load of potential <span class="math notranslate nohighlight">\(-M/b \int_0^b \theta(L, y)\, dy\)</span>,
-<span class="math notranslate nohighlight">\(\theta = \operatorname{atan2}(w_{,x}, 1 + u_{,x})\)</span>, with its
-configuration-dependent load vector and load stiffness passed to
-<code class="docutils literal notranslate"><span class="pre">structsolve.Analysis</span></code> through <code class="docutils literal notranslate"><span class="pre">calc_fext(c=c)</span></code>, <code class="docutils literal notranslate"><span class="pre">calc_fint(c,</span> <span class="pre">inc)</span></code>
-and <code class="docutils literal notranslate"><span class="pre">calc_kC(c,</span> <span class="pre">inc)</span></code>. With <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">=</span> <span class="pre">12</span></code>, <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">=</span> <span class="pre">4</span></code> and 20 Newton-Raphson
-increments of <span class="math notranslate nohighlight">\(0.05 M_{max}\)</span> (4 s), the tip displacements, averaged over
-the width, are:</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(M/M_{max}\)</span></p></th>
-<th class="head"><p>0.05</p></th>
-<th class="head"><p>0.25</p></th>
-<th class="head"><p>0.5</p></th>
-<th class="head"><p>0.75</p></th>
-<th class="head"><p>1</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(-U\)</span>, exact, Table 3a</p></td>
-<td><p>0.196</p></td>
-<td><p>4.361</p></td>
-<td><p>12.000</p></td>
-<td><p>14.546</p></td>
-<td><p>12.000</p></td>
-</tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(-U\)</span>, <code class="docutils literal notranslate"><span class="pre">'plate_clpt_tl'</span></code></p></td>
-<td><p>0.1964</p></td>
-<td><p>4.3619</p></td>
-<td><p>12.0068</p></td>
-<td><p>14.5425</p></td>
-<td><p>11.9725</p></td>
-</tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(-U\)</span>, <code class="docutils literal notranslate"><span class="pre">'plate_clpt_gl'</span></code></p></td>
-<td><p>0.2260</p></td>
-<td><p>stops</p></td>
-<td><p>–</p></td>
-<td><p>–</p></td>
-<td><p>–</p></td>
-</tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(-U\)</span>, <code class="docutils literal notranslate"><span class="pre">'plate_clpt_donnell'</span></code></p></td>
-<td><p>0.2183</p></td>
-<td><p>4.4238</p></td>
-<td><p>7.6697</p></td>
-<td><p>10.1090</p></td>
-<td><p>12.1940</p></td>
-</tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(W\)</span>, exact, Table 3a</p></td>
-<td><p>1.870</p></td>
-<td><p>7.639</p></td>
-<td><p>7.639</p></td>
-<td><p>2.546</p></td>
-<td><p>0.000</p></td>
-</tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(W\)</span>, <code class="docutils literal notranslate"><span class="pre">'plate_clpt_tl'</span></code></p></td>
-<td><p>1.8695</p></td>
-<td><p>7.6398</p></td>
-<td><p>7.6342</p></td>
-<td><p>2.5272</p></td>
-<td><p>0.0002</p></td>
-</tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(W\)</span>, <code class="docutils literal notranslate"><span class="pre">'plate_clpt_gl'</span></code></p></td>
-<td><p>1.9994</p></td>
-<td><p>stops</p></td>
-<td><p>–</p></td>
-<td><p>–</p></td>
-<td><p>–</p></td>
-</tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(W\)</span>, <code class="docutils literal notranslate"><span class="pre">'plate_clpt_donnell'</span></code></p></td>
-<td><p>1.9821</p></td>
-<td><p>8.9234</p></td>
-<td><p>11.7495</p></td>
-<td><p>13.4893</p></td>
-<td><p>14.8152</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">'plate_clpt_tl'</span></code> rolls the strip into the circle, within 2.3e-3 <span class="math notranslate nohighlight">\(L\)</span> of
-the exact solution (0.03 at the full circle). The difference is that of
-the model, not of the Ritz approximation: the curvature measured with the
-area vector, <span class="math notranslate nohighlight">\(\kappa_{xx} = \lambda^2 \mu\, \theta_{,x}\)</span> for the
-stretches <span class="math notranslate nohighlight">\(\lambda\)</span> and <span class="math notranslate nohighlight">\(\mu\)</span> along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span>, makes the bending moment
-shorten the strip and its width by <span class="math notranslate nohighlight">\((\kappa h)^2/6\)</span> and <span class="math notranslate nohighlight">\((\kappa h)^2/12\)</span>,
-and the curvature larger than <span class="math notranslate nohighlight">\(M/EI\)</span> by about <span class="math notranslate nohighlight">\(5 (\kappa h)^2/6\)</span>, 0.23 %
-at the full circle (<span class="math notranslate nohighlight">\(\kappa h = 0.052\)</span>). The uniform cylindrical solution
-of these equations, computed in the test, is reproduced to 4e-6 <span class="math notranslate nohighlight">\(L\)</span>; the
-largest difference with it over the five loads converges with the number
-of terms <span class="math notranslate nohighlight">\(m\)</span> along the length as 2.3e-2 <span class="math notranslate nohighlight">\(L\)</span> (<span class="math notranslate nohighlight">\(m = 8\)</span>), 2.8e-4 <span class="math notranslate nohighlight">\(L\)</span> (10),
-3.9e-6 <span class="math notranslate nohighlight">\(L\)</span> (12) and 3.7e-6 <span class="math notranslate nohighlight">\(L\)</span> (14 and 16), the angle <span class="math notranslate nohighlight">\(2 \pi\)</span> of the
-full circle requiring polynomials of degree 11 or more.
-<code class="docutils literal notranslate"><span class="pre">'plate_clpt_gl'</span></code>, whose curvatures <span class="math notranslate nohighlight">\(-w_{,xx}\)</span> are measured in the fixed
-frame, is 7 % more flexible in <span class="math notranslate nohighlight">\(W\)</span> already at <span class="math notranslate nohighlight">\(0.05 M_{max}\)</span> (a tip
-rotation of 0.31 rad), and its Newton-Raphson analysis stops at <span class="math notranslate nohighlight">\(0.079
-M_{max}\)</span> (0.50 rad, <span class="math notranslate nohighlight">\(W = 4.19\)</span> against 2.93); <code class="docutils literal notranslate"><span class="pre">'plate_clpt_donnell'</span></code>,
-whose membrane strains are linear in <span class="math notranslate nohighlight">\(u\)</span>, never rolls the strip: <span class="math notranslate nohighlight">\(W\)</span> keeps
-increasing, to 14.8 at <span class="math notranslate nohighlight">\(M_{max}\)</span>.</p>
-</section>
-<section id="wing-box-under-a-follower-tip-force">
-<h2>Wing box under a follower tip force<a class="headerlink" href="#wing-box-under-a-follower-tip-force" title="Link to this heading">#</a></h2>
-<p>The High-AR-t5 wing box of <a class="reference internal" href="plate_clpt_gl.html#plate-clpt-gl"><span class="std std-ref">Large rotations: plates with Green-Lagrange membrane strains</span></a>, with the same 45 domains
-(6264 degrees of freedom) and 20 Newton-Raphson increments, deflects at the
-tip (mm):</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>tip force (N)</p></th>
-<th class="head"><p>25</p></th>
-<th class="head"><p>100</p></th>
-<th class="head"><p>200</p></th>
-<th class="head"><p>300</p></th>
-<th class="head"><p>400</p></th>
-<th class="head"><p>500</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>Abaqus, Fig. 6 <a class="reference internal" href="ref.html#elalfywingboxpreprint" id="id2"><span>[elalfyWingboxPreprint]</span></a></p></td>
-<td><p>23.3</p></td>
-<td><p>93.2</p></td>
-<td><p>189.6</p></td>
-<td><p>298.9</p></td>
-<td><p>410.0</p></td>
-<td><p>515.5</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">'plate_clpt_tl'</span></code></p></td>
-<td><p>22.68</p></td>
-<td><p>90.84</p></td>
-<td><p>184.32</p></td>
-<td><p>286.16</p></td>
-<td><p>388.84</p></td>
-<td><p>488.73</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'plate_clpt_gl'</span></code></p></td>
-<td><p>22.68</p></td>
-<td><p>90.84</p></td>
-<td><p>184.37</p></td>
-<td><p>287.24</p></td>
-<td><p>393.59</p></td>
-<td><p>499.83</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>The two models agree to 0.03 % up to 200 N, below the first buckling load,
-where the box bends through the membrane strains of the skins and the
-in-plane bending of the spars. Above it, <code class="docutils literal notranslate"><span class="pre">'plate_clpt_tl'</span></code> is up to
-2.2 % stiffer, 5.2 % below Abaqus at 500 N against 3.0 %, which is
-consistent with the buckles of the top skin, rotated with the box, keeping
-their bending energy instead of losing the factor <span class="math notranslate nohighlight">\(\cos^2\theta\)</span>. The
-remaining difference with Abaqus includes the 2.7 % of the linear range
-(mid-surface domains, penalty connections), the perfect geometry and the
-rotation continuity of the connections, linear in the displacements of the
-fixed frames, which is exact only for small rotations of the joints.</p>
-<p>One analysis takes about twice as long as with <code class="docutils literal notranslate"><span class="pre">'plate_clpt_gl'</span></code> (288 s
-against 146 s on one core of a shared machine), from the 21 x 21
-integration points of the skins instead of 15 x 15. With the integration
-points of <code class="docutils literal notranslate"><span class="pre">'plate_clpt_gl'</span></code>, setting <code class="docutils literal notranslate"><span class="pre">nx</span> <span class="pre">=</span> <span class="pre">gauss_points(m)</span></code> and <code class="docutils literal notranslate"><span class="pre">ny</span> <span class="pre">=</span>
-<span class="pre">gauss_points(n)</span></code> on every domain, the tip deflections are the same to
-0.01 mm at every load, in 138 s.</p>
+<section id="accuracy-for-large-rotations">
+<h2>Accuracy for large rotations<a class="headerlink" href="#accuracy-for-large-rotations" title="Link to this heading">#</a></h2>
+<p>Benchmark 3.2 of <a class="reference internal" href="ref.html#sze2004benchmarks" id="id1"><span>[sze2004Benchmarks]</span></a>, a cantilever strip rolled into a
+full circle by an end moment, has the exact solution of the inextensible
+beam, an arc of curvature <span class="math notranslate nohighlight">\(M/EI\)</span>. <code class="docutils literal notranslate"><span class="pre">'plate_clpt_tl'</span></code> rolls the strip into
+the circle within about <span class="math notranslate nohighlight">\(2 \times 10^{-3} L\)</span> of that solution; the
+difference is that of the model, not of the Ritz approximation: with the
+curvature measured by the area vector, <span class="math notranslate nohighlight">\(\kappa_{xx} = \lambda^2 \mu\,
+\theta_{,x}\)</span> for the stretches <span class="math notranslate nohighlight">\(\lambda\)</span> and <span class="math notranslate nohighlight">\(\mu\)</span> along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span>, the
+bending moment shortens the strip by terms of order <span class="math notranslate nohighlight">\((\kappa h)^2\)</span>. The
+angle <span class="math notranslate nohighlight">\(2 \pi\)</span> of the full circle requires polynomials of degree 11 or more
+along the strip. <code class="docutils literal notranslate"><span class="pre">'plate_clpt_gl'</span></code>, whose curvatures are measured in the
+fixed frame, is too flexible from tip rotations of about 0.3 rad, and
+<code class="docutils literal notranslate"><span class="pre">'plate_clpt_donnell'</span></code>, whose membrane strains are linear in <span class="math notranslate nohighlight">\(u\)</span>, never
+rolls the strip. Under a tip force of constant direction a cantilever strip
+bent out of plane follows the inextensible elastica, where
+<code class="docutils literal notranslate"><span class="pre">'plate_clpt_gl'</span></code> follows the linear beam, and bent in its plane, the
+bending being carried by the membrane strains, it follows the elastica as
+<code class="docutils literal notranslate"><span class="pre">'plate_clpt_gl'</span></code> does.</p>
+<p>In the wing box of <a class="reference internal" href="plate_clpt_gl.html#plate-clpt-gl"><span class="std std-ref">Large rotations: plates with Green-Lagrange membrane strains</span></a>, below the buckling of the top skin,
+the box bends through the membrane strains of the skins and the in-plane
+bending of the spars, and <code class="docutils literal notranslate"><span class="pre">'plate_clpt_tl'</span></code> and <code class="docutils literal notranslate"><span class="pre">'plate_clpt_gl'</span></code> agree;
+above it, <code class="docutils literal notranslate"><span class="pre">'plate_clpt_tl'</span></code> is a few per cent stiffer, since the buckles
+of the top skin, rotated with the box, keep their bending energy instead of
+losing the factor <span class="math notranslate nohighlight">\(\cos^2\theta\)</span>.</p>
 </section>
 </section>
 
@@ -1094,11 +1727,11 @@ points of <code class="docutils literal notranslate"><span class="pre">'plate_cl
       </div>
     </a>
     <a class="right-next"
-       href="tsdt_offset.html"
+       href="cylshell_clpt_tl.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Third-order shear deformation theory with a laminate offset</p>
+        <p class="prev-next-title">Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -1123,9 +1756,7 @@ points of <code class="docutils literal notranslate"><span class="pre">'plate_cl
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kinematics">Kinematics</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#internal-forces-and-tangent-stiffness">Internal forces and tangent stiffness</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verification">Verification</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cantilever-strip-rolled-into-a-circle-by-an-end-moment">Cantilever strip rolled into a circle by an end moment</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#wing-box-under-a-follower-tip-force">Wing box under a follower tip force</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#accuracy-for-large-rotations">Accuracy for large rotations</a></li>
 </ul>
   </nav></div>
 

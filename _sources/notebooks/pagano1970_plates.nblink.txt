@@ -1,0 +1,3 @@
+{
+    "path": "../../../notebooks/pagano1970_plates.ipynb"
+}

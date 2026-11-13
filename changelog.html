@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Changelog &#8212; panels 0.15.0 documentation</title>
+    <title>Changelog &#8212; panels 0.16.0 documentation</title>
   
   
   
@@ -37,19 +37,20 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=ef97403f"></script>
+    <script src="_static/documentation_options.js?v=7de89ed4"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'changelog';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="References" href="ref.html" />
+    <link rel="next" title="How the documentation is organised" href="documentation_levels.html" />
     <link rel="prev" title="Development tools (panels.dev)" href="dev.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.15.0" />
+  <meta name="docsearch:version" content="0.16.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -117,7 +118,7 @@
   
   
   
-    <p class="title logo__title">panels 0.15.0 documentation</p>
+    <p class="title logo__title">panels 0.16.0 documentation</p>
   
 </a></div>
     
@@ -216,6 +217,34 @@
 
 
 <li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="tsdt_offset.html">
     Third-order shear deformation theory with a laminate offset
   </a>
@@ -251,92 +280,456 @@
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+  <a class="nav-link dropdown-item nav-internal" href="pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_linear_static.html">
     Linear static analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_linear_buckling.html">
     Linear buckling analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_frequency.html">
     Frequency analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_flutter.html">
     Panel flutter analysis
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_newton_raphson.html">
     Non-linear static analysis with the Newton-Raphson method
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_arc_length.html">
     Non-linear static analysis with the arc-length methods
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_follower_pressure.html">
     Follower (hydrostatic) pressure
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_prescribed_displacements.html">
     Prescribed displacements
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_face_clamp.html">
     Clamped and face-clamped edges
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_cylinder.html">
     Cylinders modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_tstiff2d.html">
     Panels with a T-stiffener modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_wingbox.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_multidomain_wingbox.html">
     Wing-box modeled as a multi-domain assembly
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_stiffpanelbay.html">
     Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
   </a>
 </li>
 
@@ -351,6 +744,13 @@
 <li class=" current active">
   <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
     Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="documentation_levels.html">
+    How the documentation is organised
   </a>
 </li>
 
@@ -522,6 +922,34 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="cylshell_clpt_tl.html">
+    Large rotations: total-Lagrangian Kirchhoff-Love cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fsdt_tsdt_gl.html">
+    Shear deformable models with Green-Lagrange membrane strains
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="fsdt_tsdt_tl.html">
+    Total-Lagrangian shear deformable models
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="annular_clpt.html">
+    Annular-sector plates
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="tsdt_offset.html">
     Third-order shear deformation theory with a laminate offset
   </a>
@@ -557,92 +985,456 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_linear_static.html">
+  <a class="nav-link nav-internal" href="pyodide.html">
+    Running in the browser with Pyodide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_linear_static.html">
     Linear static analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_linear_buckling.html">
     Linear buckling analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_frequency.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_frequency.html">
     Frequency analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_flutter.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_flutter.html">
     Panel flutter analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_newton_raphson.html">
     Non-linear static analysis with the Newton-Raphson method
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_arc_length.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_arc_length.html">
     Non-linear static analysis with the arc-length methods
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_follower_pressure.html">
     Follower (hydrostatic) pressure
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_prescribed_displacements.html">
     Prescribed displacements
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_face_clamp.html">
     Clamped and face-clamped edges
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_cylinder.html">
     Cylinders modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_tstiff2d.html">
     Panels with a T-stiffener modeled as multi-domain assemblies
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_multidomain_wingbox.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_multidomain_wingbox.html">
     Wing-box modeled as a multi-domain assembly
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+  <a class="nav-link nav-internal" href="notebooks/ex_stiffpanelbay.html">
     Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/pagano1970_plates.html">
+    Cross-ply and sandwich plates under a sinusoidal pressure: Pagano (1970)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/varadan1991_cylinders.html">
+    Cross-ply cylinders under a sinusoidal load: Varadan and Bhaskar (1991)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/leissa1973_cylinder_frequencies.html">
+    Natural frequencies of circular cylindrical shells: Leissa (1973)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/jaunky1999_laminated_panel_buckling.html">
+    Buckling of a laminated cylindrical panel in axial compression: Jaunky and Knight (1999)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/noor1975_buckling.html">
+    Buckling of cross-ply plates in uniaxial compression: Noor (1975)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas1993_thick_rings.html">
+    Thick orthotropic cylinders under external pressure: Kardomateas (1993)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas1993b_1995_thick_cylinders.html">
+    Thick cylinders in axial compression and under combined loads: Kardomateas (1993b), Kardomateas and Philobos (1995)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/kardomateas2003_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Kardomateas and Simitses (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/han2004_sandwich_rings.html">
+    Long sandwich cylinders under hydrostatic pressure: Han, Kardomateas and Simitses (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/nasa_sp8007_external_pressure.html">
+    Cylinders under lateral and hydrostatic pressure: NASA/SP-8007-2020/REV 2
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/schweizerhof1984_pressure_loads.html">
+    Displacement dependent pressure loads: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/schweizerhof1984_cantilever_postbuckling.html">
+    Cantilever cylinder under a follower pressure: Schweizerhof and Ramm (1984)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sze2004_hinged_roofs.html">
+    Limit loads of hinged cylindrical roofs: Sabir and Lock (1972), Sze et al. (2004)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sabir1972_roof_snap_back.html">
+    Snap-through and snap-back of a hinged cylindrical roof: Donnell, Sanders, Green-Lagrange and total-Lagrangian kinematics
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/large_rotation_plates.html">
+    Large rotations of plates: a strip rolled into a circle and a wing box under a follower force
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/null_space_vs_penalty.html">
+    Exact connections and prescribed displacements: the null-space method against the penalty method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/tangent_stiffness_product.html">
+    Tangent stiffness matrix and its product by a vector: verification and cost
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/tsdt_offset_connections.html">
+    Third-order shear deformation theory with a laminate offset: connections and reference surface
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/fk1952_shallow_arches.html">
+    Snap-through of a shallow circular arch: Fung and Kaplan (1952)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/simo1990_cylinder_postbuckling.html">
+    Post-buckling of an axially compressed cylinder: Simo, Fox and Rifai (1990)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/stamatelos_labeas_2023.html">
+    Reproducing Stamatelos & Labeas (2023) with panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/stamatelos_labeas_2023_multidomain.html">
+    Reproducing Stamatelos & Labeas (2023) with panels.multidomain.MultiDomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/sewall1968_blade_cylinder_vibration.html">
+    Vibration of cylinders with integral blade stringers: Sewall and Naumann (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/egle1968_few_stringer_cylinder_vibration.html">
+    Vibration of cylinders with four and eight stringers: Egle and Sewall (1968)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/card1966_blade_cylinder_buckling.html">
+    Axial buckling of cylinders with integral blade stringers: Card and Jones (1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/weller1977_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: integrally stiffened Technion shells (Weller and Singer 1977; Poorveis and Kabir 2006)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/peterson1959_blade_cylinder_buckling.html">
+    Discrete and smeared stringers: cylinders with riveted Z stringers (Peterson and Dow 1959; Card and Jones 1966)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/singer1971_blade_cylinder_buckling.html">
+    Flat integral stringers, simply supported and clamped: the Caltech shells AS-2 to AS-4 (Singer, Arbocz and Babcock 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/abramovich2009_blade_panels.html">
+    First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/lanzi2003_torsion_cylinder.html">
+    Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/moore1944_ring_cylinders.html">
+    Torsional buckling of ring-stiffened cylinders: Moore and Wescoat (1944), Table I
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/moore1944_stiffened_cylinders.html">
+    Torsional buckling of ring- and stringer-stiffened cylinders: Moore and Wescoat (1944), Table II
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/hamada1986_annular_torsion.html">
+    In-plane torsional buckling of clamped annular plates (Hamada and Harima 1986)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/majumdar1971_annular_compression.html">
+    Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/thick_annular_plates.html">
+    Thick annular plates: shear deformation theories against exact and Ritz solutions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/annular_webs_on_cylinders.html">
+    Annular webs of ring frames connected to cylinders
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_alfano2001.html">
+    DCB benchmark: Alfano and Crisfield (2001)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_camanho2003.html">
+    DCB benchmark: Camanho, Dávila and de Moura (2003)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_turon2007.html">
+    DCB benchmark: Turon, Dávila, Camanho and Costa (2007)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_krueger2008.html">
+    DCB benchmarks: Krueger (2008), NASA/TM-2008-215123
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_tijs2022.html">
+    DCB benchmark: Tijs et al. (2022), AS4D/PEKK-FC
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_tijs2023_phd.html">
+    Mode I benchmarks: Tijs (2023), PhD thesis, AS4D/PEKK-FC and conduction welded joints
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_lecinana2023.html">
+    Mode I benchmark: Leciñana et al. (2023), AS4D/PEKK-FC fatigue specimens
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_validation_summary.html">
+    Validation of the cohesive zone model against mode I DCB results of the literature
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_convergence_study.html">
+    Convergence study of the cohesive zone on a mode I DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/dcb_mode_I_solver_study.html">
+    Solution procedure of the cohesive zone: consistent tangent, line search and bisection
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/cohesive_zone_verification.html">
+    Cohesive connection 'SB_TSL': verification and linear measures of the DCB
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/krueger2012_mmb_benchmark.html">
+    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/conn_method_comparison.html">
+    Benchmarks with the penalty and the null-space connections
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/test_quadrature_partial_integration_matrix.html">
+    Partial integration of a matrix with Gauss-Legendre points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/test_quadrature_partial_integration_of_domain.html">
+    Partial integration of a polynomial over part of the domain
   </a>
 </li>
 
@@ -657,6 +1449,13 @@
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="#" aria-current="page">
     Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="documentation_levels.html">
+    How the documentation is organised
   </a>
 </li>
 
@@ -770,6 +1569,854 @@
 <p>The changes of each version, from the file <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> of the
 <a class="reference external" href="https://github.com/saullocastro/panels/blob/main/CHANGELOG.md">repository</a>:</p>
 <div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Changelog</span>
+
+<span class="gu">## 0.16.0 (2026-11-13)</span>
+
+<span class="gu">### Changed: validation runs of more than 30 s in the notebooks only</span>
+
+<span class="k">-</span><span class="w"> </span>The tests that compared with literature, test or finite element values
+  and took more than 30 s each (optimized build) are replaced by fast
+  tests of the same features on coarse models, with values of the code:
+  the Moore and Wescoat (1944) specimens 17 and 19, the post-buckling
+  paths of Simo et al. (1990) and of Schweizerhof and Ramm (1984), Fig.
+  13, the hinged roofs of Sze et al. (2004) with <span class="sb">`cylshell_clpt_tl`</span>, the
+  wing box under a follower force against Abaqus, cylinders 1 and 2 of
+  Peterson and Dow (1959) and the panel of Jaunky and Knight (1999). The
+  notebooks show the full comparisons.
+<span class="k">-</span><span class="w"> </span>New notebooks <span class="sb">`leissa1973_cylinder_frequencies`</span> (Leissa 1973, Tables
+  2.6, 2.8 and 2.46, CLPT, FSDT and TSDT) and
+  <span class="sb">`jaunky1999_laminated_panel_buckling`</span> (Jaunky and Knight 1999, Table 2).
+<span class="k">-</span><span class="w"> </span><span class="sb">`tests/tests_shell/test_nonlinear_riks.py`</span> checks the limit point of the
+  hinged roof against Table 9a of Sze et al. (2004), 2226.3 N at the
+  central deflection 11.293; the central deflection at 4000 N, beyond the
+  table, is a value of the code.
+
+<span class="gu">### Tests: small annular models in the line-traced run; notebook `annular_webs_on_cylinders`</span>
+
+<span class="k">-</span><span class="w"> </span>Every test of the annular models and of the annular webs connected to
+  cylinders has small-model variants (few terms) that keep each model,
+  load, edge condition, connection and option checked in the line-traced
+  coverage run, against closed forms, Ritz bounds, the same web clamped
+  directly, or values of the code; the full-size tests of 30 s or less
+  keep their literature values and are marked <span class="sb">`slow`</span> when the small
+  variants cover their lines.
+<span class="k">-</span><span class="w"> </span>95 more tests marked <span class="sb">`slow`</span> by the rule of <span class="sb">`pyproject.toml`</span>, measured on
+  the whole suite: the line-traced run of <span class="sb">`coverage.yml`</span> keeps every
+  <span class="sb">`.pyx`</span> line.
+<span class="k">-</span><span class="w"> </span>The frequencies of annular webs connected with <span class="sb">`'BFxcte'`</span> to cylinders
+  of the shear deformation theories (TSDT webs on TSDT cylinders, mixed
+  FSDT/TSDT, FSDT on FSDT), against the roots of the annulus, are in the
+  new notebook <span class="sb">`annular_webs_on_cylinders`</span>, with the CLPT webs, the
+  external frame and the offset or mid-surface description of the inner
+  face.
+<span class="k">-</span><span class="w"> </span><span class="sb">`test_cylshell_tsdt_tl.py`</span> checks the <span class="sb">`annular_tsdt_tl`</span> web on the inner
+  surface of a <span class="sb">`cylshell_tsdt_tl`</span> cylinder, with the null-space and the
+  penalty connections, with small models against the same web clamped
+  directly; the comparison of the full-size models with the roots of the
+  annulus is section 6 of the notebook <span class="sb">`annular_webs_on_cylinders`</span>.
+<span class="k">-</span><span class="w"> </span>Irie, Yamada and Tsujino (1983) cited with the author's initial M. and
+  the title "subjected to a torque" in <span class="sb">`test_annular_tsdt.py`</span> and
+  <span class="sb">`test_annular_tsdt_tl.py`</span>.
+<span class="k">-</span><span class="w"> </span>The linear-kernel tests of <span class="sb">`annular_tsdt_tl`</span> compare its matrices with
+  those of <span class="sb">`annular_tsdt_gl`</span> and <span class="sb">`annular_tsdt_donnell`</span> with the same
+  Gauss-Legendre points: the default numbers of points of the three models
+  differ, and the integrands of the annular models, rational in <span class="sb">`x`</span>, are
+  not integrated exactly by any of them. The docstrings of <span class="sb">`Shell`</span> and
+  <span class="sb">`gauss_points`</span> say so.
+
+<span class="gu">### New: notebook `thick_annular_plates`; tests of thick annuli and of mixed FSDT/TSDT webs</span>
+
+<span class="k">-</span><span class="w"> </span>The notebook <span class="sb">`thick_annular_plates`</span> compares the annular models with
+  Bagheri et al. (2019), Bisadi et al. (2012) and Dozio (2015), with
+  convergence studies.
+<span class="k">-</span><span class="w"> </span><span class="sb">`test_annular_tsdt.py`</span> checks the <span class="sb">`annular_tsdt_*`</span> models against the
+  exact third-order solutions of Bisadi et al. (2012), Tables 5 to 9
+  (<span class="sb">`h/a`</span> from 0.1 to 0.3, all edge conditions): within 0.18 % with a
+  clamped edge and 1e-5 without one.
+<span class="k">-</span><span class="w"> </span><span class="sb">`test_annular_fsdt.py`</span> checks the <span class="sb">`annular_fsdt_*`</span> models against the
+  first-order values of Dozio (2015), Table 5 (shear correction 5/6),
+  within 0.005 %. For the annulus free inside and clamped outside, the
+  models have a pair of modes with one nodal diameter (frequency
+  parameter 40.29) that the table does not list; the test skips it and says so in its Notes.
+<span class="k">-</span><span class="w"> </span>The tests of Bagheri et al. (2019) stay at the paper's shear correction
+  1 (within 0.038 % of the paper); the Notes of <span class="sb">`test_annular_fsdt.py`</span>
+  and the notebook give, beside them, the values with the default
+  <span class="sb">`'rohwer'`</span> (5/6 for these plates), 0.76 % to 8.20 % lower.
+<span class="k">-</span><span class="w"> </span><span class="sb">`tests/multidomain/test_annular_cylinder_mixed.py`</span>: an <span class="sb">`annular_fsdt_*`</span>
+  web on a <span class="sb">`cylshell_tsdt_*`</span> cylinder and an <span class="sb">`annular_tsdt_*`</span> web on a
+  <span class="sb">`cylshell_fsdt_*`</span> cylinder, connected with <span class="sb">`'BFxcte'`</span> with and without
+  <span class="sb">`face`</span>, null space and penalty: the same web clamped directly and
+  rigid motions free of energy.
+
+<span class="gu">### Changed: `MultiDomain` imposes the prescribed displacements with `pd_method='null-space'` by default</span>
+
+<span class="k">-</span><span class="w"> </span>The default of <span class="sb">`pd_method`</span> of <span class="sb">`MultiDomain`</span> is <span class="sb">`'null-space'`</span>, as for
+  <span class="sb">`conn_method`</span>: the prescribed displacements of <span class="sb">`Shell.add_point_pd`</span>,
+  <span class="sb">`Shell.add_distr_pd_fixed_x`</span> and <span class="sb">`Shell.add_distr_pd_fixed_y`</span> are imposed
+  exactly, <span class="sb">`calc_fext`</span> does not contain their penalty forces <span class="sb">`k u_p`</span>, and
+  <span class="sb">`get_Z`</span> contains their constraints. It was <span class="sb">`'penalty'`</span>; code that adds the
+  penalty stiffnesses of <span class="sb">`fkCpd`</span>, <span class="sb">`fkCld_xcte`</span> or <span class="sb">`fkCld_ycte`</span> to the
+  stiffness matrix must now pass <span class="sb">`pd_method='penalty'`</span>. Assemblies without
+  prescribed displacements are unchanged. <span class="sb">`json_io.load`</span> uses the same
+  default for a file without the key <span class="sb">`pd_method`</span>, and the notebook helper
+  <span class="sb">`blade_cylinder_utils.build_cylinder`</span> defaults to <span class="sb">`'null-space'`</span>.
+<span class="k">-</span><span class="w"> </span>Cost, measured on hpc12 for linear buckling under end-shortening (single
+  plate, blade- and Z-stiffened cylinders up to 77760 Ritz constants, the
+  L-stringer cylinder of 38880 Ritz constants under compression and
+  torsion): the total time of the null-space method is within -36 % to
+  +7 % of the penalty method with <span class="sb">`k = 10^4 A_11/a`</span> and <span class="sb">`10^6 A_11/a`</span>,
+  <span class="sb">`get_Z`</span> taking up to 4.5 s longer, and the peak memory within -9 % to
+  +6 %.
+<span class="k">-</span><span class="w"> </span>Tests that use the penalty forms (<span class="sb">`test_dcb_damage`</span>,
+  <span class="sb">`test_dcb_linear_measures`</span>, <span class="sb">`test_face_clamp`</span>, <span class="sb">`test_kCpd_kernels`</span>,
+  <span class="sb">`test_multidomain_postprocessing`</span>, <span class="sb">`test_null_space_pd`</span>) pass
+  <span class="sb">`pd_method='penalty'`</span> (values unchanged); <span class="sb">`test_null_space_pd`</span> checks the
+  new default. The notebooks <span class="sb">`null_space_vs_penalty`</span> and the helper
+  <span class="sb">`dcb_utils`</span> pass <span class="sb">`pd_method='penalty'`</span> where they used the default
+  (results unchanged).
+
+<span class="gu">### New: `'BFycte'` at a face of the base; the cylinder builders tie the stiffeners to the skin surface</span>
+
+<span class="k">-</span><span class="w"> </span>The connection <span class="sb">`'BFycte'`</span> takes the keys <span class="sb">`face='lower'|'upper'`</span> and
+  <span class="sb">`kinematics='sanders'|'model'`</span> of <span class="sb">`'BFxcte'`</span>, with the same meaning: the
+  edge <span class="sb">`ycte2`</span> of the flange <span class="sb">`p2`</span> (<span class="sb">`0`</span> for <span class="sb">`'lower'`</span>, <span class="sb">`p2.b`</span> for
+  <span class="sb">`'upper'`</span>) is tied to the face <span class="sb">`z1 = d1 -+ h1/2`</span> of the base <span class="sb">`p1`</span>, whose
+  points follow the Sanders-Koiter kinematics of a <span class="sb">`cylshell_*`</span> base by
+  default, <span class="sb">`u1(z) = u1 - z w1,x`</span>, <span class="sb">`v1(z) = (1 + z/r1) v1 - z w1,y`</span>, with
+  the rotation of the normal about <span class="sb">`x`</span> at the face, <span class="sb">`-w1,y + v1/r1`</span>. Penalty
+  (<span class="sb">`kCBFycte_face.fkCBFycte_face`</span>) and null space
+  (<span class="sb">`nullspace.constraint_matrix`</span>); new module
+  <span class="sb">`panels.multidomain.connections.kCBFycte_face`</span>, derivation and symbolic
+  checks in <span class="sb">`theory/multidomain_penalization/bfycte_face.py`</span>. Tests:
+  <span class="sb">`tests/multidomain/test_conn_BFycte_face.py`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`create_cylinder_blade_stiffened`</span> and <span class="sb">`create_cylinder_z_stiffened`</span> set
+  the face from <span class="sb">`side`</span> (<span class="sb">`'internal'`</span> -&gt; <span class="sb">`'lower'`</span>, <span class="sb">`'external'`</span> -&gt;
+  <span class="sb">`'upper'`</span>): <span class="sb">`width_blades`</span> is the height of a blade from the surface of
+  the skin, and <span class="sb">`width_web`</span> the width of a web from the face of the strip
+  (the face of the attached flange) to the middle surface of the free
+  flange; both were measured from the middle surface of the skin, the
+  stiffener overlapping the skin. The results of every analysis built with
+  these functions change; the tests set the dimensions of their sources
+  from the skin surface (Card and Jones 1966 cylinders 3 and 4,
+  <span class="sb">`h_b = 0.33 in - t`</span>; Singer et al. 1971 AS-2, <span class="sb">`h_s`</span>; Peterson and Dow
+  1959 Z stringers, <span class="sb">`H_w = 0.54 - 3(0.040)/2 = 0.48`</span> in) and their
+  regression values are updated.
+<span class="k">-</span><span class="w"> </span>The key <span class="sb">`kinematics`</span> given without <span class="sb">`face`</span> raises a <span class="sb">`ValueError`</span> in
+  <span class="sb">`'BFxcte'`</span> and <span class="sb">`'BFycte'`</span>; it was ignored.
+
+<span class="gu">### New notebooks and tests: stiffened cylinders in torsion of Moore and Wescoat (1944)</span>
+
+<span class="k">-</span><span class="w"> </span>New notebooks <span class="sb">`notebooks/moore1944_ring_cylinders.ipynb`</span> and
+  <span class="sb">`notebooks/moore1944_stiffened_cylinders.ipynb`</span> (Tutorials), with the
+  helper module <span class="sb">`notebooks/moore1944_utils.py`</span>, the run script
+  <span class="sb">`notebooks/moore1944_runs.py`</span> and its results
+  <span class="sb">`notebooks/results/moore1944_stage1.json`</span>, <span class="sb">`moore1944_stage2.json`</span>: first
+  buckling torques of the ring-stiffened specimens 16, 17, 18, 13, 13A and
+  of the ring- and stringer-stiffened specimens 19, 14, 20, 15, 21 of NACA
+  ARR 4E31 (Tables I and II), the rings as <span class="sb">`annular_clpt_donnell`</span> webs on
+  the inner surface of the skin (<span class="sb">`'BFxcte'`</span> with <span class="sb">`face='lower'`</span>), the
+  channel stringers outside the skin as a base layer of the skin strip and
+  flat webs and lips connected with <span class="sb">`'BFycte'`</span>, under the constant shear
+  flow of a torque.
+<span class="k">-</span><span class="w"> </span>New tests in <span class="sb">`tests/multidomain/test_moore1944_torsion.py`</span>, about 12 min
+  (specimens 17 and 19 marked <span class="sb">`slow`</span>):
+  specimen 16 against Donnell's formula as given in ARR 4E31, specimens 17
+  (rings) and 19 (rings and stringers) against the converged values of the
+  same models.
+
+<span class="gu">### Changed: `create_wingbox` connects the domains with `conn_method='null-space'` by default</span>
+
+<span class="k">-</span><span class="w"> </span>The default of <span class="sb">`conn_method`</span> of <span class="sb">`create_wingbox`</span>, and so of
+  <span class="sb">`wingbox_tip_force_lb`</span>, is <span class="sb">`'null-space'`</span>, the default of <span class="sb">`MultiDomain`</span>
+  and of every other builder and analysis of <span class="sb">`panels.multidomain`</span>; it was
+  <span class="sb">`'penalty'`</span>. The first buckling tip force of the default wing-box (High-AR-t5,
+  default terms) is 190.41 N, 172.78 N with <span class="sb">`conn_method='penalty'`</span>
+  (docstring example of <span class="sb">`wingbox_tip_force_lb`</span>).
+<span class="k">-</span><span class="w"> </span>Tests: <span class="sb">`test_wingbox_tip_force_lb_default`</span> checks the new default and its
+  load, 190.405 N; <span class="sb">`test_wingbox_models`</span> passes <span class="sb">`conn_method='penalty'`</span>
+  (stored loads unchanged). The notebook <span class="sb">`ex_multidomain_wingbox`</span> passes
+  <span class="sb">`conn_method='penalty'`</span> where it used the default (results unchanged).
+
+<span class="gu">### Changed: the cylinder builders store their connections in the assembly</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`create_cylinder`</span> and <span class="sb">`create_cylinder_blade_stiffened`</span> pass their
+  connections to <span class="sb">`MultiDomain`</span>, as <span class="sb">`create_cylinder_z_stiffened`</span> does: the
+  returned list of connections is <span class="sb">`md.conn`</span>, used by <span class="sb">`calc_kC`</span>, <span class="sb">`get_Z`</span>,
+  <span class="sb">`linear_static`</span> and the other methods when no connections are given
+  (before, <span class="sb">`md.conn`</span> was <span class="sb">`None`</span>). Returned values unchanged. Tests:
+  <span class="sb">`test_create_cylinder`</span> (new, <span class="sb">`tests/multidomain/test_cylinder.py`</span>),
+  <span class="sb">`test_return_info`</span>.
+<span class="k">-</span><span class="w"> </span>New argument <span class="sb">`side='internal'|'external'`</span> (default <span class="sb">`'internal'`</span>) of
+  <span class="sb">`cylinder_blade_stiffened_compression_lb_Nxx_cte`</span>,
+  <span class="sb">`cylinder_blade_stiffened_compression_lb_Nxx_from_static`</span> and
+  <span class="sb">`cylinder_blade_stiffened_compression_lb_pd_from_static`</span>, passed to
+  <span class="sb">`create_cylinder_blade_stiffened`</span>. Test <span class="sb">`test_analyses_side`</span>.
+
+<span class="gu">### Changed: in-plane loads of `tstiff2d_1stiff_flutter`</span>
+
+<span class="k">-</span><span class="w"> </span>New arguments <span class="sb">`Nyy_skin`</span>, <span class="sb">`Nyy_base`</span>, <span class="sb">`Nyy_flange`</span>, <span class="sb">`Nxy_skin`</span>,
+  <span class="sb">`Nxy_base`</span> and <span class="sb">`Nxy_flange`</span> (default <span class="sb">`None`</span>), placed after <span class="sb">`Nxx_flange`</span>:
+  <span class="sb">`run_static_case`</span> and the arguments after it moved six positions.
+<span class="k">-</span><span class="w"> </span><span class="sb">`run_static_case=False`</span>: <span class="sb">`Nxx_*`</span>, <span class="sb">`Nyy_*`</span> and <span class="sb">`Nxy_*`</span> are constant
+  membrane stress resultants of every domain of the skin, base and flange,
+  and the geometric stiffness matrix is computed from them (<span class="sb">`calc_kG`</span>
+  without <span class="sb">`c`</span>). The three <span class="sb">`Nxx_*`</span> were not used and the geometric
+  stiffness was zero. Docstring example with <span class="sb">`Nxx_*`</span> = -100 N/m in the
+  three parts: <span class="sb">`sqrt(-Re lambda_1)`</span> 487.4174 to 486.3599 rad/s (without
+  loads unchanged, 487.42); <span class="sb">`N_yy = -100`</span> N/m gives 475.3830, `N_xy =
+  -100` N/m 487.4116.
+<span class="k">-</span><span class="w"> </span><span class="sb">`run_static_case=True`</span>: <span class="sb">`Nxx_*`</span> and <span class="sb">`Nxy_*`</span> are axial and shear loads
+  distributed at the edge <span class="sb">`x = 0`</span> of each part, and the geometric
+  stiffness comes from the membrane stresses of the static solution, as
+  for <span class="sb">`Nxx_*`</span> before; any <span class="sb">`Nyy_*`</span> given raises <span class="sb">`ValueError`</span>. The boundary
+  conditions, for the static case and for the eigenvalue problem, are
+  those of the compression analysis of the paper, Fig. 7: the edges
+  <span class="sb">`x = 0`</span>, <span class="sb">`y = 0`</span> and <span class="sb">`y = b`</span> of the skin and the loaded end of the
+  flange are free in <span class="sb">`u`</span>, and the loaded edge <span class="sb">`x = 0`</span> of the skin and of
+  the flange is also free in <span class="sb">`v`</span>; they were those of Fig. 8. Docstring
+  example with the static case: without loads <span class="sb">`sqrt(-Re lambda_1)`</span>
+  487.4174 to 448.3766 rad/s (the first eigenvalue is now real at Mach 2);
+  <span class="sb">`Nxx_*`</span> = -100 N/m 448.0302 (-7.7e-4; before 487.4215, the loads acting
+  on restrained displacements); <span class="sb">`Nxy_skin`</span> = -100 N/m 448.3763.
+<span class="k">-</span><span class="w"> </span>The attributes <span class="sb">`Nxx`</span>, <span class="sb">`Nyy`</span>, <span class="sb">`Nxy`</span> of the returned domains are the
+  constant loads (<span class="sb">`run_static_case=False`</span>, <span class="sb">`0`</span> for <span class="sb">`None`</span>) or <span class="sb">`0`</span>.
+<span class="k">-</span><span class="w"> </span>New tests <span class="sb">`test_tstiff2d_1stiff_flutter_constant_prestress`</span>,
+  <span class="sb">`test_tstiff2d_1stiff_flutter_static_edge_loads`</span> and
+  <span class="sb">`test_tstiff2d_1stiff_flutter_static_case_buckling_fig7`</span> (without flow,
+  <span class="sb">`omega_1^2`</span> falls to 0.8 % of its unloaded value at 0.99 times the
+  buckling load of <span class="sb">`tstiff2d_1stiff_compression`</span>, Fig. 7); the notebook
+  <span class="sb">`ex_multidomain_tstiff2d`</span> runs the flutter case with both kinds of load.
+
+<span class="gu">### Generators of `plate_fsdt_donnell`, `plate_tsdt_donnell`, `cylshell_fsdt_donnell`, `cylshell_fsdt_sanders`, `cylshell_tsdt_donnell`, `cylshell_tsdt_sanders`: one folder per model</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`theory/shells/fsdt_tsdt/`</span>, which derived the six models from one
+  parametrized script, is split into one self-contained folder per model,
+  <span class="sb">`theory/shells/&lt;model&gt;/`</span> (<span class="sb">`&lt;model&gt;.py`</span>, derivation with symbolic checks:
+  linear part, exact tangent, finite differences and, for the TSDT, the
+  offset cubic; <span class="sb">`write_pyx.py`</span>; <span class="sb">`&lt;model&gt;.md`</span>), in the layout of the folders
+  of the <span class="sb">`*_gl`</span> models.
+<span class="k">-</span><span class="w"> </span>The non-linear kernels <span class="sb">`fkC_num`</span>, <span class="sb">`fkG_num`</span>, <span class="sb">`calc_fint`</span> and <span class="sb">`calc_kTv`</span>
+  are written in the layout of the <span class="sb">`*_gl`</span> models: the generalized
+  derivatives <span class="sb">`d = [Phi] c`</span>, <span class="sb">`[B] = d eps/d d`</span> and <span class="sb">`[B]^T [F] [B] + [H]`</span> at
+  each integration point. Same results to round-off (largest relative
+  difference 1.2e-15 on random states with the laminate <span class="sb">`ABD`</span>); a
+  Newton-Raphson analysis with <span class="sb">`m = n = 12`</span> runs 70 % (plate FSDT) to 91 %
+  (Sanders cylinder TSDT) faster, <span class="sb">`calc_kTv`</span> 9 % to 20 % faster. With a
+  constitutive matrix per integration point, <span class="sb">`fkC_num`</span> uses all its entries,
+  as <span class="sb">`calc_fint`</span> does, instead of assuming the symmetric blocks of a
+  laminate. The other kernels, <span class="sb">`fk0`</span>, <span class="sb">`fkG0`</span>, <span class="sb">`fkM`</span>, <span class="sb">`fkAx`</span>, <span class="sb">`fkAy`</span>, <span class="sb">`fcA`</span>,
+  <span class="sb">`fkM_num`</span>, <span class="sb">`fkAx_num`</span>, <span class="sb">`fkAy_num`</span> and the follower-pressure kernels, are
+  unchanged, character for character.
+<span class="k">-</span><span class="w"> </span><span class="sb">`theory/shells/tangent_product`</span> no longer writes <span class="sb">`calc_kTv`</span> of these six
+  models.
+
+<span class="gu">### New models `plate_tsdt_tl`, `cylshell_tsdt_tl`, `annular_tsdt_tl`: total-Lagrangian TSDT</span>
+
+<span class="k">-</span><span class="w"> </span>Reddy's third-order shear deformation theory for finite rotations: the
+  deformed position of the point at <span class="sb">`z`</span> is <span class="sb">`X + z d + z^3 q`</span>, `q = -c1 (d -
+  N)`, with the second-order director <span class="sb">`d`</span> of <span class="sb">`plate_fsdt_tl`</span>,
+  <span class="sb">`cylshell_fsdt_tl`</span> and <span class="sb">`annular_fsdt_tl`</span> and the normal of the deformed
+  mid-surface <span class="sb">`N = X,x x X,y`</span>, not normalized; the linear part of <span class="sb">`d - N`</span> is
+  Reddy's <span class="sb">`(phix + w,x, phiy + w,y, 0)`</span>. Strains: those of the FSDT TL
+  models and the coefficients of <span class="sb">`z^3`</span> of the in-plane and of <span class="sb">`z^2`</span> of the
+  transverse shear Green-Lagrange strains, <span class="sb">`kappa3 = X,a . q,b`</span> (plate:
+  <span class="sb">`-c1 (kappa + X,ab . N)`</span>), <span class="sb">`gamma2 = -3 c1 gamma`</span> exactly, so that the
+  faces stay free of transverse shear for any deformation; for the cylinder
+  <span class="sb">`kyy3`</span> has the term <span class="sb">`-c1 (exx + eyy)/r`</span>, which removes the stretch of <span class="sb">`N`</span>
+  from its linear part. Linear parts of <span class="sb">`plate_tsdt_donnell`</span>,
+  <span class="sb">`cylshell_tsdt_sanders`</span> and <span class="sb">`annular_tsdt_donnell`</span>; strains invariant
+  under rigid rotations up to the error of the second-order director.
+<span class="k">-</span><span class="w"> </span>Linear third-order terms with the director of the FSDT TL models were
+  compared and not kept: their face shear does not vanish, and in large
+  bending they lock (thin strip at a tip rotation of 0.46 rad 25 % too
+  stiff, 50 % at 0.99 rad).
+<span class="k">-</span><span class="w"> </span>Generators <span class="sb">`theory/shells/{plate,cylshell,annular}_tsdt_tl/`</span> (derivation
+  with symbolic checks, <span class="sb">`write_pyx.py`</span>, notes) and kernels
+  <span class="sb">`panels/models/{plate,cylshell}_tsdt_tl_num.pyx`</span> (with follower pressure)
+  and <span class="sb">`panels/models/annular_tsdt_tl(_num).pyx`</span>; the analytical kernels of
+  the plate and of the cylinder are those of <span class="sb">`plate_tsdt_gl`</span> and
+  <span class="sb">`cylshell_tsdt_gl`</span>.
+<span class="k">-</span><span class="w"> </span>Registered in <span class="sb">`modelDB`</span> (integrand degree <span class="sb">`6p`</span>), <span class="sb">`setup.py`</span>,
+  <span class="sb">`panels.models`</span>; <span class="sb">`fsdt_tsdt_field.is_tl`</span> and the 13 strains in
+  <span class="sb">`fsdt_tsdt_field.fstrain`</span>; the cylinder is a Sanders model for
+  <span class="sb">`fsdt_tsdt_field.is_sanders`</span> and <span class="sb">`kCsdt._rinv_sanders`</span>; follower pressure
+  (<span class="sb">`theory/shells/follower_pressure`</span>).
+<span class="k">-</span><span class="w"> </span>Documentation: section "Third-order shear deformation theory" of the
+  total-Lagrangian page, section of the annular page, model tables, "How
+  to choose a model".
+<span class="k">-</span><span class="w"> </span>Tests: <span class="sb">`tests/tests_shell/test_plate_tsdt_tl.py`</span>,
+  <span class="sb">`test_cylshell_tsdt_tl.py`</span>, <span class="sb">`test_annular_tsdt_tl.py`</span>.
+
+<span class="gu">### New models `plate_fsdt_tl`, `cylshell_fsdt_tl`: total-Lagrangian FSDT</span>
+
+<span class="k">-</span><span class="w"> </span>The FSDT with the Green-Lagrange membrane strains of <span class="sb">`plate_fsdt_gl`</span> and
+  <span class="sb">`cylshell_fsdt_gl`</span> and the curvatures and transverse shear strains of the
+  second-order director <span class="sb">`d = (psix, psiy, 1 - (psix^2 + psiy^2)/2)`</span>,
+  <span class="sb">`psix = phix`</span>, <span class="sb">`psiy = phiy + v/r`</span>: the displacement field of the
+  moderate rotation theory of Schmidt and Reddy (1988), Eq. (16), with the
+  transverse normal strain of Palmerio, Reddy and Schmidt (1990, Part 1),
+  Eq. (20), set to zero. Strains cubic; Palmerio's Eq. (20) to
+  <span class="sb">`O(eps^3)`</span>; for the cylinder the Koiter terms <span class="sb">`-eyy/r`</span>, <span class="sb">`-gxy/(2r)`</span> of
+  <span class="sb">`cylshell_clpt_tl`</span>, so that the linear part is that of
+  <span class="sb">`cylshell_fsdt_sanders`</span> (<span class="sb">`plate_fsdt_donnell`</span> for the plate).
+<span class="k">-</span><span class="w"> </span>Generators <span class="sb">`theory/shells/{plate,cylshell}_fsdt_tl/`</span> (derivation with
+  symbolic checks; <span class="sb">`write_pyx.py`</span>; notes) and kernels
+  <span class="sb">`panels/models/{plate,cylshell}_fsdt_tl_num.pyx`</span>; the analytical kernels
+  are those of the GL models.
+<span class="k">-</span><span class="w"> </span>Registered in <span class="sb">`modelDB`</span> (integrand degree <span class="sb">`6p`</span>, <span class="sb">`3p + 1`</span> points),
+  <span class="sb">`setup.py`</span>, <span class="sb">`panels.models`</span>; <span class="sb">`fsdt_tsdt_field.is_tl`</span> and the strains in
+  <span class="sb">`fsdt_tsdt_field.fstrain`</span>; the cylinder is a Sanders model for
+  <span class="sb">`fsdt_tsdt_field.is_sanders`</span> and <span class="sb">`kCsdt._rinv_sanders`</span>; follower pressure
+  (<span class="sb">`follower_pressure.MODELS`</span>).
+<span class="k">-</span><span class="w"> </span>Tests <span class="sb">`tests/tests_shell/test_fsdt_tl.py`</span> and the two models in
+  <span class="sb">`test_tangent_consistency.py`</span>. Page <span class="sb">`doc/source/fsdt_tsdt_tl.rst`</span>.
+
+<span class="gu">### New models `plate_fsdt_gl`, `plate_tsdt_gl`, `cylshell_fsdt_gl`, `cylshell_tsdt_gl`: shear deformation with Green-Lagrange membrane strains</span>
+
+<span class="k">-</span><span class="w"> </span>The FSDT and TSDT of <span class="sb">`plate_fsdt_donnell`</span>, <span class="sb">`plate_tsdt_donnell`</span>,
+  <span class="sb">`cylshell_fsdt_sanders`</span> and <span class="sb">`cylshell_tsdt_sanders`</span> with the complete
+  Green-Lagrange membrane strains of <span class="sb">`plate_clpt_gl`</span> and <span class="sb">`cylshell_clpt_gl`</span>
+  (Amabili 2008, Eqs. (1.118)-(1.120) for the cylinder); bending and
+  transverse shear strains linear. The linear kernels are those of the
+  linear models (imported); <span class="sb">`fkG0`</span> has the <span class="sb">`u-u`</span>, <span class="sb">`v-v`</span> (and <span class="sb">`v-w`</span>) blocks.
+<span class="k">-</span><span class="w"> </span>Generators, one self-contained folder per model:
+  <span class="sb">`theory/shells/{plate,cylshell}_{fsdt,tsdt}_gl/`</span> (derivation with symbolic
+  checks: membrane strains <span class="sb">`(F^T F - I)/2`</span>, linear part equal to the
+  operators of the matching linear model folder (<span class="sb">`plate_fsdt_donnell`</span>,
+  <span class="sb">`cylshell_fsdt_sanders`</span>, ...), zero strains for finite rigid
+  rotations, exact tangent, finite differences; <span class="sb">`write_pyx.py`</span>; notes).
+  New kernels <span class="sb">`panels/models/*_{fsdt,tsdt}_gl.pyx`</span> and <span class="sb">`*_num.pyx`</span>
+  (<span class="sb">`fkG0`</span>, <span class="sb">`fkC_num`</span>, <span class="sb">`fkG_num`</span>, <span class="sb">`calc_fint`</span>, <span class="sb">`calc_kTv`</span>,
+  <span class="sb">`calc_fext_follower`</span>, <span class="sb">`fkCfollower_num`</span>).
+<span class="k">-</span><span class="w"> </span>Registered in <span class="sb">`modelDB`</span>, <span class="sb">`setup.py`</span> and <span class="sb">`panels.models`</span>;
+  <span class="sb">`fsdt_tsdt_field.is_gl`</span> and the Green-Lagrange membrane strains in
+  <span class="sb">`fsdt_tsdt_field.fstrain`</span>; the cylinders are Sanders models for
+  <span class="sb">`fsdt_tsdt_field.is_sanders`</span> and the connections (<span class="sb">`kCsdt._rinv_sanders`</span>);
+  follower pressure of <span class="sb">`plate_clpt_gl`</span> and <span class="sb">`cylshell_clpt_gl`</span>
+  (<span class="sb">`follower_pressure.MODELS`</span>).
+<span class="k">-</span><span class="w"> </span>Tests <span class="sb">`tests/tests_shell/test_fsdt_tsdt_gl.py`</span> (linear kernels, rigid
+  rotations, in-plane cantilever strip against the elastica, Euler load of a
+  pinned tube, hinged roof of Sze, Liu and Lo 2004, Table 9a) and the four
+  models in <span class="sb">`test_tangent_consistency.py`</span>. Page <span class="sb">`doc/source/fsdt_tsdt_gl.rst`</span>.
+
+<span class="gu">### New models `annular_fsdt_donnell`, `annular_fsdt_gl`, `annular_fsdt_tl`: annular-sector plates with transverse shear</span>
+
+<span class="k">-</span><span class="w"> </span>The annular sectors of <span class="sb">`annular_clpt_*`</span> with the first-order shear
+  deformation theory, 5 DOFs <span class="sb">`u, v, w, phix, phiy`</span> per term, the inputs,
+  coordinates and local axes of <span class="sb">`annular_clpt_donnell`</span>:
+  <span class="sb">`annular_fsdt_donnell`</span> with the von Kármán strains of the Mindlin plate in
+  polar coordinates (Bagheri, Kiani and Eslami 2019, Eqs. 2 and 6);
+  <span class="sb">`annular_fsdt_gl`</span> with the complete Green-Lagrange membrane strains of
+  <span class="sb">`annular_clpt_gl`</span>; <span class="sb">`annular_fsdt_tl`</span> with the second-order director and
+  the strains of <span class="sb">`plate_fsdt_tl`</span> in polar coordinates. The laminate offset
+  <span class="sb">`Shell.offset`</span> enters the stiffness (<span class="sb">`Shell.ABD`</span>, 8 x 8) and the mass.
+  The matrices of the whole domain are integrated numerically; the fields
+  module of each model provides <span class="sb">`fuvw`</span>, <span class="sb">`fstrain`</span>, <span class="sb">`strain_names`</span>,
+  <span class="sb">`stress_names`</span> and <span class="sb">`fg`</span>.
+<span class="k">-</span><span class="w"> </span>One self-contained generator per model in
+  <span class="sb">`theory/shells/annular_fsdt_&lt;variant&gt;/`</span> (<span class="sb">`&lt;model&gt;.py`</span> with the symbolic
+  checks, <span class="sb">`write_pyx.py`</span>, the same in the three folders, <span class="sb">`&lt;model&gt;.md`</span>).
+<span class="k">-</span><span class="w"> </span>Tests: thin annuli (<span class="sb">`h/a = 0.001`</span>) against Yamaki (1958), Irie et al.
+  (1983) and the exact frequencies of Leissa (1969); thick annuli under a
+  torque (<span class="sb">`h/a = 0.05`</span>, <span class="sb">`0.10`</span>) against Bagheri et al. (2019), Table 2;
+  agreement of the three models in the linear limit; rigid rotations; the
+  tangent stiffness; the offset and the flat-plate limit.
+
+<span class="gu">### New models `annular_clpt_donnell`, `annular_clpt_gl`, `annular_clpt_tl`: annular-sector plates</span>
+
+<span class="k">-</span><span class="w"> </span>Annular sectors of flat plates, CLPT in polar coordinates:
+  <span class="sb">`annular_clpt_donnell`</span> with the von Kármán strains of circular plates
+  (Amabili 2008, Sec. 1.4.2, Eqs. 1.175-1.180), the convention of
+  <span class="sb">`plate_clpt_donnell`</span> for the von Kármán flat plate; <span class="sb">`annular_clpt_gl`</span> with
+  the complete Green-Lagrange membrane strains (Eqs. 1.166-1.168), as
+  <span class="sb">`plate_clpt_gl`</span>; <span class="sb">`annular_clpt_tl`</span> also with the changes of curvature of
+  the deformed normal, as <span class="sb">`plate_clpt_tl`</span>. `Shell(model='annular_clpt_...',
+  a=radial width, b=arc length of the outer edge, r=outer radius)`; `x = r -
+  rho` runs from the outer edge inwards, <span class="sb">`y = r theta`</span> along it, and `u, v,
+  w<span class="sb">` are measured along `</span>e<span class="ge">_x = -e_</span>rho`, <span class="sb">`e_y = e_theta`</span>, <span class="sb">`e_z = e_x x e_y`</span>.
+  The laminate offset <span class="sb">`Shell.offset`</span> enters the stiffness (<span class="sb">`Shell.ABD`</span>) and
+  the mass (moments of the density) of the three models.
+<span class="k">-</span><span class="w"> </span>The web of a ring frame of a stiffened cylinder is an application (<span class="sb">`a`</span> the
+  height of the web): these are the local axes of the flange of <span class="sb">`'BFxcte'`</span>,
+  so that a web connects to a cylinder of the same radius at the station
+  <span class="sb">`x_f`</span> with `dict(p1=cylinder, p2=web, func='BFxcte', xcte1=x_f,
+  xcte2=0)`, with the penalty or the null-space method, and a closed ring
+  is made of sectors joined with <span class="sb">`'SSycte'`</span>.
+<span class="k">-</span><span class="w"> </span>Generated from <span class="sb">`theory/shells/annular_clpt_donnell/`</span>,
+  <span class="sb">`theory/shells/annular_clpt_gl/`</span> and <span class="sb">`theory/shells/annular_clpt_tl/`</span>
+  (derivations with symbolic checks: Amabili's Eqs. 1.166-1.168 and
+  1.175-1.180, the three-dimensional Kirchhoff field, rigid motions, small
+  for <span class="sb">`donnell`</span> and finite for the membrane strains of <span class="sb">`gl`</span> and all strains
+  of <span class="sb">`tl`</span>, the flat-plate limit and the exact tangent; the same
+  self-contained <span class="sb">`write_pyx.py`</span> in each folder):
+  <span class="sb">`panels/models/annular_clpt_*_num.pyx`</span> (<span class="sb">`fkC_num`</span>, <span class="sb">`fkG_num`</span>, <span class="sb">`fkM_num`</span>,
+  <span class="sb">`calc_fint`</span>, <span class="sb">`calc_kTv`</span>, <span class="sb">`fuvw`</span>, <span class="sb">`fstrain`</span>) and
+  <span class="sb">`panels/models/annular_clpt_*.pyx`</span> (<span class="sb">`fk0`</span>, <span class="sb">`fkG0`</span>, <span class="sb">`fkM`</span>). The
+  coefficients <span class="sb">`1/rho`</span> make the integrands rational: every matrix is
+  integrated with the Gauss-Legendre rule. The piston-theory kernels raise
+  <span class="sb">`NotImplementedError`</span>; the follower pressure is not available for these
+  models.
+<span class="k">-</span><span class="w"> </span>Tests against Leissa (1969), Table 2.21 (annulus clamped outside and
+  free inside, alone and clamped through <span class="sb">`'BFxcte'`</span> by the clamped end of a
+  cylinder), against <span class="sb">`4 pi^2 D/b^2`</span> and the plate models with a laminate
+  offset in the flat-plate limit, and of the tangent stiffness against the derivative of the
+  internal force vector. New page "Annular-sector plates".
+<span class="k">-</span><span class="w"> </span>Tests of annuli under a uniform compression on both edges against Yamaki
+  (1958), Table 1, and the roots of his stability conditions (twelve
+  combinations of clamped, simply supported, free and movable edges), and
+  under a torque, with the pre-buckling state of a linear static case,
+  against Irie, Yamada and Tsujino (1983), Table 1. New notebooks
+  <span class="sb">`hamada1986_annular_torsion`</span> (experiments of Hamada and Harima 1986) and
+  <span class="sb">`majumdar1971_annular_compression`</span> (experiments of Majumdar 1971).
+
+<span class="gu">### New models `annular_tsdt_donnell`, `annular_tsdt_gl`: annular-sector plates with the TSDT</span>
+
+<span class="k">-</span><span class="w"> </span>The annular sectors of <span class="sb">`annular_clpt_donnell`</span> and <span class="sb">`annular_clpt_gl`</span> with
+  Reddy's third-order shear deformation theory, 5 DOFs `u, v, w, phix,
+  phiy`, the polar counterparts of <span class="sb">`plate_tsdt_donnell`</span> and
+  <span class="sb">`plate_tsdt_gl`</span>: the displacement field of the flat plate, with the cubic
+  term about the mid-surface of the laminate, and <span class="sb">`s w,y`</span> (<span class="sb">`s = r/rho`</span>, the
+  derivative along the arc) in place of <span class="sb">`w,y`</span>; the in-plane strains at <span class="sb">`z`</span>
+  are the linear membrane strains in polar coordinates of <span class="sb">`u(z), v(z)`</span>,
+  plus the von Kármán (<span class="sb">`donnell`</span>) or Green-Lagrange (<span class="sb">`gl`</span>) membrane terms.
+  The laminate offset <span class="sb">`Shell.offset`</span> enters the stiffness (<span class="sb">`Shell.ABD`</span> of
+  the TSDT) and the mass (moments of the density about the mid-surface).
+<span class="k">-</span><span class="w"> </span>Generated from <span class="sb">`theory/shells/annular_tsdt_donnell/`</span> and
+  <span class="sb">`theory/shells/annular_tsdt_gl/`</span> (derivations with symbolic checks: the
+  three-dimensional TSDT field in the metric of the plane, the CLPT limit
+  <span class="sb">`phix = -w,x`</span>, <span class="sb">`phiy = -s w,y`</span>, rigid motions, small and, for the <span class="sb">`gl`</span>
+  membrane strains, finite, the flat-plate limit, the exact tangent and the
+  mass integrand; the same self-contained <span class="sb">`write_pyx.py`</span> in both folders):
+  <span class="sb">`panels/models/annular_tsdt_*_num.pyx`</span> (<span class="sb">`fkC_num`</span>, <span class="sb">`fkG_num`</span>, <span class="sb">`fkM_num`</span>,
+  <span class="sb">`calc_fint`</span>, <span class="sb">`calc_kTv`</span>, <span class="sb">`fstrain`</span>; <span class="sb">`fuvw`</span> and <span class="sb">`fg`</span> of <span class="sb">`fsdt_tsdt_field`</span>)
+  and <span class="sb">`panels/models/annular_tsdt_*.pyx`</span> (<span class="sb">`fk0`</span>, <span class="sb">`fkG0`</span>, <span class="sb">`fkM`</span>), all
+  integrated with the Gauss-Legendre rule. The piston-theory kernels raise
+  <span class="sb">`NotImplementedError`</span>.
+<span class="k">-</span><span class="w"> </span>Tests of thin annuli against Leissa (1969, exact roots, clamped outside
+  and free inside), Yamaki (1958, Table 1, compression) and Irie, Yamada and
+  Tsujino (1983, Table 1, torsion), of a thick <span class="sb">`[0/90]`</span> sector of large
+  radius against the TSDT frequencies of Reddy (1984), of the offset against
+  the flat plates, of <span class="sb">`gl`</span> against <span class="sb">`donnell`</span> in the linear limit, and of the
+  tangent stiffness. New section of the page "Annular-sector plates".
+
+<span class="gu">### New key `'face'` of the connection `'BFxcte'`: flanges and ring-frame webs on a face of the base</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`dict(p1=base, p2=flange, func='BFxcte', xcte1=..., xcte2=..., face=...)`</span>
+  with <span class="sb">`face='lower'`</span> or <span class="sb">`'upper'`</span> ties the edge of the flange to the face of
+  the base at <span class="sb">`z = d -+ h/2`</span> (offset <span class="sb">`d`</span>, thickness <span class="sb">`h`</span> of the base) instead
+  of its reference surface; without the key, or with <span class="sb">`face=None`</span>, the
+  connection is unchanged. <span class="sb">`'lower'`</span> and <span class="sb">`'upper'`</span> refer to the coordinate
+  <span class="sb">`z`</span> of the base <span class="sb">`p1`</span>, as the faces of <span class="sb">`'SB'`</span> refer to the <span class="sb">`z`</span> of the
+  connected domains. The flange lies on the side of the face:
+  <span class="sb">`xcte2=0`</span> at the lower face, <span class="sb">`xcte2=p2.a`</span> at the upper face. The points of
+  the face follow the base, <span class="sb">`u(z) = u - z w,x`</span>, <span class="sb">`v(z) = (1 + z/r) v - z w,y`</span>
+  for the CLPT, the displacements at <span class="sb">`z`</span> of the FSDT and TSDT, and the
+  rotation of the normal at <span class="sb">`z`</span>; penalty and null-space methods. For a
+  <span class="sb">`cylshell_*`</span> base, <span class="sb">`'lower'`</span> is the inner and <span class="sb">`'upper'`</span> the outer surface:
+  the web of an internal ring frame, an <span class="sb">`annular_*`</span> plate, has its outer edge
+  on the inner surface, <span class="sb">`xcte2=0, face='lower'`</span>, and the web of an external
+  frame its inner edge on the outer surface, <span class="sb">`xcte2=web.a, face='upper'`</span>.
+<span class="k">-</span><span class="w"> </span>The face of a <span class="sb">`cylshell_*`</span> base follows the Sanders-Koiter kinematics, with
+  the term <span class="sb">`z v/r`</span>, whatever the model of the cylinder (<span class="sb">`cylshell_clpt_*`</span>,
+  <span class="sb">`cylshell_fsdt_*`</span>, <span class="sb">`cylshell_tsdt_*`</span>, Donnell, Sanders, GL and TL), so
+  that a rigid rotation about the axis is free of penalty energy and of
+  constraint residual also for a Donnell cylinder. The new key
+  <span class="sb">`'kinematics'`</span> of <span class="sb">`'BFxcte'`</span>, <span class="sb">`'sanders'`</span> (default) or <span class="sb">`'model'`</span>, makes
+  the face follow the kinematics of the model of the cylinder instead; for
+  <span class="sb">`cylshell_clpt_donnell`</span>, <span class="sb">`cylshell_fsdt_donnell`</span> and
+  <span class="sb">`cylshell_tsdt_donnell`</span>, without the term <span class="sb">`z v/r`</span>, a rigid rotation then
+  leaves the residual <span class="sb">`-z_f Omega`</span> at the face, of relative order <span class="sb">`h/(2 r)`</span>,
+  and <span class="sb">`check_bfxcte`</span> issues a <span class="sb">`UserWarning`</span> that names the section "Rigid
+  rotation at a face of a Donnell cylinder" of the page "Multidomain
+  connections". New functions <span class="sb">`kCBFxcte_face.face_rinv`</span> and
+  <span class="sb">`kCBFxcte_face.kinematics_of`</span>; new argument <span class="sb">`kinematics`</span> of
+  <span class="sb">`bfxcte_face_components`</span> and <span class="sb">`fkCBFxcte_face`</span>, and <span class="sb">`rinv`</span> of the private
+  <span class="sb">`kCsdt._surface_terms`</span>. The basis <span class="sb">`Z`</span> of the null space is computed again
+  when the key <span class="sb">`'kinematics'`</span> changes.
+<span class="k">-</span><span class="w"> </span>An <span class="sb">`annular_*`</span> flange on a <span class="sb">`cylshell_*`</span> base, with or without the key,
+  must have its edge <span class="sb">`xcte2`</span> at the radius of the connected surface,
+  <span class="sb">`r2 - xcte2 = r1 + z`</span>, and span the same angle, <span class="sb">`b2/r2 = b1/r1`</span>; the
+  connection raises a <span class="sb">`ValueError`</span> otherwise.
+<span class="k">-</span><span class="w"> </span>New module <span class="sb">`panels.multidomain.connections.kCBFxcte_face`</span>
+  (<span class="sb">`check_bfxcte`</span>, <span class="sb">`face_coordinate`</span>, <span class="sb">`bfxcte_face_components`</span>,
+  <span class="sb">`fkCBFxcte_face`</span>); <span class="sb">`nullspace.constraint_matrix`</span> imposes the same
+  quantities. The basis <span class="sb">`Z`</span> of the null space is computed again when the
+  key <span class="sb">`'face'`</span> or the offset of a panel changes (<span class="sb">`MultiDomain._Z_signature`</span>).
+<span class="k">-</span><span class="w"> </span>Derivation: <span class="sb">`theory/multidomain_penalization/connections.py`</span> (blocks
+  <span class="sb">`kCBFxcte_face11`</span>, <span class="sb">`kCBFxcte_face12`</span>) and the symbolic checks of
+  <span class="sb">`theory/multidomain_penalization/bfxcte_face.py`</span> (Kirchhoff-Love
+  displacement of a point of the normal, rotation about the circumferential
+  axis, zero residuals of the six rigid motions when the edge of the plate
+  is at the radius of the face; for a Donnell cylinder, the rotation about
+  the axis free of strain, the residual <span class="sb">`-z_f Omega`</span> with the Donnell
+  kinematics at the face and the rotation <span class="sb">`r Omega/(r + z_f)`</span> of the plate
+  that satisfies them). The block of the face in <span class="sb">`connections.py`</span> has the
+  <span class="sb">`1/r`</span> of the face, <span class="sb">`rinvf1`</span>.
+<span class="k">-</span><span class="w"> </span>Tests <span class="sb">`tests/multidomain/test_annular_cylinder.py`</span>: internal and external
+  frames at the clamped end of a cylinder against the roots of the
+  frequency equations of the annulus clamped outside or inside (Leissa
+  1969, Eqs. (1.11)-(1.13) and (1.17); the latter checked against
+  the values of Southwell in Leissa's Table 2.31), the face
+  of a cylinder with the offset <span class="sb">`h/2`</span> against the connection at its
+  reference surface, the same frame with the reference surface of the
+  cylinder at its inner face or at mid-thickness, the rigid-body motions
+  of a free cylinder with both frames, for a Sanders-Koiter and a Donnell
+  cylinder, with the default <span class="sb">`conn_method`</span> of <span class="sb">`MultiDomain`</span>
+  (<span class="sb">`'null-space'`</span>), the residual and the warning with <span class="sb">`kinematics='model'`</span>
+  (null space and penalty), the face of every <span class="sb">`cylshell_*`</span> model under a
+  rigid rotation, the penalty energy from the fields and against the
+  constraints of the null-space method, and the geometry checks. Pages
+  "Multidomain connections" (new section "Rigid rotation at a face of a
+  Donnell cylinder") and "Annular-sector plates".
+
+<span class="gu">### New argument `models` of the wing box and of the blade-stiffened cylinder</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`create_wingbox`</span> takes <span class="sb">`models`</span>, a dict of the model of each group of
+  domains, keyed like <span class="sb">`terms`</span>: <span class="sb">`'skin'`</span> (default <span class="sb">`plate_clpt_donnell`</span>),
+  <span class="sb">`'spar'`</span> (<span class="sb">`plate_clpt_gl`</span>), <span class="sb">`'stringer'`</span> (<span class="sb">`plate_clpt_gl`</span>) and <span class="sb">`'rib'`</span>
+  (<span class="sb">`plate_clpt_donnell`</span>); <span class="sb">`wingbox_tip_force_lb`</span> passes it on, and
+  <span class="sb">`info['models']`</span> returns the models used. Each group accepts
+  <span class="sb">`plate_clpt_donnell`</span>, <span class="sb">`plate_clpt_gl`</span> and <span class="sb">`plate_clpt_tl`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`create_cylinder_blade_stiffened`</span> and the three
+  <span class="sb">`cylinder_blade_stiffened_compression_lb_*`</span> analyses take <span class="sb">`models`</span> with
+  the keys <span class="sb">`'skin'`</span> (default <span class="sb">`cylshell_clpt_sanders`</span>; also
+  <span class="sb">`cylshell_clpt_gl`</span>, <span class="sb">`cylshell_clpt_tl`</span> and <span class="sb">`cylshell_clpt_donnell`</span>) and
+  <span class="sb">`'blade'`</span> (default <span class="sb">`plate_clpt_gl`</span>; also <span class="sb">`plate_clpt_tl`</span> and
+  <span class="sb">`plate_clpt_donnell`</span>).
+<span class="k">-</span><span class="w"> </span>A missing key takes its default, and the defaults give the results of
+  the assemblies unchanged (all the eigenvalues of the docstring examples
+  and of the wing box with 0, 2 and 4 stringers equal to the last digit);
+  an unknown key or a model not listed raises <span class="sb">`ValueError`</span>. The models of
+  the shear deformation theories are not accepted: their connections with
+  the classical models are not implemented, and the boundary condition
+  flags of these assemblies are those of the classical theory.
+<span class="k">-</span><span class="w"> </span>The TL models have the analytical kernels and, for a membrane
+  pre-buckling state, the geometric stiffness of the GL models: cylinder 4
+  of Card and Jones (1966) with a TL skin and TL blades buckles at the
+  load of the GL ones to the last digit; with the static pre-buckling
+  state the TL curvatures add the work of the bending moments, -6.6e-8
+  (relative) for that cylinder, -1.8e-4 for the laminated cylinder of the
+  examples, -2.7e-6 for the wing box of TL plates without stringers. New
+  tests <span class="sb">`test_discrete_tl_skin`</span>, <span class="sb">`test_tl_skin_Nxx_from_static`</span> (slow) and
+  <span class="sb">`test_models_argument`</span> in
+  <span class="sb">`tests/multidomain/test_cylinder_blade_stiffened.py`</span>; <span class="sb">`test_create_wingbox`</span>
+  and <span class="sb">`test_wingbox_models`</span> in <span class="sb">`tests/multidomain/test_wingbox.py`</span> check
+  the models of the wing box.
+
+<span class="gu">### New model `cylshell_clpt_tl`: total-Lagrangian Kirchhoff-Love cylinders</span>
+
+<span class="k">-</span><span class="w"> </span>Cylindrical shells, CLPT, with the Green-Lagrange membrane strains of
+  <span class="sb">`cylshell_clpt_gl`</span> and the changes of curvature measured with the area
+  vector <span class="sb">`a = X,x x X,y`</span> of the deformed mid-surface: <span class="sb">`kxx = -a.X,xx`</span>,
+  <span class="sb">`kyy = -a.X,yy - 1/r - (exx + 2 eyy)/r`</span>, <span class="sb">`kxy = -2 a.X,xy - gxy/(2r)`</span>, the
+  second derivatives of the position including those of the local basis.
+  The first terms are the change of the second fundamental form times the
+  area stretch; the terms <span class="sb">`-eyy/r`</span> and <span class="sb">`-gxy/(2r)`</span> make the linear part the
+  Sanders changes of curvature (Koiter's form, van der Heijden 2008, Eq.
+  3.16.8, p. 183, and Eq. 3.17.3, p. 202), a change of the order of the
+  membrane strain divided by the radius (p. 202). All six strains are invariant under any rigid rotation of
+  any deformed state. The analytical kernels are those of
+  <span class="sb">`cylshell_clpt_gl`</span>; the curvatures are cubic in the displacements and
+  the default integration is exact with <span class="sb">`3p + 1`</span> points (<span class="sb">`modelDB`</span> key
+  <span class="sb">`'integrand_degree': (6, 0)`</span>).
+<span class="k">-</span><span class="w"> </span>Generated from <span class="sb">`theory/shells/cylshell_clpt_tl/`</span> (derivation with symbolic
+  checks, among them the term-by-term comparison with the non-linear
+  curvatures of Novozhilov's theory of Amabili 2008, Eqs. 1.130-1.132,
+  <span class="sb">`write_pyx.py`</span>, self-contained, <span class="sb">`cylshell_clpt_tl.md`</span>, and
+  <span class="sb">`sanders_linear_part.py`</span>, which checks step by step why the linear part of
+  the curvatures is Sanders'): <span class="sb">`panels/models/cylshell_clpt_tl_num.pyx`</span>
+  (<span class="sb">`fkC_num`</span>, <span class="sb">`fkG_num`</span>, <span class="sb">`calc_fint`</span>, <span class="sb">`calc_kTv`</span>, follower pressure;
+  <span class="sb">`fkM_num`</span>, <span class="sb">`fkAx_num`</span>, <span class="sb">`fkAy_num`</span> of <span class="sb">`cylshell_clpt_sanders_num`</span>).
+<span class="k">-</span><span class="w"> </span>Registered in <span class="sb">`panels.modelDB`</span> and <span class="sb">`setup.py`</span>; <span class="sb">`clpt_field.is_sanders`</span>,
+  <span class="sb">`is_gl`</span> and <span class="sb">`is_tl`</span> return 1 for it (<span class="sb">`Shell.strain`</span> gives its
+  curvatures with <span class="sb">`NLgeom=True`</span>), and the connections of <span class="sb">`MultiDomain`</span>
+  include the <span class="sb">`v/r`</span> of its rotation, as for <span class="sb">`cylshell_clpt_sanders`</span>.
+<span class="k">-</span><span class="w"> </span>Documentation page <span class="sb">`cylshell_clpt_tl.rst`</span>: the derivation of the changes
+  of curvature from the position of the deformed mid-surface, and why their
+  linear part is exactly Sanders'.
+<span class="k">-</span><span class="w"> </span>New <span class="sb">`tests/tests_shell/test_cylshell_clpt_tl.py`</span>: zero strains and
+  internal forces for finite rigid rotations of a free panel, strains of a
+  bent panel unchanged by a rigid rotation, linear kernels equal to those of
+  <span class="sb">`cylshell_clpt_sanders`</span>, and the hinged roof of Sabir and Lock (Sze, Liu
+  and Lo 2004, Sec. 3.8, Tables 9a and 9d) under a prescribed central
+  deflection traced with the Riks method (quarter, 8 x 8 terms): limit load
+  of the thick roof -0.28 % from the S4R path, and the thin roof followed
+  through its snap-back, the turns of the central deflection 17.005 and
+  14.486 against 17.008 and 14.451. The model is added to the tangent,
+  tangent product and follower-pressure tests (<span class="sb">`test_tangent_consistency.py`</span>)
+  and to the connection tests of <span class="sb">`tests/multidomain/test_bf_sanders.py`</span>.
+<span class="k">-</span><span class="w"> </span>New notebook <span class="sb">`notebooks/sabir1972_roof_snap_back.ipynb`</span>: snap-through and
+  snap-back of the hinged roof with <span class="sb">`cylshell_clpt_donnell`</span>, <span class="sb">`_sanders`</span>,
+  <span class="sb">`_gl`</span> and <span class="sb">`_tl`</span> against the paths of Sze et al. (2004), prescribed central
+  deflection, reaction tracked with the Riks method, convergence with
+  6 to 14 terms; the test module provides <span class="sb">`hinged_roof`</span> and <span class="sb">`roof_path`</span>.
+
+<span class="gu">### New stiffener model `bladestiff2d_clt_sanders`</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`BladeStiff2D`</span> on a curved bay follows the Sanders kinematics of the
+  default cylindrical skin (<span class="sb">`cylshell_clpt_sanders`</span>): its base is a
+  <span class="sb">`cylshell_clpt_sanders`</span> shell and the connection of the flange, which
+  remains a plate (<span class="sb">`plate_clpt_donnell`</span>), constrains its rotation to that
+  of the normal of the skin, <span class="sb">`w,y - v/r`</span>. The base was built without a
+  model (Sanders on a curved bay) while the connection used Donnell's
+  rotation <span class="sb">`w,y`</span>, with which a rigid rotation of the cylinder about its
+  axis strains the connection.
+<span class="k">-</span><span class="w"> </span>New argument <span class="sb">`model`</span> of <span class="sb">`BladeStiff2D`</span> and of
+  <span class="sb">`StiffPanelBay.add_bladestiff2d`</span>, stored in <span class="sb">`BladeStiff2D.model`</span> (also
+  in the JSON files): <span class="sb">`'bladestiff2d_clt_donnell'`</span> (base
+  <span class="sb">`plate_clpt_donnell`</span> on a flat bay, <span class="sb">`cylshell_clpt_donnell`</span> on a curved
+  bay) or <span class="sb">`'bladestiff2d_clt_sanders'`</span> (curved bays only). The default
+  <span class="sb">`None`</span> selects <span class="sb">`'bladestiff2d_clt_sanders'`</span> on a curved skin whose model
+  is not <span class="sb">`cylshell_clpt_donnell`</span>, <span class="sb">`'bladestiff2d_clt_donnell'`</span> otherwise;
+  a skin <span class="sb">`cylshell_clpt_donnell`</span> therefore gets a Donnell base as well.
+  <span class="sb">`panels.stiffener.modelDB`</span> has the new entry and the key <span class="sb">`'base models'`</span>.
+<span class="k">-</span><span class="w"> </span>Generated by <span class="sb">`theory/multidomain_panels/bladestiff2d_clt_sanders/`</span>
+  (derivation with symbolic checks of the rigid rotation and of the base
+  against <span class="sb">`cylshell_clpt_sanders`</span>, writer of
+  <span class="sb">`panels/stiffener/models/bladestiff2d_clt_sanders.pyx`</span>, markdown);
+  registered in <span class="sb">`setup.py`</span> and <span class="sb">`panels.stiffener.models`</span>.
+<span class="k">-</span><span class="w"> </span>New <span class="sb">`tests/tests_stiffpanelbay/test_bladestiff2d_curved.py`</span>: the
+  selection of the stiffener and base models, and the energy of the
+  connection kernels under a rigid rotation of the cylinder (zero with
+  <span class="sb">`bladestiff2d_clt_sanders`</span>, <span class="sb">`kr alpha^2 a/2`</span> with
+  <span class="sb">`bladestiff2d_clt_donnell`</span>).
+<span class="k">-</span><span class="w"> </span>No stored test value changes: no test had a curved bay with a
+  <span class="sb">`BladeStiff2D`</span>; flat bays use <span class="sb">`bladestiff2d_clt_donnell`</span> as before.
+
+<span class="gu">### New model `cylshell_clpt_gl`</span>
+
+<span class="k">-</span><span class="w"> </span>Cylindrical shells, CLPT, with the complete Green-Lagrange membrane
+  strains of the mid-surface (the Flügge-Lur'e-Byrne strains of Amabili
+  2008, Eqs. 1.118-1.120) and the changes of curvature of
+  <span class="sb">`cylshell_clpt_sanders`</span>. The membrane strains vanish for any rigid
+  motion and contain the rotation about the normal that
+  <span class="sb">`cylshell_clpt_sanders`</span> omits: under an axial load the geometric
+  stiffness has <span class="sb">`N_xx v,x^2`</span> besides <span class="sb">`N_xx w,x^2`</span>. For a pinned tube bending
+  as a beam (<span class="sb">`R/h = 100`</span>, <span class="sb">`L/R = 50`</span> and <span class="sb">`80`</span>) <span class="sb">`cylshell_clpt_gl`</span> buckles at
+  0.989 and 0.996 times the Euler load, <span class="sb">`cylshell_clpt_sanders`</span> at 1.984 and
+  1.994 times it. Use it for long cylinders bending as beams, low
+  circumferential wave numbers, and curved panels or stiffener blades loaded
+  in their own plane.
+<span class="k">-</span><span class="w"> </span>Generated from <span class="sb">`theory/shells/cylshell_clpt_gl/`</span> (derivation with
+  symbolic checks, <span class="sb">`write_pyx.py`</span>, <span class="sb">`cylshell_clpt_gl.md`</span>) with the kernel
+  templates of <span class="sb">`plate_clpt_gl`</span>: <span class="sb">`panels/models/cylshell_clpt_gl.pyx`</span>
+  (<span class="sb">`fkG0`</span>; <span class="sb">`fk0`</span>, <span class="sb">`fkM`</span>, <span class="sb">`fkAx`</span>, <span class="sb">`fkAy`</span>, <span class="sb">`fcA`</span> of <span class="sb">`cylshell_clpt_sanders`</span>)
+  and <span class="sb">`cylshell_clpt_gl_num.pyx`</span> (<span class="sb">`fkC_num`</span>, <span class="sb">`fkG_num`</span>, <span class="sb">`calc_fint`</span>,
+  <span class="sb">`calc_kTv`</span>, follower pressure; <span class="sb">`fkM_num`</span>, <span class="sb">`fkAx_num`</span>, <span class="sb">`fkAy_num`</span> of
+  <span class="sb">`cylshell_clpt_sanders_num`</span>). <span class="sb">`theory/shells/plate_clpt_gl/write_pyx.py`</span>
+  takes the non-linear derivatives and the blocks of the geometric
+  stiffness from the derivation (the plate kernels are unchanged).
+<span class="k">-</span><span class="w"> </span>Registered in <span class="sb">`panels.modelDB`</span> and <span class="sb">`setup.py`</span>; <span class="sb">`clpt_field.is_sanders`</span>
+  and <span class="sb">`is_gl`</span> return 1 for it (rotation <span class="sb">`phiy = -w,y + v/r`</span>, strains of
+  <span class="sb">`Shell.strain`</span>), and the connections of <span class="sb">`MultiDomain`</span> include the <span class="sb">`v/r`</span>
+  of its rotation (<span class="sb">`_rinv_sanders`</span> of <span class="sb">`multidomain.py`</span> and
+  <span class="sb">`connections/kCsdt.py`</span>), as for <span class="sb">`cylshell_clpt_sanders`</span>.
+<span class="k">-</span><span class="w"> </span>New <span class="sb">`tests/tests_shell/test_cylshell_clpt_gl.py`</span>: Euler load of the
+  pinned tube, axial buckling of shear-diaphragm panels against Batdorf
+  (1947) and <span class="sb">`cylshell_clpt_sanders`</span> (4.2 % below it for a panel of 180
+  degrees, 1.0 % for 40 degrees, <span class="sb">`R/h = 100`</span>, <span class="sb">`L/R = 2`</span>), zero membrane
+  strains for finite rigid rotations, linear kernels equal to those of
+  <span class="sb">`cylshell_clpt_sanders`</span>. The model is added to the tangent, tangent
+  product and follower-pressure tests (<span class="sb">`test_tangent_consistency.py`</span>) and to
+  the connection tests of <span class="sb">`tests/multidomain/test_bf_sanders.py`</span>.
+<span class="k">-</span><span class="w"> </span>The skin panels of <span class="sb">`create_cylinder_blade_stiffened`</span> and of the three
+  <span class="sb">`cylinder_blade_stiffened_compression_lb_*`</span> analyses may be
+  <span class="sb">`cylshell_clpt_gl`</span> (<span class="sb">`models={'skin': 'cylshell_clpt_gl'}`</span>, see the
+  argument <span class="sb">`models`</span> below). For cylinder 4 of Card and Jones (1966), the GL
+  skin lowers the discrete load by 1.3 %, to 1.6 % below <span class="sb">`N_s`</span>; new test
+  <span class="sb">`test_discrete_gl_skin`</span> in <span class="sb">`tests/multidomain/test_cylinder_blade_stiffened.py`</span>.
+
+<span class="gu">### Changed: the ends of the `BladeStiff2D` flange follow the bay</span>
+
+<span class="k">-</span><span class="w"> </span>The flags of the ends <span class="sb">`x1`</span> and <span class="sb">`x2`</span> of the flange of <span class="sb">`BladeStiff2D`</span> are
+  copied from those of the bay when the stiffener is created, through the
+  connection at the root of the blade (<span class="sb">`u_f = u`</span>, <span class="sb">`v_f = -w`</span>, <span class="sb">`w_f = v`</span>):
+  <span class="sb">`x1u, x1ur`</span> from the bay's <span class="sb">`x1u, x1ur`</span>, <span class="sb">`x1v, x1vr`</span> from <span class="sb">`x1w, x1wr`</span>,
+  <span class="sb">`x1w, x1wr`</span> from <span class="sb">`x1v, x1vr`</span>, likewise at <span class="sb">`x2`</span>. They were fixed
+  (<span class="sb">`u_f = u_f,x = v_f = v_f,x = w_f = 0`</span>, <span class="sb">`w_f,x`</span> free) whatever the bay.
+  For stiffeners not held by the ribs (ending at the bay, running through
+  mouse holes) the user changes the flags of <span class="sb">`BladeStiff2D.flange`</span> after
+  creating the stiffener (docstring example). With the default bay the
+  flange now has <span class="sb">`v_f,x`</span> free and <span class="sb">`w_f,x = 0`</span>: the example of
+  <span class="sb">`BladeStiff2D`</span> gives 707.3 instead of 662.5 (678.7 with <span class="sb">`v_f`</span>, <span class="sb">`w_f`</span>
+  free at the ends). With the simple supports of Sewall and Naumann (1968),
+  skin <span class="sb">`u`</span> free, the internally stiffened sector gives 140.0 Hz with 10 by
+  8 terms of the skin and 10 by 5 of each flange (139.98 Hz with 14 by 12
+  and 14 by 7; measured 137.0 and 147.0 Hz; <span class="sb">`MultiDomain`</span> sector with the
+  same blade flags 139.7 Hz) without changing the flange flags, against
+  234.2 Hz with the former fixed flags. Tests in
+  <span class="sb">`tests/tests_stiffpanelbay/test_bladestiff2d_vibration.py`</span>: the mapping
+  of the flags, and the Sewall and Naumann sector with the default flags
+  and with <span class="sb">`w_f`</span> freed. The example notebooks <span class="sb">`ex_stiffpanelbay`</span> (values
+  of the <span class="sb">`BladeStiff2D`</span> flange) and <span class="sb">`sewall1968_blade_cylinder_vibration`</span>
+  (new <span class="sb">`BladeStiff2D`</span> section) were re-executed.
+
+<span class="gu">### Fixed</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`Shell.m`</span> and <span class="sb">`Shell.n`</span> are properties whose setters raise the
+  <span class="sb">`ValueError`</span> of the constructor for values above 30 (the Bardell
+  functions of the order 31 and above are not coded); assigning them after
+  the construction was not checked and silently capped the number of terms
+  at 30. New test <span class="sb">`test_m_n_above_30_raise`</span> in
+  <span class="sb">`tests/tests_shell/test_argument_validation.py`</span>.
+<span class="k">-</span><span class="w"> </span>The flange of <span class="sb">`BladeStiff2D`</span> has free edges <span class="sb">`y_f = 0`</span> and <span class="sb">`y_f = b_f`</span>,
+  as documented: the flags <span class="sb">`y1ur`</span>, <span class="sb">`y2ur`</span>, <span class="sb">`y1vr`</span>, <span class="sb">`y2vr`</span> of the flange
+  were <span class="sb">`0`</span>, which imposed <span class="sb">`u_f,y = v_f,y = 0`</span> at the root and at the tip
+  of the blade and made the in-plane bending of a deep blade converge very
+  slowly with the number of terms (lowest frequency of a sector of the
+  internally stiffened cylinder of Sewall and Naumann 1968, simply
+  supported: 746 Hz with 10 by 8 terms of the skin and 10 by 5 of each
+  flange, 484 Hz with 14 by 12 and 14 by 7; now 138.0 and 137.96 Hz,
+  measured 137.0 and 147.0 Hz). Results of bays with shallow flanges change
+  little.
+  New tests in <span class="sb">`tests/tests_stiffpanelbay/test_bladestiff2d_vibration.py`</span>:
+  the Sewall and Naumann sector against their Table II and against the
+  <span class="sb">`MultiDomain`</span> sector with plate blades (<span class="sb">`'BFycte'`</span>), a flat bay with one
+  blade against the <span class="sb">`MultiDomain`</span> assembly, and the flags of the flange.
+
+<span class="gu">### Changed: blades and flanges of the ready-made assemblies use `plate_clpt_gl`</span>
+
+<span class="k">-</span><span class="w"> </span>The blades of <span class="sb">`create_cylinder_blade_stiffened`</span> (and of the three
+  <span class="sb">`cylinder_blade_stiffened_compression_lb_*`</span> analyses), the stringers of
+  <span class="sb">`create_wingbox`</span> and the flanges of <span class="sb">`tstiff2d_1stiff_compression`</span>,
+  <span class="sb">`tstiff2d_1stiff_flutter`</span> and <span class="sb">`tstiff2d_1stiff_freq`</span> are
+  <span class="sb">`plate_clpt_gl`</span> instead of <span class="sb">`plate_clpt_donnell`</span>. These plates carry axial
+  load in their own plane and bend in their plane when the stiffened
+  structure buckles; the von Kármán geometric stiffness has no
+  <span class="sb">`N_xx v_,x^2`</span> term, so the load of a blade did not destabilize its
+  in-plane (for a stringer, radial) bending, and general instability loads
+  came out about twice too high. The linear stiffness, mass and
+  aerodynamic matrices are unchanged. Effects: cylinder 4 of Card and
+  Jones (1966), 60 internal blades, simply supported, 1.95 times the
+  smeared-stringer load with <span class="sb">`plate_clpt_donnell`</span> blades, 6.6 % below it
+  with <span class="sb">`plate_clpt_gl`</span>; the wing box with <span class="sb">`nstr=2`</span> stringers, first
+  buckling tip force from 536.0 to 436.1 N (default terms); the stored
+  values of the
+  T-stiffened panel tests and of the wing box without stringers change by
+  less than 1e-5; the laminated examples of the blade-stiffened cylinder by
+  less than 0.01 %.
+<span class="k">-</span><span class="w"> </span>The spars of <span class="sb">`create_wingbox`</span> are also <span class="sb">`plate_clpt_gl`</span> (the default of
+  the key <span class="sb">`'spar'`</span> of the argument <span class="sb">`models`</span> below; <span class="sb">`plate_clpt_donnell`</span>
+  with <span class="sb">`models={'spar': 'plate_clpt_donnell'}`</span>). The spar webs carry the bending
+  stresses of the box in their own plane, but these vary linearly over the
+  height with a zero resultant and do almost no work on the vertical
+  deflection of the spars: the first buckling tip force changes by less
+  than 3e-5 (172.7828 to 172.7826 N without stringers, 436.0593 to
+  436.0549 N with <span class="sb">`nstr=2`</span>, 518.0477 to 518.0323 N with <span class="sb">`nstr=4`</span>, default
+  terms; the first modes are local modes of the upper skin); the static
+  deflection is unchanged. New test <span class="sb">`test_wingbox_models`</span> in
+  <span class="sb">`tests/multidomain/test_wingbox.py`</span>; the example
+  <span class="sb">`ex_multidomain_wingbox.ipynb`</span> compares the two spar models.
+<span class="k">-</span><span class="w"> </span><span class="sb">`tests/multidomain/test_cylinder_blade_stiffened.py`</span> is anchored in the
+  literature: the cylinder 4 of Card and Jones (1966, NASA TN D-3639)
+  against the smeared-stringer theory of Block, Card and Mikulas (1965,
+  NASA TN D-2960, Eq. (15)), implemented in the new model module
+  <span class="sb">`tests/multidomain/smeared_stringer_cylinder.py`</span> and checked against the
+  16 values of their Table I(c) and the four <span class="sb">`N_s`</span> of Card and Jones; the
+  discrete model with simply supported ends is 6.6 % below the smeared
+  load and 0.25 % below <span class="sb">`N_s`</span>. The three analysis functions keep regression
+  values for this cylinder; <span class="sb">`test_null_space.py`</span> has the new value of its
+  laminated blade-stiffened case.
+<span class="k">-</span><span class="w"> </span>Documentation: "How to choose a model" of the shell overview explains
+  when plates loaded in their own plane need <span class="sb">`plate_clpt_gl`</span>.
+
+<span class="gu">### Changed: boundary conditions of `tstiff2d_1stiff_freq` and `tstiff2d_1stiff_flutter`</span>
+
+<span class="k">-</span><span class="w"> </span>Both functions restrain <span class="sb">`u = v = w = 0`</span> at the four edges of the skin and
+  at both ends of the flange, the boundary conditions of the vibration
+  analysis of Castro and Donadon (2017), Fig. 8, p. 236, and of
+  <span class="sb">`tstiff2d_1stiff_freq`</span> of compmech 0.7.1. They had the conditions of the
+  compression analysis (Fig. 7), with <span class="sb">`u`</span> free at the edges <span class="sb">`x = 0`</span>,
+  <span class="sb">`y = 0`</span> and <span class="sb">`y = b`</span> of the skin and at the end <span class="sb">`x = 0`</span> of the flange (10
+  flags). The curved panel <span class="ni">#1</span> of the paper (<span class="sb">`r = 10`</span> m, <span class="sb">`m = n = 8`</span>,
+  penalty) now gives 65.215 to 55.972 Hz for the six defect lengths of
+  Table 5, +0.01 % to +0.51 % from the paper's <span class="sb">`m = n = 8`</span> values (before:
+  62.618 to 53.705 Hz, 3.6 % to 4.0 % below).
+<span class="k">-</span><span class="w"> </span><span class="sb">`tstiff2d_1stiff_flutter`</span>: these conditions hold with
+  <span class="sb">`run_static_case=False`</span>; with <span class="sb">`run_static_case=True`</span> those of Fig. 7,
+  with <span class="sb">`v`</span> also free at the loaded edge <span class="sb">`x = 0`</span>, see
+  "Changed: in-plane loads of <span class="sb">`tstiff2d_1stiff_flutter`</span>".
+<span class="k">-</span><span class="w"> </span>Stored values: <span class="sb">`test_tstiff2d_assembly.py`</span>, first natural frequency
+  48.2733 to 48.4404 rad/s, flutter <span class="sb">`sqrt(-lambda_1)`</span> 446.12 to
+  503.06-139.60j (the first eigenvalue is now a complex pair);
+  <span class="sb">`test_null_space.py::test_tstiff2d_freq`</span> 48.3875 to 48.5631; <span class="sb">`Examples`</span>
+  48.39 to 48.56 and 448.57 to 487.42. New test
+  <span class="sb">`test_tstiff2d_1stiff_freq_castro_donadon_2017_table5`</span> (Table 5,
+  <span class="sb">`m = n = 8`</span>, within 0.6 %).
+<span class="k">-</span><span class="w"> </span>New test <span class="sb">`test_tstiff2d_1stiff_freq_castro_donadon_2017_fig15_flat`</span>: the
+  flat panel <span class="ni">#1</span> (<span class="sb">`a/b = 0.5`</span>, <span class="sb">`b/b_b = 5`</span>) against the frequency ratios of
+  Fig. 15 of the paper, digitised (uncertainty about 0.004), for six
+  defect lengths from 0.407 to 0.907: 0.002 to 0.005 below the curve,
+  asserted within 0.01.
+
+<span class="gu">### Changed: the boundary-condition flags of `StiffPanelBay` are fixed once it has panels</span>
+
+<span class="k">-</span><span class="w"> </span>The 24 flags <span class="sb">`x1u, x1ur, ..., y2w, y2wr`</span> of <span class="sb">`StiffPanelBay`</span> are
+  properties whose setters raise an <span class="sb">`AttributeError`</span> when the bay has
+  panels and the value differs from the current one. The panels and the
+  stiffeners copy the flags when they are created, whereas the connections
+  of <span class="sb">`BladeStiff2D`</span> read those of the bay at assembly, so a change after
+  <span class="sb">`add_panel`</span> gave an inconsistent model. Assigning the same value, and
+  loading a saved bay, are unaffected. New test
+  <span class="sb">`test_boundary_flags_fixed_after_add_panel`</span> in
+  <span class="sb">`tests/tests_stiffpanelbay/test_stiffpanelbay_api.py`</span>.
+
+<span class="gu">### API change: `create_cylinder_blade_stiffened` returns `(md, conns, info)`; new argument `side`</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`create_cylinder_blade_stiffened`</span> returns three values, `md, conns,
+  info`, instead of two: code that unpacks the result into two names,
+  <span class="sb">`md, conns = create_cylinder_blade_stiffened(...)`</span>, now raises
+  <span class="sb">`ValueError`</span> (too many values to unpack) and must become `md, conns, info
+  = ...`. <span class="sb">`info`</span> is a dictionary with the keys of <span class="sb">`create_wingbox`</span> that
+  apply: <span class="sb">`'skin'`</span> and <span class="sb">`'blades'`</span> (the lists of domains), <span class="sb">`'ws'`</span> (the width
+  of a skin panel) and <span class="sb">`'models'`</span> (the model of each group, <span class="sb">`models`</span>
+  completed with the defaults). The three
+  <span class="sb">`cylinder_blade_stiffened_compression_lb_*`</span> analyses return what they
+  returned before.
+<span class="k">-</span><span class="w"> </span>New argument <span class="sb">`side='internal'|'external'`</span> of
+  <span class="sb">`create_cylinder_blade_stiffened`</span>: the default <span class="sb">`'internal'`</span> keeps the
+  blades inside the cylinder (edge <span class="sb">`y = 0`</span> of the blade connected), and
+  <span class="sb">`'external'`</span> stands them outside (edge <span class="sb">`y`</span> = <span class="sb">`width_blades[i]`</span>
+  connected). <span class="sb">`ValueError`</span> for any other value.
+<span class="k">-</span><span class="w"> </span>Tests: <span class="sb">`test_return_info`</span> and <span class="sb">`test_side`</span> in
+  <span class="sb">`tests/multidomain/test_cylinder_blade_stiffened.py`</span> (cylinder 3 of Card
+  and Jones 1966, external blades, against the smeared theory and
+  <span class="sb">`N_s`</span> = 1326 lb/in, and lower with the blades inside);
+  <span class="sb">`tests/multidomain/test_singer1971_cylinder.py`</span> uses <span class="sb">`side='external'`</span>.
+
+<span class="gu">### New function `create_cylinder_z_stiffened`: cylinders with Z-section stringers</span>
+
+<span class="k">-</span><span class="w"> </span>New module <span class="sb">`panels.multidomain.cylinder_z_stiffened`</span> with
+  <span class="sb">`create_cylinder_z_stiffened`</span>, imported in <span class="sb">`panels.multidomain`</span>: the
+  whole cylinder with equally spaced Z-section stringers made of three
+  plates (the attached flange in the laminate of the strip of skin under
+  it, offset from the middle surface of the skin, the web and the free
+  flange as <span class="sb">`plate_clpt_gl`</span> strips connected with <span class="sb">`'BFycte'`</span>), skin domains
+  <span class="sb">`cylshell_clpt_sanders`</span>; any number of stringers, <span class="sb">`side='internal'`</span> or
+  <span class="sb">`'external'`</span>, <span class="sb">`flange_side=-1`</span> or <span class="sb">`1`</span> (orientation of the Z), clamped or
+  simply supported ends (<span class="sb">`bc`</span>), the laminate of the skin, <span class="sb">`models`</span>, and the
+  variants without the attached or the free flange. <span class="sb">`stack_z`</span> is one stack,
+  the bent sheet (each plate takes it in the order of its own <span class="sb">`z`</span> axis:
+  plies reversed and angles changed in sign in the free flange, and in the
+  web of an internal Z with <span class="sb">`flange_side=1`</span> or an external Z with
+  <span class="sb">`flange_side=-1`</span>), or three stacks, attached flange, web, free flange,
+  each in the axes of its plate; <span class="sb">`info['stacks_z']`</span> gives the stack of each
+  plate. It returns <span class="sb">`(md, conns, info)`</span> as
+  <span class="sb">`create_cylinder_blade_stiffened`</span>, the connections stored in the
+  assembly, <span class="sb">`md.conn`</span>. Page <span class="sb">`multidomain_cylinder.rst`</span>.
+<span class="k">-</span><span class="w"> </span>New tests in <span class="sb">`tests/multidomain/test_cylinder_z_stiffened_peterson1959.py`</span>,
+  about 1 min: the assembly (<span class="sb">`test_create_cylinder_z_stiffened`</span>) and
+  cylinders 1 and 2 of NASA Memo 2-12-59L (120 internal stringers, <span class="sb">`R`</span> =
+  23.74 in, clamped ends, membrane pre-buckling state), which buckle at
+  2127.6 and 3194.0 lb/in with 12 and 13 circumferential waves; the
+  measured loads, 270 and 413 kips, are 85.1 and 86.7 % of these (checked
+  between 70 and 100 %). <span class="sb">`test_stack_z_bent_sheet`</span> and
+  <span class="sb">`test_stack_z_mirror`</span> check the laminates of the plates on a small
+  laminated cylinder, against the stiffness matrices of the sheet seen
+  from either face and by the mirror symmetry of the buckling loads. The
+  notebook
+  <span class="sb">`peterson1959_blade_cylinder_buckling.ipynb`</span> uses the function through
+  its helper module <span class="sb">`notebooks/z_stringer_cylinder.py`</span>.
 
 <span class="gu">## 0.15.0 (2026-11-03)</span>
 
@@ -3006,11 +4653,11 @@ removed from <span class="sb">`panels.modelDB.db`</span>, and <span class="sb">`
       </div>
     </a>
     <a class="right-next"
-       href="ref.html"
+       href="documentation_levels.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">References</p>
+        <p class="prev-next-title">How the documentation is organised</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
