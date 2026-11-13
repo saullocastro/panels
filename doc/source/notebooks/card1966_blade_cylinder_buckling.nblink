@@ -1,0 +1,6 @@
+{
+    "path": "../../../notebooks/card1966_blade_cylinder_buckling.ipynb",
+    "extra-media": [
+        "../../../notebooks/blade_cylinder_utils.py"
+    ]
+}

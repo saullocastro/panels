@@ -25,6 +25,10 @@ did not (AMD processor, Windows 11).
 
 The analytical kernels must be finite and agree with the numerically
 integrated ones, for every model and with and without a laminate offset.
+The kernels of the whole domain of ``'annular_clpt_donnell'`` are
+themselves numerical, with ``shell.nx`` and ``shell.ny`` points, its
+integrands being rational in `x`: they are compared with the numerical
+kernels at the same points.
 
 """
 import sys
@@ -47,7 +51,9 @@ def _rel(A, B):
     return np.abs(A - B).max()/np.abs(B).max()
 
 
-@pytest.mark.parametrize('model', sorted(modelDB.db.keys()))
+@pytest.mark.parametrize('model', [
+    pytest.param(m, marks=pytest.mark.slow) if m == 'annular_tsdt_tl' else m
+    for m in sorted(modelDB.db.keys())])
 @pytest.mark.parametrize('offset', [0., 1.2e-3])
 def test_analytical_kernels_finite_and_equal_numerical(model, offset):
     s = Shell(model=model, a=0.4, b=0.3,
@@ -59,6 +65,8 @@ def test_analytical_kernels_finite_and_equal_numerical(model, offset):
     mats = modelDB.db[model]['matrices']
     num = modelDB.db[model]['matrices_num']
     nx, ny = 2*s.m + 4, 2*s.n + 4
+    if model.startswith('annular'):
+        nx, ny = s.nx, s.ny
     k0 = mats.fk0(s, size, 0, 0)
     assert np.isfinite(k0.data).all()
     kC_num = num.fkC_num(np.zeros(size), s.ABD, s, size, 0, 0, nx, ny, 0)

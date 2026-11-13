@@ -18,8 +18,8 @@ up to ``max_NR_iter=200`` iterations per opening, so they stop at the first
 opening that does not converge. Every Newton-Raphson iteration is traced,
 ``(delta, iteration, criterion, step)``, to detect a limit cycle: ``collect``
 reports the smallest period with which the criterion of the last opening
-repeats. The results are discussed in Section *Solution procedure* of
-``doc/source/cohesive_zone.rst``.
+repeats. The notebook ``dcb_mode_I_solver_study.ipynb`` runs the same
+cases and discusses the results.
 
 Usage, from the root of the repository::
 

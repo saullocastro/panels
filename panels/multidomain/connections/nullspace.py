@@ -2,8 +2,7 @@ r"""
 Null-space method for the connections
 
 Imposes the connections of a :class:`.MultiDomain` assembly exactly, with
-the default ``conn_method='null-space'``, see :ref:`null_space` for the
-usage and a comparison with the penalty method. The quantities penalized by
+the default ``conn_method='null-space'``. The quantities penalized by
 the kernels of :mod:`panels.multidomain.connections` become linear
 constraints on the Ritz constants, built by :func:`.constraint_matrix`, one
 row per quantity and point, and eliminated with a sparse basis of their null
@@ -14,15 +13,14 @@ problem is solved with the solvers of ``structsolve`` unchanged, see
 :meth:`.MultiDomain.expand` and :meth:`.MultiDomain.get_reduced_functions`.
 
 The quantities of each connection are those of its penalty kernel, see
-:ref:`null_space_quantities`. The connections available are listed in
+:func:`.constraint_matrix`. The connections available are listed in
 :data:`NULL_SPACE_FUNCS`, the damaged connection ``'SB_TSL'`` remains a
 penalty stiffness.
 
 With ``MultiDomain(..., pd_method='null-space')`` the prescribed
 displacements of the panels are constraints with a right-hand side, built
 by :func:`.pd_constraint_matrix` and eliminated after the connections by
-:class:`.Elimination`, which also gives the particular solutions, see
-:ref:`null_space_pd`.
+:class:`.Elimination`, which also gives the particular solutions.
 
 Notes
 -----
@@ -69,7 +67,7 @@ displacements of the panels are the inhomogeneous constraints `\boldsymbol{B}_d 
 = \bar{\boldsymbol{d}}_0 + \lambda \bar{\boldsymbol{d}}_1`, built by :func:`.pd_constraint_matrix` and
 eliminated after the connections by :class:`.Elimination`, which also gives
 the particular solutions `\boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r + \boldsymbol{c}_{p0} + \lambda
-\boldsymbol{c}_{p1}`, see :ref:`null_space_pd`.
+\boldsymbol{c}_{p1}`.
 
 """
 import numpy as np
@@ -82,6 +80,8 @@ from panels.bardell import calc_vec_f, calc_vec_fp
 from panels.logger import warn
 from . import kCsdt
 from . import kCBFxycte
+from . import kCBFxcte_face
+from . import kCBFycte_face
 
 
 #: Connections that can be imposed with the null-space method
@@ -303,7 +303,12 @@ def constraint_matrix(connecti, size):
     ``col_start`` of each panel. The edge connections of the models with 3
     DOFs per term use the quantities of the classical laminated plate
     theory, those of the models with 5 DOFs the quantities of
-    :mod:`.kCsdt`; ``'SB'`` uses for all the models the displacements at the
+    :mod:`.kCsdt`; ``'BFxcte'`` with the key ``'face'`` uses for all the
+    models the quantities of :func:`.kCBFxcte_face.bfxcte_face_components`
+    at the face of ``p1``, with the kinematics of the key ``'kinematics'``,
+    see :func:`.kCBFxcte_face.face_rinv`, with ``max(n1, n2, 4)`` points at the same
+    natural coordinate `\eta` of both panels, whose edges span the same
+    angle but may differ in length; ``'SB'`` uses for all the models the displacements at the
     faces in contact, the quantities of the penalty matrix of
     :func:`.skin_base.fkCSB`, see :func:`._sb_components`, and also
     connects the rotations of the FSDT and TSDT when ``connecti['kr']`` is
@@ -316,7 +321,8 @@ def constraint_matrix(connecti, size):
         one of :data:`NULL_SPACE_FUNCS`. The coordinates of the connection,
         ``xcte1`` or ``ycte1``, refer to ``p1``, and ``xcte2`` or ``ycte2``
         to ``p2``. For ``'BFxcte'`` and ``'BFycte'``, ``p1`` is the base and
-        ``p2`` the flange; for ``'BFxycte'``, ``p1`` has the edge ``xcte1``
+        ``p2`` the flange, with the key ``'face'`` of ``'BFxcte'``, see
+        :mod:`panels.multidomain.connections.kCBFxcte_face`; for ``'BFxycte'``, ``p1`` has the edge ``xcte1``
         and ``p2`` the edge ``ycte2``, with the key ``'angle'``; for
         ``'SB'``, ``p1`` is the panel on the positive side of the interface
         along the `z` axis of both panels,
@@ -336,7 +342,8 @@ def constraint_matrix(connecti, size):
     ValueError
         When ``p1`` and ``p2`` are the same object; for ``'SB'``, when the
         panels do not have the same dimensions ``a`` and ``b``; for
-        ``'BFxycte'``, see :func:`.kCBFxycte.check_xycte`.
+        ``'BFxycte'``, see :func:`.kCBFxycte.check_xycte`; for
+        ``'BFxcte'``, see :func:`.kCBFxcte_face.check_bfxcte`.
     NotImplementedError
         When the models of ``p1`` and ``p2`` have a different number of
         DOFs per term; when ``connecti['func']`` is not one of
@@ -372,6 +379,13 @@ def constraint_matrix(connecti, size):
             "Connection '{0}' between models with a different number of "
             "DOFs per term, got models '{1}' and '{2}'".format(func,
             p1.model, p2.model))
+    face = None
+    if func == 'BFxcte':
+        z_face = kCBFxcte_face.check_bfxcte(connecti)
+        face = connecti.get(kCBFxcte_face.FACE_KEY)
+    elif func == 'BFycte':
+        z_face = kCBFycte_face.check_bfycte(connecti)
+        face = connecti.get(kCBFxcte_face.FACE_KEY)
     if func in ('SSxcte', 'BFxcte'):
         ctes = dict(x=(connecti['xcte1'], connecti['xcte2']), y=None)
     elif func in ('SSycte', 'BFycte'):
@@ -389,6 +403,14 @@ def constraint_matrix(connecti, size):
             "the available ones are {1}".format(func, NULL_SPACE_FUNCS))
     if func == 'SB':
         comps = _sb_components(p1, p2, connecti.get('kr', 0.))
+    elif face is not None and func == 'BFycte':
+        comps = [sides for _, sides in
+                 kCBFycte_face.bfycte_face_components(p1, p2, z_face,
+                 kinematics=kCBFxcte_face.kinematics_of(connecti, func))]
+    elif face is not None:
+        comps = [sides for _, sides in
+                 kCBFxcte_face.bfxcte_face_components(p1, p2, z_face,
+                 kinematics=kCBFxcte_face.kinematics_of(connecti))]
     elif func == 'BFxycte':
         comps = [sides for _, sides in kCBFxycte.xycte_components(p1, p2,
                  connecti.get('angle', 90.))]
@@ -401,6 +423,12 @@ def constraint_matrix(connecti, size):
         s = leggauss(max(p1.n, p2.m, 4))[0]
         xis = [np.array([2*connecti['xcte1']/p1.a - 1]), s]
         etas = [s, np.array([2*connecti['ycte2']/p2.b - 1])]
+    elif face is not None and func == 'BFxcte':
+        #NOTE the edges span the same angle but not the same length, see
+        #     kCBFxcte_face.check_bfxcte; they share the natural coordinate
+        xis = _points(p1, p2, 'x', ctes['x'])
+        s = leggauss(max(p1.n, p2.n, 4))[0]
+        etas = [s, s]
     else:
         xis = _points(p1, p2, 'x', ctes['x'])
         etas = _points(p1, p2, 'y', ctes['y'])
@@ -526,6 +554,17 @@ def pd_rows(p, comp, xis, etas, z=0., col0=0, size=None):
     -------
     B : scipy.sparse.csr_matrix
         The rows, with the shape ``(len(xis)*len(etas), size)``.
+
+    Notes
+    -----
+    The component is a linear combination of terms `\alpha_t \partial_x^{d_x}
+    \partial_y^{d_y} q_t` of the fields `q_t` of the panel, see
+    :func:`._pd_terms`. With `q_t = \sum_{i,j} f_i(\xi) g_j(\eta)
+    c^{q_t}_{ij}`, the entry of the row of the point `(\xi_k, \eta_l)` for the
+    Ritz constant `c^{q_t}_{ij}` is `\alpha_t \, \partial_x^{d_x} f_i(\xi_k)
+    \, \partial_y^{d_y} g_j(\eta_l)`, with the derivatives of :func:`._eval`;
+    all the points are obtained at once as the Kronecker product of the
+    values along `\eta` and along `\xi`.
 
     """
     if size is None:

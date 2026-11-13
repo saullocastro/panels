@@ -1,7 +1,7 @@
 r"""Verification of the follower pressure of :meth:`.Shell.add_pressure_load`
 
 A follower pressure stays normal to the deformed mid-surface and acts on its
-deformed area, see ``theory/shells/follower_pressure/follower_pressure.py``.
+deformed area.
 Its force vector `\boldsymbol{F}_p(\boldsymbol{c})` enters the residual through
 :meth:`.Shell.calc_fint`, and its load stiffness `\boldsymbol{K}_F = -\partial
 \boldsymbol{F}_p/\partial \boldsymbol{c}`, :meth:`.Shell.calc_kCfollower`, enters
@@ -257,9 +257,10 @@ def check_quadratic(errors, floor=1.e-12):
     return checked, orders
 
 
-@pytest.mark.parametrize('model', ['plate_clpt_donnell',
-                                   'cylshell_clpt_sanders',
-                                   'cylshell_fsdt_sanders'])
+@pytest.mark.parametrize('model', [
+    pytest.param('plate_clpt_donnell', marks=pytest.mark.slow),
+    'cylshell_clpt_sanders',
+    pytest.param('cylshell_fsdt_sanders', marks=pytest.mark.slow)])
 def test_newton_raphson_converges_quadratically(model):
     s = follower_shell(model)
     rec = Recorder(s)

@@ -244,7 +244,54 @@ def main():
 
     out = {}
     out['k0'] = analytical_function(
-        'def fk0(object shell, int size, int row0, int col0):',
+        r'''def fk0(object shell, int size, int row0, int col0):
+    r"""Linear constitutive stiffness matrix, integrated analytically
+
+    Integrates the linear constitutive stiffness matrix of the shell over
+    its whole domain for the constitutive matrix ``shell.ABD``, constant
+    over the domain.
+
+    Parameters
+    ----------
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+
+    Returns
+    -------
+    k0 : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. Only the upper
+        triangle is assembled; the caller symmetrizes it.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell` or ``shell.ABD`` is not a
+        ``6 x 6`` matrix.
+
+    Notes
+    -----
+    With the linear part `\boldsymbol{\varepsilon}_L =
+    \boldsymbol{B}_L \boldsymbol{c}` of the generalized strains of the kinematics of the module,
+    and the constitutive matrix `\boldsymbol{F}` (``shell.ABD``):
+
+    .. math::
+
+        \boldsymbol{K}_{C0} = \int_0^b \int_0^a \boldsymbol{B}_L^\top
+        \boldsymbol{F} \boldsymbol{B}_L \, dx \, dy
+
+    The integral over the whole domain is evaluated in closed form, each
+    entry being a sum of products of one-dimensional integrals of Bardell's
+    functions and their derivatives along `\xi` and `\eta`, with `x = a(\xi +
+    1)/2`, `y = b(\eta + 1)/2` and `dx\,dy = (ab/4)\,d\xi\,d\eta`.
+
+    """''',
         '\n'.join(['    cdef double a, b, r',
                    '    cdef double [:, ::1] F',
                    '    cdef int m, n',
@@ -264,7 +311,59 @@ def main():
                    BC_BLOCK]),
         'k0', kC0)
     out['kG0'] = analytical_function(
-        'def fkG0(double Nxx, double Nyy, double Nxy, object shell,\n         int size, int row0, int col0):',
+        r'''def fkG0(double Nxx, double Nyy, double Nxy, object shell,
+         int size, int row0, int col0):
+    r"""Geometric stiffness matrix of a constant membrane stress state
+
+    Integrates, analytically over the whole domain, the geometric
+    stiffness matrix of the membrane stress resultants ``Nxx``, ``Nyy``
+    and ``Nxy``, constant over the domain.
+
+    Parameters
+    ----------
+    Nxx, Nyy, Nxy : float
+        Membrane stress resultants, force per unit length, tension positive.
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+
+    Returns
+    -------
+    kG0 : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. Only the upper
+        triangle is assembled; the caller symmetrizes it.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell`.
+
+    Notes
+    -----
+    With `\boldsymbol{N} = \begin{bmatrix} N_{xx} & N_{xy} \\ N_{xy} &
+    N_{yy} \end{bmatrix}` and `\boldsymbol{G} \boldsymbol{c} = \{\beta_x, \beta_y\}^\top` the
+    rotations of the non-linear terms of the membrane strains:
+
+    .. math::
+
+        \boldsymbol{K}_{G} = \int_0^b \int_0^a \boldsymbol{G}^\top
+        \boldsymbol{N} \boldsymbol{G} \, dx \, dy
+
+    which is the Hessian of the work of the constant stress resultants on
+    the non-linear part of the membrane strains of the kinematics of the module.
+
+    The integral over the whole domain is evaluated in closed form, each
+    entry being a sum of products of one-dimensional integrals of Bardell's
+    functions and their derivatives along `\xi` and `\eta`, with `x = a(\xi +
+    1)/2`, `y = b(\eta + 1)/2` and `dx\,dy = (ab/4)\,d\xi\,d\eta`.
+
+    """''',
         '\n'.join(['    cdef double a, b, r',
                    '    cdef int m, n',
                    BC_CDEF, '',
@@ -279,7 +378,57 @@ def main():
                    BC_BLOCK]),
         'kG0', kG)
     out['kM'] = analytical_function(
-        'def fkM(object shell, int size, int row0, int col0):',
+        r'''def fkM(object shell, int size, int row0, int col0):
+    r"""Mass matrix, integrated analytically
+
+    Integrates the consistent mass matrix of the shell over its whole
+    domain, with the moments of the density of the laminate
+    ``shell.lam``, constant over the domain.
+
+    Parameters
+    ----------
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+
+    Returns
+    -------
+    kM : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. Only the upper
+        triangle is assembled; the caller symmetrizes it.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell`.
+
+    Notes
+    -----
+    With the displacement field through the thickness `\{u(z), v(z),
+    w(z)\}^\top = \boldsymbol{S}(z) \boldsymbol{c}` of the kinematics of the module, `z` measured
+    from the reference surface:
+
+    .. math::
+
+        \boldsymbol{M} = \int_0^b \int_0^a \int_{d - h/2}^{d + h/2} \rho \,
+        \boldsymbol{S}(z)^\top \boldsymbol{S}(z) \, dz \, dx \, dy
+
+    with the offset `d` (``shell.offset``). The integral through the
+    thickness gives the moments `I_n = \int \rho z^n dz`, `n = 0, 1, 2`,
+    ``intrho``, ``intrhoz`` and ``intrhoz2`` of ``shell.lam``.
+
+    The integral over the whole domain is evaluated in closed form, each
+    entry being a sum of products of one-dimensional integrals of Bardell's
+    functions and their derivatives along `\xi` and `\eta`, with `x = a(\xi +
+    1)/2`, `y = b(\eta + 1)/2` and `dx\,dy = (ab/4)\,d\xi\,d\eta`.
+
+    """''',
         '\n'.join(['    cdef double a, b, r, I0, I1, I2',
                    '    cdef int m, n',
                    BC_CDEF, '',

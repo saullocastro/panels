@@ -72,6 +72,7 @@ import contextlib
 import io
 import json
 import os
+import re
 import sys
 import time
 
@@ -100,7 +101,11 @@ def method_dir(method):
 def _code_cells(notebook):
     with open(os.path.join(HERE, notebook), encoding='utf-8') as fid:
         nb = json.load(fid)
-    return [''.join(c['source']) for c in nb['cells'] if c['cell_type'] == 'code']
+    # IPython magics, e.g. %matplotlib inline, are not Python: dropped; a
+    # continuation line such as "% value)" is kept
+    return [''.join(line for line in ''.join(c['source']).splitlines(True)
+                    if not re.match(r'\s*%+[A-Za-z]', line))
+            for c in nb['cells'] if c['cell_type'] == 'code']
 
 
 def _exec_notebook(notebook, ns=None, after=None, quiet=True):
@@ -442,7 +447,8 @@ def profile_case(job, method):
     dc = expand(solve(k0, -red(fint - fext + kCp*c), silent=True))
     pr.disable()
     s = io.StringIO()
-    pstats.Stats(pr, stream=s).sort_stats('tottime').print_stats(12)
+    # file names without their folders, as the paths depend on the machine
+    pstats.Stats(pr, stream=s).strip_dirs().sort_stats('tottime').print_stats(12)
     out['cprofile'] = s.getvalue()
     return out
 

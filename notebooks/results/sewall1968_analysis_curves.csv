@@ -1,0 +1,506 @@
+# Sewall, J. L. and Naumann, E. C., 'An experimental and analytical vibration study of thin cylindrical shells
+# with and without longitudinal stiffeners', NASA TN D-4705, 1968. Digitised analytical curves of
+# Figs. 8-11 (report pp. 44-51 = PDF pp. 46-53): 'Present paper' (theory=present) and 'Ref. 13 and app. B'
+# (theory=ref13). shell: U unstiffened, ES externally stiffened, IS internally stiffened. f_Hz in Hz (= cps).
+# Read at every integer n inside the drawn range of each curve (no extrapolation except where a note says
+# the curve end is hidden under a test symbol). Test points are NOT included (see Tables II-V).
+# Method: embedded 300 dpi scans; axes calibrated by linear fits to the tick marks (skew from the drawn axis
+# lines); curve centre lines traced column by column; value at n = local quadratic fit of the traced centre
+# line within +-0.12 n (widened up to +-0.48 n where the line is hidden by a test symbol or a dash gap).
+# Reading precision per figure (Hz/px; line width; max tick-fit residuals). Estimated uncertainty of a value:
+# +-2 Hz where the curve is flat (line-centre position +-1.5 px, symbol/dash-gap interpolation, overlap);
+# on steep parts add 1.5 px in n times the slope; stated in the note when the total is >= 3 Hz:
+#   8a: 0.452 Hz/px, 112.2 px per unit n, line width 4.0 px = 1.8 Hz, flat parts +-2 Hz, max tick residuals 1.1 px (n) / 1.3 px (f)
+#   8b: 0.497 Hz/px, 104.6 px per unit n, line width 4.0 px = 2.0 Hz, flat parts +-2 Hz, max tick residuals 1.0 px (n) / 1.6 px (f)
+#   9a: 0.458 Hz/px, 110.7 px per unit n, line width 7.0 px = 3.2 Hz, flat parts +-2 Hz, max tick residuals 2.8 px (n) / 2.2 px (f)
+#   9b: 0.398 Hz/px, 121.1 px per unit n, line width 5.0 px = 2.0 Hz, flat parts +-2 Hz, max tick residuals 2.7 px (n) / 1.0 px (f)
+#   10a: 0.459 Hz/px, 110.7 px per unit n, line width 4.0 px = 1.8 Hz, flat parts +-2 Hz, max tick residuals 2.1 px (n) / 0.4 px (f)
+#   10b: 0.504 Hz/px, 102.9 px per unit n, line width 3.0 px = 1.5 Hz, flat parts +-2 Hz, max tick residuals 0.7 px (n) / 1.1 px (f)
+#   11a: 0.459 Hz/px, 110.9 px per unit n, line width 4.0 px = 1.8 Hz, flat parts +-2 Hz, max tick residuals 1.7 px (n) / 2.0 px (f)
+#   11b: 0.504 Hz/px, 102.8 px per unit n, line width 3.0 px = 1.5 Hz, flat parts +-2 Hz, max tick residuals 0.8 px (n) / 1.4 px (f)
+# Legend check: Figs. 8(b) solid=present ext., long dash=present int., short dash=ref13 ext., dash-dot=ref13 int.;
+# Figs. 9(b), 10(b), 11(b) show only 'Theory' (present paper): solid ext., dashed int. (no Ref. 13 curves).
+# Fig. 9 (free-free) includes m = 0. Fig. 10(b) has no ext. m = 3 curve.
+figure,ends,shell,theory,m,n,f_Hz,note
+8a,SS,U,present,1,3,469.8,"steep (about -252 Hz per unit n): +-3 Hz"
+8a,SS,U,present,1,4,285.0,
+8a,SS,U,present,1,5,205.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8a,SS,U,present,1,6,168.8,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8a,SS,U,present,1,7,167.4,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8a,SS,U,present,1,8,188.8,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8a,SS,U,present,1,9,226.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8a,SS,U,present,1,10,276.0,
+8a,SS,U,present,1,11,328.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8a,SS,U,present,1,12,389.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8a,SS,U,present,1,13,456.8,
+8a,SS,U,present,1,14,526.9,
+8a,SS,U,present,1,15,601.9,
+8a,SS,U,present,2,5,651.6,"at the end of the drawn curve (traced to n = 4.98)"
+8a,SS,U,present,2,6,493.9,
+8a,SS,U,present,2,7,398.4,
+8a,SS,U,present,2,8,347.1,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8a,SS,U,present,2,9,329.4,
+8a,SS,U,present,2,10,340.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8a,SS,U,present,2,11,374.2,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8a,SS,U,present,2,12,421.4,
+8a,SS,U,present,2,13,479.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8a,SS,U,present,2,14,546.4,
+8a,SS,U,present,2,15,624.1,"at the end of the drawn curve (traced to n = 15.02)"
+8a,SS,U,present,3,8,627.1,"at the end of the drawn curve (traced to n = 7.98)"
+8a,SS,U,present,3,9,551.2,
+8a,SS,U,present,3,10,507.3,
+8a,SS,U,present,3,11,496.3,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8a,SS,U,present,3,12,513.8,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8a,SS,U,present,3,13,549.7,
+8a,SS,U,present,3,14,601.7,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8a,SS,U,present,3,15,663.5,
+8b,SS,ES,present,1,4,295.8,
+8b,SS,ES,present,1,5,227.8,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8b,SS,ES,present,1,6,195.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8b,SS,ES,present,1,7,187.6,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8b,SS,ES,present,1,8,192.2,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8b,SS,ES,present,1,9,212.8,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8b,SS,ES,present,1,10,243.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8b,SS,ES,present,1,11,281.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8b,SS,ES,present,1,12,329.8,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n"
+8b,SS,ES,present,1,13,373.7,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m1 (-0.2 Hz); assignment uncertain"
+8b,SS,ES,present,1,14,423.0,
+8b,SS,ES,present,1,15,477.2,"at the end of the drawn curve (traced to n = 15.00)"
+8b,SS,ES,present,2,6,578.8,
+8b,SS,ES,present,2,7,522.1,
+8b,SS,ES,present,2,8,488.0,
+8b,SS,ES,present,2,9,471.2,
+8b,SS,ES,present,2,10,470.8,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8b,SS,ES,present,2,11,482.1,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8b,SS,ES,present,2,12,505.8,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8b,SS,ES,present,2,13,537.5,
+8b,SS,ES,present,2,14,577.4,
+8b,SS,ES,present,2,15,619.7,"at the end of the drawn curve (traced to n = 15.00)"
+8b,SS,ES,present,3,7,942.4,
+8b,SS,ES,present,3,8,895.6,
+8b,SS,ES,present,3,9,864.1,
+8b,SS,ES,present,3,10,847.3,
+8b,SS,ES,present,3,11,843.7,
+8b,SS,ES,present,3,12,851.7,
+8b,SS,ES,present,3,13,869.1,
+8b,SS,ES,present,3,14,891.2,
+8b,SS,ES,present,3,15,920.1,"at the end of the drawn curve (traced to n = 14.98)"
+8b,SS,ES,ref13,1,4,265.6,
+8b,SS,ES,ref13,1,5,196.6,
+8b,SS,ES,ref13,1,6,162.9,
+8b,SS,ES,ref13,1,7,157.4,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8b,SS,ES,ref13,1,8,163.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m1 (-0.1 Hz); assignment uncertain"
+8b,SS,ES,ref13,1,9,186.1,
+8b,SS,ES,ref13,1,10,215.8,
+8b,SS,ES,ref13,1,11,252.3,
+8b,SS,ES,ref13,1,12,294.0,
+8b,SS,ES,ref13,1,13,339.4,
+8b,SS,ES,ref13,1,14,387.6,
+8b,SS,ES,ref13,1,15,439.4,"at the end of the drawn curve (traced to n = 14.99)"
+8b,SS,ES,ref13,2,6,475.8,"lines overlap/touch within about one line width with IS_ref13_m2 (+0.0 Hz); assignment uncertain"
+8b,SS,ES,ref13,2,7,417.8,"lines overlap/touch within about one line width with IS_ref13_m2 (+0.0 Hz); assignment uncertain"
+8b,SS,ES,ref13,2,8,385.1,"lines overlap/touch within about one line width with IS_ref13_m2 (+0.0 Hz); assignment uncertain"
+8b,SS,ES,ref13,2,9,373.0,
+8b,SS,ES,ref13,2,10,380.0,
+8b,SS,ES,ref13,2,11,400.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8b,SS,ES,ref13,2,12,428.5,"lines overlap/touch within about one line width with IS_present_m2 (-0.2 Hz); assignment uncertain"
+8b,SS,ES,ref13,2,13,465.8,
+8b,SS,ES,ref13,2,14,507.7,
+8b,SS,ES,ref13,2,15,554.9,"at the end of the drawn curve (traced to n = 15.00)"
+8b,SS,ES,ref13,3,7,778.0,"lines overlap/touch within about one line width with IS_ref13_m3 (+0.0 Hz); assignment uncertain"
+8b,SS,ES,ref13,3,8,722.5,"lines overlap/touch within about one line width with IS_ref13_m3 (+0.0 Hz); assignment uncertain"
+8b,SS,ES,ref13,3,9,690.2,"lines overlap/touch within about one line width with IS_ref13_m3 (+0.0 Hz); assignment uncertain"
+8b,SS,ES,ref13,3,10,678.9,"lines overlap/touch within about one line width with IS_ref13_m3 (+0.0 Hz); assignment uncertain"
+8b,SS,ES,ref13,3,11,680.4,
+8b,SS,ES,ref13,3,12,695.1,
+8b,SS,ES,ref13,3,13,718.7,
+8b,SS,ES,ref13,3,14,748.5,
+8b,SS,ES,ref13,3,15,789.6,"at the end of the drawn curve (traced to n = 14.99); lines overlap/touch within about one line width with IS_present_m3 (-0.7 Hz); assignment uncertain"
+8b,SS,IS,present,1,4,238.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.12 n"
+8b,SS,IS,present,1,5,165.6,
+8b,SS,IS,present,1,6,137.6,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8b,SS,IS,present,1,7,140.6,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n"
+8b,SS,IS,present,1,8,162.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ES_ref13_m1 (+0.1 Hz); assignment uncertain"
+8b,SS,IS,present,1,9,192.8,"lines overlap/touch within about one line width with IS_ref13_m1 (+0.0 Hz); assignment uncertain"
+8b,SS,IS,present,1,10,230.1,
+8b,SS,IS,present,1,11,272.5,
+8b,SS,IS,present,1,12,324.4,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8b,SS,IS,present,1,13,373.5,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ES_present_m1 (+0.2 Hz); assignment uncertain"
+8b,SS,IS,present,1,14,428.0,
+8b,SS,IS,present,1,15,487.9,"at the end of the drawn curve (traced to n = 14.97)"
+8b,SS,IS,present,2,6,383.2,
+8b,SS,IS,present,2,7,330.3,
+8b,SS,IS,present,2,8,311.4,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8b,SS,IS,present,2,9,322.5,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8b,SS,IS,present,2,10,348.7,
+8b,SS,IS,present,2,11,384.1,
+8b,SS,IS,present,2,12,428.3,"lines overlap/touch within about one line width with ES_ref13_m2 (+0.2 Hz); assignment uncertain"
+8b,SS,IS,present,2,13,475.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_ref13_m2 (+0.1 Hz); assignment uncertain"
+8b,SS,IS,present,2,14,529.6,
+8b,SS,IS,present,2,15,584.8,"at the end of the drawn curve (traced to n = 14.99)"
+8b,SS,IS,present,3,7,626.0,
+8b,SS,IS,present,3,8,579.7,
+8b,SS,IS,present,3,9,568.8,
+8b,SS,IS,present,3,10,579.3,
+8b,SS,IS,present,3,11,604.5,
+8b,SS,IS,present,3,12,640.3,
+8b,SS,IS,present,3,13,684.2,
+8b,SS,IS,present,3,14,734.4,
+8b,SS,IS,present,3,15,788.9,"at the end of the drawn curve (traced to n = 14.99); lines overlap/touch within about one line width with ES_ref13_m3 (+0.7 Hz); assignment uncertain"
+8b,SS,IS,ref13,1,8,169.7,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8b,SS,IS,ref13,1,9,192.8,"lines overlap/touch within about one line width with IS_present_m1 (+0.0 Hz); assignment uncertain"
+8b,SS,IS,ref13,1,10,224.4,
+8b,SS,IS,ref13,1,11,262.1,
+8b,SS,IS,ref13,1,12,305.6,
+8b,SS,IS,ref13,1,13,354.6,
+8b,SS,IS,ref13,1,14,407.8,
+8b,SS,IS,ref13,1,15,464.8,"at the end of the drawn curve (traced to n = 15.00)"
+8b,SS,IS,ref13,2,6,475.8,"lines overlap/touch within about one line width with ES_ref13_m2 (+0.0 Hz); assignment uncertain"
+8b,SS,IS,ref13,2,7,417.8,"lines overlap/touch within about one line width with ES_ref13_m2 (+0.0 Hz); assignment uncertain"
+8b,SS,IS,ref13,2,8,385.1,"lines overlap/touch within about one line width with ES_ref13_m2 (+0.0 Hz); assignment uncertain"
+8b,SS,IS,ref13,2,9,378.0,
+8b,SS,IS,ref13,2,10,387.2,
+8b,SS,IS,ref13,2,11,407.9,
+8b,SS,IS,ref13,2,12,437.3,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8b,SS,IS,ref13,2,13,476.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m2 (-0.1 Hz); assignment uncertain"
+8b,SS,IS,ref13,2,14,523.5,
+8b,SS,IS,ref13,2,15,573.7,"at the end of the drawn curve (traced to n = 15.00)"
+8b,SS,IS,ref13,3,7,778.0,"lines overlap/touch within about one line width with ES_ref13_m3 (+0.0 Hz); assignment uncertain"
+8b,SS,IS,ref13,3,8,722.5,"lines overlap/touch within about one line width with ES_ref13_m3 (+0.0 Hz); assignment uncertain"
+8b,SS,IS,ref13,3,9,690.2,"lines overlap/touch within about one line width with ES_ref13_m3 (+0.0 Hz); assignment uncertain"
+8b,SS,IS,ref13,3,10,678.9,"lines overlap/touch within about one line width with ES_ref13_m3 (+0.0 Hz); assignment uncertain"
+8b,SS,IS,ref13,3,11,684.1,
+8b,SS,IS,ref13,3,12,700.2,
+8b,SS,IS,ref13,3,13,726.5,
+8b,SS,IS,ref13,3,14,758.1,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+8b,SS,IS,ref13,3,15,800.9,"at the end of the drawn curve (traced to n = 14.99)"
+9a,FF,U,present,0,2,7.5,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m1 (+1.3 Hz); assignment uncertain"
+9a,FF,U,present,0,3,21.4,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m1 (+1.6 Hz); assignment uncertain"
+9a,FF,U,present,0,4,40.2,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m1 (+1.3 Hz); assignment uncertain"
+9a,FF,U,present,0,5,64.2,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m1 (+2.0 Hz); assignment uncertain"
+9a,FF,U,present,0,6,94.6,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m1 (+1.7 Hz); assignment uncertain"
+9a,FF,U,present,0,7,131.5,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m1 (+0.6 Hz); assignment uncertain"
+9a,FF,U,present,0,8,172.1,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m1 (+0.2 Hz); assignment uncertain"
+9a,FF,U,present,0,9,216.3,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m1 (+0.9 Hz); assignment uncertain"
+9a,FF,U,present,0,10,267.1,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m1 (+0.5 Hz); assignment uncertain"
+9a,FF,U,present,0,11,323.8,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m1 (+0.8 Hz); assignment uncertain"
+9a,FF,U,present,0,12,387.1,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m1 (+1.0 Hz); assignment uncertain"
+9a,FF,U,present,0,13,454.4,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m1 (+0.9 Hz); assignment uncertain"
+9a,FF,U,present,0,14,519.4,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside)"
+9a,FF,U,present,0,15,597.7,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside)"
+9a,FF,U,present,1,2,8.8,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m0 (-1.3 Hz); assignment uncertain"
+9a,FF,U,present,1,3,23.0,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m0 (-1.6 Hz); assignment uncertain"
+9a,FF,U,present,1,4,41.5,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m0 (-1.3 Hz); assignment uncertain"
+9a,FF,U,present,1,5,66.2,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m0 (-2.0 Hz); assignment uncertain"
+9a,FF,U,present,1,6,96.3,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m0 (-1.7 Hz); assignment uncertain"
+9a,FF,U,present,1,7,132.1,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m0 (-0.6 Hz); assignment uncertain"
+9a,FF,U,present,1,8,172.3,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m0 (-0.2 Hz); assignment uncertain"
+9a,FF,U,present,1,9,217.2,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m0 (-0.9 Hz); assignment uncertain"
+9a,FF,U,present,1,10,267.6,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m0 (-0.5 Hz); assignment uncertain"
+9a,FF,U,present,1,11,324.6,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m0 (-0.8 Hz); assignment uncertain"
+9a,FF,U,present,1,12,388.1,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m0 (-1.0 Hz); assignment uncertain"
+9a,FF,U,present,1,13,455.3,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside); lines overlap/touch within about one line width with U_present_m0 (-0.9 Hz); assignment uncertain"
+9a,FF,U,present,1,14,524.9,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside)"
+9a,FF,U,present,1,15,603.2,"m=0 and m=1 are drawn as two touching lines forming one thick line; m=1 read at the upper edge, m=0 at the lower edge (half a line width inside)"
+9a,FF,U,present,2,5,392.6,"at the end of the drawn curve (traced to n = 5.00)"
+9a,FF,U,present,2,6,292.2,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+9a,FF,U,present,2,7,249.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+9a,FF,U,present,2,8,243.9,
+9a,FF,U,present,2,9,264.1,
+9a,FF,U,present,2,10,299.8,
+9a,FF,U,present,2,11,348.5,
+9a,FF,U,present,2,12,403.8,
+9a,FF,U,present,2,13,468.7,
+9a,FF,U,present,2,14,540.5,
+9a,FF,U,present,2,15,614.7,
+9a,FF,U,present,3,7,558.0,"at the end of the drawn curve (traced to n = 7.00)"
+9a,FF,U,present,3,8,468.1,
+9a,FF,U,present,3,9,419.7,
+9a,FF,U,present,3,10,408.1,
+9a,FF,U,present,3,11,425.6,
+9a,FF,U,present,3,12,461.3,
+9a,FF,U,present,3,13,511.9,
+9a,FF,U,present,3,14,574.2,
+9a,FF,U,present,3,15,644.8,
+9b,FF,ES,present,0,2,6.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m0 (+0.0 Hz); assignment uncertain"
+9b,FF,ES,present,0,3,16.8,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m0 (+0.0 Hz); assignment uncertain"
+9b,FF,ES,present,0,4,30.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m0 (+0.0 Hz); assignment uncertain"
+9b,FF,ES,present,0,5,49.1,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m0 (+0.0 Hz); assignment uncertain"
+9b,FF,ES,present,0,6,72.5,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m0 (+0.0 Hz); assignment uncertain"
+9b,FF,ES,present,0,7,98.5,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m0 (+0.0 Hz); assignment uncertain"
+9b,FF,ES,present,0,8,127.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m0 (+0.0 Hz); assignment uncertain"
+9b,FF,ES,present,0,9,161.7,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m0 (+1.5 Hz); assignment uncertain"
+9b,FF,ES,present,0,10,199.1,
+9b,FF,ES,present,0,11,241.2,
+9b,FF,ES,present,0,12,287.7,
+9b,FF,ES,present,0,13,338.1,"lines overlap/touch within about one line width with IS_present_m0 (+2.2 Hz); assignment uncertain"
+9b,FF,ES,present,0,14,391.2,"lines overlap/touch within about one line width with IS_present_m0 (+1.8 Hz); assignment uncertain"
+9b,FF,ES,present,0,15,445.4,
+9b,FF,ES,present,1,2,16.1,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m1 (+0.0 Hz); assignment uncertain"
+9b,FF,ES,present,1,3,31.7,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m1 (+0.0 Hz); assignment uncertain"
+9b,FF,ES,present,1,4,49.2,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m1 (+0.0 Hz); assignment uncertain"
+9b,FF,ES,present,1,5,69.5,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m1 (+0.0 Hz); assignment uncertain"
+9b,FF,ES,present,1,6,92.3,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m1 (+0.0 Hz); assignment uncertain"
+9b,FF,ES,present,1,7,120.3,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m1 (+0.0 Hz); assignment uncertain"
+9b,FF,ES,present,1,8,150.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m1 (+0.0 Hz); assignment uncertain"
+9b,FF,ES,present,1,9,184.1,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m1 (+0.0 Hz); assignment uncertain"
+9b,FF,ES,present,1,10,221.8,"lines overlap/touch within about one line width with IS_present_m1 (+0.0 Hz); assignment uncertain"
+9b,FF,ES,present,1,11,263.2,"lines overlap/touch within about one line width with IS_present_m1 (+2.0 Hz); assignment uncertain"
+9b,FF,ES,present,1,12,308.2,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.12 n"
+9b,FF,ES,present,1,13,350.1,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+9b,FF,ES,present,1,14,403.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+9b,FF,ES,present,1,15,464.9,
+9b,FF,ES,present,2,5,439.7,
+9b,FF,ES,present,2,6,373.7,
+9b,FF,ES,present,2,7,338.3,
+9b,FF,ES,present,2,8,328.9,
+9b,FF,ES,present,2,9,339.6,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+9b,FF,ES,present,2,10,360.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+9b,FF,ES,present,2,11,388.8,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+9b,FF,ES,present,2,12,426.1,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+9b,FF,ES,present,2,13,469.6,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+9b,FF,ES,present,2,14,516.0,
+9b,FF,ES,present,2,15,569.3,
+9b,FF,IS,present,0,2,6.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ES_present_m0 (+0.0 Hz); assignment uncertain"
+9b,FF,IS,present,0,3,16.8,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ES_present_m0 (+0.0 Hz); assignment uncertain"
+9b,FF,IS,present,0,4,30.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ES_present_m0 (+0.0 Hz); assignment uncertain"
+9b,FF,IS,present,0,5,49.1,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ES_present_m0 (+0.0 Hz); assignment uncertain"
+9b,FF,IS,present,0,6,72.5,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ES_present_m0 (+0.0 Hz); assignment uncertain"
+9b,FF,IS,present,0,7,98.5,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ES_present_m0 (+0.0 Hz); assignment uncertain"
+9b,FF,IS,present,0,8,127.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ES_present_m0 (+0.0 Hz); assignment uncertain"
+9b,FF,IS,present,0,9,163.2,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ES_present_m0 (-1.5 Hz); assignment uncertain"
+9b,FF,IS,present,0,10,204.4,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+9b,FF,IS,present,0,11,248.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+9b,FF,IS,present,0,12,296.2,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+9b,FF,IS,present,0,13,340.3,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n; lines overlap/touch within about one line width with ES_present_m0 (-2.2 Hz); assignment uncertain"
+9b,FF,IS,present,0,14,393.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n; lines overlap/touch within about one line width with ES_present_m0 (-1.8 Hz); assignment uncertain"
+9b,FF,IS,present,0,15,458.8,
+9b,FF,IS,present,1,2,16.1,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ES_present_m1 (+0.0 Hz); assignment uncertain"
+9b,FF,IS,present,1,3,31.7,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ES_present_m1 (+0.0 Hz); assignment uncertain"
+9b,FF,IS,present,1,4,49.2,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ES_present_m1 (+0.0 Hz); assignment uncertain"
+9b,FF,IS,present,1,5,69.5,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ES_present_m1 (+0.0 Hz); assignment uncertain"
+9b,FF,IS,present,1,6,92.3,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ES_present_m1 (+0.0 Hz); assignment uncertain"
+9b,FF,IS,present,1,7,120.3,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ES_present_m1 (+0.0 Hz); assignment uncertain"
+9b,FF,IS,present,1,8,150.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ES_present_m1 (+0.0 Hz); assignment uncertain"
+9b,FF,IS,present,1,9,184.1,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ES_present_m1 (+0.0 Hz); assignment uncertain"
+9b,FF,IS,present,1,10,221.8,"lines overlap/touch within about one line width with ES_present_m1 (+0.0 Hz); assignment uncertain"
+9b,FF,IS,present,1,11,265.2,"lines overlap/touch within about one line width with ES_present_m1 (-2.0 Hz); assignment uncertain"
+9b,FF,IS,present,1,12,312.4,
+9b,FF,IS,present,1,13,359.7,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+9b,FF,IS,present,1,14,411.4,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+9b,FF,IS,present,1,15,477.1,
+9b,FF,IS,present,2,5,315.3,
+9b,FF,IS,present,2,6,255.0,
+9b,FF,IS,present,2,7,235.6,
+9b,FF,IS,present,2,8,246.2,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.12 n"
+9b,FF,IS,present,2,9,275.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+9b,FF,IS,present,2,10,311.1,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+9b,FF,IS,present,2,11,359.1,
+9b,FF,IS,present,2,12,405.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+9b,FF,IS,present,2,13,451.8,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+9b,FF,IS,present,2,14,505.3,
+9b,FF,IS,present,2,15,561.6,
+10a,CC,U,present,1,4,484.4,"at the end of the drawn curve (traced to n = 3.98)"
+10a,CC,U,present,1,5,360.5,
+10a,CC,U,present,1,6,284.2,
+10a,CC,U,present,1,7,243.7,
+10a,CC,U,present,1,8,237.5,
+10a,CC,U,present,1,9,255.9,
+10a,CC,U,present,1,10,290.2,
+10a,CC,U,present,1,11,336.5,
+10a,CC,U,present,1,12,393.5,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+10a,CC,U,present,1,13,459.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.12 n"
+10a,CC,U,present,1,14,528.8,
+10a,CC,U,present,1,15,602.6,
+10a,CC,U,present,2,6,649.1,
+10a,CC,U,present,2,7,530.9,
+10a,CC,U,present,2,8,454.1,
+10a,CC,U,present,2,9,412.1,
+10a,CC,U,present,2,10,400.3,
+10a,CC,U,present,2,11,416.9,
+10a,CC,U,present,2,12,451.7,
+10a,CC,U,present,2,13,500.4,
+10a,CC,U,present,2,14,561.6,
+10a,CC,U,present,2,15,632.2,
+10a,CC,U,present,3,8,729.1,
+10a,CC,U,present,3,9,642.6,
+10a,CC,U,present,3,10,587.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+10a,CC,U,present,3,11,560.8,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+10a,CC,U,present,3,12,564.2,
+10a,CC,U,present,3,13,589.8,
+10a,CC,U,present,3,14,631.5,
+10a,CC,U,present,3,15,686.8,"at the end of the drawn curve (traced to n = 14.97)"
+10b,CC,ES,present,1,3,570.5,"at the end of the drawn curve (traced to n = 2.99)"
+10b,CC,ES,present,1,4,446.4,
+10b,CC,ES,present,1,5,368.3,
+10b,CC,ES,present,1,6,322.0,
+10b,CC,ES,present,1,7,296.7,
+10b,CC,ES,present,1,8,288.7,
+10b,CC,ES,present,1,9,294.3,
+10b,CC,ES,present,1,10,310.6,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.12 n"
+10b,CC,ES,present,1,11,335.7,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+10b,CC,ES,present,1,12,368.1,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+10b,CC,ES,present,1,13,410.6,
+10b,CC,ES,present,1,14,455.5,
+10b,CC,ES,present,1,15,506.1,"at the end of the drawn curve (traced to n = 15.02)"
+10b,CC,ES,present,2,6,725.2,
+10b,CC,ES,present,2,7,670.2,
+10b,CC,ES,present,2,8,635.6,
+10b,CC,ES,present,2,9,615.7,
+10b,CC,ES,present,2,10,609.9,
+10b,CC,ES,present,2,11,615.6,
+10b,CC,ES,present,2,12,631.6,
+10b,CC,ES,present,2,13,654.5,
+10b,CC,ES,present,2,14,683.1,
+10b,CC,ES,present,2,15,717.4,"at the end of the drawn curve (traced to n = 15.01)"
+10b,CC,IS,present,1,3,505.0,
+10b,CC,IS,present,1,4,356.5,
+10b,CC,IS,present,1,5,268.4,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+10b,CC,IS,present,1,6,220.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+10b,CC,IS,present,1,7,200.6,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+10b,CC,IS,present,1,8,202.5,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+10b,CC,IS,present,1,9,222.6,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+10b,CC,IS,present,1,10,255.7,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+10b,CC,IS,present,1,11,293.6,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+10b,CC,IS,present,1,12,342.2,
+10b,CC,IS,present,1,13,392.4,
+10b,CC,IS,present,1,14,445.9,
+10b,CC,IS,present,1,15,500.4,"at the end of the drawn curve (traced to n = 15.00)"
+10b,CC,IS,present,2,5,610.3,
+10b,CC,IS,present,2,6,504.6,
+10b,CC,IS,present,2,7,442.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+10b,CC,IS,present,2,8,416.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+10b,CC,IS,present,2,9,413.5,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+10b,CC,IS,present,2,10,427.4,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+10b,CC,IS,present,2,11,457.4,
+10b,CC,IS,present,2,12,497.4,
+10b,CC,IS,present,2,13,542.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+10b,CC,IS,present,2,14,591.5,
+10b,CC,IS,present,2,15,645.3,"at the end of the drawn curve (traced to n = 14.99)"
+10b,CC,IS,present,3,6,862.6,
+10b,CC,IS,present,3,7,777.4,
+10b,CC,IS,present,3,8,734.1,
+10b,CC,IS,present,3,9,715.9,
+10b,CC,IS,present,3,10,721.9,
+10b,CC,IS,present,3,11,741.8,
+10b,CC,IS,present,3,12,772.2,
+10b,CC,IS,present,3,13,811.1,
+10b,CC,IS,present,3,14,856.1,
+10b,CC,IS,present,3,15,905.4,"at the end of the drawn curve (traced to n = 14.98)"
+11a,CF,U,present,1,2,318.8,"at the end of the drawn curve (traced to n = 1.98)"
+11a,CF,U,present,1,3,172.2,
+11a,CF,U,present,1,4,109.5,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11a,CF,U,present,1,5,91.6,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11a,CF,U,present,1,6,107.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11a,CF,U,present,1,7,134.3,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11a,CF,U,present,1,8,171.1,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11a,CF,U,present,1,9,216.6,
+11a,CF,U,present,1,10,267.2,
+11a,CF,U,present,1,11,323.7,
+11a,CF,U,present,1,12,386.3,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11a,CF,U,present,1,13,453.6,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11a,CF,U,present,1,14,524.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11a,CF,U,present,1,15,599.0,"at the end of the drawn curve (traced to n = 14.99)"
+11a,CF,U,present,2,4,514.4,
+11a,CF,U,present,2,5,368.0,
+11a,CF,U,present,2,6,285.7,
+11a,CF,U,present,2,7,244.2,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11a,CF,U,present,2,8,239.6,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11a,CF,U,present,2,9,258.5,
+11a,CF,U,present,2,10,293.8,
+11a,CF,U,present,2,11,342.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.12 n"
+11a,CF,U,present,2,12,401.1,
+11a,CF,U,present,2,13,467.1,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.12 n"
+11a,CF,U,present,2,14,536.1,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.12 n"
+11a,CF,U,present,2,15,607.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.12 n"
+11a,CF,U,present,3,6,658.7,"at the end of the drawn curve (traced to n = 5.99)"
+11a,CF,U,present,3,7,530.3,
+11a,CF,U,present,3,8,451.4,
+11a,CF,U,present,3,9,410.3,
+11a,CF,U,present,3,10,400.7,
+11a,CF,U,present,3,11,418.5,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11a,CF,U,present,3,12,453.4,
+11a,CF,U,present,3,13,503.7,
+11a,CF,U,present,3,14,565.1,
+11a,CF,U,present,3,15,635.5,"curve end hidden under a test symbol; extrapolated 0.09 n beyond the last traced point"
+11b,CF,ES,present,1,1,531.9,"ext. (solid) and int. (dashed) m=1 lines coincide (one line) for n < 1.6; value given to both; the curves start on the frequency axis at n = 0 (about 880-900 Hz), where they cannot be separated from the axis line (n = 0 not read); lines overlap/touch within about one line width with IS_present_m1 (+0.0 Hz); assignment uncertain; steep (about -341 Hz per unit n): +-5 Hz"
+11b,CF,ES,present,1,2,286.2,
+11b,CF,ES,present,1,3,170.2,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,ES,present,1,4,114.1,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,ES,present,1,5,97.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,ES,present,1,6,99.7,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,ES,present,1,7,115.0,
+11b,CF,ES,present,1,8,139.8,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,ES,present,1,9,169.5,"ext. (solid) and int. (dashed) m=1 lines overlap within about one line width at n = 8.5-10.7 (they cross there); value read at the centre of the combined line and given to both; line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with IS_present_m1 (+0.0 Hz); assignment uncertain"
+11b,CF,ES,present,1,10,204.3,"ext. (solid) and int. (dashed) m=1 lines overlap within about one line width at n = 9.3-10.7 (they cross there); value read at the centre of the combined line and given to both; lines overlap/touch within about one line width with IS_present_m1 (+0.0 Hz); assignment uncertain"
+11b,CF,ES,present,1,11,251.3,"lines overlap/touch within about one line width with IS_present_m1 (-0.5 Hz); assignment uncertain"
+11b,CF,ES,present,1,12,295.3,
+11b,CF,ES,present,1,13,345.0,
+11b,CF,ES,present,1,14,397.6,
+11b,CF,ES,present,1,15,451.6,"at the end of the drawn curve (traced to n = 14.99)"
+11b,CF,ES,present,2,2,940.4,"at the end of the drawn curve (traced to n = 1.99); steep (about -277 Hz per unit n): +-4 Hz"
+11b,CF,ES,present,2,3,648.6,"steep (about -220 Hz per unit n): +-3 Hz"
+11b,CF,ES,present,2,4,487.1,
+11b,CF,ES,present,2,5,393.4,
+11b,CF,ES,present,2,6,339.5,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,ES,present,2,7,310.5,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,ES,present,2,8,304.4,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.12 n"
+11b,CF,ES,present,2,9,312.3,
+11b,CF,ES,present,2,10,331.6,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,ES,present,2,11,358.1,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,ES,present,2,12,394.1,
+11b,CF,ES,present,2,13,434.5,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,ES,present,2,14,480.5,
+11b,CF,ES,present,2,15,528.4,"curve end hidden under a test symbol; extrapolated 0.09 n beyond the last traced point"
+11b,CF,ES,present,3,5,855.4,"at the end of the drawn curve (traced to n = 4.98)"
+11b,CF,ES,present,3,6,756.5,
+11b,CF,ES,present,3,7,689.1,
+11b,CF,ES,present,3,8,648.6,
+11b,CF,ES,present,3,9,627.4,
+11b,CF,ES,present,3,10,622.8,
+11b,CF,ES,present,3,11,630.8,
+11b,CF,ES,present,3,12,649.0,
+11b,CF,ES,present,3,13,674.5,
+11b,CF,ES,present,3,14,706.6,
+11b,CF,ES,present,3,15,744.8,"at the end of the drawn curve (traced to n = 15.01)"
+11b,CF,IS,present,1,1,531.9,"ext. (solid) and int. (dashed) m=1 lines coincide (one line) for n < 1.6; value given to both; the curves start on the frequency axis at n = 0 (about 880-900 Hz), where they cannot be separated from the axis line (n = 0 not read); lines overlap/touch within about one line width with ES_present_m1 (+0.0 Hz); assignment uncertain; steep (about -341 Hz per unit n): +-5 Hz"
+11b,CF,IS,present,1,2,268.9,
+11b,CF,IS,present,1,3,145.5,
+11b,CF,IS,present,1,4,92.2,
+11b,CF,IS,present,1,5,77.6,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,IS,present,1,6,86.3,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,IS,present,1,7,107.7,
+11b,CF,IS,present,1,8,136.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,IS,present,1,9,169.5,"ext. (solid) and int. (dashed) m=1 lines overlap within about one line width at n = 8.5-10.7 (they cross there); value read at the centre of the combined line and given to both; line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ES_present_m1 (+0.0 Hz); assignment uncertain"
+11b,CF,IS,present,1,10,204.3,"ext. (solid) and int. (dashed) m=1 lines overlap within about one line width at n = 9.3-10.7 (they cross there); value read at the centre of the combined line and given to both; lines overlap/touch within about one line width with ES_present_m1 (+0.0 Hz); assignment uncertain"
+11b,CF,IS,present,1,11,250.8,"lines overlap/touch within about one line width with ES_present_m1 (+0.5 Hz); assignment uncertain"
+11b,CF,IS,present,1,12,304.8,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,IS,present,1,13,354.7,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,IS,present,1,14,408.0,
+11b,CF,IS,present,1,15,467.1,"at the end of the drawn curve (traced to n = 14.98)"
+11b,CF,IS,present,2,2,895.5,"at the end of the drawn curve (traced to n = 1.99); steep (about -482 Hz per unit n): +-7 Hz"
+11b,CF,IS,present,2,3,567.2,"steep (about -222 Hz per unit n): +-3 Hz"
+11b,CF,IS,present,2,4,425.0,
+11b,CF,IS,present,2,5,286.3,
+11b,CF,IS,present,2,6,232.0,
+11b,CF,IS,present,2,7,214.9,
+11b,CF,IS,present,2,8,225.0,
+11b,CF,IS,present,2,9,247.3,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,IS,present,2,10,280.2,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,IS,present,2,11,320.7,
+11b,CF,IS,present,2,12,363.9,
+11b,CF,IS,present,2,13,414.5,
+11b,CF,IS,present,2,14,468.2,
+11b,CF,IS,present,2,15,523.7,"at the end of the drawn curve (traced to n = 14.96)"
+11b,CF,IS,present,3,4,820.4,"steep (about -226 Hz per unit n): +-3 Hz"
+11b,CF,IS,present,3,5,630.9,
+11b,CF,IS,present,3,6,515.2,
+11b,CF,IS,present,3,7,448.1,
+11b,CF,IS,present,3,8,423.3,
+11b,CF,IS,present,3,9,425.9,
+11b,CF,IS,present,3,10,446.3,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,IS,present,3,11,480.0,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,IS,present,3,12,523.6,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,IS,present,3,13,569.1,
+11b,CF,IS,present,3,14,620.8,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+11b,CF,IS,present,3,15,676.8,"at the end of the drawn curve (traced to n = 15.01)"

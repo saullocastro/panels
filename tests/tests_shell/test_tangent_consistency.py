@@ -9,7 +9,7 @@ is what every Newton-Raphson built on the Shell class uses as the Jacobian of
 calc_fint. If the two drift apart, the analyses still converge, but linearly
 instead of quadratically.
 
-The main check is a directional Taylor test,
+The main check is a directional Taylor test::
 
     |fint(c + h d) - fint(c) - h KT d| / |h KT d|
 
@@ -30,7 +30,9 @@ MODELS = ['plate_clpt_donnell', 'cylshell_clpt_donnell',
           'cylshell_clpt_sanders', 'plate_fsdt_donnell', 'plate_tsdt_donnell',
           'cylshell_fsdt_donnell', 'cylshell_fsdt_sanders',
           'cylshell_tsdt_donnell', 'cylshell_tsdt_sanders', 'plate_clpt_gl',
-          'plate_clpt_tl']
+          'plate_clpt_tl', 'cylshell_clpt_gl', 'cylshell_clpt_tl',
+          'plate_fsdt_gl', 'plate_tsdt_gl', 'cylshell_fsdt_gl',
+          'cylshell_tsdt_gl', 'plate_fsdt_tl', 'cylshell_fsdt_tl']
 
 
 def make_shell(model):

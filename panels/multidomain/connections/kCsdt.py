@@ -36,8 +36,8 @@ All the functions return the upper triangle of the connection matrix, with
 the shape ``(size, size)`` of the assembly, as the Cython kernels of the
 models with 3 DOFs, see :func:`structsolve.sparseutils.finalize_symmetric_matrix`.
 
-The matrices are computed with the integrals of :ref:`Bardell's functions
-<theory_func_bardell>`.
+The matrices are computed with the closed-form integrals of the
+Legendre-based (Bardell) approximation functions, see the Notes.
 
 Notes
 -----
@@ -107,8 +107,15 @@ face, `d = \pm h/2`, the transverse shear vanishes there and `\theta_x =
 -w_{,x}`, `\theta_y = \Phi_y - \phi_y - w_{,y}`, i.e. `-w_{,y}` plus the
 term `v/r` of Sanders-Koiter.
 
-The integrals of Bardell's functions are exact for the polynomial
-approximations.
+The integrals of the Legendre-based (Bardell) functions [1]_ are exact
+for the polynomial approximations.
+
+References
+----------
+.. [1] Castro, S. G. P., and Donadon, M. V., Assembly of Semi-Analytical
+   models to Address Linear Buckling and Vibration of Stiffened Composite
+   Panels with Debonding Defect, Composite Structures, 160, 232-247, 2017.
+   https://doi.org/10.1016/j.compstruct.2016.10.026
 
 """
 import warnings
@@ -144,8 +151,29 @@ def _check_sdt(*panels):
 
 
 def _rinv_sanders(p):
-    r"""`1/r` of a panel with the Sanders-Koiter kinematics, zero otherwise"""
-    if p.model is not None and 'sanders' in p.model:
+    r"""`1/r` of a panel with the Sanders-Koiter kinematics, zero otherwise
+
+    The models with these kinematics have ``'sanders'`` in their name, and
+    ``'cylshell_clpt_gl'``, ``'cylshell_clpt_tl'``, ``'cylshell_fsdt_gl'``,
+    ``'cylshell_fsdt_tl'``, ``'cylshell_tsdt_gl'`` and ``'cylshell_tsdt_tl'``
+    have the same rotations of the normal.
+
+    Notes
+    -----
+    With the Sanders-Koiter kinematics the rotation of the normal about `x`
+    includes the rigid-body rotation `v/r` of the cross-section, `\phi_y =
+    -w_{,y} + v/r` for the classical laminated plate theory, which the
+    rotation continuity of the connections must include; the Donnell
+    kinematics neglect it, hence the zero, see :func:`_rotation_y`.
+
+    """
+    if p.model is not None and ('sanders' in p.model
+                                or p.model in ('cylshell_clpt_gl',
+                                               'cylshell_clpt_tl',
+                                               'cylshell_fsdt_gl',
+                                               'cylshell_fsdt_tl',
+                                               'cylshell_tsdt_gl',
+                                               'cylshell_tsdt_tl')):
         return 1./p.r
     return 0.
 
@@ -187,8 +215,27 @@ def _is_tsdt(p):
 
 
 def _alpha(p):
-    r"""`4 d^2/h^2` of a TSDT panel, with its offset `d` and thickness `h`,
-    zero for the FSDT, see :func:`._rotation_x`"""
+    r"""
+    Factor `\alpha` of the rotation at the reference surface of a TSDT panel
+
+    Parameters
+    ----------
+    p : :class:`.Shell`
+        Panel, with its ``model``, ``offset`` and ply thicknesses ``plyts``.
+
+    Returns
+    -------
+    alpha : float
+        `4 d^2/h^2` for a TSDT model, with the offset `d` and the thickness
+        `h`, the sum of the ply thicknesses; ``0.`` otherwise.
+
+    Notes
+    -----
+    With the TSDT field, `\theta_x = \phi_x - 3 c_1 d^2 (\phi_x + w_{,x}) = (1
+    - \alpha) \phi_x - \alpha w_{,x}` with `c_1 = 4/(3 h^2)`, see
+    :func:`._rotation_x`.
+
+    """
     if not _is_tsdt(p):
         return 0.
     return 4.*p.offset**2/sum(p.plyts)**2
@@ -511,14 +558,32 @@ def fkCSSycte_sdt(kt, kr, p1, p2, ycte1, ycte2, size):
     return _connection_matrix(comps, dict(x=None, y=(ycte1, ycte2)), size)
 
 
-def _surface_terms(p, z):
+def _surface_terms(p, z, rinv=None):
     r"""Terms of `u(z)` and `v(z)` of panel ``p`` at the coordinate `z`
     measured from its reference surface, for every model
 
     The same operator gives the displacements at the interface of the
-    skin-base connection ``'SB'``, see :func:`._sb_components`, and the
+    skin-base connection ``'SB'``, see :func:`._sb_components`, the
     prescribed in-plane displacements at a thickness coordinate, see
-    :func:`.nullspace.pd_rows`.
+    :func:`.nullspace.pd_rows`, and the displacements at a face of the base
+    of ``'BFxcte'``, see :func:`.kCBFxcte_face.bfxcte_face_components`.
+
+    Parameters
+    ----------
+    p : :class:`.Shell`
+        Panel.
+    z : float
+        Coordinate measured from the reference surface of ``p``, length.
+    rinv : float or None, optional
+        `1/r` of the term `z v/r` of `v(z)`, 1/length. ``None``, the
+        default, takes the kinematics of the model of ``p``,
+        :func:`._rinv_sanders`.
+
+    Returns
+    -------
+    tu, tv : list
+        The terms of `u(z)` and `v(z)`, ``(field, der_x, der_y, coeff)``,
+        see :func:`._connection_matrix`.
 
     Notes
     -----
@@ -533,8 +598,8 @@ def _surface_terms(p, z):
     with `g = (z - d)^3 + d^3`, the offset `d` of ``p``, `c_1 = 4/(3 h^2)`
     for the TSDT, `h` being the sum of the ply thicknesses of ``p``, `c_1 =
     0` for the FSDT, and the term `z v/r` only with the Sanders-Koiter
-    kinematics. For the classical laminated plate theory, 3 DOFs per term,
-    the Kirchhoff kinematics give
+    kinematics, or with the given ``rinv``. For the classical laminated
+    plate theory, 3 DOFs per term, the Kirchhoff kinematics give
 
     .. math::
 
@@ -544,7 +609,8 @@ def _surface_terms(p, z):
     Sanders-Koiter kinematics.
 
     """
-    rinv = _rinv_sanders(p)
+    if rinv is None:
+        rinv = _rinv_sanders(p)
     if _dofs(p) == 3:
         #NOTE Kirchhoff: u(z) = u - z w,x and v(z) = v + z (v/r - w,y)
         tu = [(U, 0, 0, 1.), (W, 1, 0, -z)]
@@ -562,33 +628,64 @@ def _surface_terms(p, z):
 
 
 def _face(p, side):
-    r"""Coordinate `z`, from the reference surface of ``p``, of its lower
-    face, ``side = -1``, or upper face, ``side = +1``
+    r"""
+    Coordinate of a face of ``p``, measured from its reference surface
 
-    `z = d + side \, h/2`, with the offset `d` of ``p`` and `h` the sum of
-    its ply thicknesses, the laminate occupying `d - h/2 \le z \le d + h/2`
-    for all the models, see :func:`composites.laminated_plate`. Used by the
-    skin-base connections ``'SB'`` and ``'SB_TSL'`` of all the models, see
-    :func:`._sb_components` and :func:`._sb_distances`.
+    Used by the skin-base connections ``'SB'`` and ``'SB_TSL'`` of all the
+    models, see :func:`._sb_components` and :func:`._sb_distances`.
+
+    Parameters
+    ----------
+    p : :class:`.Shell`
+        Panel, with its ``offset`` and ply thicknesses ``plyts``.
+    side : int
+        ``-1`` for the lower face, ``+1`` for the upper face.
+
+    Returns
+    -------
+    z : float
+        Coordinate `z` of the face, length.
+
+    Notes
+    -----
+    `z = d + \mathrm{side} \, h/2`, with the offset `d` of ``p`` and `h` the
+    sum of its ply thicknesses, the laminate occupying `d - h/2 \le z \le d +
+    h/2` for all the models, see :func:`composites.laminated_plate`.
 
     """
     return p.offset + side*sum(p.plyts)/2.
 
 
 def _sb_distances(p_top, p_bot):
-    r"""Distances `d^t` and `d^b` from the reference surfaces of ``p_top``
-    and ``p_bot`` to the interface of a skin-base connection
+    r"""
+    Distances from the reference surfaces of ``p_top`` and ``p_bot`` to the
+    interface of a skin-base connection
 
-    Returns ``(dt, db)``, with `d^t = h_t/2 - d_t` the distance from the
-    reference surface of ``p_top`` down to its lower face and `d^b = h_b/2 +
-    d_b` the distance from the reference surface of ``p_bot`` up to its upper
-    face, `h` being the sum of the ply thicknesses and `d` the offset of each
-    panel, see :func:`._face`. Their sum `d^t + d^b` is the distance
-    between the two reference surfaces, zero when the panels share it, e.g.
-    a stiffener base with the offset `d_t = (h_t + h_b)/2` on a skin with
-    `d_b = 0`. Without offsets, `d^t = h_t/2` and `d^b = h_b/2`. Used by
-    the separations of ``'SB_TSL'``, see :meth:`.MultiDomain._tsl_operators`
-    and :mod:`panels.multidomain.connections.kCSB_dmg`.
+    Used by the separations of ``'SB_TSL'``, see
+    :meth:`.MultiDomain._tsl_operators` and
+    :mod:`panels.multidomain.connections.kCSB_dmg`.
+
+    Parameters
+    ----------
+    p_top, p_bot : :class:`.Shell`
+        Panels on the positive and negative sides of the interface along their
+        common `z` axis.
+
+    Returns
+    -------
+    dt, db : float
+        Distance from the reference surface of ``p_top`` down to its lower
+        face and from the reference surface of ``p_bot`` up to its upper face,
+        length.
+
+    Notes
+    -----
+    `d^t = h_t/2 - d_t` and `d^b = h_b/2 + d_b`, `h` being the sum of the ply
+    thicknesses and `d` the offset of each panel, see :func:`._face`. Their sum
+    `d^t + d^b` is the distance between the two reference surfaces, zero when
+    the panels share it, e.g. a stiffener base with the offset `d_t = (h_t +
+    h_b)/2` on a skin with `d_b = 0`. Without offsets, `d^t = h_t/2` and `d^b =
+    h_b/2`.
 
     """
     return -_face(p_top, -1), _face(p_bot, +1)

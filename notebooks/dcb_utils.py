@@ -174,7 +174,8 @@ def build_dcb(case):
             c['kr'] = factor*kr
 
     panels = bot + top
-    assy = MultiDomain(panels=panels, conn=conn, conn_method=used['conn_method'])
+    assy = MultiDomain(panels=panels, conn=conn, conn_method=used['conn_method'],
+                       pd_method='penalty')
     return dict(assy=assy, conn=conn, top_tsl=top_tsl, bot_tsl=bot_tsl,
                 top_arm=top_arm, bot_arm=bot_arm, nx=nx, ny=ny,
                 size=assy.get_size(), case=used)

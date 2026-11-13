@@ -111,9 +111,28 @@ MODELS = {
     #NOTE the plate geometry is exact whatever the strains, Green-Lagrange
     #     here, see plate_clpt_gl/plate_clpt_gl.md
     'plate_clpt_gl': (3, 'plate', 'gl'),
+    #NOTE the area vector of the Sanders cylinder is the exact geometry of
+    #     the deformed mid-surface, see cylshell_clpt_gl/cylshell_clpt_gl.md
+    'cylshell_clpt_gl': (3, 'cylshell', 'sanders'),
     #NOTE likewise with the curvatures of the deformed normal, see
     #     plate_clpt_tl/plate_clpt_tl.py
     'plate_clpt_tl': (3, 'plate', 'tl'),
+    #NOTE likewise for the cylinder, see cylshell_clpt_tl/cylshell_clpt_tl.py
+    'cylshell_clpt_tl': (3, 'cylshell', 'sanders'),
+    #NOTE the shear deformable models with Green-Lagrange membrane strains,
+    #     with the geometry of plate_clpt_gl and cylshell_clpt_gl
+    'plate_fsdt_gl': (5, 'plate', 'gl'),
+    'plate_tsdt_gl': (5, 'plate', 'gl'),
+    'cylshell_fsdt_gl': (5, 'cylshell', 'sanders'),
+    'cylshell_tsdt_gl': (5, 'cylshell', 'sanders'),
+    #NOTE the total-Lagrangian FSDT models, with the same geometry of the
+    #     mid-surface
+    'plate_fsdt_tl': (5, 'plate', 'gl'),
+    'cylshell_fsdt_tl': (5, 'cylshell', 'sanders'),
+    #NOTE the total-Lagrangian TSDT models, with the same geometry of the
+    #     mid-surface
+    'plate_tsdt_tl': (5, 'plate', 'gl'),
+    'cylshell_tsdt_tl': (5, 'cylshell', 'sanders'),
 }
 
 a, b, r = symbols('a, b, r', positive=True)

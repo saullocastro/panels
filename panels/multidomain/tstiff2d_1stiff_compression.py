@@ -87,6 +87,9 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
     ``structsolve.lb`` with ``tol=0`` and ``sparse_solver=True``, and the
     eigenvectors are expanded with :meth:`.MultiDomain.expand`.
 
+    The domains of the flange use the model ``'plate_clpt_gl'``, the
+    others the default model of :class:`.Shell` (see Notes).
+
     Parameters
     ----------
 
@@ -192,6 +195,16 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
     defect, without any contact between them: the modes may show the skin
     and the base interpenetrating over the defect.
 
+    The flange carries its share of the axial load as the membrane stress
+    resultant `N_{xx}` of the plate, and bends in its own plane when the
+    stiffener deflects normal to the skin: the displacement `w` of the
+    base at the joint is the in-plane displacement `v` of the flange. The
+    geometric stiffness of the Green-Lagrange strains of
+    ``'plate_clpt_gl'`` contains the work of `N_{xx}` on this bending,
+    `\frac{1}{2} N_{xx} v_{,x}^2`, which the von Kármán strains of
+    ``'plate_clpt_donnell'`` omit; the linear stiffness, the mass and the
+    aerodynamic matrices of both models are the same.
+
     References
     ----------
     .. [1] Castro, S. G. P., and Donadon, M. V., Assembly of Semi-Analytical
@@ -202,10 +215,20 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
     Examples
     --------
 
-    The following example is one of the test cases:
+    Critical axial load multiplier of a T-stiffened panel with a
+    debonding defect over 60 % of its length, under a unit compressive
+    ``Nxx`` in the skin, base and flange:
 
-    .. literalinclude:: ../../tests/multidomain/test_tstiff2d_assembly.py
-        :pyobject: test_tstiff2d_1stiff_compression
+    >>> from panels.multidomain import tstiff2d_1stiff_compression
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> md, c, eigvals, eigvecs = tstiff2d_1stiff_compression(a=3., b=1.,
+    ...     ys=0.5, bb=0.2, bf=0.1, defect_a=0.6, rho=1.3e3, plyt=0.125e-3,
+    ...     laminaprop=laminaprop, stack_skin=[0, 45, -45, 90, -45, 45, 0],
+    ...     stack_base=[0, 90, 0]*4, stack_flange=[0, 90, 0]*8,
+    ...     Nxx_skin=-1., Nxx_base=-1., Nxx_flange=-1.,
+    ...     m=8, n=7, mb=7, nb=6, mf=8, nf=6, num_eigvalues=5)
+    >>> round(float(eigvals[0]), 2)
+    115.64
 
     """
     defect = defect_a * a
@@ -241,13 +264,13 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
 
     # stiffeners
     p10 = Shell(group='base', Nxx=Nxx_base, x0=alow+defect, y0=ys-bb/2., a=aup, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho, nx=nxb, ny=nyb)
-    p11 = Shell(group='flange', Nxx=Nxx_flange, x0=alow+defect, y0=0,        a=aup, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho, nx=nxf, ny=nyf)
+    p11 = Shell(group='flange', model='plate_clpt_gl', Nxx=Nxx_flange, x0=alow+defect, y0=0,        a=aup, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho, nx=nxf, ny=nyf)
     # defect
     p12 = Shell(group='base', Nxx=Nxx_base, x0=alow, y0=ys-bb/2., a=defect, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho, nx=nxb, ny=nyb)
-    p13 = Shell(group='flange', Nxx=Nxx_flange, x0=alow, y0=0,        a=defect, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho, nx=nxf, ny=nyf)
+    p13 = Shell(group='flange', model='plate_clpt_gl', Nxx=Nxx_flange, x0=alow, y0=0,        a=defect, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho, nx=nxf, ny=nyf)
     #
     p14 = Shell(group='base', Nxx=Nxx_base, x0=0, y0=ys-bb/2., a=alow, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho, nx=nxb, ny=nyb)
-    p15 = Shell(group='flange', Nxx=Nxx_flange, x0=0, y0=0,        a=alow, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho, nx=nxf, ny=nyf)
+    p15 = Shell(group='flange', model='plate_clpt_gl', Nxx=Nxx_flange, x0=0, y0=0,        a=alow, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho, nx=nxf, ny=nyf)
 
     # boundary conditions
     p01.x1u = 1 ; p01.x1ur = 1 ; p01.x2u = 0 ; p01.x2ur = 1

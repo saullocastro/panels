@@ -1,11 +1,19 @@
 r"""Cantilever strip rolled into a circle by an end moment
 
-Benchmark 3.2 of Sze, Liu and Lo (2004) [1]_, Fig. 3a (p. 1556): a strip
+Benchmark 3.2 of Sze, Liu and Lo (2004), Fig. 3a and Table 3a: a strip
 clamped at ``x = 0``, ``L = 12``, ``b = 1``, ``h = 0.1``, ``E = 1.2e6``,
 ``nu = 0``, under an end moment ``M`` up to ``M_max = 2 pi M_o``, ``M_o =
-EI/L = 25/3``, which bends it into a full circle. The exact solution of the
-inextensible Euler-Bernoulli beam is the circular arc of curvature ``M/EI``,
-p. 1555:
+EI/L = 25/3``, which bends it into a full circle. The tip displacements of
+``'plate_clpt_tl'`` are checked against the cylindrical solution of the
+model, :func:`model_arc`, and against the inextensible circular arc of the
+benchmark, :func:`inextensible_arc`, tabulated as "Exact" in Table 3a.
+panels has no applied moments: the end moment is applied as a conservative
+load that depends on the configuration, :class:`EndMoment`.
+
+Notes
+-----
+The exact solution of the inextensible Euler-Bernoulli beam is the circular
+arc of curvature ``M/EI``, p. 1555 of [1]_:
 
 .. math::
 
@@ -17,8 +25,7 @@ tabulated as "Exact" in Table 3a (p. 1557). (The text of p. 1555 says that
 ``M_max`` is ``M_o``, a misprint: Fig. 3a, Table 3a and the full circle
 are ``2 pi M_o``.)
 
-panels has no applied moments. The end moment is applied here as a
-conservative load of potential
+The end moment is applied as a conservative load of potential
 
 .. math::
 
@@ -67,6 +74,7 @@ import sys
 sys.path.append('../..')
 
 import numpy as np
+import pytest
 from scipy.optimize import fsolve
 from structsolve import Analysis
 
@@ -222,6 +230,7 @@ def test_load_stiffness_is_derivative_of_load_vector():
     assert np.allclose(K, K.T, rtol=0, atol=1e-14*np.abs(K).max())
 
 
+@pytest.mark.slow
 def test_end_moment_rolls_strip_into_circle():
     r"""``'plate_clpt_tl'``, ``m = 12``, 20 increments of 0.05 ``M_max``:
     at 0.05, 0.25, 0.5, 0.75 and 1 ``M_max`` the tip is that of the

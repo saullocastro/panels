@@ -1,10 +1,7 @@
 r"""Buckling of laminated stiffened plates with material anisotropy
 
-Reference
----------
-D. G. Stamatelos, G. N. Labeas, *Buckling Analysis of Laminated Stiffened
-Plates with Material Anisotropy Using the Rayleigh-Ritz Approach*,
-Computation 2023, 11, 110. https://doi.org/10.3390/computation11060110
+Linear buckling of unstiffened and blade-stiffened laminated plates against
+Stamatelos and Labeas (2023), Tables 2 to 5 and Figure 7.
 
 Every published value used here lives in the ``PAPER`` dictionary below, so
 that each test is plain arithmetic against a single source of truth. The
@@ -23,8 +20,12 @@ tolerances are per-case, because the paper's data is not uniformly complete:
   laminate is matched exactly once the loaded edges are clamped, which is how
   Lagace's specimens were held, so that is the boundary condition used.
 
-The notebook ``notebooks/stamatelos_labeas_2023.ipynb`` works through all of
-this with plots and commentary.
+References
+----------
+.. [1] D. G. Stamatelos, G. N. Labeas, *Buckling Analysis of Laminated
+   Stiffened Plates with Material Anisotropy Using the Rayleigh-Ritz
+   Approach*, Computation 2023, 11, 110.
+   https://doi.org/10.3390/computation11060110
 
 """
 import sys

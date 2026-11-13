@@ -2,17 +2,31 @@ r"""Connections of TSDT panels with laminate offsets
 
 The connected panels share the reference surface `z = 0`, where the
 connections tie `u, v, w` and the rotations of the normal at `z = 0`,
+`\theta_x` and `\theta_y`, see :mod:`panels.multidomain.connections.kCsdt`.
+Verified:
+
+- two panels with the same offset reproduce the single panel;
+- with the null-space method, `\theta_x`, `\theta_y` evaluated from the
+  fields are continuous across the edge for different offsets, not the
+  rotations at the mid-surfaces; at `d = \pm h/2`, `\theta_x = -w_{,x}`
+  and `\theta_y = -w_{,y}`; without offset `\theta = \phi`;
+- the penalty matrices of ``'SSxcte'`` and of the base-flange connections
+  give the penalty energy evaluated from the fields.
+
+Notes
+-----
+With the offset `d` and the thickness `h` of each panel, the rotations of
+the normal at `z = 0` are
 
 .. math::
 
     \theta_x = \phi_x - \frac{4 d^2}{h^2} (\phi_x + w_{,x}) \qquad
     \theta_y = \Phi_y - \frac{4 d^2}{h^2} (\phi_y + w_{,y})
 
-with the offset `d` and the thickness `h` of each panel, `\phi_x, \phi_y`
-being the rotations at the mid-surface of the TSDT field `u(z) = u + z
-\phi_x - c_1 [(z - d)^3 + d^3] (\phi_x + w_{,x})`, see
-:mod:`panels.multidomain.connections.kCsdt`. `\phi + w_{,x}` is the
-transverse shear strain ``gxz`` (or ``gyz``) of :meth:`.Shell.strain`.
+`\phi_x, \phi_y` being the rotations at the mid-surface of the TSDT field
+`u(z) = u + z \phi_x - c_1 [(z - d)^3 + d^3] (\phi_x + w_{,x})`.
+`\phi + w_{,x}` is the transverse shear strain ``gxz`` (or ``gyz``) of
+:meth:`.Shell.strain`.
 
 """
 import sys
@@ -131,7 +145,8 @@ def test_reference_rotation_at_a_face():
 
 
 def test_offset_zero_unchanged():
-    r"""Without offset `\theta = \phi`, the connection of previous versions"""
+    r"""Without offset `\theta = \phi`: the connection ties `\phi_x` and
+    `\phi_y`"""
     p = _plate(0.4, 1., 0., 'SSSS')
     assert kCsdt._rotation_x(p) == [(3, 0, 0, 1.)]
     assert kCsdt._rotation_y(p) == [(4, 0, 0, 1.)]

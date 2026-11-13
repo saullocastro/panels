@@ -1,3 +1,15 @@
+r"""Loads and prescribed displacements per domain of the cylinder assemblies
+
+:func:`.cylinder_compression_lb_Nxx_from_static`,
+:func:`.cylinder_blade_stiffened_compression_lb_Nxx_from_static` and
+:func:`.cylinder_blade_stiffened_compression_lb_pd_from_static` take one
+value per skin domain and per blade: each domain must receive its own
+value, not the last one of the list. With prescribed displacements, the
+prescriptions are incremental (multiplied by the load factor), imposed with
+the null-space method, and the pre-buckling state reaches `u` = ``pd`` at
+`x = a` of every domain.
+
+"""
 import sys
 sys.path.append('../..')
 

@@ -2,4 +2,5 @@ sphinx
 numpydoc
 pydata-sphinx-theme
 nbsphinx
+nbsphinx-link
 plotly

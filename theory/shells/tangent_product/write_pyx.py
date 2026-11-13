@@ -7,9 +7,8 @@ version::
 
     python write_pyx.py [model ...]
 
-The generators of whole modules, ``fsdt_tsdt/write_pyx.py`` and
-``cylshell_clpt_sanders/write_pyx.py``, append the same block through
-:func:`pyx_block`.
+The generator of the whole module, ``cylshell_clpt_sanders/write_pyx.py``,
+appends the same block through :func:`pyx_block`.
 
 """
 import os
@@ -110,7 +109,6 @@ def pyx_block(model):
     op = tp['op']
     fields, NE, DOF = op['fields'], op['NE'], op['DOF']
     cyl = op['geometry'] == 'cylshell'
-    tsdt = op['theory'] == 'tsdt'
     ds = {Symbol('ds%d' % i): Symbol('ds[%d]' % i) for i in range(NE)}
     kTv = [collect(e.xreplace(ds), list(ds.values()) + [th.Nxx, th.Nyy,
                    th.Nxy]) for e in tp['kTv']]
@@ -131,14 +129,10 @@ def pyx_block(model):
         '    {0}1{1} = shell.{0}1{1}; {0}1{1}r = shell.{0}1{1}r; '
         '{0}2{1} = shell.{0}2{1}; {0}2{1}r = shell.{0}2{1}r'.format(d, f)
         for d in 'xy' for f in fields)
-    extra_cdef = ''.join([', r' if cyl else '', ', h, c1' if tsdt else ''])
+    extra_cdef = ', r' if cyl else ''
     extra_read = ''
     if cyl:
         extra_read += '    r = shell.r\n'
-    if tsdt:
-        extra_read += ('    #NOTE the traction-free faces are assumed at z = +-h/2\n'
-                       '    h = shell.lam.h\n'
-                       '    c1 = 4./(3.*h*h)\n')
 
     def cdefs(names, per_line=6):
         return '\n'.join('    cdef double ' + ', '.join(names[i:i + per_line])
@@ -151,39 +145,66 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
         double Nyy_cte=0., double Nxy_cte=0.):
     r"""Product of the tangent stiffness matrix by a vector, without assembly
 
-    Returns `\\boldsymbol{{K}}_T(\\boldsymbol{{c}}) \\boldsymbol{{v}}`, with `\\boldsymbol{{K}}_T` the
-    tangent stiffness matrix ``fkC_num(cs, ..., NLgeom=1) + fkG_num(cs, ...)``
-    at ``cs``, i.e. the exact Jacobian of :func:`calc_fint`, plus the geometric
-    stiffness matrix of the constant membrane stress state ``Nxx_cte``,
-    ``Nyy_cte`` and ``Nxy_cte``, multiplied by ``vs``. At each integration
-    point, see ``theory/shells/tangent_product``::
-
-        beta = [G] cs,   eps = ([B_L] + [B_NL]/2) cs,   deps = ([B_L] + [B_NL]) vs
-        kTv += ([B_L] + [B_NL])^T [F] deps + [G]^T [N] [G] vs
-
-    with ``[N]`` the membrane stresses of ``[F] eps``, plus the constant
-    ones. The cost is about that of :func:`calc_fint`.
+    Returns ``KT(cs) vs``, with ``KT`` the tangent stiffness matrix
+    ``fkC_num(cs, ..., NLgeom=1) + fkG_num(cs, ...)`` at ``cs``, the exact
+    Jacobian of :func:`calc_fint`, plus the geometric stiffness matrix of
+    the constant membrane stress state ``Nxx_cte``, ``Nyy_cte`` and
+    ``Nxy_cte``. The cost is about that of :func:`calc_fint`.
 
     Parameters
     ----------
     cs, vs : array-like
-        Ritz constants of the configuration and the vector, of size ``size``.
+        Ritz constants of the configuration and the vector, 1-D of size
+        ``size``.
     Finput : array-like
-        Constitutive matrix ``({NE}, {NE})``, or one for each integration
-        point ``(nx, ny, {NE}, {NE})``.
+        Constitutive matrix of the generalized strains of the model, shape
+        ``({NE}, {NE})`` for the whole domain, e.g. ``shell.ABD``, or ``(nx, ny,
+        {NE}, {NE})`` with one matrix per integration point.
     shell : :class:`.Shell`
-        The shell.
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
     size, col0 : int
-        Size of the vectors and offset of the shell in them.
+        Size of the vectors and position where the terms of this shell
+        start.
     nx, ny : int
-        Number of integration points.
+        Number of Gauss-Legendre points along `x` and `y`.
     Nxx_cte, Nyy_cte, Nxy_cte : float, optional
-        Constant membrane stress state.
+        Constant membrane stress resultants, force per unit length, default
+        ``0``.
 
     Returns
     -------
-    kTv : np.ndarray
+    kTv : numpy.ndarray
         The product, of size ``size``.
+
+    Raises
+    ------
+    ValueError
+        If ``cs`` or ``vs`` do not have the size ``size``, ``Finput`` has an
+        invalid shape or ``shell`` is not a :class:`.Shell`.
+
+    Notes
+    -----
+    At each integration point, with the gradients `\\boldsymbol{{G}}
+    \\boldsymbol{{c}}` of the non-linear terms of the strains, the strains
+    `\\boldsymbol{{\\varepsilon}} = (\\boldsymbol{{B}}_L + \\frac{{1}}{{2}}
+    \\boldsymbol{{B}}_{{NL}}) \\boldsymbol{{c}}` and the membrane stress resultants
+    `\\boldsymbol{{N}}` of `\\boldsymbol{{F}} \\boldsymbol{{\\varepsilon}}`, plus the
+    constant ones:
+
+    .. math::
+
+        \\boldsymbol{{K}}_T \\boldsymbol{{v}} = \\int \\left[(\\boldsymbol{{B}}_L +
+        \\boldsymbol{{B}}_{{NL}})^\\top \\boldsymbol{{F}} (\\boldsymbol{{B}}_L +
+        \\boldsymbol{{B}}_{{NL}}) \\boldsymbol{{v}} + \\boldsymbol{{G}}^\\top
+        \\boldsymbol{{N}} \\boldsymbol{{G}} \\boldsymbol{{v}}\\right] dA
+
+    evaluated without forming `\\boldsymbol{{K}}_T`.
+
+    The integrals are evaluated with ``nx x ny`` Gauss-Legendre points
+    over the integration domain `x_1 \\le x \\le x_2`, `y_1 \\le y \\le y_2` of
+    :meth:`.Shell.integration_limits`, the whole shell by default.
 
     """
 '''.format(NE=NE)]

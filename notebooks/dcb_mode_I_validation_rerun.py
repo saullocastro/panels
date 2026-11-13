@@ -23,6 +23,7 @@ import io
 import json
 import os
 import pickle
+import re
 import subprocess
 import sys
 import time
@@ -71,7 +72,11 @@ def record():
                 continue
             try:
                 with contextlib.redirect_stdout(io.StringIO()):
-                    exec(compile(''.join(cell['source']), name, 'exec'), ns)
+                    # IPython magics, e.g. %matplotlib inline, are dropped; a
+                    # continuation line such as "% value)" is kept
+                    src = ''.join(line for line in ''.join(cell['source']).splitlines(True)
+                                  if not re.match(r'\s*%+[A-Za-z]', line))
+                    exec(compile(src, name, 'exec'), ns)
             except Exception as e:
                 print(f'{name}, cell {i}: {type(e).__name__}: {e}')
             plt.close('all')

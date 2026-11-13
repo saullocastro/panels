@@ -63,6 +63,41 @@ db = {
                     # the kernels divide by r and r*r, a radius is mandatory
                     'requires_r': True,
                     },
+    'cylshell_clpt_gl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': clpt_field,
+                    #NOTE fk0, fkM, fkAx, fkAy and fcA of
+                    #     cylshell_clpt_sanders, fkG0 with the in-plane
+                    #     blocks of the Green-Lagrange strains
+                    'matrices': cylshell_clpt_gl,
+                    'matrices_num': cylshell_clpt_gl_num,
+                    'dofs': 3,
+                    'e_num': 6,
+                    # the kernels divide by r and r*r, a radius is mandatory
+                    'requires_r': True,
+                    },
+    'cylshell_clpt_tl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': clpt_field,
+                    #NOTE the analytical kernels of cylshell_clpt_gl: the
+                    #     linear strains are those of cylshell_clpt_sanders
+                    #     and the geometric stiffness of a constant membrane
+                    #     stress state that of the Green-Lagrange strains
+                    'matrices': cylshell_clpt_gl,
+                    'matrices_num': cylshell_clpt_tl_num,
+                    'dofs': 3,
+                    'e_num': 6,
+                    # the kernels divide by r and r*r, a radius is mandatory
+                    'requires_r': True,
+                    # curvatures cubic in the displacements: integrands of
+                    # degree 6p - 2 along x and 6p along y, integrated
+                    # exactly by 3p + 1 points
+                    'integrand_degree': (6, 0),
+                    },
     'plate_clpt_donnell': {
                     'linear static': True,
                     'linear buckling': True,
@@ -108,6 +143,163 @@ db = {
                     # curvatures cubic in the displacements: integrands of
                     # degree 6p - 2, integrated exactly by 3p points
                     'integrand_degree': (6, -2),
+                    },
+    'annular_clpt_donnell': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    #NOTE the strains in polar coordinates of the annular
+                    #     sector need their own fields
+                    'field': annular_clpt_donnell_num,
+                    #NOTE the matrices of the whole domain are integrated
+                    #     numerically, the strains having terms in 1/rho
+                    'matrices': annular_clpt_donnell,
+                    'matrices_num': annular_clpt_donnell_num,
+                    'dofs': 3,
+                    'e_num': 6,
+                    # outer radius, the kernels divide by r - x
+                    'requires_r': True,
+                    },
+    'annular_clpt_gl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    #NOTE the strains in polar coordinates of the annular
+                    #     sector need their own fields
+                    'field': annular_clpt_gl_num,
+                    #NOTE the matrices of the whole domain are integrated
+                    #     numerically, the strains having terms in 1/rho
+                    'matrices': annular_clpt_gl,
+                    'matrices_num': annular_clpt_gl_num,
+                    'dofs': 3,
+                    'e_num': 6,
+                    # outer radius, the kernels divide by r - x
+                    'requires_r': True,
+                    },
+    'annular_clpt_tl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    #NOTE the strains in polar coordinates of the annular
+                    #     sector need their own fields
+                    'field': annular_clpt_tl_num,
+                    #NOTE the matrices of the whole domain are integrated
+                    #     numerically, the strains having terms in 1/rho
+                    'matrices': annular_clpt_tl,
+                    'matrices_num': annular_clpt_tl_num,
+                    'dofs': 3,
+                    'e_num': 6,
+                    # outer radius, the kernels divide by r - x
+                    'requires_r': True,
+                    # curvatures cubic in the displacements, as those of
+                    # cylshell_clpt_tl: more integration points
+                    'integrand_degree': (6, 0),
+                    },
+    'annular_fsdt_donnell': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    #NOTE the strains in polar coordinates of the annular
+                    #     sector need their own fields
+                    'field': annular_fsdt_donnell_num,
+                    #NOTE the matrices of the whole domain are integrated
+                    #     numerically, the strains having terms in 1/rho
+                    'matrices': annular_fsdt_donnell,
+                    'matrices_num': annular_fsdt_donnell_num,
+                    'dofs': 5,
+                    'e_num': 8,
+                    # outer radius, the kernels divide by r - x
+                    'requires_r': True,
+                    },
+    'annular_fsdt_gl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    #NOTE the strains in polar coordinates of the annular
+                    #     sector need their own fields
+                    'field': annular_fsdt_gl_num,
+                    #NOTE the matrices of the whole domain are integrated
+                    #     numerically, the strains having terms in 1/rho
+                    'matrices': annular_fsdt_gl,
+                    'matrices_num': annular_fsdt_gl_num,
+                    'dofs': 5,
+                    'e_num': 8,
+                    # outer radius, the kernels divide by r - x
+                    'requires_r': True,
+                    },
+    'annular_fsdt_tl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    #NOTE the strains in polar coordinates of the annular
+                    #     sector need their own fields
+                    'field': annular_fsdt_tl_num,
+                    #NOTE the matrices of the whole domain are integrated
+                    #     numerically, the strains having terms in 1/rho
+                    'matrices': annular_fsdt_tl,
+                    'matrices_num': annular_fsdt_tl_num,
+                    'dofs': 5,
+                    'e_num': 8,
+                    # outer radius, the kernels divide by r - x
+                    'requires_r': True,
+                    # bending and transverse shear strains cubic in the
+                    # generalized derivatives, as those of plate_fsdt_tl:
+                    # more integration points
+                    'integrand_degree': (6, 0),
+                    },
+    'annular_tsdt_donnell': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    #NOTE the strains in polar coordinates of the annular
+                    #     sector need their own strain field; fuvw and fg are
+                    #     those of fsdt_tsdt_field
+                    'field': annular_tsdt_donnell_num,
+                    #NOTE the matrices of the whole domain are integrated
+                    #     numerically, the strains having terms in 1/rho
+                    'matrices': annular_tsdt_donnell,
+                    'matrices_num': annular_tsdt_donnell_num,
+                    'dofs': 5,
+                    'e_num': 13,
+                    # outer radius, the kernels divide by r - x
+                    'requires_r': True,
+                    },
+    'annular_tsdt_gl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    #NOTE the strains in polar coordinates of the annular
+                    #     sector need their own strain field; fuvw and fg are
+                    #     those of fsdt_tsdt_field
+                    'field': annular_tsdt_gl_num,
+                    #NOTE the matrices of the whole domain are integrated
+                    #     numerically, the strains having terms in 1/rho
+                    'matrices': annular_tsdt_gl,
+                    'matrices_num': annular_tsdt_gl_num,
+                    'dofs': 5,
+                    'e_num': 13,
+                    # outer radius, the kernels divide by r - x
+                    'requires_r': True,
+                    },
+    'annular_tsdt_tl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    #NOTE the strains in polar coordinates of the annular
+                    #     sector need their own strain field; fuvw and fg are
+                    #     those of fsdt_tsdt_field
+                    'field': annular_tsdt_tl_num,
+                    #NOTE the matrices of the whole domain are integrated
+                    #     numerically, the strains having terms in 1/rho
+                    'matrices': annular_tsdt_tl,
+                    'matrices_num': annular_tsdt_tl_num,
+                    'dofs': 5,
+                    'e_num': 13,
+                    # outer radius, the kernels divide by r - x
+                    'requires_r': True,
+                    # strains cubic in the generalized derivatives, as those of
+                    # annular_fsdt_tl: more integration points
+                    'integrand_degree': (6, 0),
                     },
     'cylshell_fsdt_donnell': {
                     'linear static': True,
@@ -178,5 +370,141 @@ db = {
                     'dofs': 5,
                     'e_num': 13,
                     'requires_r': False,
+                    },
+    'plate_fsdt_gl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    #NOTE fk0, fkM, fkAx, fkAy and fcA of plate_fsdt_donnell, fkG0 with
+                    #     the in-plane blocks of the Green-Lagrange strains
+                    'matrices': plate_fsdt_gl,
+                    'matrices_num': plate_fsdt_gl_num,
+                    'dofs': 5,
+                    'e_num': 8,
+                    # the plate kernels never read r
+                    'requires_r': False,
+                    },
+    'plate_tsdt_gl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    #NOTE fk0, fkM, fkAx, fkAy and fcA of plate_tsdt_donnell, fkG0 with
+                    #     the in-plane blocks of the Green-Lagrange strains
+                    'matrices': plate_tsdt_gl,
+                    'matrices_num': plate_tsdt_gl_num,
+                    'dofs': 5,
+                    'e_num': 13,
+                    # the plate kernels never read r
+                    'requires_r': False,
+                    },
+    'cylshell_fsdt_gl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    #NOTE fk0, fkM, fkAx, fkAy and fcA of cylshell_fsdt_sanders, fkG0 with
+                    #     the in-plane blocks of the Green-Lagrange strains
+                    'matrices': cylshell_fsdt_gl,
+                    'matrices_num': cylshell_fsdt_gl_num,
+                    'dofs': 5,
+                    'e_num': 8,
+                    # the kernels divide by r, a radius is mandatory
+                    'requires_r': True,
+                    },
+    'plate_fsdt_tl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    #NOTE the analytical kernels of plate_fsdt_gl: the linear
+                    #     strains are those of plate_fsdt_donnell and the
+                    #     geometric stiffness of a constant membrane stress
+                    #     state that of the Green-Lagrange strains
+                    'matrices': plate_fsdt_gl,
+                    'matrices_num': plate_fsdt_tl_num,
+                    'dofs': 5,
+                    'e_num': 8,
+                    # the plate kernels never read r
+                    'requires_r': False,
+                    # bending and transverse shear strains cubic in the
+                    # generalized derivatives: integrands of degree 6p,
+                    # integrated exactly by 3p + 1 points
+                    'integrand_degree': (6, 0),
+                    },
+    'plate_tsdt_tl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    #NOTE the analytical kernels of plate_tsdt_gl: the linear
+                    #     strains are those of plate_tsdt_donnell and the
+                    #     geometric stiffness of a constant membrane stress
+                    #     state that of the Green-Lagrange strains
+                    'matrices': plate_tsdt_gl,
+                    'matrices_num': plate_tsdt_tl_num,
+                    'dofs': 5,
+                    'e_num': 13,
+                    # the plate kernels never read r
+                    'requires_r': False,
+                    # all strains but the membrane ones cubic in the
+                    # generalized derivatives: integrands of degree 6p,
+                    # integrated exactly by 3p + 1 points
+                    'integrand_degree': (6, 0),
+                    },
+    'cylshell_fsdt_tl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    #NOTE the analytical kernels of cylshell_fsdt_gl: the
+                    #     linear strains are those of cylshell_fsdt_sanders
+                    #     and the geometric stiffness of a constant membrane
+                    #     stress state that of the Green-Lagrange strains
+                    'matrices': cylshell_fsdt_gl,
+                    'matrices_num': cylshell_fsdt_tl_num,
+                    'dofs': 5,
+                    'e_num': 8,
+                    # the kernels divide by r, a radius is mandatory
+                    'requires_r': True,
+                    # bending and transverse shear strains cubic in the
+                    # generalized derivatives: integrands of degree 6p along
+                    # x and y, integrated exactly by 3p + 1 points
+                    'integrand_degree': (6, 0),
+                    },
+    'cylshell_tsdt_tl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    #NOTE the analytical kernels of cylshell_tsdt_gl: the
+                    #     linear strains are those of cylshell_tsdt_sanders
+                    #     and the geometric stiffness of a constant membrane
+                    #     stress state that of the Green-Lagrange strains
+                    'matrices': cylshell_tsdt_gl,
+                    'matrices_num': cylshell_tsdt_tl_num,
+                    'dofs': 5,
+                    'e_num': 13,
+                    # the kernels divide by r, a radius is mandatory
+                    'requires_r': True,
+                    # all strains but the membrane ones cubic in the
+                    # generalized derivatives: integrands of degree 6p along
+                    # x and y, integrated exactly by 3p + 1 points
+                    'integrand_degree': (6, 0),
+                    },
+    'cylshell_tsdt_gl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    #NOTE fk0, fkM, fkAx, fkAy and fcA of cylshell_tsdt_sanders, fkG0 with
+                    #     the in-plane blocks of the Green-Lagrange strains
+                    'matrices': cylshell_tsdt_gl,
+                    'matrices_num': cylshell_tsdt_gl_num,
+                    'dofs': 5,
+                    'e_num': 13,
+                    # the kernels divide by r, a radius is mandatory
+                    'requires_r': True,
                     },
     }

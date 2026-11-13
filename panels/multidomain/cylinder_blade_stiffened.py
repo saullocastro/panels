@@ -19,9 +19,35 @@ from panels.shell import Shell
 from panels.multidomain import MultiDomain
 
 
+# default model of each group of domains
+_DEFAULT_MODELS = {'skin': 'cylshell_clpt_sanders', 'blade': 'plate_clpt_gl'}
+# models accepted for each group
+_ALLOWED_MODELS = {
+    'skin': ('cylshell_clpt_sanders', 'cylshell_clpt_gl',
+             'cylshell_clpt_tl', 'cylshell_clpt_donnell'),
+    'blade': ('plate_clpt_gl', 'plate_clpt_tl', 'plate_clpt_donnell'),
+    }
+
+
+def _models(models):
+    r"""The model of each group, ``models`` completed with
+    ``_DEFAULT_MODELS``, see :func:`.create_cylinder_blade_stiffened`"""
+    models = {} if models is None else dict(models)
+    unknown = sorted(set(models) - set(_DEFAULT_MODELS))
+    if unknown:
+        raise ValueError("unknown keys of models %s, the keys are %s"
+                         % (unknown, sorted(_DEFAULT_MODELS)))
+    out = dict(_DEFAULT_MODELS, **models)
+    for group, model in out.items():
+        if model not in _ALLOWED_MODELS[group]:
+            raise ValueError("models[%r] must be one of %s, got %r"
+                             % (group, _ALLOWED_MODELS[group], model))
+    return out
+
+
 def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
         width_blades, plyt, laminaprop, npanels, m=8, n=8,
-        conn_method='null-space'):
+        conn_method='null-space', models=None, side='internal'):
     r"""Create a cylinder multidomain assembly with blade stiffeners
 
     The multidomain assembly looks like::
@@ -58,23 +84,30 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     ``x0 = 0`` and ``y0`` equal to ``i`` times the width for the ``i``-th
     panel. The ``i``-th blade is a flat :class:`.Shell` (no radius) of the
     group ``'blade_%02d' % i``, with length ``height``, width
-    ``width_blades[i]`` and stacking sequence ``stack_blades[i]``. All the
+    ``width_blades[i]`` and stacking sequence ``stack_blades[i]``. The
+    models are ``models['blade']`` for the blades, by default
+    ``'plate_clpt_gl'``, whose geometric stiffness contains the work of the
+    axial load of the blade on its bending in its own plane, the radial
+    bending of the stringer, and ``models['skin']`` for the skin panels, by
+    default ``'cylshell_clpt_sanders'``, the default of a cylinder (see
+    Notes). A skin of ``'cylshell_clpt_gl'`` adds to the geometric
+    stiffness the work of the axial load on the slopes `u_{,x}` and
+    `v_{,x}` of its in-plane displacements, which lowers the general
+    instability loads with few circumferential waves. All the
     panels have the boundary condition flags that remove `u`, `v` and `w`
     at the edges `x = 0` and `x = height` (``x1u = x2u = x1v = x2v = x1w =
     x2w = 0``) and keep all the other ones. Consecutive skin panels are
     connected with ``'SSycte'``, the edge `y = b` of one to the edge `y = 0`
     of the next, the last skin panel to the first one, and each skin panel
-    to its blade with ``'BFycte'``, at the edge `y = 0` of both. The
+    to its blade with ``'BFycte'``, at the edge `y = 0` of the skin panel.
+    With ``side='internal'`` the edge `y = 0` of the blade is connected to
+    the inner surface of the skin (key ``'face'``, ``'lower'``) and the
+    blade stands inside the cylinder, with ``side='external'`` its edge `y`
+    = ``width_blades[i]`` is connected to the outer surface (``'upper'``),
+    and the blade stands outside: the width of a blade is its height from
+    the surface of the skin. The
     assembly contains the skin panels followed by the blades. The
-    connections are returned and not stored in the assembly, which is
-    created with ``conn=None``: pass them to :meth:`.MultiDomain.calc_kC`.
-
-    The code of this function is illustrative of how it constructs the
-    multidomain assembly:
-
-    .. literalinclude:: ../../panels/multidomain/cylinder_blade_stiffened.py
-        :pyobject: create_cylinder_blade_stiffened
-
+    connections are stored in the assembly, ``md.conn``, and also returned.
 
     Parameters
     ----------
@@ -90,7 +123,8 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
         The stacking sequence for each blade (with length = npanels), the
         angles in degrees.
     width_blades : array-like
-        The width for each blade (with length = npanels), length.
+        The width for each blade (with length = npanels), its height from
+        the surface of the skin to its tip, length.
     plyt : float
         Ply thickness (assumed unique for the whole structure), length.
     laminaprop : list or tuple
@@ -103,18 +137,36 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     conn_method : str, optional
         How the connections are imposed, ``'null-space'``, the default, or
         ``'penalty'``, see :class:`.MultiDomain`.
+    models : dict, optional
+        Model of the domains of each group: ``'skin'``, the skin panels,
+        ``'cylshell_clpt_sanders'`` (default), ``'cylshell_clpt_gl'``,
+        ``'cylshell_clpt_tl'`` or ``'cylshell_clpt_donnell'``, and
+        ``'blade'``, the blades, ``'plate_clpt_gl'`` (default),
+        ``'plate_clpt_tl'`` or ``'plate_clpt_donnell'``, see
+        :mod:`panels.models` and the Notes. A missing key takes its
+        default.
+    side : str, optional
+        ``'internal'``, the default, for blades inside the cylinder, or
+        ``'external'`` for blades outside.
 
     Returns
     -------
-    md, conns : tuple
-        A tuple containing the multidomain assembly and the default connectivity
-        list of dictionaries.
+    md, conns, info : tuple
+        The multidomain assembly, the list of connection dictionaries, the
+        list stored in the assembly, ``md.conn``, and a dictionary with
+        ``'skin'``, the list
+        of the skin panels, ``'blades'``, the list of the blades, ``'ws'``,
+        the width of a skin panel, ``2*pi*r/npanels``, and ``'models'``,
+        the model of each group, ``models`` completed with the defaults.
 
     Raises
     ------
     ValueError
-        When ``npanels < 2``, or when the length of ``stack_blades`` or of
-        ``width_blades`` is not ``npanels``.
+        When ``models`` has a key other than ``'skin'`` and ``'blade'`` or a
+        model not listed above for its key, when ``side`` is neither
+        ``'internal'`` nor ``'external'``, when ``npanels < 2``, or when
+        the length of ``stack_blades`` or of ``width_blades`` is not
+        ``npanels``.
 
     Notes
     -----
@@ -122,11 +174,119 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     local axes are rotated by 90 degrees about the `x` axis with respect to
     those of the skin, and the rotation about `x` continuous along the line
     `y = 0` of the skin panel, where the blade stands normal to the skin,
-    see :meth:`.MultiDomain.get_kC_conn`. The boundary conditions and the
+    see :meth:`.MultiDomain.get_kC_conn`, at the inner or the outer surface
+    of the skin, whose points follow the Kirchhoff-Love kinematics of the
+    skin with the Sanders-Koiter term `z v/r` whatever the model of the
+    skin, see :mod:`panels.multidomain.connections.kCBFycte_face`: the blade
+    does not overlap the skin. The boundary conditions and the
     redundant constraints of the closed skin are those of
-    :func:`.create_cylinder`.
+    :func:`.create_cylinder`. The local `y` axis of the blade points towards
+    the axis of the cylinder (`v_2 = -w_1` along the joint): connected at
+    its edge `y = 0` (``ycte2 = 0``) the blade stands on the inner side of
+    the skin, connected at its edge `y = b` on the outer side.
+
+    The blades carry their share of the axial load as the membrane stress
+    resultant `N_{xx}` of the plate, and the general instability of the
+    stiffened cylinder bends them in their own plane: the radial
+    displacement `w` of the skin at the joint is the in-plane displacement
+    `v` of the blade. The work of `N_{xx}` on this deflection is the term
+    `\frac{1}{2} N_{xx} v_{,x}^2` of the Green-Lagrange membrane strain
+
+    .. math::
+
+        \varepsilon_{xx} = u_{,x} + \frac{1}{2} \left( u_{,x}^2 + v_{,x}^2
+            + w_{,x}^2 \right)
+
+    of the model ``'plate_clpt_gl'``, whose geometric stiffness matrix has
+    the blocks `u`-`u` and `v`-`v` besides the block `w`-`w`. The von
+    Kármán strains of ``'plate_clpt_donnell'`` keep `w_{,x}^2/2` only: a
+    blade of that model is loaded without destabilizing the radial bending
+    of the stringer, and the general instability loads come out too high,
+    whereas in the smeared-stiffener theory of Block, Card and Mikulas [1]_
+    the total load of the skin and of the stringers, `\bar{N}_x`, enters the
+    potential energy of the external forces through `\bar{N}_x w_{,x}^2`
+    (their Eq. (9), p. 8). Both models have the same linear constitutive
+    stiffness, mass and aerodynamic matrices, so that linear static and
+    frequency analyses do not depend on this choice.
+
+    The skin models differ in the geometric stiffness only. Under an axial
+    load the Sanders skin, ``'cylshell_clpt_sanders'``, keeps the term
+    `\frac{1}{2} N_{xx} w_{,x}^2`, as the Donnell skin, whereas
+    ``'cylshell_clpt_gl'`` has the complete Green-Lagrange membrane
+    strains, with `\frac{1}{2} N_{xx} (u_{,x}^2 + v_{,x}^2 + w_{,x}^2)`,
+    see :mod:`panels.models`. The term `v_{,x}^2` relative to `w_{,x}^2`
+    is of the order `1/n^2` for a mode of `n` circumferential waves, so that
+    the choice matters for general instability modes with few waves and for
+    the bending of the stiffened cylinder as a beam, where the Sanders skin
+    overestimates the load (about twice the Euler load of a pinned tube,
+    against the Euler load with ``'cylshell_clpt_gl'``). For the cylinder 4
+    of Card and Jones [2]_, 60 internal blades, simply supported, critical
+    mode of one axial half-wave and 6 circumferential waves, the load with
+    the skin ``'cylshell_clpt_gl'`` is 1.4 % below that with
+    ``'cylshell_clpt_sanders'`` and 4.1 % below their smeared-stringer
+    load `\bar{N}_s` (Table I), and 1.6 % higher with
+    ``'cylshell_clpt_donnell'``.
+
+    ``'cylshell_clpt_tl'`` has the membrane strains of
+    ``'cylshell_clpt_gl'`` and changes of curvature measured with the
+    deformed normal, whose linear part is that of
+    ``'cylshell_clpt_sanders'``, see :mod:`panels.models`; likewise
+    ``'plate_clpt_tl'`` for the blades with the membrane strains of
+    ``'plate_clpt_gl'``. Both have the analytical kernels of the GL model.
+    The geometric stiffness of a membrane pre-buckling state, the constant
+    `N_{xx}` of :func:`.cylinder_blade_stiffened_compression_lb_Nxx_cte`,
+    is then that of the GL models, and so are the buckling loads (cylinder
+    4 of Card and Jones [2]_: equal to the last digit). With the static
+    pre-buckling state of
+    :func:`.cylinder_blade_stiffened_compression_lb_Nxx_from_static` and
+    :func:`.cylinder_blade_stiffened_compression_lb_pd_from_static` the
+    numerical kernels of the TL models add the work of the bending moments
+    of the pre-buckling state on the quadratic part of the changes of
+    curvature: -8.7e-8 (relative) for the cylinder 4 of Card and Jones,
+    -1.6e-4 and -1.8e-4 for the laminated cylinder of the Examples of
+    these two functions. In the non-linear analyses all their strains are
+    invariant under finite rigid rotations.
+
+    Only the models of the classical laminated plate theory are accepted:
+    those of the shear deformation theories have the rotations `\phi_x,
+    \phi_y` as further degrees of freedom, a connection between one of
+    them and a model of the classical theory is not implemented (a
+    ``NotImplementedError`` of :meth:`.MultiDomain.get_kC_conn`), and the
+    boundary condition flags set here, ``x1u`` to ``y2wr``, are those of
+    the classical theory only.
+
+    References
+    ----------
+    .. [1] Block, D. L., Card, M. F., and Mikulas, M. M., Jr., "Buckling of
+       Eccentrically Stiffened Orthotropic Cylinders", NASA TN D-2960, 1965.
+    .. [2] Card, M. F., and Jones, R. M., "Experimental and Theoretical Results
+       for Buckling of Eccentrically Stiffened Cylinders", NASA TN D-3639,
+       1966.
+
+    Examples
+    --------
+    A cylinder of 4 skin panels with 4 blades of 20 mm, the groups of the
+    domains and the connections:
+
+    >>> from panels.multidomain import create_cylinder_blade_stiffened
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> md, conns, info = create_cylinder_blade_stiffened(height=0.5, r=0.25,
+    ...     stack=[0, 90, 0], stack_blades=[[0, 90, 0]]*4,
+    ...     width_blades=[0.02]*4, plyt=0.125e-3, laminaprop=laminaprop,
+    ...     npanels=4)
+    >>> print([p.group for p in md.panels])
+    ['skin', 'skin', 'skin', 'skin', 'blade_00', 'blade_01', 'blade_02', 'blade_03']
+    >>> print(sorted(set(c['func'] for c in conns)), len(conns),
+    ...       md.conn is conns)
+    ['BFycte', 'SSycte'] 8 True
+    >>> print(info['models'])
+    {'skin': 'cylshell_clpt_sanders', 'blade': 'plate_clpt_gl'}
 
     """
+    models = _models(models)
+    if side not in ('internal', 'external'):
+        raise ValueError("side must be 'internal' or 'external', got %r"
+                         % (side, ))
     if npanels < 2:
         raise ValueError('At least two panels are needed')
     if len(stack_blades) != npanels:
@@ -140,7 +300,7 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     for i in range(npanels):
         y0 = i*b_skin
         panel = Shell(group='skin', x0=0, y0=y0, a=height, b=b_skin,
-                      r=r, m=m, n=n, plyt=plyt,
+                      r=r, model=models['skin'], m=m, n=n, plyt=plyt,
                       stack=stack, laminaprop=laminaprop,
                       x1u=0, x1ur=1, x2u=0, x2ur=1,
                       x1v=0, x1vr=1, x2v=0, x2vr=1,
@@ -153,7 +313,7 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
         y0 = i*b_skin
         blade_name = 'blade_%02d' % i
         blade = Shell(group=blade_name, x0=0, y0=y0, a=height, b=width_blades[i],
-                      m=m, n=n, plyt=plyt,
+                      model=models['blade'], m=m, n=n, plyt=plyt,
                       stack=stack_blades[i], laminaprop=laminaprop,
                       x1u=0, x1ur=1, x2u=0, x2ur=1,
                       x1v=0, x1vr=1, x2v=0, x2vr=1,
@@ -176,17 +336,20 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
             conns.append(dict(p1=p01, p2=p02, func='SSycte', ycte1=0, ycte2=p02.b))
 
     for panel, blade in zip(skin, blades):
-        conns.append(dict(p1=panel, p2=blade, func='BFycte', ycte1=0, ycte2=0))
+        ycte2 = 0 if side == 'internal' else blade.b
+        face = 'lower' if side == 'internal' else 'upper'
+        conns.append(dict(p1=panel, p2=blade, func='BFycte', ycte1=0,
+                          ycte2=ycte2, face=face))
 
-    md = MultiDomain(skin + blades, conn_method=conn_method)
+    md = MultiDomain(skin + blades, conns, conn_method=conn_method)
 
-    return md, conns
+    return md, conns, dict(skin=skin, blades=blades, ws=b_skin, models=models)
 
 
 def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blades,
         width_blades, plyt, laminaprop,
         npanels, Nxxs_skin, Nxxs_blade, m=8, n=8, num_eigvalues=20,
-        conn_method='null-space'):
+        conn_method='null-space', models=None, side='internal'):
     r"""Linear buckling analysis with a constant Nxx for each panel
 
     See :func:`.create_cylinder_blade_stiffened` for most parameters.
@@ -238,6 +401,13 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
     conn_method : str, optional
         How the connections are imposed, ``'null-space'``, the default, or
         ``'penalty'``, see :class:`.MultiDomain`.
+    models : dict, optional
+        Model of the skin panels, key ``'skin'``, and of the blades, key
+        ``'blade'``, see :func:`.create_cylinder_blade_stiffened`.
+    side : str, optional
+        ``'internal'``, the default, for blades inside the cylinder, or
+        ``'external'`` for blades outside, see
+        :func:`.create_cylinder_blade_stiffened`.
 
     Returns
     -------
@@ -251,7 +421,8 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
     ------
     ValueError
         When the length of ``Nxxs_skin`` or of ``Nxxs_blade`` is not
-        ``npanels``.
+        ``npanels``, or when ``models`` or ``side`` is not accepted by
+        :func:`.create_cylinder_blade_stiffened`.
 
     Notes
     -----
@@ -268,16 +439,25 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
     Examples
     --------
 
-    The following example is one of the test cases:
+    Critical axial load of a cylinder of 5 panels, each with a blade, force per unit length:
 
-    .. literalinclude:: ../../tests/multidomain/test_cylinder_blade_stiffened.py
-        :pyobject: test_cylinder_blade_stiffened_compression_lb_Nxx_cte
+    >>> from panels.multidomain import (
+    ...     cylinder_blade_stiffened_compression_lb_Nxx_cte)
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> Nxxs = [-100.]*5
+    >>> md, eigvals, eigvecs = cylinder_blade_stiffened_compression_lb_Nxx_cte(
+    ...     height=0.5, r=0.25, stack=[0, 45, -45, 90, -45, 45],
+    ...     stack_blades=[[0, 90, 0]*4]*5, width_blades=[0.02]*5,
+    ...     plyt=0.125e-3, laminaprop=laminaprop, npanels=5,
+    ...     Nxxs_skin=Nxxs, Nxxs_blade=Nxxs, m=8, n=12, num_eigvalues=5)
+    >>> round(float(Nxxs[0]*eigvals[0]))
+    -51578
 
     """
-    md, conns = create_cylinder_blade_stiffened(height=height, r=r,
+    md, conns, info = create_cylinder_blade_stiffened(height=height, r=r,
             stack=stack, stack_blades=stack_blades, width_blades=width_blades,
             plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n,
-            conn_method=conn_method)
+            conn_method=conn_method, models=models, side=side)
     if len(Nxxs_skin) != npanels:
         raise ValueError('The length of "Nxxs_skin" must be the same as "npanels"')
     if len(Nxxs_blade) != npanels:
@@ -293,7 +473,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
             i_blade += 1
             p.Nxx = Nxxs_blade[i_blade]
 
-    k0 = md.reduce(md.calc_kC(conns, silent=True))
+    k0 = md.reduce(md.calc_kC(silent=True))
     kG = md.reduce(md.calc_kG(silent=True))
     eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=num_eigvalues, num_eigvalues_print=5)
@@ -303,7 +483,8 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
 def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
         stack_blades, width_blades, plyt, laminaprop, npanels, Nxxs_skin,
         Nxxs_blade, m=8, n=8,
-        num_eigvalues=20, conn_method='null-space'):
+        num_eigvalues=20, conn_method='null-space', models=None,
+        side='internal'):
     r"""Linear buckling analysis with a Nxx calculated using static analysis
 
     See :func:`.create_cylinder_blade_stiffened` for most parameters.
@@ -359,6 +540,13 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
     conn_method : str, optional
         How the connections are imposed, ``'null-space'``, the default, or
         ``'penalty'``, see :class:`.MultiDomain`.
+    models : dict, optional
+        Model of the skin panels, key ``'skin'``, and of the blades, key
+        ``'blade'``, see :func:`.create_cylinder_blade_stiffened`.
+    side : str, optional
+        ``'internal'``, the default, for blades inside the cylinder, or
+        ``'external'`` for blades outside, see
+        :func:`.create_cylinder_blade_stiffened`.
 
     Returns
     -------
@@ -373,7 +561,8 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
     ------
     ValueError
         When the length of ``Nxxs_skin`` or of ``Nxxs_blade`` is not
-        ``npanels``.
+        ``npanels``, or when ``models`` or ``side`` is not accepted by
+        :func:`.create_cylinder_blade_stiffened`.
 
     Notes
     -----
@@ -386,16 +575,25 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
     Examples
     --------
 
-    The following example is one of the test cases:
+    Critical axial load of a cylinder of 5 panels, each with a blade, force per unit length:
 
-    .. literalinclude:: ../../tests/multidomain/test_cylinder_blade_stiffened.py
-        :pyobject: test_cylinder_blade_stiffened_compression_lb_Nxx_from_static
+    >>> from panels.multidomain import (
+    ...     cylinder_blade_stiffened_compression_lb_Nxx_from_static)
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> Nxxs = [-100.]*5
+    >>> md, c, eigvals, eigvecs = cylinder_blade_stiffened_compression_lb_Nxx_from_static(
+    ...     height=0.5, r=0.25, stack=[0, 45, -45, 90, -45, 45],
+    ...     stack_blades=[[0, 90, 0]*4]*5, width_blades=[0.02]*5,
+    ...     plyt=0.125e-3, laminaprop=laminaprop, npanels=5,
+    ...     Nxxs_skin=Nxxs, Nxxs_blade=Nxxs, m=8, n=12, num_eigvalues=5)
+    >>> round(float(Nxxs[0]*eigvals[0]))
+    -40322
 
     """
-    md, conns = create_cylinder_blade_stiffened(height=height, r=r,
+    md, conns, info = create_cylinder_blade_stiffened(height=height, r=r,
             stack=stack, stack_blades=stack_blades, width_blades=width_blades,
             plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n,
-            conn_method=conn_method)
+            conn_method=conn_method, models=models, side=side)
     if len(Nxxs_skin) != npanels:
         raise ValueError('The length of "Nxxs_skin" must be the same as "npanels"')
     if len(Nxxs_blade) != npanels:
@@ -416,7 +614,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
 
     fext = md.calc_fext(silent=True)
 
-    k0 = md.reduce(md.calc_kC(conns, silent=True))
+    k0 = md.reduce(md.calc_kC(silent=True))
     incs, cs = static(k0, md.reduce(fext), silent=True)
     c = md.expand(cs[0])
     kG = md.reduce(md.calc_kG(c=c, silent=True))
@@ -432,7 +630,8 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
 def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
         stack_blades, width_blades, plyt, laminaprop, npanels, pds_skin,
         pds_blade, m=8, n=8,
-        num_eigvalues=20, ku=1.e6, conn_method='null-space'):
+        num_eigvalues=20, ku=1.e6, conn_method='null-space',
+        models=None, side='internal'):
     r"""Linear buckling analysis with prescribed displacement
 
     See :func:`.create_cylinder_blade_stiffened` for most parameters.
@@ -497,6 +696,13 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
     conn_method : str, optional
         How the connections are imposed, ``'null-space'``, the default, or
         ``'penalty'``, see :class:`.MultiDomain`.
+    models : dict, optional
+        Model of the skin panels, key ``'skin'``, and of the blades, key
+        ``'blade'``, see :func:`.create_cylinder_blade_stiffened`.
+    side : str, optional
+        ``'internal'``, the default, for blades inside the cylinder, or
+        ``'external'`` for blades outside, see
+        :func:`.create_cylinder_blade_stiffened`.
 
     Returns
     -------
@@ -511,13 +717,14 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
     ------
     ValueError
         When the length of ``pds_skin`` or of ``pds_blade`` is not
-        ``npanels``.
+        ``npanels``, or when ``models`` or ``side`` is not accepted by
+        :func:`.create_cylinder_blade_stiffened`.
 
     Notes
     -----
     The prescribed displacements are the linear constraints `u(x = height,
     y) = \lambda u_p`, eliminated exactly together with the connections,
-    see :ref:`null_space_pd`: the pre-buckling state is `\hat{\boldsymbol{c}}(\lambda) =
+    see :meth:`.MultiDomain.get_cp`: the pre-buckling state is `\hat{\boldsymbol{c}}(\lambda) =
     \lambda \hat{\boldsymbol{c}}_1`, with `u = u_p` at `x = height` for `\lambda = 1`, and
     the critical end-shortening of each panel is ``eigvals[0]`` times its
     prescribed value. The modes have `u = 0` at `x = height`, the
@@ -527,22 +734,31 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
     Examples
     --------
 
-    The following example is one of the test cases:
+    Critical end-shortening of a cylinder of 5 panels, each with a blade, length:
 
-    .. literalinclude:: ../../tests/multidomain/test_cylinder_blade_stiffened.py
-        :pyobject: test_cylinder_blade_stiffened_compression_lb_pd_from_static
+    >>> from panels.multidomain import (
+    ...     cylinder_blade_stiffened_compression_lb_pd_from_static)
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> pds = [-1.e-3]*5
+    >>> md, c, eigvals, eigvecs = cylinder_blade_stiffened_compression_lb_pd_from_static(
+    ...     height=0.5, r=0.25, stack=[0, 45, -45, 90, -45, 45],
+    ...     stack_blades=[[0, 90, 0]*4]*5, width_blades=[0.02]*5,
+    ...     plyt=0.125e-3, laminaprop=laminaprop, npanels=5,
+    ...     pds_skin=pds, pds_blade=pds, m=8, n=12, num_eigvalues=5)
+    >>> round(float(pds[0]*eigvals[0]), 7)
+    -0.0004825
 
     """
-    md, conns = create_cylinder_blade_stiffened(height=height, r=r,
+    md, conns, info = create_cylinder_blade_stiffened(height=height, r=r,
             stack=stack, stack_blades=stack_blades, width_blades=width_blades,
             plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n,
-            conn_method=conn_method)
+            conn_method=conn_method, models=models, side=side)
     if len(pds_skin) != npanels:
         raise ValueError('The length of "pds_skin" must be the same as "npanels"')
     if len(pds_blade) != npanels:
         raise ValueError('The length of "pds_blade" must be the same as "npanels"')
-    #NOTE the prescribed displacements imposed exactly, the connections
-    #     stored in the assembly, used by linear_static and linear_buckling
+    #NOTE an assembly of the same panels and connections with the
+    #     prescribed displacements imposed exactly
     md = MultiDomain(md.panels, conns, conn_method=conn_method,
                      pd_method='null-space')
     i_skin = -1

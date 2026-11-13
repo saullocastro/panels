@@ -47,7 +47,9 @@ def _field(p, c, xs, ys):
 
 @pytest.mark.parametrize('base_model', ['plate_clpt_donnell',
                                         'cylshell_clpt_donnell',
-                                        'cylshell_clpt_sanders'])
+                                        'cylshell_clpt_sanders',
+                                        'cylshell_clpt_gl',
+                                        'cylshell_clpt_tl'])
 def test_energy(base_model):
     r"""`\boldsymbol{c}^\top \boldsymbol{K} \boldsymbol{c}` against the line integral of `k_t [(u_1 -
     u_2)^2 + (v_1 - w_2)^2 + (w_1 + v_2)^2] + k_r (\omega_1 - \omega_2)^2`,
@@ -109,9 +111,16 @@ def _fit(p, targets, gridx=12, gridy=10):
     return c
 
 
-def test_rigid_rotation_about_the_axis():
+@pytest.mark.parametrize('base_model', ['cylshell_clpt_sanders',
+                                        'cylshell_clpt_gl',
+                                        'cylshell_clpt_tl'])
+def test_rigid_rotation_about_the_axis(base_model):
     r"""Rigid-body rotation `\theta` of a Sanders-Koiter skin with a flange
     about the axis of the cylinder
+
+    The skin has the Sanders-Koiter kinematics, ``cylshell_clpt_sanders``,
+    or the same rotations with the Green-Lagrange membrane strains,
+    ``cylshell_clpt_gl`` and ``cylshell_clpt_tl``.
 
     The skin has `v_1 = r \theta`, the flange, whose axis `y_2` points
     along `-z_1` from `y_2 = 0`, has `w_2 = (r - y_2) \theta`. Both rotate
@@ -119,7 +128,7 @@ def test_rigid_rotation_about_the_axis():
     energy. Without the term `v_1/r` of the rotation of the skin, the
     rotation penalty gives `k_r a \theta^2`
     """
-    base, flange = _panels('cylshell_clpt_sanders')
+    base, flange = _panels(base_model)
     ycte1, ycte2 = base.b/2, 0.
     kt, kr = 1.e8, 1.e4
     conn = [dict(p1=base, p2=flange, func='BFycte', ycte1=ycte1, ycte2=ycte2,

@@ -19,7 +19,9 @@ from panels.multidomain import MultiDomain
 def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
         laminaprop, stack_skin, stack_base, stack_flange,
         air_speed=None, rho_air=None, Mach=None, speed_sound=None, flow='x',
-        Nxx_skin=None, Nxx_base=None, Nxx_flange=None, run_static_case=True,
+        Nxx_skin=None, Nxx_base=None, Nxx_flange=None,
+        Nyy_skin=None, Nyy_base=None, Nyy_flange=None,
+        Nxy_skin=None, Nxy_base=None, Nxy_flange=None, run_static_case=True,
         r=None, m=8, n=8, mb=None, nb=None, mf=None, nf=None,
         num_eigvalues=25, conn_method='null-space'):
     r"""Flutter of T-Stiffened Shell with possible defect at middle
@@ -64,23 +66,60 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     :func:`.tstiff2d_1stiff_compression` with ``run_static_case=True``: the
     middle row of domains has the length ``defect_a*a`` of the defect, or
     ``0.33*a`` when ``defect_a = 0``, and its base is not connected to the
-    skin when ``defect_a > 0``. The aerodynamic parameters are given to the
+    skin when ``defect_a > 0``. The boundary conditions are those of the
+    vibration analysis of Castro and Donadon (2017), Fig. 8, p. 236:
+    `u = v = w = 0` at the four edges of the skin, `x = 0`, `x = a`,
+    `y = 0` and `y = b`, and at both ends of the flange, `x = 0` and
+    `x = a`; the edges of the base are free, the base being held by its
+    connections to the skin and to the flange, and the rotations are free
+    at every edge. With ``run_static_case=True`` the boundary conditions
+    are those of the compression analysis of Castro and Donadon (2017),
+    Fig. 7, p. 236, with `v` also free at the loaded edge: the loaded edge
+    `x = 0` of the skin (``p07``, ``p08``, ``p09``) and of the flange
+    (``p15``) is free in `u` and `v`, such that the axial and shear edge
+    loads act on the panel, the edges `y = 0` (``p03``, ``p06``, ``p09``)
+    and `y = b` (``p01``, ``p04``, ``p07``) of the skin are free in `u`,
+    `w = 0` remains at these edges and `v = 0` at `y = 0` and `y = b`, and
+    the edge `x = a` of the skin and the end `x = a` of the flange keep
+    `u = v = w = 0`. These boundary conditions hold for the static
+    analysis and for the eigenvalue problem. The aerodynamic parameters are given to the
     9 skin domains only, and the aerodynamic matrix is the sum of
     :meth:`.Shell.calc_kA` of the skin domains.
 
-    With ``run_static_case=True`` and at least one of ``Nxx_skin``,
-    ``Nxx_base`` and ``Nxx_flange`` given, a distributed force along `x` is
-    added with :meth:`.Shell.add_distr_load_fixed_x` at the edge `x = 0` of
-    those of the domains ``p07``, ``p08``, ``p09``, ``p14`` and ``p15``
-    whose ``Nxx`` is not ``None``, and a linear static analysis with
-    ``structsolve.static`` gives the pre-buckling state ``c``. The attributes
-    ``Nxx`` of all the domains are then set to ``0`` and the geometric
-    stiffness matrix is computed at ``c``, or with ``c=None`` when no load
-    was given. The reduced matrices, see :meth:`.MultiDomain.reduce`, the sum
+    The in-plane loads, the membrane stress resultants ``Nxx_*``,
+    ``Nyy_*`` and ``Nxy_*`` of the skin, the base and the flange (force per
+    unit length, negative ``Nxx`` and ``Nyy`` in compression), enter the
+    geometric stiffness matrix in one of two ways:
+
+    - ``run_static_case=False``: they are constant stress states, the
+      attributes ``Nxx``, ``Nyy`` and ``Nxy`` of every domain of the skin,
+      of the base and of the flange, ``None`` giving ``0``, and the
+      geometric stiffness matrix is computed from them with
+      :meth:`.MultiDomain.calc_kG` without ``c``. Without any non-zero
+      load the geometric stiffness matrix is not included.
+    - ``run_static_case=True``: ``Nxx_*`` and ``Nxy_*`` are edge loads, a
+      distributed force along `x` and along `y`, constant along the edge,
+      added with :meth:`.Shell.add_distr_load_fixed_x` at the edge `x = 0`
+      of the domains ``p07``, ``p08`` and ``p09`` (skin), ``p14`` (base) and
+      ``p15`` (flange), with the sign of the stress resultants of that edge
+      (see Notes). A linear static analysis with ``structsolve.static``
+      gives the pre-buckling state ``c``, generally not a constant stress
+      state, and the geometric stiffness matrix is computed at ``c``, with
+      the attributes ``Nxx``, ``Nyy`` and ``Nxy`` of every domain equal to
+      ``0``. ``Nyy_skin``, ``Nyy_base`` and ``Nyy_flange`` must be
+      ``None``: this function has no edge load along `y`. Without any edge
+      load the geometric stiffness matrix is not included, but the
+      boundary conditions are those of ``run_static_case=True`` all the
+      same.
+
+    The reduced matrices, see :meth:`.MultiDomain.reduce`, the sum
     of the constitutive, geometric and aerodynamic stiffness matrices and
     the mass matrix, are passed to ``structsolve.freq`` with ``tol=0`` and
     ``sparse_solver=True``, and the eigenvectors are expanded with
     :meth:`.MultiDomain.expand`.
+
+    The domains of the flange use the model ``'plate_clpt_gl'``, the
+    others the default model of :class:`.Shell` (see Notes).
 
     Parameters
     ----------
@@ -122,20 +161,33 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
         Default ``None``.
     flow : "x" or "y", optional
         Direction of airflow. Default ``'x'``.
-    Nxx_skin : float or None, optional
-        Skin load distributed at the assembly edge at `x=0`, force per unit
-        length. Default ``None``, no load.
-    Nxx_base : float or None, optional
-        Stiffener's base load distributed at the assembly edge at `x=0`,
-        force per unit length. Default ``None``, no load.
-    Nxx_flange : float or None, optional
-        Stiffener's flange load distributed at the assembly edge at `x=0`,
-        force per unit length. Default ``None``, no load.
+    Nxx_skin, Nxx_base, Nxx_flange : float or None, optional
+        Membrane stress resultant `N_{xx}` of the skin, of the stiffener's
+        base and of the stiffener's flange, force per unit length, negative
+        in compression: constant in each domain of that part with
+        ``run_static_case=False``, an axial load distributed at its edge
+        `x = 0` with ``run_static_case=True``. Default ``None``, no load.
+    Nyy_skin, Nyy_base, Nyy_flange : float or None, optional
+        Membrane stress resultant `N_{yy}` of the skin, of the base and of
+        the flange, force per unit length, negative in compression,
+        constant in each domain of that part with
+        ``run_static_case=False``; must be ``None`` with
+        ``run_static_case=True``. Default ``None``, no load.
+    Nxy_skin, Nxy_base, Nxy_flange : float or None, optional
+        Membrane stress resultant `N_{xy}` of the skin, of the base and of
+        the flange, force per unit length: constant in each domain of that
+        part with ``run_static_case=False``, a shear load distributed at its
+        edge `x = 0` with ``run_static_case=True``. Default ``None``, no
+        load.
     run_static_case : bool, optional
-        If True a static analysis is run before the frequency analysis
-        to compute the real membrane stress state along the domain, otherwise
-        the geometric stiffness matrix is not included and ``Nxx_skin``,
-        ``Nxx_base`` and ``Nxx_flange`` are not used. Default ``True``.
+        If True, the edge `x = 0` of the skin and of the flange is free in
+        `u` and `v`, the edges `y = 0` and `y = b` of the skin are free in
+        `u`, the loads ``Nxx_*`` and ``Nxy_*`` are applied at the edge
+        `x = 0` and the geometric stiffness matrix is computed from the
+        membrane stresses of a linear static analysis; if False, from the
+        constant loads ``Nxx_*``, ``Nyy_*`` and ``Nxy_*``, with the
+        boundary conditions of Fig. 8. Default ``True``.
+
     r : float or None, optional
         Radius of the stiffened panel, length. Default ``None``, a flat
         panel.
@@ -161,6 +213,12 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
         ``structsolve.freq``, see there, and the eigenvectors of the
         assembly, one per column, with ``assy.get_size()`` rows.
 
+    Raises
+    ------
+    ValueError
+        If ``run_static_case=True`` and any of ``Nyy_skin``, ``Nyy_base``
+        and ``Nyy_flange`` is not ``None``.
+
     Notes
     -----
     For more details about each parameter and the aerodynamic formulation see
@@ -183,10 +241,57 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     mistake of the paper, the correction of Krumhaar softening the shell. The flutter onset is found by increasing the
     aerodynamic load, e.g. ``air_speed``, until two natural frequencies
     coalesce and the eigenvalues become complex. With
-    ``run_static_case=True`` and loads, `\boldsymbol{K}_G` is computed from the
-    linear membrane stresses of the static solution, see
-    :func:`.tstiff2d_1stiff_compression` for the sign of the loads and the
-    model of the debonding defect.
+    ``run_static_case=False`` the boundary conditions are those of the
+    vibration analysis of the same assembly, Fig. 8 of [2]_, p. 236. With
+    ``run_static_case=True`` they are those of the compression analysis,
+    Fig. 7 of [2]_, p. 236, where the skin edges that move along `x` under
+    the load, `x = 0`, `y = 0` and `y = b`, have `v = w = 0` and `u` free,
+    and the flange has `v = w = 0` at the loaded end, with, in addition,
+    `v` free at the loaded edge `x = 0` of the skin and of the flange,
+    such that the shear edge loads act on the panel. With `u = v = 0` at
+    `x = 0`, the edge loads would act on restrained displacements and load
+    the panel only through the free edges of the base; with `u = 0` at
+    `y = 0` and `y = b`, these edges would take up most of the axial edge
+    load near `x = 0`. One set of boundary conditions holds for the static
+    analysis and for the eigenvalue problem: the pre-stressed structure is
+    the vibrating one. The debonding defect is modelled as in
+    :func:`.tstiff2d_1stiff_compression`.
+
+    `\boldsymbol{K}_G = \boldsymbol{K}_G(\boldsymbol{N})` is the geometric
+    stiffness of the membrane stresses `\boldsymbol{N}` of
+    :meth:`.Shell.calc_kG`, not multiplied by a load factor: the in-plane
+    loads are a pre-stress of the vibrating panel. With
+    ``run_static_case=False``, `\boldsymbol{N}` is constant in each domain,
+
+    .. math::
+
+        \boldsymbol{N} = \begin{bmatrix} N_{xx} & N_{xy} \\ N_{xy} & N_{yy}
+              \end{bmatrix}
+
+    with the values of the part (skin, base or flange) to which the domain
+    belongs, prescribed whatever the boundary conditions and without
+    redistribution between the parts. With ``run_static_case=True``, the edge `x = 0`,
+    whose outward normal is `-x`, carries the force per unit length
+    `(-N_{xx}, -N_{xy})` of the stress resultants `N_{xx}` and `N_{xy}`;
+    the static analysis therefore uses the opposite of the force vector of
+    :meth:`.Shell.add_distr_load_fixed_x` with the functions `N_{xx}` and
+    `N_{xy}`, the convention of :func:`.tstiff2d_1stiff_compression`. Its
+    solution `\boldsymbol{c}` gives `\boldsymbol{N}` from the linear part of
+    the membrane strains, which varies over each domain and redistributes
+    the loads between the skin and the stiffener according to the
+    boundary conditions and the stiffnesses. A load `N_{yy}` would have to
+    act at the edges `y = 0` and `y = b` of the skin, which are restrained;
+    the function raises an error instead of ignoring it.
+
+    The flange carries its share of the axial load as the membrane stress
+    resultant `N_{xx}` of the plate, and bends in its own plane when the
+    stiffener deflects normal to the skin: the displacement `w` of the
+    base at the joint is the in-plane displacement `v` of the flange. The
+    geometric stiffness of the Green-Lagrange strains of
+    ``'plate_clpt_gl'`` contains the work of `N_{xx}` on this bending,
+    `\frac{1}{2} N_{xx} v_{,x}^2`, which the von Kármán strains of
+    ``'plate_clpt_donnell'`` omit; the linear stiffness, the mass and the
+    aerodynamic matrices of both models are the same.
 
     References
     ----------
@@ -194,16 +299,35 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
        M. V., Flutter of stiffened composite panels considering the
        stiffener's base as a structural element, Composite Structures,
        2016. https://doi.org/10.1016/j.compstruct.2015.12.056
+    .. [2] Castro, S. G. P., and Donadon, M. V., Assembly of Semi-Analytical
+       models to Address Linear Buckling and Vibration of Stiffened
+       Composite Panels with Debonding Defect, Composite Structures, 2017.
+       https://doi.org/10.1016/j.compstruct.2016.10.026
 
     Examples
     --------
 
-    The following example is one of the test cases:
+    Square root of minus the real part of the first eigenvalue, in rad/s,
+    of a T-stiffened panel with a debonding defect over 10 % of its
+    length, at Mach 2:
 
-    .. literalinclude:: ../../tests/multidomain/test_tstiff2d_assembly.py
-        :pyobject: test_tstiff2d_1stiff_flutter
+    >>> from panels.multidomain import tstiff2d_1stiff_flutter
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> md, eigvals, eigvecs = tstiff2d_1stiff_flutter(a=3., b=1.,
+    ...     ys=0.5, bb=0.2, bf=0.1, defect_a=0.1, rho=1.3e3, plyt=0.125e-3,
+    ...     laminaprop=laminaprop, stack_skin=[0, 45, -45, 90, -45, 45, 0],
+    ...     stack_base=[0, 90, 0]*4, stack_flange=[0, 90, 0]*8,
+    ...     air_speed=2*343., rho_air=1.2, Mach=2, speed_sound=343.,
+    ...     run_static_case=False, m=6, n=7, mb=5, nb=6, mf=6, nf=7,
+    ...     num_eigvalues=5)
+    >>> round(float((-eigvals[0].real)**0.5), 2)
+    487.42
 
     """
+    if run_static_case and not (Nyy_skin is None and Nyy_base is None
+                                and Nyy_flange is None):
+        raise ValueError('Nyy_skin, Nyy_base and Nyy_flange must be None '
+                         'with run_static_case=True')
     defect = defect_a * a
     has_defect = True if defect > 0 else False
     defect = 0.33*a if defect == 0 else defect # to avoid weird domains
@@ -216,33 +340,33 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     mf = m if mf is None else mf
     nf = n if nf is None else nf
     # skin panels
-    p01 = Shell(group='skin', Nxx=Nxx_skin, x0=alow+defect, y0=ys+bb/2., a=aup, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, air_speed=air_speed, flow=flow)
-    p02 = Shell(group='skin', Nxx=Nxx_skin, x0=alow+defect, y0=ys-bb/2., a=aup, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, air_speed=air_speed, flow=flow)
-    p03 = Shell(group='skin', Nxx=Nxx_skin, x0=alow+defect, y0=0, a=aup, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, air_speed=air_speed, flow=flow)
+    p01 = Shell(group='skin', x0=alow+defect, y0=ys+bb/2., a=aup, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, air_speed=air_speed, flow=flow)
+    p02 = Shell(group='skin', x0=alow+defect, y0=ys-bb/2., a=aup, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, air_speed=air_speed, flow=flow)
+    p03 = Shell(group='skin', x0=alow+defect, y0=0, a=aup, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, air_speed=air_speed, flow=flow)
     # defect
-    p04 = Shell(group='skin', Nxx=Nxx_skin, x0=alow, y0=ys+bb/2., a=defect, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, air_speed=air_speed, flow=flow)
-    p05 = Shell(group='skin', Nxx=Nxx_skin, x0=alow, y0=ys-bb/2., a=defect, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, air_speed=air_speed, flow=flow)
-    p06 = Shell(group='skin', Nxx=Nxx_skin, x0=alow, y0=0, a=defect, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, air_speed=air_speed, flow=flow)
+    p04 = Shell(group='skin', x0=alow, y0=ys+bb/2., a=defect, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, air_speed=air_speed, flow=flow)
+    p05 = Shell(group='skin', x0=alow, y0=ys-bb/2., a=defect, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, air_speed=air_speed, flow=flow)
+    p06 = Shell(group='skin', x0=alow, y0=0, a=defect, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, air_speed=air_speed, flow=flow)
     #
-    p07 = Shell(group='skin', Nxx=Nxx_skin, x0=0, y0=ys+bb/2., a=alow, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, air_speed=air_speed, flow=flow)
-    p08 = Shell(group='skin', Nxx=Nxx_skin, x0=0, y0=ys-bb/2., a=alow, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, air_speed=air_speed, flow=flow)
-    p09 = Shell(group='skin', Nxx=Nxx_skin, x0=0, y0=0, a=alow, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, air_speed=air_speed, flow=flow)
+    p07 = Shell(group='skin', x0=0, y0=ys+bb/2., a=alow, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, air_speed=air_speed, flow=flow)
+    p08 = Shell(group='skin', x0=0, y0=ys-bb/2., a=alow, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, air_speed=air_speed, flow=flow)
+    p09 = Shell(group='skin', x0=0, y0=0, a=alow, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, air_speed=air_speed, flow=flow)
 
     # stiffeners
-    p10 = Shell(group='base', Nxx=Nxx_base, x0=alow+defect, y0=ys-bb/2., a=aup, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho)
-    p11 = Shell(group='flange', Nxx=Nxx_flange, x0=alow+defect, y0=0, a=aup, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
+    p10 = Shell(group='base', x0=alow+defect, y0=ys-bb/2., a=aup, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho)
+    p11 = Shell(group='flange', model='plate_clpt_gl', x0=alow+defect, y0=0, a=aup, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
     # defect
-    p12 = Shell(group='base', Nxx=Nxx_base, x0=alow, y0=ys-bb/2., a=defect, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho)
-    p13 = Shell(group='flange', Nxx=Nxx_flange, x0=alow, y0=0, a=defect, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
+    p12 = Shell(group='base', x0=alow, y0=ys-bb/2., a=defect, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho)
+    p13 = Shell(group='flange', model='plate_clpt_gl', x0=alow, y0=0, a=defect, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
     #
-    p14 = Shell(group='base', Nxx=Nxx_base, x0=0, y0=ys-bb/2., a=alow, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho)
-    p15 = Shell(group='flange', Nxx=Nxx_flange, x0=0, y0=0, a=alow, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
+    p14 = Shell(group='base', x0=0, y0=ys-bb/2., a=alow, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho)
+    p15 = Shell(group='flange', model='plate_clpt_gl', x0=0, y0=0, a=alow, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
 
     # boundary conditions
     p01.x1u = 1 ; p01.x1ur = 1 ; p01.x2u = 0 ; p01.x2ur = 1
     p01.x1v = 1 ; p01.x1vr = 1 ; p01.x2v = 0 ; p01.x2vr = 1
     p01.x1w = 1 ; p01.x1wr = 1 ; p01.x2w = 0 ; p01.x2wr = 1
-    p01.y1u = 1 ; p01.y1ur = 1 ; p01.y2u = 1 ; p01.y2ur = 1
+    p01.y1u = 1 ; p01.y1ur = 1 ; p01.y2u = 0 ; p01.y2ur = 1
     p01.y1v = 1 ; p01.y1vr = 1 ; p01.y2v = 0 ; p01.y2vr = 1
     p01.y1w = 1 ; p01.y1wr = 1 ; p01.y2w = 0 ; p01.y2wr = 1
 
@@ -256,14 +380,14 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     p03.x1u = 1 ; p03.x1ur = 1 ; p03.x2u = 0 ; p03.x2ur = 1
     p03.x1v = 1 ; p03.x1vr = 1 ; p03.x2v = 0 ; p03.x2vr = 1
     p03.x1w = 1 ; p03.x1wr = 1 ; p03.x2w = 0 ; p03.x2wr = 1
-    p03.y1u = 1 ; p03.y1ur = 1 ; p03.y2u = 1 ; p03.y2ur = 1
+    p03.y1u = 0 ; p03.y1ur = 1 ; p03.y2u = 1 ; p03.y2ur = 1
     p03.y1v = 0 ; p03.y1vr = 1 ; p03.y2v = 1 ; p03.y2vr = 1
     p03.y1w = 0 ; p03.y1wr = 1 ; p03.y2w = 1 ; p03.y2wr = 1
 
     p04.x1u = 1 ; p04.x1ur = 1 ; p04.x2u = 1 ; p04.x2ur = 1
     p04.x1v = 1 ; p04.x1vr = 1 ; p04.x2v = 1 ; p04.x2vr = 1
     p04.x1w = 1 ; p04.x1wr = 1 ; p04.x2w = 1 ; p04.x2wr = 1
-    p04.y1u = 1 ; p04.y1ur = 1 ; p04.y2u = 1 ; p04.y2ur = 1
+    p04.y1u = 1 ; p04.y1ur = 1 ; p04.y2u = 0 ; p04.y2ur = 1
     p04.y1v = 1 ; p04.y1vr = 1 ; p04.y2v = 0 ; p04.y2vr = 1
     p04.y1w = 1 ; p04.y1wr = 1 ; p04.y2w = 0 ; p04.y2wr = 1
 
@@ -277,28 +401,28 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     p06.x1u = 1 ; p06.x1ur = 1 ; p06.x2u = 1 ; p06.x2ur = 1
     p06.x1v = 1 ; p06.x1vr = 1 ; p06.x2v = 1 ; p06.x2vr = 1
     p06.x1w = 1 ; p06.x1wr = 1 ; p06.x2w = 1 ; p06.x2wr = 1
-    p06.y1u = 1 ; p06.y1ur = 1 ; p06.y2u = 1 ; p06.y2ur = 1
+    p06.y1u = 0 ; p06.y1ur = 1 ; p06.y2u = 1 ; p06.y2ur = 1
     p06.y1v = 0 ; p06.y1vr = 1 ; p06.y2v = 1 ; p06.y2vr = 1
     p06.y1w = 0 ; p06.y1wr = 1 ; p06.y2w = 1 ; p06.y2wr = 1
 
-    p07.x1u = 1 ; p07.x1ur = 1 ; p07.x2u = 1 ; p07.x2ur = 1
+    p07.x1u = 0 ; p07.x1ur = 1 ; p07.x2u = 1 ; p07.x2ur = 1
     p07.x1v = 0 ; p07.x1vr = 1 ; p07.x2v = 1 ; p07.x2vr = 1
     p07.x1w = 0 ; p07.x1wr = 1 ; p07.x2w = 1 ; p07.x2wr = 1
-    p07.y1u = 1 ; p07.y1ur = 1 ; p07.y2u = 1 ; p07.y2ur = 1
+    p07.y1u = 1 ; p07.y1ur = 1 ; p07.y2u = 0 ; p07.y2ur = 1
     p07.y1v = 1 ; p07.y1vr = 1 ; p07.y2v = 0 ; p07.y2vr = 1
     p07.y1w = 1 ; p07.y1wr = 1 ; p07.y2w = 0 ; p07.y2wr = 1
 
-    p08.x1u = 1 ; p08.x1ur = 1 ; p08.x2u = 1 ; p08.x2ur = 1
+    p08.x1u = 0 ; p08.x1ur = 1 ; p08.x2u = 1 ; p08.x2ur = 1
     p08.x1v = 0 ; p08.x1vr = 1 ; p08.x2v = 1 ; p08.x2vr = 1
     p08.x1w = 0 ; p08.x1wr = 1 ; p08.x2w = 1 ; p08.x2wr = 1
     p08.y1u = 1 ; p08.y1ur = 1 ; p08.y2u = 1 ; p08.y2ur = 1
     p08.y1v = 1 ; p08.y1vr = 1 ; p08.y2v = 1 ; p08.y2vr = 1
     p08.y1w = 1 ; p08.y1wr = 1 ; p08.y2w = 1 ; p08.y2wr = 1
 
-    p09.x1u = 1 ; p09.x1ur = 1 ; p09.x2u = 1 ; p09.x2ur = 1
+    p09.x1u = 0 ; p09.x1ur = 1 ; p09.x2u = 1 ; p09.x2ur = 1
     p09.x1v = 0 ; p09.x1vr = 1 ; p09.x2v = 1 ; p09.x2vr = 1
     p09.x1w = 0 ; p09.x1wr = 1 ; p09.x2w = 1 ; p09.x2wr = 1
-    p09.y1u = 1 ; p09.y1ur = 1 ; p09.y2u = 1 ; p09.y2ur = 1
+    p09.y1u = 0 ; p09.y1ur = 1 ; p09.y2u = 1 ; p09.y2ur = 1
     p09.y1v = 0 ; p09.y1vr = 1 ; p09.y2v = 1 ; p09.y2vr = 1
     p09.y1w = 0 ; p09.y1wr = 1 ; p09.y2w = 1 ; p09.y2wr = 1
 
@@ -343,12 +467,23 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     p14.y1w = 1 ; p14.y1wr = 1 ; p14.y2w = 1 ; p14.y2wr = 1
 
     # flange low
-    p15.x1u = 1 ; p15.x1ur = 1 ; p15.x2u = 1 ; p15.x2ur = 1
+    p15.x1u = 0 ; p15.x1ur = 1 ; p15.x2u = 1 ; p15.x2ur = 1
     p15.x1v = 0 ; p15.x1vr = 1 ; p15.x2v = 1 ; p15.x2vr = 1
     p15.x1w = 0 ; p15.x1wr = 1 ; p15.x2w = 1 ; p15.x2wr = 1
     p15.y1u = 1 ; p15.y1ur = 1 ; p15.y2u = 1 ; p15.y2ur = 1
     p15.y1v = 1 ; p15.y1vr = 1 ; p15.y2v = 1 ; p15.y2vr = 1
     p15.y1w = 1 ; p15.y1wr = 1 ; p15.y2w = 1 ; p15.y2wr = 1
+
+    if run_static_case:
+        # loaded edge x = 0 free in u and v
+        for p in [p07, p08, p09, p15]:
+            p.x1u = 1
+            p.x1v = 1
+        # skin edges y = 0 and y = b free in u
+        for p in [p03, p06, p09]:
+            p.y1u = 1
+        for p in [p01, p04, p07]:
+            p.y2u = 1
 
     conn = [
         # skin-skin
@@ -400,26 +535,39 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
 
     k0 = assy.reduce(assy.calc_kC(valid_conn, silent=True))
 
+    # (Nxx, Nyy, Nxy) of each group, None when not given
+    loads = {
+        'skin': (Nxx_skin, Nyy_skin, Nxy_skin),
+        'base': (Nxx_base, Nyy_base, Nxy_base),
+        'flange': (Nxx_flange, Nyy_flange, Nxy_flange),
+        }
+
     c = None
+    kG = 0.
     if run_static_case:
-        if not (Nxx_skin is None and Nxx_base is None and Nxx_flange is None):
+        # Nxx and Nxy are edge loads at x = 0
+        edge = [p for p in [p07, p08, p09, p14, p15]
+                if not (loads[p.group][0] is None and loads[p.group][2] is None)]
+        if len(edge) > 0:
             fext = np.zeros(size)
-            for p in [p07, p08, p09, p14, p15]:
-                if p.Nxx is None:
-                    continue
-                p.add_distr_load_fixed_x(0, lambda y: p.Nxx, None, None)
+            for p in edge:
+                Nxx, Nyy, Nxy = loads[p.group]
+                funcx = None if Nxx is None else (lambda y, N=Nxx: N)
+                funcy = None if Nxy is None else (lambda y, N=Nxy: N)
+                p.add_distr_load_fixed_x(0, funcx, funcy, None)
                 fext[p.col_start: p.col_end] = p.calc_fext(silent=True)
 
             incs, cs = static(k0, -assy.reduce(fext), silent=True)
             c = assy.expand(cs[0])
-
-        for p in panels:
-            p.Nxx = 0.
-
-        kG = assy.reduce(assy.calc_kG(c=c, silent=True))
+            kG = assy.reduce(assy.calc_kG(c=c, silent=True))
 
     else:
-        kG = 0.
+        # constant membrane stress resultants of each domain
+        for p in panels:
+            p.Nxx, p.Nyy, p.Nxy = [0. if N is None else N
+                                   for N in loads[p.group]]
+        if any(any((p.Nxx, p.Nyy, p.Nxy)) for p in panels):
+            kG = assy.reduce(assy.calc_kG(silent=True))
 
     kM = assy.reduce(assy.calc_kM(silent=True))
 

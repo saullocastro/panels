@@ -1,4 +1,10 @@
-r"""Saving and loading in the JSON + NumPy zip container, see panels.json_io"""
+r"""Saving and loading in the JSON + NumPy zip container, see panels.json_io
+
+A model loaded back has the inputs saved, and rebuilds the same laminate and
+the same matrices, bit for bit; the stored eigenpairs, Ritz constants and
+fields are those saved, bit for bit.
+
+"""
 import copy
 import io
 import json
@@ -520,7 +526,7 @@ class _Payload:
 
 
 def test_pickle_files_are_not_loaded(tmp_path):
-    """Pickle files, e.g. of older versions, can execute arbitrary code"""
+    """Pickle files are not loaded: they can execute arbitrary code"""
     data = pickle.dumps(_Payload())
     (tmp_path / 'plate.Shell').write_bytes(data)
     for f in (tmp_path / 'plate.Shell', io.BytesIO(data)):
@@ -528,7 +534,7 @@ def test_pickle_files_are_not_loaded(tmp_path):
             load_shell(f)
         with pytest.raises(ValueError, match='Not a zip file saved by panels'):
             json_io.load(f)
-    # the extension of the old pickle files is no longer completed
+    # the extension of a pickle file is not completed
     with pytest.raises(FileNotFoundError):
         load_shell(tmp_path / 'plate')
     assert UNPICKLED == []

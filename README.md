@@ -18,7 +18,7 @@ Semi-analytical methods for plates, shells and stiffened panels
 - Geometrically non-linear static analyses (postbuckling) using the Newton-Raphson method or the arc-length methods of Riks and Crisfield, with the product of the tangent stiffness matrix by a vector available without assembly
 - Dead or follower (hydrostatic) pressure loads, with the unsymmetric load stiffness of the follower pressure
 - Multi-domain assemblies of plates, cylindrical shells, cylinders, stiffened panels, with the domains connected exactly with the null-space method, the default, or by penalty stiffnesses. Debonding defects or cohesive zone can be simulated
-- Prescribed displacements and rotations imposed exactly with the null-space method, `MultiDomain(..., pd_method='null-space')`, for displacement control in linear static, linear buckling and geometrically non-linear (Newton-Raphson, Riks, Crisfield) analyses, with the reaction forces; or by penalty stiffnesses, the default
+- Prescribed displacements and rotations imposed exactly with the null-space method, the default, `MultiDomain(..., pd_method='null-space')`, for displacement control in linear static, linear buckling and geometrically non-linear (Newton-Raphson, Riks, Crisfield) analyses, with the reaction forces; or by penalty stiffnesses
 - CLPT, FSDT and TSDT kinematics for plates and cylindrical shells
 - Donnell and Sanders-Koiter kinematics for cylindrical shells
 
@@ -29,7 +29,7 @@ The structural matrices are solved with
 Citing this library
 ===================
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.15.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.16.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Documentation
@@ -129,15 +129,23 @@ s.save()              # writes plate.shell.zip
 s2 = load('plate')
 ```
 
-The pickle files saved by older versions are no longer loaded, since a pickle
-file can execute arbitrary code; one from a trusted source can be converted
-by loading it with `pickle.load()` and saving the object again.
+Pickle files are not loaded, since a pickle file can execute arbitrary code;
+one from a trusted source can be converted by loading it with `pickle.load()`
+and saving the object again.
 
 
 History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
+* version 0.16.0 (2026-11-13)
+    - New models with transverse shear and Green-Lagrange membrane strains, `plate_fsdt_gl`, `plate_tsdt_gl`, `cylshell_fsdt_gl` and `cylshell_tsdt_gl`, total-Lagrangian models `plate_fsdt_tl`, `cylshell_fsdt_tl`, `plate_tsdt_tl` and `cylshell_tsdt_tl`, and the Kirchhoff-Love cylinders `cylshell_clpt_gl` and `cylshell_clpt_tl`
+    - New annular-sector plate models: `annular_clpt_donnell`, `annular_clpt_gl`, `annular_clpt_tl`, `annular_fsdt_donnell`, `annular_fsdt_gl`, `annular_fsdt_tl`, `annular_tsdt_donnell`, `annular_tsdt_gl` and `annular_tsdt_tl`
+    - New stiffener model `bladestiff2d_clt_sanders`; new function `create_cylinder_z_stiffened`, cylinders with Z-section stringers; key `'face'` of the connections `'BFxcte'` and `'BFycte'`, which ties flanges and ring-frame webs to a face of the base; argument `models` of the wing box and of the blade-stiffened cylinder
+    - New defaults: `MultiDomain` imposes the prescribed displacements with `pd_method='null-space'`, `create_wingbox` connects the domains with `conn_method='null-space'`, the blades and flanges of the ready-made assemblies use `plate_clpt_gl`, and the ends of the `BladeStiff2D` flange follow the bay
+    - API changes: `create_cylinder_blade_stiffened` returns `(md, conns, info)` and takes the argument `side`; in-plane loads `Nyy_*` and `Nxy_*` of `tstiff2d_1stiff_flutter`; the boundary-condition flags of `StiffPanelBay` are fixed once it has panels; the cylinder builders store their connections in the assembly; `tstiff2d_1stiff_freq` and `tstiff2d_1stiff_flutter` restrain `u = v = w = 0` at the edges of the skin and the ends of the flange, as in Castro and Donadon (2017)
+    - BUG: `Shell.m` and `Shell.n` above 30 assigned after the construction were silently capped and now raise a `ValueError`; the flange of `BladeStiff2D` has the free edges it is documented with
+    - New validation notebooks in `notebooks/`, among them the stiffened cylinders in torsion of Moore and Wescoat (1944), blade-stiffened cylinders (`card1966_*`, `peterson1959_*`, `sewall1968_*`, `singer1971_*`, `weller1977_*`) and annular plates and webs (`thick_annular_plates`, `annular_webs_on_cylinders`); validation runs of more than 30 s are in the notebooks only, with fast tests of the same features
 * version 0.15.0 (2026-11-03)
     - New model `plate_clpt_gl`, plates with full Green-Lagrange membrane strains, for large rotations, e.g. of wing boxes
     - New connection `'BFxycte'`, an edge `x = const` joined to an edge `y = const`, and the wing-box example `panels.multidomain.wingbox` (High-AR-t5) built with it
@@ -199,7 +207,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
     - The kernels `fkCSB11_dmg`, `fkCSB12_dmg` and `fkCSB22_dmg` take the
       distances `dt` and `db` from each mid-surface to the interface
     - Validation of the cohesive zone against mode I DCB results in the
-      literature, in `notebooks/`, with a convergence study
+      literature, in notebooks, with a convergence study
     - Fixed `StiffPanelBay.save()` with `composites>=0.9.0`
 * version 0.6.21 (2026-09-18)
     - Fixed the mass of the base of `BladeStiff2D`, which was missing, and the
@@ -227,7 +235,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
       `c_cte` no longer reaches the nogil kernels, and a model that needs a
       radius raises instead of computing with `r = 0`
     - Reproduction of Stamatelos and Labeas (Computation 2023, 11, 110) in
-      `notebooks/stamatelos_labeas_2023.ipynb`
+      a notebook
     - Tangent stiffness matrix that is the exact derivative of the internal
       force vector, giving quadratic convergence to the Newton-Raphson method
     - `Shell` and `MultiDomain` can be passed directly to

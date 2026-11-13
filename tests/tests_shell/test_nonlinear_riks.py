@@ -1,17 +1,37 @@
 """Snap-through of a hinged cylindrical shell traced with the Riks method
 
-Classical arc-length benchmark of Sabir and Lock (1972): a shallow cylindrical
-panel with the straight edges hinged and the curved edges free, loaded by a
-point force at its center. The load-deflection curve has a limit point
-followed by snap-through, after which the load drops and increases again.
-Load control (Newton-Raphson) cannot pass the limit point, whereas the
-arc-length method of structsolve traces the whole path until the load factor
-reaches 1.
+Classical arc-length benchmark of Sabir and Lock [1]_, as given by Sze et al.
+[2]_, Sec. 3.8, Fig. 9a and Table 9a: a shallow cylindrical panel with the
+straight edges hinged and the curved edges free, loaded by a point force at
+its center. The load-deflection curve has a limit point followed by
+snap-through, after which the load drops and increases again. Load control
+(Newton-Raphson) cannot pass the limit point, whereas the arc-length method
+of structsolve traces the whole path until the load factor reaches 1.
 
 The Shell methods ``calc_fext``, ``calc_fint``, ``calc_kC`` and ``calc_kG``
 are passed directly to :class:`structsolve.Analysis`.
 
 Units: N, mm, MPa.
+
+Notes
+-----
+The model has 6 x 6 terms. The limit point is checked against Table 9a of
+[2]_ (ABAQUS S4R), whose largest load is ``P/P_{max} = 0.7421`` with
+``P_{max} = 3000``, i.e. 2226.3 N, at the central deflection ``-W_C =
+11.293``; the 6 x 6 model gives 2235.1 N (+0.4 %). The table ends at 3250.5
+N, below the reference load of 4000 N of the test, so the central
+deflection at 4000 N, -29.1, is a value of the code (6 x 6 terms, hpc12).
+
+References
+----------
+.. [1] Sabir, A. B., Lock, A. C., "The application of finite elements to
+   the large deflection geometrically nonlinear behaviour of cylindrical
+   shells", in: Brebbia, C. A., Tottenham, H. (eds.), Variational Methods
+   in Engineering, Southampton University Press, 1972, 7/54-7/65 (as cited
+   by [2]_).
+.. [2] Sze, K. Y., Liu, X. H., Lo, S. H., "Popular benchmark problems for
+   geometric nonlinear analysis of shells", Finite Elements in Analysis and
+   Design 40 (2004) 1551-1569. https://doi.org/10.1016/j.finel.2003.11.001
 """
 import sys
 sys.path.append('../..')
@@ -86,12 +106,13 @@ def test_riks_hinged_cylindrical_shell():
     # limit point: first converged increment followed by a load drop
     ilim = np.argmax(np.diff(lbds) < 0)
     assert 0 < ilim
-    assert np.isclose(lbds[ilim]*Pref, 2280., rtol=0.02)
+    # [2], Table 9a: P/Pmax = 0.7421 at -W_C = 11.293, Pmax = 3000
+    assert np.isclose(lbds[ilim]*Pref, 0.7421*3000., rtol=0.02)
     # the load is nearly constant around the limit point, such that the
     # deflection at the limit point is checked against the two converged
     # increments that bracket it rather than against the one with the largest
     # load, which depends on how the arc length samples the path
-    assert (1 + 0.1)*wc[ilim + 1] <= -8.83 <= (1 - 0.1)*wc[ilim]
+    assert (1 + 0.1)*wc[ilim + 1] <= -11.293 <= (1 - 0.1)*wc[ilim]
 
     # snap-through: after the limit point the load drops to a fraction of the
     # limit load and then increases again, up to the reference load
@@ -101,6 +122,7 @@ def test_riks_hinged_cylindrical_shell():
     assert np.all(np.diff(lbds[:ilim + 1]) > 0)
     assert np.all(np.diff(lbds[ilim:imin + 1]) < 0)
     assert np.all(np.diff(lbds[imin:]) > 0)
+    # value of the code, 6 x 6 terms: Table 9a of [2] ends at 3250.5 N
     assert np.isclose(wc[-1], -29.1, rtol=0.02)
 
 

@@ -153,7 +153,102 @@ def is_sanders(object s):
         ``1`` when ``'sanders'`` is in the name of the model, else ``0``.
 
     '''
-    return 1 if 'sanders' in s.model else 0
+    return 1 if ('sanders' in s.model
+                 or s.model in ('cylshell_fsdt_gl', 'cylshell_tsdt_gl',
+                                'cylshell_fsdt_tl', 'cylshell_tsdt_tl')) else 0
+
+
+def is_gl(object s):
+    r'''Tell whether the model of ``s`` has Green-Lagrange membrane strains
+
+    Parameters
+    ----------
+    s : :class:`.Shell`
+        The shell, whose attribute ``model`` is read.
+
+    Returns
+    -------
+    gl : int
+        ``1`` when the name of the model ends with ``'_gl'`` or the model is
+        one of :func:`.is_tl`, else ``0``.
+
+    Notes
+    -----
+    The membrane strains of these models are the Green-Lagrange strains of
+    the mid-surface, `\varepsilon_{xx} = u_{,x} + (u_{,x}^2 + v_{,x}^2 +
+    \beta_x^2)/2`, `\varepsilon_{yy} = v_{,y} + w/r + (u_{,y}^2 + (v_{,y} +
+    w/r)^2 + \beta_y^2)/2`, `\gamma_{xy} = u_{,y} + v_{,x} + u_{,x} u_{,y}
+    + v_{,x} (v_{,y} + w/r) + \beta_x \beta_y`, with `\beta_x = -w_{,x}`,
+    `\beta_y = -w_{,y} + v/r` and `1/r = 0` for the plates, see
+    :mod:`panels.models`.
+
+    '''
+    return 1 if (s.model.endswith('_gl') or is_tl(s) == 1) else 0
+
+
+def is_tl(object s):
+    r'''Tell whether the model of ``s`` is a total-Lagrangian FSDT or TSDT
+    model
+
+    Parameters
+    ----------
+    s : :class:`.Shell`
+        The shell, whose attribute ``model`` is read.
+
+    Returns
+    -------
+    tl : int
+        ``1`` when the model is ``'plate_fsdt_tl'``, ``'cylshell_fsdt_tl'``,
+        ``'plate_tsdt_tl'`` or ``'cylshell_tsdt_tl'``, else ``0``.
+
+    Notes
+    -----
+    The membrane strains of these models are those of :func:`.is_gl`; the
+    curvatures and transverse shear strains are those of the second-order
+    director `\mathbf{d} = (\psi_x, \psi_y, 1 - (\psi_x^2 + \psi_y^2)/2)`,
+    `\psi_x = \phi_x`, `\psi_y = \phi_y + v/r`, in the local basis, with
+    the tangent vectors `\mathbf{X}_{,x} = (1 + u_{,x}, v_{,x}, w_{,x})`,
+    `\mathbf{X}_{,y} = (u_{,y}, 1 + v_{,y} + w/r, w_{,y} - v/r)` and `1/r =
+    0` for the plate:
+
+    .. math::
+
+        \kappa_{xx} = \mathbf{X}_{,x} \cdot \mathbf{d}_{,x} \qquad
+        \kappa_{yy} = \mathbf{X}_{,y} \cdot \mathbf{d}_{,y} - \frac{1}{r} -
+        \frac{\varepsilon_{yy}}{r}
+
+        \kappa_{xy} = \mathbf{X}_{,x} \cdot \mathbf{d}_{,y} +
+        \mathbf{X}_{,y} \cdot \mathbf{d}_{,x} - \frac{\gamma_{xy}}{2 r}
+        \qquad \gamma_{yz} = \mathbf{X}_{,y} \cdot \mathbf{d} \qquad
+        \gamma_{xz} = \mathbf{X}_{,x} \cdot \mathbf{d}
+
+    with `\mathbf{d}_{,x} = (\psi_{x,x}, \psi_{y,x}, \psi_{z,x})` and
+    `\mathbf{d}_{,y} = (\psi_{x,y}, \psi_{y,y} + \psi_z/r, \psi_{z,y} -
+    \psi_y/r)`, see :mod:`panels.models.plate_fsdt_tl_num` and
+    :mod:`panels.models.cylshell_fsdt_tl_num`. The TSDT models add the
+    third-order strains of the field `\mathbf{X} + z \mathbf{d} + z^3
+    \mathbf{q}`, `\mathbf{q} = -c_1 (\mathbf{d} - \mathbf{N})`, with the
+    normal of the deformed mid-surface `\mathbf{N} = \mathbf{X}_{,x} \times
+    \mathbf{X}_{,y}`:
+
+    .. math::
+
+        \kappa^{(3)}_{xx} = \mathbf{X}_{,x} \cdot \mathbf{q}_{,x} \qquad
+        \kappa^{(3)}_{yy} = \mathbf{X}_{,y} \cdot \mathbf{q}_{,y} -
+        \frac{c_1}{r} (\varepsilon_{xx} + \varepsilon_{yy})
+
+        \kappa^{(3)}_{xy} = \mathbf{X}_{,x} \cdot \mathbf{q}_{,y} +
+        \mathbf{X}_{,y} \cdot \mathbf{q}_{,x} \qquad
+        \gamma^{(2)}_{yz} = -3 c_1 \gamma_{yz} \qquad
+        \gamma^{(2)}_{xz} = -3 c_1 \gamma_{xz}
+
+    with the derivatives along `y` of the vectors in the local basis as for
+    `\mathbf{d}_{,y}`, see :mod:`panels.models.plate_tsdt_tl_num` and
+    :mod:`panels.models.cylshell_tsdt_tl_num`.
+
+    '''
+    return 1 if s.model in ('plate_fsdt_tl', 'cylshell_fsdt_tl',
+                            'plate_tsdt_tl', 'cylshell_tsdt_tl') else 0
 
 
 def rinv(object s):
@@ -415,9 +510,14 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
         The strains are those of the notes of
         :mod:`panels.models.fsdt_tsdt_field`, with `c_1 = 4/(3 h^2)` for the
         TSDT, and with the non-linear terms `\beta_x^2/2`, `\beta_y^2/2`
-        and `\beta_x \beta_y` multiplied by ``NLgeom``.
+        and `\beta_x \beta_y` multiplied by ``NLgeom``; for the models of
+        :func:`.is_gl` the membrane strains are the Green-Lagrange strains
+        given there, with their quadratic terms multiplied by ``NLgeom``,
+        and for those of :func:`.is_tl` with ``NLgeom=1`` the curvatures,
+        third-order strains and transverse shear strains are those given
+        there.
     '''
-    cdef double a, b, h, c1, ri, sr, bx, by
+    cdef double a, b, h, c1, ri, sr, bx, by, gl, ux, uy, vx, vy
     cdef int m, n, pti, size, tsdt
     cdef double bcs[40]
     cdef double [:, ::1] out
@@ -434,6 +534,12 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
     cdef double val_yy[5]
     cdef double val_xy[5]
     cdef double gyz, gxz
+    cdef int tl
+    cdef double px, py, pz, px_x, px_y, py_x, py_y, pz_x, pz_y
+    cdef double xx0, xx1, xx2, xy0, xy1, xy2, dy1, dy2
+    cdef double xxx0, xxx1, xxx2, xxy0, xxy1, xxy2, xyy0, xyy1, xyy2
+    cdef double nx0, nx1, nx2, ny0, ny1, ny2
+    cdef double qx0, qx1, qx2, qy0, qy1, qy2
     a = s.a
     b = s.b
     m = s.m
@@ -446,6 +552,8 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
     #NOTE r is only read for the cylinders, a plate may have r = None
     ri = rinv(s)
     sr = ri*is_sanders(s)
+    gl = is_gl(s)
+    tl = is_tl(s)
     read_bcs(s, bcs)
     size = xs.shape[0]
     out = np.zeros((13 if tsdt == 1 else 8, size), dtype=DOUBLE)
@@ -469,6 +577,15 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
             out[0, pti] = val_x[0] + NLgeom*0.5*bx*bx
             out[1, pti] = val_y[1] + ri*val[2] + NLgeom*0.5*by*by
             out[2, pti] = val_y[0] + val_x[1] + NLgeom*bx*by
+            # Green-Lagrange membrane strains: quadratic terms of the
+            # in-plane gradients u,x, u,y, v,x and v,y + w/r
+            ux = val_x[0]
+            uy = val_y[0]
+            vx = val_x[1]
+            vy = val_y[1] + ri*val[2]
+            out[0, pti] += gl*NLgeom*0.5*(ux*ux + vx*vx)
+            out[1, pti] += gl*NLgeom*0.5*(uy*uy + vy*vy)
+            out[2, pti] += gl*NLgeom*(ux*uy + vx*vy)
             out[3, pti] = val_x[3]
             out[4, pti] = val_y[4] + sr*val_y[1]
             out[5, pti] = (val_y[3] + val_x[4]
@@ -486,6 +603,70 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
             else:
                 out[6, pti] = gyz
                 out[7, pti] = gxz
+            if tl == 1 and NLgeom == 1:
+                # second-order director d = (px, py, pz) and its derivatives
+                px = val[3]
+                py = val[4] + ri*val[1]
+                px_x = val_x[3]
+                px_y = val_y[3]
+                py_x = val_x[4] + ri*val_x[1]
+                py_y = val_y[4] + ri*val_y[1]
+                pz = 1. - 0.5*(px*px + py*py)
+                pz_x = -(px*px_x + py*py_x)
+                pz_y = -(px*px_y + py*py_y)
+                # tangent vectors X,x and X,y, and the components of d,y
+                xx0 = 1. + ux
+                xx1 = vx
+                xx2 = val_x[2]
+                xy0 = uy
+                xy1 = 1. + vy
+                xy2 = val_y[2] - ri*val[1]
+                dy1 = py_y + ri*pz
+                dy2 = pz_y - ri*py
+                out[3, pti] = xx0*px_x + xx1*py_x + xx2*pz_x
+                out[4, pti] = (xy0*px_y + xy1*dy1 + xy2*dy2 - ri
+                               - ri*out[1, pti])
+                out[5, pti] = (xx0*px_y + xx1*dy1 + xx2*dy2 + xy0*px_x
+                               + xy1*py_x + xy2*pz_x - 0.5*ri*out[2, pti])
+                gyz = xy0*px + xy1*py + xy2*pz
+                gxz = xx0*px + xx1*py + xx2*pz
+                if tsdt == 0:
+                    out[6, pti] = gyz
+                    out[7, pti] = gxz
+                else:
+                    # second derivatives of X in the local basis
+                    xxx0 = val_xx[0]
+                    xxx1 = val_xx[1]
+                    xxx2 = val_xx[2]
+                    xxy0 = val_xy[0]
+                    xxy1 = val_xy[1] + ri*val_x[2]
+                    xxy2 = val_xy[2] - ri*val_x[1]
+                    xyy0 = val_yy[0]
+                    xyy1 = val_yy[1] + 2*ri*val_y[2] - ri*ri*val[1]
+                    xyy2 = val_yy[2] - 2*ri*val_y[1] - ri - ri*ri*val[2]
+                    # derivatives of N = X,x x X,y
+                    nx0 = (xxx1*xy2 - xxx2*xy1) + (xx1*xxy2 - xx2*xxy1)
+                    nx1 = (xxx2*xy0 - xxx0*xy2) + (xx2*xxy0 - xx0*xxy2)
+                    nx2 = (xxx0*xy1 - xxx1*xy0) + (xx0*xxy1 - xx1*xxy0)
+                    ny0 = (xxy1*xy2 - xxy2*xy1) + (xx1*xyy2 - xx2*xyy1)
+                    ny1 = (xxy2*xy0 - xxy0*xy2) + (xx2*xyy0 - xx0*xyy2)
+                    ny2 = (xxy0*xy1 - xxy1*xy0) + (xx0*xyy1 - xx1*xyy0)
+                    # q,x = -c1 (d,x - N,x) and q,y = -c1 (d,y - N,y)
+                    qx0 = -c1*(px_x - nx0)
+                    qx1 = -c1*(py_x - nx1)
+                    qx2 = -c1*(pz_x - nx2)
+                    qy0 = -c1*(px_y - ny0)
+                    qy1 = -c1*(dy1 - ny1)
+                    qy2 = -c1*(dy2 - ny2)
+                    out[6, pti] = xx0*qx0 + xx1*qx1 + xx2*qx2
+                    out[7, pti] = (xy0*qy0 + xy1*qy1 + xy2*qy2
+                                   - c1*ri*(out[0, pti] + out[1, pti]))
+                    out[8, pti] = (xx0*qy0 + xx1*qy1 + xx2*qy2 + xy0*qx0
+                                   + xy1*qx1 + xy2*qx2)
+                    out[9, pti] = gyz
+                    out[10, pti] = gxz
+                    out[11, pti] = -3*c1*gyz
+                    out[12, pti] = -3*c1*gxz
     free(f)
     return tuple(np.asarray(out[k]) for k in range(out.shape[0]))
 

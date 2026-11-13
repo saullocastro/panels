@@ -14,40 +14,44 @@ stated otherwise. The mass matrices
 include the rotary and the higher-order inertia, consistently with the
 displacement field of each theory.
 
-References:
+The reference values are those of the TSDT of Reddy (1984), the FSDT of
+Whitney and Pagano (1970) and Reddy and Chao (1981) and the 3D elasticity
+of Noor (1973, 1975) and Pagano (1970), as reproduced in Adim, Daouadji and
+Rabahi (2016), Tables 3 and 7, and in arXiv:1312.4032, Tables 1, 2 and 6;
+the FSDT of Liew, Xiang and Kitipornchai (1993) and Hashemi and Arsanjani
+(2005), as reproduced in arXiv:2009.05597, Table 2; and the classical plate
+theory of Leissa (1973). Where a comment says so, the reference value is
+the Navier solution of the theory. The 3D elasticity solutions, which none
+of the equivalent single-layer theories reproduces exactly, are given in
+the ``Notes`` of the tests, for comparison only.
 
-- Noor, A. K., "Free vibrations of multilayered composite plates", AIAA J.,
-  11(7), 1038-1039, 1973 (3D elasticity), and Reddy, J. N., "A simple
-  higher-order theory for laminated composite plates", J. Appl. Mech., 51,
-  745-752, 1984 (TSDT), as reproduced in Table 3 of Adim, B., Daouadji, T. H.
-  and Rabahi, A., Int. J. Adv. Struct. Eng., 8, 103-117, 2016.
-
-- Noor, A. K., "Stability of multilayered composite plates", Fibre Sci.
-  Technol., 8(2), 81-89, 1975 (3D elasticity), with the TSDT of Reddy
-  (1984), as reproduced in Table 7 of Adim et al. (2016).
-
-- Whitney, J. M. and Pagano, N. J., "Shear deformation in heterogeneous
-  anisotropic plates", J. Appl. Mech., 37, 1031-1036, 1970 (FSDT), and Reddy
-  (1984) (TSDT), as reproduced in Table 6 of Natarajan, S., Nguyen-Xuan,
-  H., Ferreira, A. J. M. and Carrera, E., arXiv:1312.4032.
-
-- Pagano, N. J., "Exact solutions for rectangular bidirectional composites
-  and sandwich plates", J. Compos. Mater., 4, 20-34, 1970 (3D elasticity),
-  with the TSDT of Reddy (1984) and the FSDT of Reddy and Chao (1981), as
-  reproduced in Tables 1 and 2 of arXiv:1312.4032.
-
-- Liew, K. M., Xiang, Y. and Kitipornchai, S., "Transverse vibration of
-  thick rectangular plates", Comput. Struct., 49, 1-29, 1993 (FSDT, `k =
-  5/6`), and Hashemi, S. H. and Arsanjani, M., "Exact characteristic
-  equations for some of classical boundary conditions of vibrating
-  moderately thick rectangular plates", Int. J. Solids Struct., 42, 819-853,
-  2005 (FSDT, `k = 0.86667`), as reproduced in Table 2 of arXiv:2009.05597.
-
-- Leissa, A. W., "The free vibration of rectangular plates", J. Sound
-  Vib., 31, 257-293, 1973 (classical plate theory).
-
-The 3D elasticity solutions are given in the comments, for reference, since
-none of the equivalent single-layer theories reproduces them exactly.
+References
+----------
+.. [1] Noor, A. K., "Free vibrations of multilayered composite plates", AIAA
+   J., 11(7), 1038-1039, 1973 (3D elasticity), and Reddy, J. N., "A simple
+   higher-order theory for laminated composite plates", J. Appl. Mech., 51,
+   745-752, 1984 (TSDT), as reproduced in Table 3 of Adim, B., Daouadji, T.
+   H. and Rabahi, A., Int. J. Adv. Struct. Eng., 8, 103-117, 2016.
+.. [2] Noor, A. K., "Stability of multilayered composite plates", Fibre Sci.
+   Technol., 8(2), 81-89, 1975 (3D elasticity), with the TSDT of Reddy
+   (1984), as reproduced in Table 7 of Adim et al. (2016).
+.. [3] Whitney, J. M. and Pagano, N. J., "Shear deformation in heterogeneous
+   anisotropic plates", J. Appl. Mech., 37, 1031-1036, 1970 (FSDT), and
+   Reddy (1984) (TSDT), as reproduced in Table 6 of Natarajan, S.,
+   Nguyen-Xuan, H., Ferreira, A. J. M. and Carrera, E., arXiv:1312.4032.
+.. [4] Pagano, N. J., "Exact solutions for rectangular bidirectional
+   composites and sandwich plates", J. Compos. Mater., 4, 20-34, 1970 (3D
+   elasticity), with the TSDT of Reddy (1984) and the FSDT of Reddy and
+   Chao (1981), as reproduced in Tables 1 and 2 of arXiv:1312.4032.
+.. [5] Liew, K. M., Xiang, Y. and Kitipornchai, S., "Transverse vibration of
+   thick rectangular plates", Comput. Struct., 49, 1-29, 1993 (FSDT, `k =
+   5/6`), and Hashemi, S. H. and Arsanjani, M., "Exact characteristic
+   equations for some of classical boundary conditions of vibrating
+   moderately thick rectangular plates", Int. J. Solids Struct., 42,
+   819-853, 2005 (FSDT, `k = 0.86667`), as reproduced in Table 2 of
+   arXiv:2009.05597.
+.. [6] Leissa, A. W., "The free vibration of rectangular plates", J. Sound
+   Vib., 31, 257-293, 1973 (classical plate theory).
 """
 import sys
 sys.path.append('../..')
@@ -166,14 +170,12 @@ def cross_ply(num_layers, symmetric=False):
     return [0 if i % 2 == 0 else 90 for i in range(num_layers)]
 
 
-# E1/E2: (TSDT of Reddy (1984), FSDT with k = 5/6 by the Navier solution)
+# E1/E2: (TSDT, FSDT with k = 5/6 by the Navier solution)
 NOOR_1973 = {
-    # antisymmetric [0/90], a/h = 5, 3D elasticity of Noor (1973):
-    # 6.2578, 6.9845, 7.6745, 8.1763, 8.5625
+    # antisymmetric [0/90], a/h = 5
     2: {3: (6.2169, 6.20855), 10: (6.9887, 6.93924), 20: (7.8210, 7.70599),
         30: (8.5050, 8.32112), 40: (9.0871, 8.83331)},
-    # antisymmetric [0/90]_2, a/h = 5, 3D elasticity of Noor (1973):
-    # 6.5455, 8.1445, 9.4055, 10.1650, 10.679
+    # antisymmetric [0/90]_2, a/h = 5
     4: {3: (6.5008, 6.50425), 10: (8.1954, 8.2246), 20: (9.6265, 9.68846),
         30: (10.5348, 10.61976), 40: (11.1716, 11.27077)},
 }
@@ -182,7 +184,21 @@ NOOR_1973 = {
 @pytest.mark.parametrize('num_layers', [2, 4])
 @pytest.mark.parametrize('E1E2', [3, 10, 20, 30, 40])
 def test_frequency_antisymmetric_cross_ply_noor(num_layers, E1E2):
-    r"""Noor (1973), `a/h = 5`, `\bar\omega = \omega a^2/h \sqrt{\rho/E_2}`"""
+    r"""Noor (1973), `a/h = 5`, `\bar\omega = \omega a^2/h \sqrt{\rho/E_2}`
+
+    Antisymmetric cross-ply plates, TSDT and FSDT.
+
+    Notes
+    -----
+    The 3D elasticity solutions of [1]_ for `E_1/E_2 = 3, 10, 20, 30, 40`
+    are 6.2578, 6.9845, 7.6745, 8.1763, 8.5625 for `[0/90]` and 6.5455,
+    8.1445, 9.4055, 10.1650, 10.679 for `[0/90]_2`.
+
+    References
+    ----------
+    .. [1] Noor, A. K., "Free vibrations of multilayered composite plates",
+       AIAA J., 11(7), 1038-1039, 1973.
+    """
     a = 1.
     h = a/5
     tsdt, fsdt = NOOR_1973[num_layers][E1E2]
@@ -193,7 +209,7 @@ def test_frequency_antisymmetric_cross_ply_noor(num_layers, E1E2):
         assert np.isclose(omega*a**2/h*np.sqrt(RHO/E2), ref, rtol=rtol), model
 
 
-# a/h: (FSDT of Whitney and Pagano (1970), TSDT of Reddy (1984))
+# a/h: (FSDT, TSDT)
 WHITNEY_PAGANO = {2: (5.4998, 5.5065), 4: (9.3949, 9.3235),
                   10: (15.1426, 15.1073),
                   #NOTE for a/h = 20 the published TSDT value is 17.6457, which
@@ -223,14 +239,10 @@ def test_frequency_symmetric_cross_ply_vs_thickness(ah):
         assert np.isclose(omega*a**2/h*np.sqrt(RHO/E2), ref, rtol=2e-5), model
 
 
-# layers: (TSDT of Reddy (1984), FSDT with k = 5/6 and CLPT by the Navier
-# solution)
+# layers: (TSDT, FSDT with k = 5/6 and CLPT by the Navier solution)
 NOOR_1975 = {
-    # 3D elasticity of Noor (1975): 21.2796
     4: (22.5790, 22.8060, 30.3591),
-    # 3D elasticity of Noor (1975): 23.6689
     6: (24.4596, 24.5777, 33.5817),
-    # 3D elasticity of Noor (1975): 24.9636
     10: (25.4225, 25.4500, 35.2316),
 }
 
@@ -240,6 +252,16 @@ def test_buckling_antisymmetric_cross_ply_noor(num_layers):
     r"""Noor (1975), uniaxial compression, `a/h = 10`, `E_1/E_2 = 40`
 
     With `\bar{N} = N_{cr} a^2/(E_2 h^3)`.
+
+    Notes
+    -----
+    The 3D elasticity solutions of [1]_ are 21.2796, 23.6689 and 24.9636 for
+    4, 6 and 10 layers.
+
+    References
+    ----------
+    .. [1] Noor, A. K., "Stability of multilayered composite plates", Fibre
+       Sci. Technol., 8(2), 81-89, 1975.
     """
     a = 1.
     h = a/10
@@ -271,11 +293,8 @@ def sinusoidal_load(s, q0):
 
 # a/h: {model: normalized central deflection}
 PAGANO = {
-    # 3D elasticity of Pagano (1970): 1.9540
     4: {TSDT: 1.8937},
-    # 3D elasticity of Pagano (1970): 0.7430
     10: {TSDT: 0.7147, FSDT: 0.6628, CLPT: 0.43125},
-    # 3D elasticity of Pagano (1970): 0.4347
     100: {TSDT: 0.4343, FSDT: 0.4337},
 }
 
@@ -288,6 +307,16 @@ def test_bending_symmetric_cross_ply_pagano(ah):
     E_2`, `\nu_{12} = 0.25`, and the central deflection normalized as
     `\bar{w} = 100 w E_2 h^3/(q_0 a^4)`. The classical plate theory gives
     0.43125 for any `a/h`.
+
+    Notes
+    -----
+    The 3D elasticity solutions of [1]_ are 1.9540, 0.7430 and 0.4347 for
+    `a/h = 4, 10, 100`.
+
+    References
+    ----------
+    .. [1] Pagano, N. J., "Exact solutions for rectangular bidirectional
+       composites and sandwich plates", J. Compos. Mater., 4, 20-34, 1970.
     """
     a = 1.
     h = a/ah
@@ -305,10 +334,10 @@ def test_bending_symmetric_cross_ply_pagano(ah):
 
 
 @pytest.mark.parametrize('ha, k, ref', [
-    # Liew, Xiang and Kitipornchai (1993)
+    # k = 5/6
     (0.1, 5/6, 19.0651),
     (0.2, 5/6, 17.4485),
-    # Hashemi and Arsanjani (2005)
+    # k = 0.86667
     (0.1, 0.86667, 19.0840),
     (0.2, 0.86667, 17.5055),
     ])
@@ -336,11 +365,24 @@ def test_higher_modes_isotropic_thick_plate():
 
     With `\bar\omega = \omega h \sqrt{\rho/G}`, for the modes `(1, 1)`,
     `(1, 2)`, `(2, 1)`, `(2, 2)`, `(1, 3)` and `(3, 1)`, the FSDT with `k =
-    5/6` gives 0.0930, 0.2219, 0.2219, 0.3406, 0.4149 and 0.4149, as
-    reproduced for the isotropic plate in Table 1 of "Free vibration
-    analysis of advanced composite plates with porosities", Algerian Journal
-    of Research and Technology (ajrt.dz). The 3D elasticity solution of Srinivas, Rao and Rao
-    (1970) is about 0.0932, 0.2226, 0.3421 and 0.4171 for the distinct modes.
+    5/6` gives 0.0930, 0.2219, 0.2219, 0.3406, 0.4149 and 0.4149, the
+    FSDPT values of the non-porous isotropic plate of Merdaci et al. (2020),
+    Table 1.
+
+    Notes
+    -----
+    Table 1 of [1]_ (p. 19), `a/b = 1`, `a/h = 10`, porosity coefficient 0,
+    column FSDPT: 0.0930, 0.2219, 0.3406 and 0.4149 for the modes `(1, 1)`,
+    `(1, 2)`, `(2, 2)` and `(1, 3)`. The 3D elasticity solution of Srinivas,
+    Rao and Rao (1970) is about 0.0932, 0.2226, 0.3421 and 0.4171 for the
+    distinct modes.
+
+    References
+    ----------
+    .. [1] Merdaci, S., Belghoul, H., Hadj Mostefa, A., Merazi, M.,
+       Hellal, H., Boutaleb, S., Free vibration analysis of advanced
+       composite plates with porosities, Algerian Journal of Research and
+       Technology 4(2) (2020) 13-23. https://doi.org/10.58681/ajrt.20040202
     """
     a = 1.
     h = 0.1*a
@@ -355,7 +397,8 @@ def test_higher_modes_isotropic_thick_plate():
     assert np.allclose(omegas, refs, rtol=6e-4)
 
 
-# Leissa (1973), with the edges x = 0, y = 0, x = a and y = b in this order
+# boundary conditions of the edges x = 0, y = 0, x = a and y = b in this
+# order: frequency parameter
 LEISSA_PLATES = {'SSSS': 19.739, 'SCSC': 28.951, 'SCSS': 23.646,
                  'SCSF': 12.687, 'SSSF': 11.685, 'SFSF': 9.631}
 
@@ -466,27 +509,32 @@ def test_shear_correction_published_values():
     r"""Transverse shear stiffness of the FSDT, rows and columns 6 and 7 of
     ``Shell.ABD``, the `yz` and `xz` components, against published values
 
-    - Rohwer, K., "Improved transverse shear stiffnesses for layered finite
-      elements", DFVLR-FB 88-32, 1988: the ``[0,90]_s`` laminate of four
-      plies of 0.25 mm, p. 18, of the CFRP of Table 1, p. 19, in kN/mm^2.
-      Table 2, p. 19, gives `\bar{H}_{11} = \bar{H}_{22} = 3.450` and the
-      improved `H_{11} = 2.313` kN/mm, with Rohwer's index 1 for `x`, i.e.
-      ``A55``, and p. 18 the reductions 0.75 and 0.82 of `H` with respect to
-      the constant-stress stiffness `\bar{\bar{H}}` in the `x` and `y`
-      directions, and "Coupling terms are zero". His `H_{22} = 2.521` is
-      not used: ``composites`` gives 2.5252, as an independent
-      implementation of his Eq. (43) does, and 2.5252/3.067 still rounds to
-      0.82, see ``tests/test_transverse_shear.py`` of ``composites``.
-    - Vlachoutsis, S., "Shear correction factors for plates and shells",
-      Int. J. Numer. Meth. Engng, 33(7), 1537-1552, 1992,
-      https://doi.org/10.1002/nme.1620330712: the isotropic sandwich with
-      ``c/h = 0.8``, ``E1/E2 = 5`` and ``nu = 0.3``, Table I, p. 1548, ``K =
-      0.5324``, for ``'rohwer'`` and ``'vlachoutsis'``, whereas ``'constant'``
-      and the float ``5/6`` overestimate it by 56.5 %.
+    - Rohwer (1988): the ``[0,90]_s`` laminate of four plies of 0.25 mm,
+      p. 18, of the CFRP of Table 1, p. 19, in kN/mm^2. Table 2, p. 19,
+      gives `\bar{H}_{11} = \bar{H}_{22} = 3.450` and the improved `H_{11} =
+      2.313` kN/mm, with Rohwer's index 1 for `x`, i.e. ``A55``, and p. 18
+      the reductions 0.75 and 0.82 of `H` with respect to the constant-stress
+      stiffness `\bar{\bar{H}}` in the `x` and `y` directions, and "Coupling
+      terms are zero". His `H_{22} = 2.521` is not used: ``composites``
+      gives 2.5252, as an independent implementation of his Eq. (43) does,
+      and 2.5252/3.067 still rounds to 0.82, see
+      ``tests/test_transverse_shear.py`` of ``composites``.
+    - Vlachoutsis (1992): the isotropic sandwich with ``c/h = 0.8``, ``E1/E2
+      = 5`` and ``nu = 0.3``, Table I, p. 1548, ``K = 0.5324``, for
+      ``'rohwer'`` and ``'vlachoutsis'``, whereas ``'constant'`` and the
+      float ``5/6`` overestimate it by 56.5 %.
 
     All values must round to the printed digits. The order of the rows
     ``(yz, xz)`` is checked by the different values of the two directions
     of the cross-ply laminate.
+
+    References
+    ----------
+    .. [1] Rohwer, K., "Improved transverse shear stiffnesses for layered
+       finite elements", DFVLR-FB 88-32, 1988.
+    .. [2] Vlachoutsis, S., "Shear correction factors for plates and
+       shells", Int. J. Numer. Meth. Engng, 33(7), 1537-1552, 1992.
+       https://doi.org/10.1002/nme.1620330712
     """
     cfrp = (138., 9.3, 0.3, 4.6, 4.6, 2.3)
     s = make_plate(FSDT, a=100., h=1., stack=[0, 90, 90, 0], laminaprop=cfrp,

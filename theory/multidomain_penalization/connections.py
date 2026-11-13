@@ -25,6 +25,10 @@ Created on Sun Mar 10 13:07:49 2024
 #   kCBFxycte: the block 12 of kCBFxycte.pyx, computed from the quantities
 #   of kCBFxycte.xycte_components, the blocks 11 and 22 being those of
 #   kCBFxcte11 and kCBFycte22
+#   kCBFxcte_face: kCBFxcte_face.py (fkCBFxcte_face), BFxcte at a face of
+#   the base, computed from the quantities of bfxcte_face_components
+#   kCBFycte_face: kCBFycte_face.py (fkCBFycte_face), BFycte at a face of
+#   the base, computed from the quantities of bfycte_face_components
 #   kCSB: skin_base.py (fkCSB), computed from the quantities of
 #   kCsdt._sb_components with the integrals of kCsdt._connection_matrix
 #   kCSSxcte_sdt, kCSSycte_sdt, kCSB_sdt: kCsdt.py, for the models based on
@@ -245,6 +249,60 @@ piece_wise_simplify(kCSB11, [])
 piece_wise_simplify(kCSB12, [])
 piece_wise_simplify(kCSB22, [])
 
+# BFxcte at a face of the base, key 'face' of the connection, 'lower' or
+# 'upper' in the coordinate z1 of the base: the edge x2 = xcte2 of the
+# flange (2) is connected to the line x1 = xcte1, z = zf1 = d1 -+ h1/2 of
+# the base (1), whose points follow the Kirchhoff kinematics of (1),
+# clpt_interface() above,
+#     u1(zf1) = u1 - zf1 w1,x,  v1(zf1) = (1 + zf1 rinvf1) v1 - zf1 w1,y
+# with rinvf1 = 1/r1 for a cylinder (cylshell_*) whatever its model, the
+# Sanders-Koiter rotation of the normal, key 'kinematics' = 'sanders' (the
+# default), or rinvf1 = rinv1 of the model with kinematics='model' (zero for
+# the Donnell models and the plates), kCBFxcte_face.face_rinv; the residual
+# of a rigid rotation about the axis with rinvf1 = 0 is in bfxcte_face.py
+# the rotation about y, -w1,x, being the same at every z, and as for BFxcte
+#     u1(zf1) = w2,  v1(zf1) = v2,  w1 = -u2,  w1,x = w2,x
+# The two edges share eta and span the same angle, also when b1 != b2 (a
+# cylinder and an annular plate whose edge is at the radius r1 + zf1), the
+# integral along the connection being over the length b1 of the base. The
+# block 22 is that of BFxcte. The checks of these quantities against the
+# rigid motions of the assembly are in bfxcte_face.py; the matrix is
+# computed by panels.multidomain.connections.kCBFxcte_face.fkCBFxcte_face
+var('zf1, rinvf1')
+qfu1A, qfv1A = clpt_interface(u1A, v1A, w1A_xi, w1A_eta, zf1, rinvf1)
+qfu1B, qfv1B = clpt_interface(u1B, v1B, w1B_xi, w1B_eta, zf1, rinvf1)
+kCBFxcte_face11 =  (b1/2)*kt*(qfu1A.T*qfu1B + qfv1A.T*qfv1B + w1A.T*w1B + (kr/kt)*((2/a1)*w1A_xi.T) * ((2/a1)*w1B_xi))
+kCBFxcte_face12 = -(b1/2)*kt*(qfu1A.T*w2B + qfv1A.T*v2B - w1A.T*u2B + (kr/kt)*((2/a1)*w1A_xi.T) * ((2/a2)*w2B_xi))
+kCBFxcte_face22 = kCBFxcte22
+
+piece_wise_simplify(kCBFxcte_face11, [])
+piece_wise_simplify(kCBFxcte_face12, [])
+
+# BFycte at a face of the base, key 'face' of the connection, 'lower' or
+# 'upper' in the coordinate z1 of the base: the edge y2 = ycte2 of the
+# flange (2) is connected to the line y1 = ycte1, z = zf1 = d1 -+ h1/2 of
+# the base (1), along x, with the Kirchhoff kinematics of (1) as for BFxcte
+# at a face, rinvf1 = 1/r1 for a cylinder whatever its model by default, or
+# rinvf1 = rinv1 of the model with kinematics='model', and the rotation of
+# the normal about x at the face, d v1(z)/dz = -w1,y + rinvf1 v1, i.e. the
+# quantity om1 of BFycte above with rinvf1 in place of rinv1:
+#     u1(zf1) = u2,  v1(zf1) = w2,  w1 = -v2,  om1(rinvf1) = om2
+# The two edges share xi and have the same length a1 = a2; the block 22 is
+# that of BFycte. The checks of these quantities against the rigid motions
+# of a cylinder and a blade along a generator are in bfycte_face.py; the
+# matrix is computed by
+# panels.multidomain.connections.kCBFycte_face.fkCBFycte_face
+qgu1A, qgv1A = clpt_interface(u1A, v1A, w1A_xi, w1A_eta, zf1, rinvf1)
+qgu1B, qgv1B = clpt_interface(u1B, v1B, w1B_xi, w1B_eta, zf1, rinvf1)
+omf1A = (2/b1)*w1A_eta - rinvf1*v1A
+omf1B = (2/b1)*w1B_eta - rinvf1*v1B
+kCBFycte_face11 =  (a1/2)*kt*(qgu1A.T*qgu1B + qgv1A.T*qgv1B + w1A.T*w1B + (kr/kt)*omf1A.T*omf1B)
+kCBFycte_face12 = -(a1/2)*kt*(qgu1A.T*u2B + qgv1A.T*w2B - w1A.T*v2B + (kr/kt)*omf1A.T*om2B)
+kCBFycte_face22 = kCBFycte22
+
+piece_wise_simplify(kCBFycte_face11, [])
+piece_wise_simplify(kCBFycte_face12, [])
+
 
 # MODELS BASED ON SHEAR DEFORMATION THEORIES (FSDT and TSDT)
 # 5 DOFs per term u, v, w, phix, phiy, with the displacement field
@@ -256,7 +314,8 @@ piece_wise_simplify(kCSB22, [])
 # with z measured from the reference surface and d the offset of the
 # laminate, where c1 = 0 for the FSDT and c1 = 4/(3 h^2) for the TSDT, and Phiy =
 # phiy + v/r is the rotation of the normal about x with the Sanders-Koiter
-# kinematics, see theory/shells/fsdt_tsdt, obtained with rinv1 = 1/r1 and
+# kinematics, see theory/shells/cylshell_fsdt_sanders and
+# theory/shells/cylshell_tsdt_sanders, obtained with rinv1 = 1/r1 and
 # rinv2 = 1/r2 of each panel, and Phiy = phiy with rinv = 0 otherwise
 var('krw, cphi1, cw1, cphi2, cw2, zi1, zi2')
 var('f1Aphix, g1Aphix, f1Aphiy, g1Aphiy, f1Bphix, g1Bphix, f1Bphiy, g1Bphiy')
@@ -401,6 +460,11 @@ matrices = [
     [kCSB11, 'kCSB11'],
     [kCSB12, 'kCSB12'],
     [kCSB22, 'kCSB22'],
+
+    [kCBFxcte_face11, 'kCBFxcte_face11'],
+    [kCBFxcte_face12, 'kCBFxcte_face12'],
+    [kCBFycte_face11, 'kCBFycte_face11'],
+    [kCBFycte_face12, 'kCBFycte_face12'],
 
     [kCSSxcte_sdt11, 'kCSSxcte_sdt11'],
     [kCSSxcte_sdt12, 'kCSSxcte_sdt12'],

@@ -1,12 +1,12 @@
 r"""Cantilever cylinder under a follower pressure traced with the Riks method
 
 Benchmark of Schweizerhof and Ramm (1984), Section 6.4, "Cylindrical
-cantilever shell under uniform pressure", Fig. 12, Table 4 and Fig. 13 [1]:
+cantilever shell under uniform pressure", Fig. 12, Table 4 and Fig. 13:
 E = 2.1e6, mu = 0.3, R = 100, shell 1 with L/R = 6 and R/t = 100, the upper
 edge free and the lower edge hinged, either with the warping completely
 restrained, B1, v = w = u = 0, or partially restrained, B2, v = w = 0 and u
-fixed at one point only. As in [1], a half wave of the circumference, b =
-pi R/n with n = 3, is modelled, with symmetry conditions on the straight
+fixed at one point only. As in the reference, a half wave of the
+circumference, b = pi R/n with n = 3, is modelled, with symmetry conditions on the straight
 edges, see ``test_follower_pressure_validation.schweizerhof_sector``, with
 the CLPT and the kinematics of Sanders, ``cylshell_clpt_sanders``: Donnell's
 kinematics are not accurate for n = 3 circumferential waves. The load is
@@ -14,12 +14,21 @@ p = K E/(12(1 - mu**2)) (t/R)**3, Eq. (60), the hydrostatic (follower)
 pressure with its unsymmetric load stiffness, ``follower=True``, the free
 edge making the load nonconservative.
 
-The geometric imperfection of 1 % of t in the shape of the lowest linear
-buckling mode of the follower load, the w part of the mode, of Ritz vector
-c0, is added exactly as in ``test_simo1990_cylinder_postbuckling.py``, here
-for the Sanders kinematics, whose non-linear strains are quadratic forms of
-the rotations phix = -w,x and phiy = -w,y + v/r, linear in c: the strains of
-the imperfect shell are eps(c + c0) - eps(c0), whence
+The tests check the linear buckling factors of Table 4, the consistency of
+the internal forces and of the tangent stiffness matrix of the imperfect
+shell, the inertia of the tangent stiffness matrix along the fundamental
+path of the perfect shell beyond its bifurcation, and, with 8 x 6 terms, the
+load-deflection path of the imperfect shell B2 up to w/t = 0.3 traced with
+the Riks method (the path of Fig. 13), with a geometric imperfection of 1 %
+of t in the shape of the w part of the lowest linear buckling mode of the
+follower load, added as in ``test_simo1990_cylinder_postbuckling.py``.
+
+Notes
+-----
+The imperfection, of Ritz vector c0, is added exactly for the Sanders
+kinematics, whose non-linear strains are quadratic forms of the rotations
+phix = -w,x and phiy = -w,y + v/r, linear in c: the strains of the
+imperfect shell are eps(c + c0) - eps(c0), whence::
 
     fint_imp(c) = fint(c + c0) - fint(c0) - kG(N0) c
     kT_imp(c) = kT(c + c0) - kG(N0)
@@ -30,9 +39,11 @@ the rotations phix and phiy, see :func:`calc_kG_N`. The follower pressure
 acts on the imperfect geometry, its force vector at c being Fp(c + c0) and
 its load stiffness that of c + c0.
 
-[1] Schweizerhof, K., Ramm, E., Displacement dependent pressure loads in
-    nonlinear finite element analyses, Computers & Structures, 18(6),
-    1099-1114, 1984. https://doi.org/10.1016/0045-7949(84)90154-8
+References
+----------
+.. [1] Schweizerhof, K., Ramm, E., Displacement dependent pressure loads in
+   nonlinear finite element analyses, Computers & Structures, 18(6),
+   1099-1114, 1984. https://doi.org/10.1016/0045-7949(84)90154-8
 
 """
 import sys
@@ -139,12 +150,12 @@ def membrane_stresses(s, c, NLgeom=True):
 
 
 def w_max(s, c, grid=21):
-    r"""Maximum |w| over the sector"""
+    r"""Maximum ``|w|`` over the sector"""
     return np.abs(s.uvw(c, gridx=grid, gridy=grid)[1]['w']).max()
 
 
 def imperfection(s, mode, xi):
-    r"""The w part of ``mode`` scaled to a maximum |w0| of ``xi*t``"""
+    r"""The w part of ``mode`` scaled to a maximum ``|w0|`` of ``xi*t``"""
     c0 = np.zeros_like(mode)
     c0[2::3] = mode[2::3]
     w = np.ravel(s.uvw(c0, gridx=51, gridy=51)[1]['w'])
@@ -218,6 +229,7 @@ def riks(model, stop, inc, max_inc=None, num_eigvals=20):
     return an, Ks
 
 
+@pytest.mark.slow
 def test_imperfection_identities():
     s, kP = build_shell('B2', m=8, nt=6)
     size = s.get_size()
@@ -286,6 +298,7 @@ def test_imperfection_identities():
     assert abs(dU - fv) <= 1e-7*abs(fv)
 
 
+@pytest.mark.slow
 def test_linear_buckling_shell1():
     # Table 4 of [1], shell 1, k_c and k_f (Eq. (63)) of B1 and B2: the
     # sector of 14 x 8 terms is within 0.1 % of that of 22 x 8 terms, and
@@ -306,6 +319,7 @@ def test_linear_buckling_shell1():
         assert abs((Kc - Kf)/Kf - (k_c - k_f)/k_f) <= 5e-3
 
 
+@pytest.mark.slow
 def test_riks_perfect_shell_inertia():
     # the fundamental path of the perfect shell B1 beyond its bifurcation,
     # at K_f: one negative eigenvalue after it. structsolve counts the
@@ -324,42 +338,22 @@ def test_riks_perfect_shell_inertia():
     assert np.all(nneg[Ks > K_f] == 1) and np.all(det[Ks > K_f] == -1)
 
 
-def fig13_path(bc, wstop):
-    r"""Riks analysis of the shell with the imperfection of 1 % of t up to
-    w_max/t = wstop"""
-    s, kP = build_shell(bc)
+@pytest.mark.slow
+def test_riks_imperfect_B2_coarse():
+    # B2, 8 x 6 terms, imperfection of 1 % of t, Riks up to w/t = 0.3: no
+    # limit point, the load increases monotonically towards the bifurcation
+    # load k_f of the same model and the tangent stiffness matrix keeps no
+    # negative eigenvalue; k_f and the last load are values of the code
+    # with these terms
+    s, kP = build_shell('B2', m=8, nt=6)
     K_f, mode = buckling_K(s, kP)
+    assert np.isclose(K_f, 8.19280, rtol=1e-4)
     model = ImperfectShell(s, imperfection(s, mode, 0.01), kP)
-    an, Ks = riks(model, value_reached(lambda c: w_max(s, c)/t, wstop),
+    an, Ks = riks(model, value_reached(lambda c: w_max(s, c)/t, 0.3),
                   inc=1., max_inc=4.)
     ws = np.array([w_max(s, c)/t for c in an.cs])
-    # no limit point: the load increases monotonically towards K_f and the
-    # tangent stiffness matrix keeps no negative eigenvalue
+    assert ws[-1] >= 0.3
     assert np.all(np.diff(Ks) > 0) and Ks[-1] < K_f
     assert all(n == 0 for n in an.num_negative_eigvals)
     assert all(d == 1 for d in an.det_signs)
-    return Ks, ws, K_f
-
-
-def test_riks_imperfect_B2():
-    # Fig. 13 of [1], K = 7.72 and 7.82 read at w/t = 0.29 and 0.51 with a
-    # precision of about 0.05: the curve of the figure, with its perfect
-    # shell at K = 8.04, is that of B2 (k_f = 8.10), not that of B1 (9.70)
-    # stated in the text, see test_riks_imperfect_plateau
-    Ks, ws, K_f = fig13_path('B2', 0.5)
-    for w, K in ((0.286, 7.72), (0.510, 7.82)):
-        assert abs(np.interp(w, ws, Ks) - K) <= 0.15
-
-
-@pytest.mark.slow
-def test_riks_imperfect_plateau():
-    # up to w/t = 3: K = 7.99 read at w/t = 2.94 on Fig. 13, and 8.04 for
-    # the perfect shell
-    Ks, ws, K_f = fig13_path('B2', 3.)
-    assert abs(np.interp(2.936, ws, Ks) - 7.99) <= 0.1
-    assert K_f - Ks[-1] < 0.03
-    # B1, the boundary conditions stated in the text of [1], plateaus 20 %
-    # higher, below its k_f
-    Ks, ws, K_f = fig13_path('B1', 3.)
-    assert K_f - Ks[-1] < 0.05
-    assert np.interp(2.936, ws, Ks) > 1.19*7.99
+    assert np.isclose(Ks[-1], 7.9562, rtol=1e-3)

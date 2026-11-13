@@ -4,7 +4,7 @@ The package metadata, including the version, is in ``pyproject.toml``.
 This file keeps only what ``pyproject.toml`` cannot express: the Cython
 extensions with their compiler flags per platform and the file
 ``panels/version.py``, written from the version of ``pyproject.toml``
-and read by ``panels.version`` and ``doc/source/conf.py``.
+and read by ``panels.version`` and by the configuration of the documentation.
 """
 import copy
 import platform
@@ -33,15 +33,15 @@ def read_version():
         return tomllib.load(f)['project']['version']
 
 
-# NOTE the year of the copyright of the documentation, read by
-#      doc/source/conf.py
+# NOTE the year of the copyright of the documentation, read by its
+#      configuration
 YEAR = '2026'
 
 
 def write_version_py(version):
-    """Write ``panels/version.py``, with the fields of the former scheme
-    (``short_version``, ``version``, ``full_version``, ``svn_revision``,
-    ``isreleased``, ``__year__``, ``__version__``), all from the version
+    """Write ``panels/version.py``, with the fields ``short_version``,
+    ``version``, ``full_version``, ``svn_revision``, ``isreleased``,
+    ``__year__`` and ``__version__``, all from the version
     of ``pyproject.toml``"""
     cnt = """# This file is generated automatically by the setup.py
 short_version = '%(version)s'
@@ -75,7 +75,8 @@ trace = ('CYTHON_TRACE_NOGIL' in os.environ.keys()
 #      from the Python build is not guaranteed, and -fno-math-errno, which
 #      lets sqrt() compile to a single instruction and changes no result.
 #      MSVC is already at its fastest standard-conforming setting with the
-#      /O2 and /GL that setuptools passes. Flags that change floating-point
+#      /O2 and /GL that setuptools passes, except for the modules of
+#      MSVC_SSA_OFF below. Flags that change floating-point
 #      results, such as /fp:fast or -ffast-math, and flags that tie a wheel to
 #      the CPU that built it, such as -march=native, are deliberately left out
 # NOTE a WebAssembly build for Pyodide, see .github/workflows/pyodide.yml,
@@ -209,6 +210,141 @@ extensions = [
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, define_macros=define_macros,
               language='c++'),
+    Extension('panels.models.annular_clpt_donnell',
+        sources=[
+            './panels/models/annular_clpt_donnell.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.annular_clpt_donnell_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/annular_clpt_donnell_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.annular_clpt_gl',
+        sources=[
+            './panels/models/annular_clpt_gl.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.annular_clpt_gl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/annular_clpt_gl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.annular_clpt_tl',
+        sources=[
+            './panels/models/annular_clpt_tl.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.annular_clpt_tl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/annular_clpt_tl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.annular_fsdt_donnell',
+        sources=[
+            './panels/models/annular_fsdt_donnell.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.annular_fsdt_donnell_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/annular_fsdt_donnell_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.annular_fsdt_gl',
+        sources=[
+            './panels/models/annular_fsdt_gl.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.annular_fsdt_gl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/annular_fsdt_gl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.annular_fsdt_tl',
+        sources=[
+            './panels/models/annular_fsdt_tl.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.annular_fsdt_tl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/annular_fsdt_tl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.annular_tsdt_donnell',
+        sources=[
+            './panels/models/annular_tsdt_donnell.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.annular_tsdt_donnell_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/annular_tsdt_donnell_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.annular_tsdt_gl',
+        sources=[
+            './panels/models/annular_tsdt_gl.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.annular_tsdt_gl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/annular_tsdt_gl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.annular_tsdt_tl',
+        sources=[
+            './panels/models/annular_tsdt_tl.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.annular_tsdt_tl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/annular_tsdt_tl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
     Extension('panels.models.plate_clpt_tl_num',
         sources=[
             './panels/core/src/bardell_functions.cpp',
@@ -321,6 +457,102 @@ extensions = [
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, define_macros=define_macros,
               language='c++'),
+    Extension('panels.models.plate_fsdt_gl',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/models/plate_fsdt_gl.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.plate_fsdt_gl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/plate_fsdt_gl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.plate_fsdt_tl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/plate_fsdt_tl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.cylshell_fsdt_gl',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/models/cylshell_fsdt_gl.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.cylshell_fsdt_gl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/cylshell_fsdt_gl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.plate_tsdt_tl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/plate_tsdt_tl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.cylshell_tsdt_tl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/cylshell_tsdt_tl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.cylshell_fsdt_tl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/cylshell_fsdt_tl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.plate_tsdt_gl',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/models/plate_tsdt_gl.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.plate_tsdt_gl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/plate_tsdt_gl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.cylshell_tsdt_gl',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/models/cylshell_tsdt_gl.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.cylshell_tsdt_gl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/cylshell_tsdt_gl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
     Extension('panels.models.cylshell_clpt_donnell',
         sources=[
             './panels/core/src/bardell.cpp',
@@ -353,6 +585,30 @@ extensions = [
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, define_macros=define_macros,
               language='c++'),
+    Extension('panels.models.cylshell_clpt_gl',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/models/cylshell_clpt_gl.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.cylshell_clpt_gl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/cylshell_clpt_gl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.cylshell_clpt_tl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/cylshell_clpt_tl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
 # stiffener models
     Extension('panels.stiffener.models.bladestiff1d_clt_donnell',
         sources=[
@@ -368,6 +624,15 @@ extensions = [
             './panels/core/src/bardell.cpp',
             './panels/core/src/bardell_functions.cpp',
             './panels/stiffener/models/bladestiff2d_clt_donnell.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.stiffener.models.bladestiff2d_clt_sanders',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/stiffener/models/bladestiff2d_clt_sanders.pyx',
             ],
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, define_macros=define_macros,
@@ -440,6 +705,29 @@ extensions = [
               language='c++'),
 
     ]
+
+# NOTE MSVC only: the SSA optimizer of MSVC is off (/d2SSAOptimizer-) for the
+#      modules of MSVC_SSA_OFF. Their generated integrand functions are very
+#      large, and MSVC optimizes each function on a single thread; with /O2
+#      and /GL the code generation of annular_tsdt_tl_num, at the link
+#      (/LTCG), takes more than 45 min of CPU time (2.6 h of wall time in a
+#      full build), and that of annular_clpt_tl_num 15 min. Whole-program
+#      optimization is not the cause: with /GL- the same code generation
+#      moves to the compiler and takes as long. With the SSA optimizer off,
+#      and /O2 and /GL kept, each of them builds in under 1 min, and the
+#      assembly of their matrices and vectors runs as fast as with the
+#      default flags (differences within +-10 %, of either sign, the
+#      scatter of the measurement). GCC and Clang compile each file at -O3
+#      with no link-time step, in normal time, and get no change
+MSVC_SSA_OFF = [
+    'panels.models.annular_clpt_tl_num',
+    'panels.models.annular_tsdt_tl_num',
+    ]
+if platform.system() == 'Windows' and not emscripten:
+    for ext in extensions:
+        if ext.name in MSVC_SSA_OFF:
+            ext.extra_compile_args = (ext.extra_compile_args
+                                      + ['/d2SSAOptimizer-'])
 
 def generated_with_other_trace_mode(ext):
     r"""Whether the C++ file generated from a Cython source of ``ext`` was

@@ -1,3 +1,12 @@
+r"""Default penalties of four connected panels against a single panel
+
+Four curved panels, `r = 10`, with `u = v = w = 0` and the rotations free
+at the outer edges, are connected by ``'SSxcte'`` and ``'SSycte'`` with the
+penalties of :func:`.calc_kt_kr`, assembled from the block functions of
+:mod:`.kCSSxcte` and :mod:`.kCSSycte`. The first natural frequency must be
+that of the same panel modelled with a single domain within 1 %.
+
+"""
 import sys
 sys.path.append('../..')
 

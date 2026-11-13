@@ -5,7 +5,7 @@ displacements of :meth:`.Shell.add_point_pd`,
 :meth:`.Shell.add_distr_pd_fixed_x` and :meth:`.Shell.add_distr_pd_fixed_y`
 are the constraints `\boldsymbol{B}_d \boldsymbol{c} = \bar{\boldsymbol{d}}_0 + \lambda \bar{\boldsymbol{d}}_1`, eliminated
 with the connections, `\boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r + \boldsymbol{c}_{p0} + \lambda
-\boldsymbol{c}_{p1}`, see ``doc/source/multidomain_null_space.rst``:
+\boldsymbol{c}_{p1}`, see :mod:`panels.multidomain.connections.nullspace`:
 
 - the membrane patch test is exact, for single and multiple domains, with
   the reaction `P = E A u/L`
@@ -201,7 +201,7 @@ def penalty_static(p, delta, k):
     p.add_point_pd(0., 0., 0., 0., k, 0., 0., 0.)
     for pd in p.distr_pds + p.distr_pds_inc:
         pd[2] = (lambda f: (lambda y: k*f(y)))(pd[2])
-    md = MultiDomain([p], conn=[])
+    md = MultiDomain([p], conn=[], pd_method='penalty')
     size = md.get_size()
     kCp = finalize_symmetric_matrix(fkCld_xcte(k, 0., 0., p, 0., size, 0, 0)
         + fkCld_xcte(k, 0., 0., p, p.a, size, 0, 0)
@@ -233,29 +233,30 @@ def test_limit_of_the_penalty_method():
 
 def test_penalty_unchanged_and_excluded_from_fext():
     r"""The forces `k u_p` are in ``calc_fext`` with ``pd_method='penalty'``,
-    the default, and not with ``pd_method='null-space'``"""
+    and not with ``pd_method='null-space'``, the default"""
     p = plate(1., 0.6)
     p.add_point_load(0.5, 0.3, 0., 0., 1.)
-    md0 = MultiDomain([p], conn=[])
+    md0 = MultiDomain([p], conn=[], pd_method='penalty')
     f_load = md0.calc_fext()
     p.add_point_pd(0.5, 0.3, 0., 0., 0., 0., 1e6, 1e-3)
     p.add_distr_pd_fixed_x(0.2, kw=1e6, funcw=lambda y: 1e-3*y)
-    fext = MultiDomain([p], conn=[]).calc_fext()
-    assert MultiDomain([p], conn=[]).pd_method == 'penalty'
+    fext = MultiDomain([p], conn=[], pd_method='penalty').calc_fext()
+    assert MultiDomain([p], conn=[]).pd_method == 'null-space'
     assert not np.allclose(fext, f_load)
-    fext_ns = MultiDomain([p], conn=[], pd_method='null-space').calc_fext()
+    fext_ns = MultiDomain([p], conn=[]).calc_fext()
     assert np.array_equal(fext_ns, f_load)
     with pytest.raises(ValueError, match='pd_method'):
         MultiDomain([p], conn=[], pd_method='lagrange')
     c = np.zeros(fext.size)
     with pytest.raises(ValueError, match='requires pd_method'):
-        MultiDomain([p], conn=[]).reaction_pd(c)
+        MultiDomain([p], conn=[], pd_method='penalty').reaction_pd(c)
     with pytest.raises(ValueError, match='requires pd_method'):
-        MultiDomain([p], conn=[]).reaction_resultant(c, [(p, 'x', 0.2)])
+        MultiDomain([p], conn=[], pd_method='penalty').reaction_resultant(
+            c, [(p, 'x', 0.2)])
     p.add_point_pd(0.1, 0.1, None, None, None, None, None, None,
                    kphix=1., phixp=0.)
     with pytest.raises(NotImplementedError, match='rotations'):
-        MultiDomain([p], conn=[]).calc_fext()
+        MultiDomain([p], conn=[], pd_method='penalty').calc_fext()
 
 
 def test_mixed_constant_and_incremented_linear():
@@ -604,7 +605,7 @@ def test_nonlinear_reaction_matches_penalty():
     #     convergence tolerance, relative to the penalty forces k*u_p,
     #     dominates, see the penalty vs null-space section of the docs
     k = 1e4*E*p.plyt
-    mdp = MultiDomain([p], conn=[])
+    mdp = MultiDomain([p], conn=[], pd_method='penalty')
     p.clear_disps()
     p.add_distr_pd_fixed_x(0., ku=k, funcu=lambda y: 0.)
     p.add_distr_pd_fixed_x(p.a, ku=k, funcu=lambda y: -delta)
@@ -706,11 +707,12 @@ def test_linear_static_through_analysis_raises():
 
 
 def test_without_prescriptions_unchanged():
-    r"""Without prescribed displacements, ``pd_method='null-space'`` gives
-    the same `\boldsymbol{Z}` and the same reduced functions as the default"""
+    r"""Without prescribed displacements, ``pd_method='null-space'``, the
+    default, gives the same `\boldsymbol{Z}` and the same reduced functions as
+    ``pd_method='penalty'``"""
     ps, conn = two_by_two()
-    md1 = MultiDomain(ps, conn)
-    md2 = MultiDomain(ps, conn, pd_method='null-space')
+    md1 = MultiDomain(ps, conn, pd_method='penalty')
+    md2 = MultiDomain(ps, conn)
     Z1, Z2 = md1.get_Z(), md2.get_Z()
     assert (Z1 != Z2).nnz == 0
     for f1, f2 in zip(md1.get_reduced_functions(),

@@ -42,6 +42,8 @@ extensions = [
     'sphinx.ext.autosummary',
     'numpydoc',
     'sphinx.ext.mathjax',
+    'nbsphinx',
+    'nbsphinx_link',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -51,6 +53,10 @@ templates_path = ['_templates']
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
+
+# the notebooks are rendered with their stored outputs, linked by the
+# nblink files
+nbsphinx_execute = 'never'
 
 default_role = 'math'
 

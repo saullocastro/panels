@@ -41,11 +41,7 @@ where the prime is the derivative with respect to `\xi`, and
 hierarchical: increasing the number of terms, ``m`` along `x` and ``n``
 along `y`, adds functions without changing the previous ones. Evaluated in
 floating point, the terms of high degree carry a round-off that grows with
-the degree, below `10^{-4}` of the largest value of each term at the ends,
-as asserted by ``tests/test_bardell.py``:
-
-.. literalinclude:: ../../tests/test_bardell.py
-    :pyobject: test_end_values_and_flags
+the degree, below `10^{-4}` of the largest value of each term at the ends.
 
 
 Boundary flags
@@ -128,9 +124,9 @@ field outputs, :meth:`.Shell.uvw`, :meth:`.Shell.strain` and
 The values of the functions at the integration points can be tabulated once
 per kernel, see :ref:`tabulation`.
 
-The closed-form integrals agree with a Gauss-Legendre quadrature of 30
-points, exact for the products of two terms up to the round-off of the
-functions, and Eq. :eq:`bardell-separation` gives the physical integrals:
-
-.. literalinclude:: ../../tests/test_bardell.py
-    :pyobject: test_integrals_against_quadrature
+The product of two terms is a polynomial of degree up to 58, integrated
+exactly by a Gauss-Legendre quadrature of 30 points: the closed-form
+integrals agree with it up to the round-off of the functions, and
+Eq. :eq:`bardell-separation` gives the physical integrals, e.g.
+`\int_0^a P_{i,x} P_{k,x} \, dx = (2/a)^2 (a/2)` ``calc_integral_fpfp(i, k,
+...)``.

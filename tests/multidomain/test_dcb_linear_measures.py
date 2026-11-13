@@ -1,7 +1,26 @@
 r"""Linear solutions of the DCB model of the thesis of D'Souza (2024)
 
-Values of the tables of the sections "Load measured at the loaded edge" and
-"Penalty stiffness of the edge connections" of doc/source/cohesive_zone.rst.
+The linear solution, below the damage onset, of the DCB of
+``test_dcb_damage.py``, computed by :func:`dcb_thesis_linear`, against
+reference values of this model stored in the tests (tables of results that
+help to choose the penalty stiffnesses):
+
+- ``test_load_measures``: four measures of the load at the loaded edge, the
+  reaction of the prescribed displacement, the area integrals of the
+  traction of the cohesive zone with the full and the corrected separation,
+  and the line integral of the transverse shear force `Q_x` of the loaded
+  arm, for three penalty stiffnesses `k_o` of the cohesive zone, and the
+  equilibrium of the loaded arm;
+- ``test_edge_penalty_factor``: the stiffness and the largest separation per
+  mm of opening against the factor on the default penalties of the
+  ``'SSxcte'`` connections; with the default penalties the DCB is 20 % less
+  stiff than with penalties 1000 times larger.
+
+References
+----------
+.. [1] D'Souza, N., "Multi-Domain Semi-Analytical Cohesive Zone Approach",
+   MSc thesis, Delft University of Technology, 2024.
+   https://resolver.tudelft.nl/uuid:4709f888-c032-4d9f-97e3-402dfdd47cf1
 
 """
 import pytest
@@ -20,7 +39,8 @@ def dcb_thesis_linear(k_o, edge_penalty_factor=1., a2=0.015, wp=0.5,
     r"""Linear solution of the DCB model of the thesis, per mm of opening
 
     The DCB of ``test_dcb_damage.py`` (``dcb_damage_prop_no_f_kcrack``):
-    `L = 65` mm, `b = 25` mm, `a_0 = 48` mm, arms `[0]_{15}` of 0.14 mm,
+    `L = 65` mm, `b = 25` mm, `a_0 = 48` mm, arms of 15 plies at 0 degrees
+    of 0.14 mm,
     three domains per arm (cohesive domain of 17 mm, connecting domain of
     length ``a2``, free arm), the tip of the top arm loaded by the
     prescribed displacement ``wp`` imposed with `k_w = 10^6`, the tip of the
@@ -80,7 +100,7 @@ def dcb_thesis_linear(k_o, edge_penalty_factor=1., a2=0.015, wp=0.5,
         conni['kt'] = edge_penalty_factor*kt
         conni['kr'] = edge_penalty_factor*kr
     assy = MultiDomain(panels=[bot1, bot2, bot3, top1, top2, top3],
-                       conn=conn, conn_method='penalty')
+                       conn=conn, conn_method='penalty', pd_method='penalty')
     size = assy.get_size()
     # pristine interface
     assy.update_TSL_history(curr_max_dmg_index=np.zeros((nr_y_gauss,
@@ -112,8 +132,9 @@ def dcb_thesis_linear(k_o, edge_penalty_factor=1., a2=0.015, wp=0.5,
 
 @pytest.mark.slow
 def test_load_measures():
-    # tip displacement of 1 mm, default edge penalties; columns: k_o (N/mm^3),
-    # reaction, int k Delta dA, int k Delta^corr dA, int Q_x dy (N)
+    # solution at a tip displacement wp = 0.5 mm, per mm of wp, default edge
+    # penalties; columns: k_o (N/mm^3), reaction, int k Delta dA,
+    # int k Delta^corr dA, int Q_x dy (N/mm)
     table = [
         (1e4, 24.9847, 24.9902, 388.113, 24.4146),
         (5e4, 25.8676, 25.8731, 593.064, 25.2804),

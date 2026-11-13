@@ -1,27 +1,32 @@
 r"""Cylindrical shells using the FSDT and the TSDT
 
 The models ``'cylshell_fsdt_donnell'``, ``'cylshell_fsdt_sanders'``,
-``'cylshell_tsdt_donnell'`` and ``'cylshell_tsdt_sanders'``, see
-``theory/shells/fsdt_tsdt/fsdt_tsdt.py``. The references are:
+``'cylshell_tsdt_donnell'`` and ``'cylshell_tsdt_sanders'`` against:
 
-- Leissa, A. W., "Vibration of shells", NASA SP-288, 1973, Table 2.8:
-  frequencies of 3D elasticity of circular cylindrical shells supported by
-  shear diaphragms (SD), with the frequency parameter `\Omega = \omega R
-  \sqrt{\rho (1 - \nu^2)/E}`. An open panel of angle `\pi/n` supported by SD
-  on all edges has the frequencies of the closed shell with `n`
-  circumferential waves (Leissa, p. 158).
+- the frequencies of 3D elasticity of circular cylindrical shells supported
+  by shear diaphragms (SD) of Leissa (1973), Table 2.8, with the frequency
+  parameter `\Omega = \omega R \sqrt{\rho (1 - \nu^2)/E}`;
+- the axial buckling of cylindrical panels with Donnell's equations of
+  Batdorf (1947);
+- the rigid-body motions, for which the strains of Sanders' theory vanish,
+  Sanders (1959).
 
-- Batdorf, S. B., NACA TR 874, 1947: axial buckling of cylindrical panels
-  with Donnell's equations.
+The Navier solution of the SD-SD panel of the same kinematics, implemented
+independently herein, verifies the Ritz solution, whose CLPT counterpart is
+verified against the same references in ``test_sanders_kinematics.py``.
 
-- Sanders, J. L., "An improved first-approximation theory for thin shells",
-  NASA TR R-24, 1959: the strains of Sanders' theory vanish for any
-  rigid-body motion.
+Notes
+-----
+An open panel of angle `\pi/n` supported by SD on all edges has the
+frequencies of the closed shell with `n` circumferential waves ([1]_, p.
+158).
 
-The Navier solution of the SD-SD panel of the kinematics of
-``theory/shells/fsdt_tsdt``, implemented independently herein, verifies the
-Ritz solution, whose CLPT counterpart is verified against the same
-references in ``test_sanders_kinematics.py``.
+References
+----------
+.. [1] Leissa, A. W., "Vibration of shells", NASA SP-288, 1973.
+.. [2] Batdorf, S. B., NACA TR 874, 1947.
+.. [3] Sanders, J. L., "An improved first-approximation theory for thin
+   shells", NASA TR R-24, 1959.
 """
 import os
 import sys

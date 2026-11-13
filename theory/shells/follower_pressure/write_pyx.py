@@ -7,8 +7,9 @@ The kernels ``calc_fext_follower`` and ``fkCfollower_num`` of each model of
 
     python write_pyx.py [model ...]
 
-The generators of whole modules, ``fsdt_tsdt/write_pyx.py`` and
-``cylshell_clpt_sanders/write_pyx.py``, append the same block through
+The generators of whole modules, ``cylshell_clpt_sanders/write_pyx.py``
+and the ``write_pyx.py`` of the models with 5 DOFs, e.g.
+``cylshell_fsdt_sanders/write_pyx.py``, append the same block through
 :func:`pyx_block`.
 
 """
@@ -135,18 +136,75 @@ def calc_fext_follower(double [::1] cs, double [:, ::1] pnxny,
         int size, int col0, int quadratic=0, int reference=1):
     r"""Force vector of a follower pressure in the configuration ``cs``
 
-    Integrates ``F_p = int p (Nu ax + Nv ay + Nw az) dA`` over the patch
-    ``px1 <= x <= px2``, ``py1 <= y <= py2``, with ``nx x ny`` Gauss-Legendre
-    points, ``(nx, ny) = pnxny.shape``, being ``pnxny[ptx, pty]`` the pressure,
-    already multiplied by the load factor, at each point. The area vector
-    ``(ax, ay, az)`` of the deformed mid-surface is, see
-    ``theory/shells/follower_pressure``::
+    Integrates, over the patch ``px1 <= x <= px2``, ``py1 <= y <= py2``
+    with ``nx x ny`` Gauss-Legendre points, ``(nx, ny) = pnxny.shape``,
+    the force vector of a pressure that stays normal to the deformed
+    mid-surface and acts on its deformed area. Only ``u, v, w`` enter.
 
-{adoc}
+    Parameters
+    ----------
+    cs : array-like
+        Ritz constants of the configuration, 1-D of size ``size``, in the
+        units of the displacements (the rotations in radians).
+    pnxny : array-like
+        Pressure at each Gauss-Legendre point of the patch, already
+        multiplied by the load factor, shape ``(nx, ny)``, force per unit
+        area, positive along `z`.
+    px1, px2, py1, py2 : float
+        Limits of the loaded patch along `x` and `y`, lengths.
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Size of the vector, the number of degrees of freedom of the assembly.
+    col0 : int
+        Position of the vector where the terms of this shell start.
+    quadratic : int, optional
+        ``1`` keeps the part of the area vector quadratic in the
+        displacement gradients, default ``0``.
+    reference : int, optional
+        ``1`` includes the dead part ``F_p(0)``, the load in the undeformed
+        configuration, default ``1``.
+
+    Returns
+    -------
+    fext : numpy.ndarray
+        Force vector of size ``size``.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell`.
+
+    Notes
+    -----
+    With `\\boldsymbol{{X}} = \\boldsymbol{{X}}_0 + \\boldsymbol{{u}}` the
+    deformed mid-surface, the virtual work of the pressure `p` is `\\delta W_p
+    = \\int p \\, \\boldsymbol{{a}} \\cdot \\delta \\boldsymbol{{u}} \\, dx \\, dy`, with
+    the area vector per unit undeformed area `\\boldsymbol{{a}} =
+    \\boldsymbol{{X}}_{{,x}} \\times \\boldsymbol{{X}}_{{,y}} = \\boldsymbol{{a}}_0 +
+    \\boldsymbol{{a}}_1 + \\boldsymbol{{a}}_2`, of order 0, 1 and 2 in the
+    displacement gradients, in the local basis of the undeformed
+    mid-surface. The force vector is
+
+    .. math::
+
+        \\boldsymbol{{F}}_p = \\int p \\left[(\\boldsymbol{{S}}^u)^\\top a_x +
+        (\\boldsymbol{{S}}^v)^\\top a_y + (\\boldsymbol{{S}}^w)^\\top a_z\\right]
+        dx \\, dy
+
+    with `\\boldsymbol{{S}}^u`, `\\boldsymbol{{S}}^v`, `\\boldsymbol{{S}}^w` the rows
+    of the approximation functions of `u`, `v`, `w`, and the area vector
+    `r_{{ef}} \\boldsymbol{{a}}_0 + \\boldsymbol{{a}}_1 + q_f \\boldsymbol{{a}}_2` of
+    the kinematics of the module::
+
+    {adoc}
 
     with ``qf = 1`` for ``quadratic=1`` and ``qf = 0`` otherwise, and ``ref =
-    1`` for ``reference=1``, which includes the dead part ``F_p(0)``, and
-    ``ref = 0`` otherwise.
+    1`` for ``reference=1`` and ``ref = 0`` otherwise. The part
+    `\\boldsymbol{{a}}_2` is of the order of the terms that the strains
+    neglect.
 
     """
 '''.format(adoc='\n'.join('        a%s = %s' % (c, th.pstr(e))
@@ -207,12 +265,67 @@ def calc_fext_follower(double [::1] cs, double [:, ::1] pnxny,
 def fkCfollower_num(double [::1] cs, double [:, ::1] pnxny,
         double px1, double px2, double py1, double py2, object shell,
         int size, int row0, int col0, int quadratic=0):
-    r"""Load stiffness ``-dF_p/dc`` of a follower pressure
+    r"""Load stiffness matrix of a follower pressure
 
-    See :func:`.calc_fext_follower` for the parameters. The matrix is
-    unsymmetric in general, so it is assembled in full, not as an upper
-    triangle, and must not be symmetrized. With ``quadratic=0`` it does not
-    depend on ``cs``.
+    Returns ``-dF_p/dc`` at ``cs``, ``F_p`` the force vector of
+    :func:`calc_fext_follower`. The matrix is unsymmetric in general, so
+    it is assembled in full, not as an upper triangle, and must not be
+    symmetrized. With ``quadratic=0`` it does not depend on ``cs``.
+
+    Parameters
+    ----------
+    cs : array-like
+        Ritz constants of the configuration, 1-D of size ``size``, in the
+        units of the displacements (the rotations in radians).
+    pnxny : array-like
+        Pressure at each Gauss-Legendre point of the patch, already
+        multiplied by the load factor, shape ``(nx, ny)``, force per unit
+        area, positive along `z`.
+    px1, px2, py1, py2 : float
+        Limits of the loaded patch along `x` and `y`, lengths.
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+    quadratic : int, optional
+        ``1`` keeps the part of the area vector quadratic in the
+        displacement gradients, default ``0``.
+
+    Returns
+    -------
+    kC : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. The matrix is assembled in full.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell`.
+
+    Notes
+    -----
+    With the area vector `\\boldsymbol{a}(\\boldsymbol{c})` of
+    :func:`calc_fext_follower`:
+
+    .. math::
+
+        \\boldsymbol{K}_F = -\\frac{\\partial \\boldsymbol{F}_p}{\\partial
+        \\boldsymbol{c}} = -\\int p \\left[(\\boldsymbol{S}^u)^\\top
+        \\frac{\\partial a_x}{\\partial \\boldsymbol{c}} + (\\boldsymbol{S}^v)^\\top
+        \\frac{\\partial a_y}{\\partial \\boldsymbol{c}} +
+        (\\boldsymbol{S}^w)^\\top \\frac{\\partial a_z}{\\partial
+        \\boldsymbol{c}}\\right] dx \\, dy
+
+    added to the tangent stiffness matrix. For the area vector of first
+    order, `\\boldsymbol{K}_F` is symmetric when `p` is uniform over the whole
+    integration domain and, on each edge, either `w = 0` or the displacement
+    normal to the edge is zero; otherwise, e.g. for a free edge, a patch or a
+    varying `p`, the load is not conservative and `\\boldsymbol{K}_F` is
+    unsymmetric.
 
     """
 ''')
