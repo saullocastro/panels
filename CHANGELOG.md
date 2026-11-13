@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.16.0 (2026-11-13)
 
 ### Changed: validation runs of more than 30 s in the notebooks only
 
