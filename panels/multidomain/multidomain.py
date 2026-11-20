@@ -556,6 +556,8 @@ class MultiDomain(object):
         #NOTE the interfaces of the 'CZM' connections, with their history,
         #     keyed by the id of the connection dictionary
         self._czm = {}
+        #NOTE the linear constraints of add_linear_constraint()
+        self._linear_constraints = []
         self.panels = panels
         self.size = None
         self.out_num_cores = 4
@@ -861,7 +863,98 @@ class MultiDomain(object):
                             (False, p.point_pds_values_inc
                                     + p.distr_pds_values_inc))
                         for values in values_list)
-        return sig_conn, tuple(sig_panels), sig_pds
+        #NOTE the rows of the linear constraints define [Z], their values
+        #     only the particular solutions
+        sig_lc = tuple((lc['cte'], tuple((id(p), comp, x, y, z, coeff)
+                                         for p, comp, x, y, z, coeff
+                                         in lc['terms']))
+                       for lc in self._linear_constraints)
+        return sig_conn, tuple(sig_panels), sig_pds, sig_lc
+
+
+    def add_linear_constraint(self, terms, value=0., cte=False, label=''):
+        r"""Adds a linear constraint between components of any panels
+
+        The constraint `\sum_k \alpha_k \bar{q}_k = q`, where each
+        `\bar{q}_k` is a component of a panel at a point, or its mean along
+        a line, is imposed exactly with the null-space method together with
+        the prescribed displacements, ``pd_method='null-space'``: with
+        ``cte=False`` the value is multiplied by the load factor, with
+        ``cte=True`` it is constant, see :meth:`.get_cp`. For instance, the
+        rigid lever of the mixed-mode bending test, which relates the mean
+        deflections of the upper arm at the load line, `x = 0`, and at the
+        saddle, `x = L`, to the displacement `\delta` of the load point::
+
+            md.add_linear_constraint([(top_a, 'w', 0., None, 0., c/L),
+                                      (top_b, 'w', L - top_b.x0, None, 0.,
+                                       -(1 + c/L))], value=1.)
+
+        with the lever displacement `\delta = \lambda` and the lever load the
+        generalized reaction of the incremented prescriptions,
+        :meth:`.reaction_pd`.
+
+        Parameters
+        ----------
+        terms : list of tuple
+            ``(panel, comp, x, y, z, coeff)``: the panel, the component,
+            ``'u'``, ``'v'``, ``'w'``, ``'phix'`` or ``'phiy'``, the point
+            ``(x, y)`` in the coordinates of the panel, or the line ``x``
+            with ``y=None`` or ``y`` with ``x=None`` for the mean along it,
+            the thickness coordinate ``z`` of ``'u'`` and ``'v'``, and the
+            coefficient `\alpha_k`.
+        value : float, optional
+            Right-hand side `q`.
+        cte : bool, optional
+            Whether the value is constant or multiplied by the load factor.
+        label : str, optional
+            Name used in the messages.
+
+        Returns
+        -------
+        constraint : dict
+            The constraint, with the keys ``'terms'``, ``'value'``, ``'cte'``
+            and ``'label'``. Changing ``'value'`` changes the particular
+            solutions only, see :meth:`.get_cp`.
+
+        Notes
+        -----
+        The row of the constraint is `\sum_k \alpha_k \boldsymbol{s}_k`,
+        with `\boldsymbol{s}_k` the row of the component at the point, or the
+        mean of its rows at the Gauss-Legendre points of the line, which is
+        exact since the component is a polynomial along the line, see
+        :func:`.nullspace.mean_row`. The rows are eliminated after those of
+        the prescribed displacements of the panels, see :meth:`.get_Z`, and
+        the work-conjugate force of the constraint is part of the reaction
+        :meth:`.reaction_pd` of its set, constant or incremented.
+
+        """
+        comps = {name: i for i, name in enumerate(nullspace.PD_COMPONENTS)}
+        out = []
+        for p, comp, x, y, z, coeff in terms:
+            if not any(p is q for q in self.panels):
+                raise ValueError('The panel of a linear constraint is not '
+                                 'part of the assembly')
+            if isinstance(comp, str):
+                comp = comps[comp]
+            out.append((p, comp, x, y, float(z), float(coeff)))
+        lc = dict(terms=out, value=float(value), cte=bool(cte), label=label)
+        self._linear_constraints.append(lc)
+        self.Z = None
+        self._Z_key = None
+        return lc
+
+
+    def _linear_constraint_blocks(self, size):
+        r"""Blocks of :meth:`.get_Z` of the linear constraints"""
+        blocks = []
+        for lc in self._linear_constraints:
+            row = csr_matrix((1, size))
+            for p, comp, x, y, z, coeff in lc['terms']:
+                row = row + coeff*nullspace.mean_row(p, comp, x, y, size, z)
+            blocks.append(dict(user=True, label=lc['label'], cte=lc['cte'],
+                               value=lc['value'], B=csr_matrix(row),
+                               panel=None, x=None, y=None, z=0., comp=None))
+        return blocks
 
 
     def get_Z(self, conn=None, tol=None, rhs_tol=None):
@@ -976,6 +1069,10 @@ class MultiDomain(object):
         if self.pd_method == 'null-space':
             for p in self.panels:
                 blocks += nullspace.pd_blocks(p, size)
+            blocks += self._linear_constraint_blocks(size)
+        elif self._linear_constraints:
+            raise NotImplementedError('The linear constraints of '
+                    'add_linear_constraint() require pd_method="null-space"')
         if blocks:
             elim = nullspace.Elimination(size, tol)
             for B in Bs:
@@ -1000,6 +1097,9 @@ class MultiDomain(object):
 
 
     def _pd_label(self, block):
+        if block.get('user'):
+            return "linear constraint '{0}' (cte={1})".format(block['label'],
+                                                              block['cte'])
         comp = nullspace.PD_COMPONENTS[block['comp']]
         if block['z'] != 0 and block['comp'] in (nullspace.U, nullspace.V):
             comp = '{0} at z = {1:g}'.format(comp, block['z'])
@@ -1018,6 +1118,8 @@ class MultiDomain(object):
         r"""Boundary condition flags equal to zero that restrain the
         prescribed component at its points, with ``ends=False`` only those
         that restrain it along the whole line"""
+        if block.get('user'):
+            return []
         p = block['panel']
         flags = []
         for field, der_x, der_y, _ in nullspace._pd_terms(p, block['comp'],
@@ -1046,6 +1148,11 @@ class MultiDomain(object):
             p = block['panel']
             k = int(np.argmax(np.abs(res)))
             label = self._pd_label(block)
+            if block.get('user'):
+                return ('The {0} is not consistent with the constraints '
+                        'imposed before it: it is a combination of them with '
+                        'the residual {1:.2e} > {2:.2e}'.format(label,
+                        abs(res[k]), atol))
             flags = self._pd_zero_flags(block)
             if resultant:
                 return ('The reaction resultant of the selected lines is not '
@@ -1161,9 +1268,14 @@ class MultiDomain(object):
         #NOTE [Z] is reused while the positions and the components do not
         #     change, the values are read again from the panels
         entries = [e for p in self.panels for e in nullspace.pd_entries(p)]
-        assert len(entries) == len(blocks)
-        for block, entry in zip(blocks, entries):
+        pblocks = [b for b in blocks if not b.get('user')]
+        ublocks = [b for b in blocks if b.get('user')]
+        assert len(entries) == len(pblocks)
+        assert len(ublocks) == len(self._linear_constraints)
+        for block, entry in zip(pblocks, entries):
             block['value'] = entry[4]
+        for block, lc in zip(ublocks, self._linear_constraints):
+            block['value'] = lc['value']
         ds = [nullspace.pd_rhs(b) for b in blocks]
         key = np.concatenate(ds)
         if (self._cp_cache is not None
@@ -3991,7 +4103,8 @@ class MultiDomain(object):
                 iface = czm.CohesiveInterface(ci['p1'], ci['p2'],
                         ci['laws'], ci['nr_x_gauss'], ci['nr_y_gauss'],
                         size, mode_ratio=ci.get('mode_ratio', 'per-law'),
-                        k_contact=ci.get('k_contact'))
+                        k_contact=ci.get('k_contact'),
+                        contact_eps=ci.get('contact_eps', 1e-3))
                 self._czm[id(ci)] = iface
             out.append(iface)
         return out

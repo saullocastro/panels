@@ -716,6 +716,44 @@ def pd_constraint_matrix(p, comp, x, y, size, z=0.):
     return pd_rows(p, comp, xis, etas, z, p.col_start, size)
 
 
+def mean_row(p, comp, x, y, size, z=0.):
+    r"""Row of the mean of a component along a line, or of its value at a
+    point
+
+    For a line, ``x`` with ``y=None`` or ``y`` with ``x=None``, the row
+    gives `\frac{1}{b} \int_0^b q(x, y) \, \mathrm{d}y`, or the mean along
+    `x`, integrated exactly with the Gauss-Legendre points of
+    :func:`.pd_points`, since the component is a polynomial along the line
+    with at most as many coefficients as points; for a point, ``x`` and
+    ``y`` given, the row of :func:`.pd_constraint_matrix`.
+
+    Parameters
+    ----------
+    p : :class:`.Shell`
+        Panel, with ``col_start`` defined.
+    comp : int
+        Index of the component in :data:`PD_COMPONENTS`.
+    x, y : float or None
+        The point, or the line, see :func:`.pd_points`.
+    size : int
+        Size of the assembly.
+    z : float, optional
+        Thickness coordinate of ``'u'`` and ``'v'``, see
+        :func:`.pd_constraint_matrix`.
+
+    Returns
+    -------
+    row : scipy.sparse.csr_matrix
+        Shape ``(1, size)``.
+
+    """
+    B = pd_constraint_matrix(p, comp, x, y, size, z)
+    if x is not None and y is not None:
+        return B
+    _, weights = leggauss(B.shape[0])
+    return csr_matrix(0.5*weights[None, :] @ B)
+
+
 def pd_entries(p):
     r"""Prescribed components of a panel, ``(cte, x, y, comp, value, z)`` in
     the order of :func:`.pd_blocks`, the constant ones first
@@ -803,6 +841,10 @@ def pd_rhs(block):
         1-D array with one value per row of ``block['B']``.
 
     """
+    if block.get('user'):
+        #NOTE a linear constraint of MultiDomain.add_linear_constraint, one
+        #     row with one value
+        return np.array([block['value']], dtype=DOUBLE)
     _, _, s = pd_points(block['panel'], block['x'], block['y'])
     value = block['value']
     if s is None:

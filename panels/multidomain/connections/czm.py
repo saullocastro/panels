@@ -350,6 +350,26 @@ def evaluate_laws(laws, du, dv, dw, r_old, mode_ratio='per-law',
     return tau, T, r_new, d
 
 
+def contact_traction(dw, k, eps):
+    r"""Normal traction and its derivative of a contact-only interface
+
+    `\tau_w = -k\, p(-\Delta_w)` with the smoothed ramp `p(x) = 0` for `x
+    \le 0`, `x^2/(2\epsilon)` for `0 < x < \epsilon` and `x - \epsilon/2`
+    beyond: no traction for an opening, the penalty `k` for a penetration
+    larger than `\epsilon`, and a continuous tangent, which keeps the
+    quadratic convergence of the Newton-Raphson iterations when points of
+    the interface close or open. A sharp switch makes the iterations
+    oscillate between the states of the points near `\Delta_w = 0`. The
+    traction differs from `k \Delta_w` by at most `k \epsilon/2`.
+
+    """
+    x = np.maximum(-np.asarray(dw, dtype=DOUBLE), 0.)
+    small = x < eps
+    p = np.where(small, x*x/(2*eps), x - 0.5*eps)
+    dp = np.where(small, x/eps, 1.)
+    return -k*p, k*dp
+
+
 class CohesiveInterface(object):
     r"""Cohesive interface of a ``'CZM'`` connection
 
@@ -370,6 +390,9 @@ class CohesiveInterface(object):
         ``'per-law'`` (default) or ``'summed'``, see the module notes.
     k_contact : float or None, optional
         Normal stiffness of a contact-only interface (no laws).
+    contact_eps : float, optional
+        Penetration over which the contact stiffness of a contact-only
+        interface is phased in, see :func:`.contact_traction`, length.
 
     Attributes
     ----------
@@ -424,7 +447,7 @@ class CohesiveInterface(object):
 
     """
     def __init__(self, p_top, p_bot, laws, nr_x_gauss, nr_y_gauss, size,
-                 mode_ratio='per-law', k_contact=None):
+                 mode_ratio='per-law', k_contact=None, contact_eps=1e-3):
         for attr in ('x0', 'y0', 'a', 'b'):
             if not np.isclose(getattr(p_top, attr), getattr(p_bot, attr)):
                 raise ValueError("The domains of a 'CZM' connection must "
@@ -437,6 +460,7 @@ class CohesiveInterface(object):
         if not self.laws and not k_contact:
             raise ValueError('A contact-only interface needs k_contact')
         self.k_contact = k_contact
+        self.contact_eps = contact_eps
         self.mode_ratio = mode_ratio
         self.nr_x_gauss = int(nr_x_gauss)
         self.nr_y_gauss = int(nr_y_gauss)
@@ -489,15 +513,16 @@ class CohesiveInterface(object):
     def state(self, c, tangent=True):
         r"""Tractions, tangent, thresholds and damage at ``c`` from the last
         converged state, see :func:`.evaluate_laws`; for a contact-only
-        interface, the normal contact traction"""
+        interface, the normal contact traction of :func:`.contact_traction`"""
         du, dv, dw = self.separations(c)
         if not self.laws:
             tau = np.zeros((3, self.npts))
-            tau[2] = np.where(dw < 0, self.k_contact*dw, 0.)
+            tw, kw = contact_traction(dw, self.k_contact, self.contact_eps)
+            tau[2] = tw
             T = None
             if tangent:
                 T = np.zeros((3, 3, self.npts))
-                T[2, 2] = np.where(dw < 0, self.k_contact, 0.)
+                T[2, 2] = kw
             empty = np.zeros((0, self.npts))
             return tau, T, empty, empty
         return evaluate_laws(self.laws, du, dv, dw, self.r,
@@ -579,7 +604,10 @@ class CohesiveInterface(object):
             psi += 0.5*(1. - self.d[i])*(law.KII*S + law.KI*N)
             psi += 0.5*law.KI*Nc
         if not self.laws:
-            psi += 0.5*self.k_contact*Nc
+            x = np.maximum(-dw, 0.)
+            e = self.contact_eps
+            psi += self.k_contact*np.where(x < e, x**3/(6*e),
+                                           0.5*x*x - 0.5*e*x + e*e/6)
         return float(np.sum(self.weights*psi))
 
     def resultants(self, c):
