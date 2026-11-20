@@ -553,15 +553,20 @@ class CohesiveInterface(object):
     def kC0(self):
         r"""Secant stiffness of the last converged state at zero
         separation, with the normal stiffness of an opening, used by the
-        linear analyses"""
+        linear analyses
+
+        A contact-only interface has no stiffness in a linear analysis, the
+        faces being taken as open: the linear analyses cannot represent
+        contact, and treating the faces as bonded would glue a pre-crack
+        shut. Use a non-linear analysis where contact matters.
+
+        """
         T = np.zeros((3, 3, self.npts))
         for i, law in enumerate(self.laws):
             s = 1. - self.d[i]
             T[0, 0] += s*law.KII
             T[1, 1] += s*law.KII
             T[2, 2] += s*law.KI
-        if not self.laws:
-            T[2, 2] = self.k_contact
         return self._assemble(T)
 
     def _assemble(self, T):
