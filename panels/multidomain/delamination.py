@@ -70,7 +70,9 @@ def create_coupon(kind, laminaprop, plyt, stack, b, a0, laws, L=None, c=None,
                   x_end=None, model='plate_clpt_donnell', nd=2, L_coh=None,
                   m_crack=10, m_coh=15, m_far=10, n=6, nr_x_gauss=None,
                   nr_y_gauss=10, k_contact=None, mode_ratio='per-law',
-                  lever='mean', u_hinge_z=0., fsdt_shear_correction=5/6.):
+                  lever='mean', u_hinge_z=0., fsdt_shear_correction=5/6.,
+                  dcb_bc='hinge', far='czm', conn_method='null-space',
+                  penalty_factor=1.):
     r"""DCB, ENF or MMB coupon with cohesive interfaces
 
     Parameters
@@ -125,6 +127,22 @@ def create_coupon(kind, laminaprop, plyt, stack, b, a0, laws, L=None, c=None,
         `u = 0` is imposed at its hinge.
     fsdt_shear_correction : float or str, optional
         Shear correction factor of the shear deformation theories.
+    dcb_bc : str, optional
+        DCB only: ``'hinge'`` (default), see the module notes, or
+        ``'symmetric'``, the reference DCB of D'Souza et al.: the far end
+        `x = x_{end}` of both arms clamped and the arms opened to `\pm
+        \delta/2` at `x = 0`.
+    far : str, optional
+        Bond of the far domain, beyond ``L_coh``: ``'czm'`` (default), the
+        cohesive law with ``4*m_far`` points along `x`, or ``'sb'``, the
+        perfect bond ``'SB'`` imposed exactly.
+    conn_method : str, optional
+        ``'null-space'`` (default) or ``'penalty'`` for the connections
+        ``'SSxcte'`` (and ``'SB'``), see :class:`.MultiDomain`; the
+        prescribed displacements and the lever are always imposed exactly.
+    penalty_factor : float, optional
+        With ``conn_method='penalty'``, factor on the penalties of
+        :func:`.calc_kt_kr` (``'SSxcte'``) and of the default ``'SB'``.
 
     Returns
     -------
@@ -188,8 +206,13 @@ def create_coupon(kind, laminaprop, plyt, stack, b, a0, laws, L=None, c=None,
     conn = []
     for arm in (top, bot):
         for p1, p2 in zip(arm[:-1], arm[1:]):
-            conn.append(dict(p1=p1, p2=p2, func='SSxcte', xcte1=p1.a,
-                             xcte2=0.))
+            ci = dict(p1=p1, p2=p2, func='SSxcte', xcte1=p1.a, xcte2=0.)
+            if conn_method == 'penalty':
+                from panels.multidomain.connections import calc_kt_kr
+                kt, kr = calc_kt_kr(p1, p2, 'xcte')
+                ci['kt'] = penalty_factor*kt
+                ci['kr'] = penalty_factor*kr
+            conn.append(ci)
     if k_contact is None:
         k_contact = sum(law.KI for law in laws)
     conn.append(dict(p1=top[0], p2=bot[0], func='CZM', laws=[],
@@ -197,6 +220,9 @@ def create_coupon(kind, laminaprop, plyt, stack, b, a0, laws, L=None, c=None,
                      nr_y_gauss=nr_y_gauss))
     cohesive = []
     for i in range(1, len(top)):
+        if i > nd and far == 'sb':
+            conn.append(dict(p1=top[i], p2=bot[i], func='SB'))
+            continue
         nx = nr_x_gauss if i <= nd else 4*m_far
         ci = dict(p1=top[i], p2=bot[i], func='CZM', laws=laws,
                   nr_x_gauss=nx, nr_y_gauss=nr_y_gauss,
@@ -204,12 +230,20 @@ def create_coupon(kind, laminaprop, plyt, stack, b, a0, laws, L=None, c=None,
         conn.append(ci)
         cohesive.append(ci)
 
-    md = MultiDomain(bot + top, conn)
+    md = MultiDomain(bot + top, conn, conn_method=conn_method)
 
     # supports, exact, constant
-    bot[0].add_distr_pd_fixed_x(0., ku=1., funcu=lambda y: 0., kw=1.,
-                                funcw=lambda y: 0., z=u_hinge_z)
-    bot[0].add_point_pd(0., b/2, None, None, 1., 0., None, None)
+    symmetric = kind == 'DCB' and dcb_bc == 'symmetric'
+    if symmetric:
+        for p in (top[-1], bot[-1]):
+            p.add_distr_pd_fixed_x(p.a, ku=1., funcu=lambda y: 0., kv=1.,
+                                   funcv=lambda y: 0., kw=1.,
+                                   funcw=lambda y: 0., kphix=1.,
+                                   funcphix=lambda y: 0.)
+    else:
+        bot[0].add_distr_pd_fixed_x(0., ku=1., funcu=lambda y: 0., kw=1.,
+                                    funcw=lambda y: 0., z=u_hinge_z)
+        bot[0].add_point_pd(0., b/2, None, None, 1., 0., None, None)
     if kind in ('ENF', 'MMB'):
         bot[-1].add_distr_pd_fixed_x(bot[-1].a, kw=1., funcw=lambda y: 0.)
 
@@ -219,7 +253,12 @@ def create_coupon(kind, laminaprop, plyt, stack, b, a0, laws, L=None, c=None,
                 return p, min(max(x - p.x0, 0.), p.a)
         raise ValueError('x = {0} outside the coupon'.format(x))
 
-    if kind == 'DCB':
+    if symmetric:
+        top[0].add_distr_pd_fixed_x(0., kw=1., funcw=lambda y: 0.5,
+                                    cte=False)
+        bot[0].add_distr_pd_fixed_x(0., kw=1., funcw=lambda y: -0.5,
+                                    cte=False)
+    elif kind == 'DCB':
         top[0].add_distr_pd_fixed_x(0., kw=1., funcw=lambda y: 1.,
                                     cte=False)
         if _is_sdt(model):

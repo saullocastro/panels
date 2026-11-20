@@ -126,6 +126,7 @@ User guide
     tangent_product.rst
     tabulation.rst
     cohesive_zone.rst
+    cohesive_zone_mixed_mode.rst
     pyodide.rst
 
 
