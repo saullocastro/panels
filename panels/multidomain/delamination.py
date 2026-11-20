@@ -313,7 +313,7 @@ def crack_length(md, info, threshold=1.):
 
 
 def solve_coupon(md, info, delta_max, initialInc=0.05, maxInc=None,
-                 minInc=1e-6, NL_method='NR', NLgeom=True, relTOL=1e-6,
+                 minInc=1e-6, NL_method='NR', NLgeom=True, relTOL=1e-9,
                  maxNumIter=40, record=None, silent=True, **analysis_kw):
     r"""Load-displacement curve of a coupon of :func:`.create_coupon`
 
