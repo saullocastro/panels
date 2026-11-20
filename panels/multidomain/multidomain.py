@@ -27,6 +27,7 @@ from panels.shell import DOUBLE, check_c, Shell
 import panels.modelDB as modelDB
 from panels.multidomain import connections
 from panels.multidomain.connections import nullspace
+from panels.multidomain.connections import czm
 
 
 def load(name, max_size=json_io.MAX_SIZE):
@@ -552,6 +553,9 @@ class MultiDomain(object):
         self.c_p1 = None
         self._conn_used = None
         self._conn_terms_warned = None
+        #NOTE the interfaces of the 'CZM' connections, with their history,
+        #     keyed by the id of the connection dictionary
+        self._czm = {}
         self.panels = panels
         self.size = None
         self.out_num_cores = 4
@@ -3493,6 +3497,10 @@ class MultiDomain(object):
         for connecti in conn:
             if self._null_space(connecti):
                 continue
+            #NOTE the cohesive interfaces 'CZM' enter calc_fint, calc_kC,
+            #     calc_kT and calc_kTv directly, see cohesive_interfaces()
+            if connecti['func'] == 'CZM':
+                continue
             if connecti['func'] != 'SB_force':
                 #NOTE a local copy is used, because the coordinates of the
                 #     connection are swapped below when p1 comes after p2 in
@@ -3921,6 +3929,7 @@ class MultiDomain(object):
         kC_conn = self.get_kC_conn(conn=conn, c=c)
 
         kC += kC_conn
+        kC = kC + self._czm_stiffness(c, conn=conn)
 
         #NOTE unsymmetric, added after the symmetrization, see Shell.calc_kC
         if NLgeom and finalize:
@@ -3930,6 +3939,108 @@ class MultiDomain(object):
         msg('finished!', level=2, silent=silent)
 
         return kC
+
+
+    def cohesive_interfaces(self, conn=None):
+        r"""Interfaces of the cohesive connections ``'CZM'``
+
+        One :class:`.czm.CohesiveInterface` per connection ``'CZM'`` of
+        ``conn``, created at the first call and kept, with its history,
+        while the size of the assembly does not change.
+
+        A connection ``'CZM'`` has the keys ``'p1'`` (the domain on the
+        positive side of the interface along `z`) and ``'p2'``, as for
+        ``'SB'``, ``'laws'`` (a list of :class:`.czm.BilinearLaw`, empty for
+        a contact-only interface with the key ``'k_contact'``),
+        ``'nr_x_gauss'`` and ``'nr_y_gauss'``, and optionally
+        ``'mode_ratio'``, see :mod:`panels.multidomain.connections.czm`.
+
+        Parameters
+        ----------
+        conn : list of dict or None, optional
+            The connections, by default those of the assembly, see
+            :meth:`.get_kC_conn`.
+
+        Returns
+        -------
+        interfaces : list of :class:`.czm.CohesiveInterface`
+
+        Notes
+        -----
+        The interfaces contribute their internal force vector and their
+        consistent tangent stiffness matrix to :meth:`.calc_fint`,
+        :meth:`.calc_kC`, :meth:`.calc_kT` and :meth:`.calc_kTv`, evaluated
+        with the damage history of the last converged state, which only
+        :meth:`.commit_cohesive` updates, e.g. through the callable of
+        :meth:`.get_on_converged` given to ``structsolve.Analysis``. They are
+        neither penalty connections of :meth:`.get_kC_conn` nor
+        constraints of :meth:`.get_Z`.
+
+        """
+        try:
+            conn = self._resolve_conn(conn)
+        except RuntimeError:
+            return []
+        size = self.get_size()
+        out = []
+        for ci in conn:
+            if ci.get('func') != 'CZM':
+                continue
+            iface = self._czm.get(id(ci))
+            if iface is None or iface.size != size:
+                iface = czm.CohesiveInterface(ci['p1'], ci['p2'],
+                        ci['laws'], ci['nr_x_gauss'], ci['nr_y_gauss'],
+                        size, mode_ratio=ci.get('mode_ratio', 'per-law'),
+                        k_contact=ci.get('k_contact'))
+                self._czm[id(ci)] = iface
+            out.append(iface)
+        return out
+
+
+    def _czm_stiffness(self, c, conn=None):
+        r"""Sum of the stiffness matrices of the cohesive interfaces: the
+        consistent tangent at ``c``, or, for ``c=None``, the secant stiffness
+        of the last converged state at zero separation"""
+        size = self.get_size()
+        K = csr_matrix((size, size))
+        for iface in self.cohesive_interfaces(conn):
+            K = K + (iface.kC0() if c is None else iface.kT(c))
+        return K
+
+
+    def commit_cohesive(self, c):
+        r"""Updates the damage history of the cohesive interfaces with the
+        converged configuration ``c`` (Ritz constants of the assembly), see
+        :meth:`.czm.CohesiveInterface.commit`"""
+        for iface in self.cohesive_interfaces():
+            iface.commit(c)
+
+
+    def reset_cohesive(self):
+        r"""Pristine cohesive interfaces, see
+        :meth:`.czm.CohesiveInterface.reset`"""
+        for iface in self.cohesive_interfaces():
+            iface.reset()
+
+
+    def get_on_converged(self, callback=None):
+        r"""Callable for ``structsolve.Analysis.on_converged`` with the
+        functions of :meth:`.get_reduced_functions`
+
+        Returns ``f(an)``, which expands the last converged state of the
+        analysis, ``an.cs[-1]`` at the load factor ``an.increments[-1]``, to
+        the Ritz constants of the assembly, see :meth:`.expand`, updates the
+        history of the cohesive interfaces, :meth:`.commit_cohesive`, and
+        then calls ``callback(an, c)`` when given, e.g. to record results.
+
+        """
+        def on_converged(an):
+            lbd = an.increments[-1] if self._pd_blocks else None
+            c = self.expand(an.cs[-1], lbd)
+            self.commit_cohesive(c)
+            if callback is not None:
+                callback(an, c)
+        return on_converged
 
 
     def calc_kG(self, c=None, silent=False, finalize=True, NLgeom=False):
@@ -4148,7 +4259,7 @@ class MultiDomain(object):
         if kC_conn is None:
             kC_conn = self.get_kC_conn(c=c)
         kT += kC_conn
-        # print(f'kCconn {np.max(kC_conn):.3e}')
+        kT = kT + self._czm_stiffness(c)
         self.kT = kT
         msg('finished!', level=2, silent=silent)
         return kT
@@ -4211,6 +4322,8 @@ class MultiDomain(object):
             kTv += p.calc_kTv(c, v, size=size, col0=p.col_start,
                               silent=silent, inc=inc)
         kTv += self.get_kC_conn(c=c) @ v
+        for iface in self.cohesive_interfaces():
+            kTv += iface.kT(c) @ v
         msg('finished!', level=2, silent=silent)
         return kTv
 
@@ -4276,6 +4389,8 @@ class MultiDomain(object):
         if kC_conn is None:
             kC_conn = self.get_kC_conn(c=c)
         fint += kC_conn*c
+        for iface in self.cohesive_interfaces():
+            fint += iface.fint(c)
         self.fint = fint
         msg('finished!', level=2, silent=silent)
         return fint
