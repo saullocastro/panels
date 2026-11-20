@@ -1,5 +1,26 @@
 # Changelog
 
+## Unreleased
+
+### Added: mixed-mode multilinear cohesive interface `'CZM'` and delamination coupons
+
+- Connection `'CZM'` (`panels.multidomain.connections.czm`): a superposition
+  of mixed-mode bilinear laws with a mode-dependent penalty stiffness
+  (Turon et al. 2018), each one with its own Benzeggagh-Kenane exponent and
+  damage variable (Abdel-Monsef et al. 2023), with contact, for all the
+  models (CLPT, FSDT, TSDT); separations of the perfect bond `'SB'`;
+  consistent tangent; one history per interface, updated with converged
+  states (`MultiDomain.commit_cohesive`, `MultiDomain.get_on_converged` for
+  `structsolve.Analysis.on_converged`); exact dissipated energy.
+- `MultiDomain.add_linear_constraint`: linear constraints between components
+  of any panels at points or as means along lines, imposed exactly with the
+  prescribed displacements; `nullspace.mean_row`.
+- `panels.multidomain.delamination`: DCB, ENF and MMB coupons
+  (`create_coupon`, `solve_coupon`, `crack_length`), with the lever of the
+  MMB apparatus as a linear constraint.
+- Documentation page `cohesive_zone_mixed_mode`.
+- Requires `structsolve` with `Analysis.on_converged`.
+
 ## 0.16.0 (2026-11-13)
 
 ### Changed: validation runs of more than 30 s in the notebooks only
