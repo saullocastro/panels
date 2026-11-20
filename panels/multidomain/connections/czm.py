@@ -487,6 +487,15 @@ class CohesiveInterface(object):
                                    p_bot.col_start, size)
             B.append((Bt - Bb).tocsr())
         self.Bu, self.Bv, self.Bw = B
+        #NOTE dense operators restricted to the degrees of freedom of the
+        #     two domains, for the assembly of the tangent with dense matrix
+        #     products: every point involves all the terms of both domains
+        self.dofs = np.concatenate((np.arange(p_top.col_start, p_top.col_end),
+                                    np.arange(p_bot.col_start, p_bot.col_end)))
+        self._Bl = [Bi[:, self.dofs].toarray() for Bi in B]
+        nl = self.dofs.size
+        self._rows_g = np.repeat(self.dofs, nl)
+        self._cols_g = np.tile(self.dofs, nl)
         self.weights = np.outer(weta, wxi).ravel()*p_top.a*p_top.b/4
         xs, ys = np.meshgrid((xis + 1)*p_top.a/2, (etas + 1)*p_top.b/2)
         self.x = xs.ravel()
@@ -569,16 +578,83 @@ class CohesiveInterface(object):
             T[2, 2] += s*law.KI
         return self._assemble(T)
 
-    def _assemble(self, T):
-        Bs = (self.Bu, self.Bv, self.Bw)
-        K = csr_matrix((self.size, self.size))
+    def _T0(self):
+        r"""Tangent of the pristine interface, the same for an opening and
+        for a closure: `\mathrm{diag}(k_{sh}, k_{sh}, k_I)` summed over the
+        laws, or the contact stiffness of a contact-only interface"""
+        T0 = np.zeros((3, 3, self.npts))
+        if self.laws:
+            T0[0, 0] = sum(l.KII for l in self.laws)
+            T0[1, 1] = T0[0, 0]
+            T0[2, 2] = sum(l.KI for l in self.laws)
+        return T0
+
+    def _K0(self):
+        r"""Local stiffness matrix of the pristine interface, cached"""
+        if getattr(self, '_K0_cache', None) is None:
+            self._K0_cache = self._local(self._T0())
+        return self._K0_cache
+
+    def _local(self, T, rows=None):
+        r"""Dense `\sum_{i,j} \boldsymbol{B}_i^\top \boldsymbol{W}
+        \mathrm{diag}(T_{ij}) \boldsymbol{B}_j` on the degrees of freedom of
+        the two domains, over the points ``rows`` (all by default), with
+        three matrix products"""
+        Bl = self._Bl
+        w = self.weights
+        if rows is not None:
+            Bl = [B[rows] for B in Bl]
+            w = w[rows]
+        nl = self.dofs.size
+        K = np.zeros((nl, nl))
         for i in range(3):
+            H = None
             for j in range(3):
                 tij = T[i, j]
                 if not np.any(tij):
                     continue
-                K = K + Bs[i].T @ diags(self.weights*tij) @ Bs[j]
-        return K.tocsr()
+                term = (w*tij)[:, None]*Bl[j]
+                H = term if H is None else H + term
+            if H is not None:
+                K += Bl[i].T @ H
+        return K
+
+    def _to_global(self, K):
+        from scipy.sparse import coo_matrix
+        return coo_matrix((K.ravel(), (self._rows_g, self._cols_g)),
+                          shape=(self.size, self.size)).tocsr()
+
+    def _assemble(self, T):
+        r"""`\sum_{i,j} \boldsymbol{B}_i^\top \boldsymbol{W} \mathrm{diag}(T_{ij})
+        \boldsymbol{B}_j`, computed as the cached pristine matrix plus the
+        products restricted to the points where `T` differs from the pristine
+        tangent, i.e. the points that are damaged, loading or, for a
+        contact-only interface, in contact"""
+        if not self.laws:
+            rows = np.nonzero(np.any(T != 0, axis=(0, 1)))[0]
+            if rows.size == 0:
+                return csr_matrix((self.size, self.size))
+            return self._to_global(self._local(T[:, :, rows], rows))
+        dT = T - self._T0()
+        rows = np.nonzero(np.any(dT != 0, axis=(0, 1)))[0]
+        K = self._K0()
+        if rows.size:
+            K = K + self._local(dT[:, :, rows], rows)
+        return self._to_global(K)
+
+    def kTv(self, c, v):
+        r"""Product of the consistent tangent at ``c`` by ``v``, without
+        assembling the tangent"""
+        _, T, _, _ = self.state(c, tangent=True)
+        Bs = (self.Bu, self.Bv, self.Bw)
+        dv = [B @ v for B in Bs]
+        w = self.weights
+        out = np.zeros(self.size)
+        for i in range(3):
+            s = sum(T[i, j]*dv[j] for j in range(3))
+            if np.any(s):
+                out += Bs[i].T @ (w*s)
+        return out
 
     def _Gc_laws(self, c):
         r"""`G_c(B)` of each law at the points, with the mode ratio of

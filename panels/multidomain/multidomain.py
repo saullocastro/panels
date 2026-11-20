@@ -4436,7 +4436,7 @@ class MultiDomain(object):
                               silent=silent, inc=inc)
         kTv += self.get_kC_conn(c=c) @ v
         for iface in self.cohesive_interfaces():
-            kTv += iface.kT(c) @ v
+            kTv += iface.kTv(c, v)
         msg('finished!', level=2, silent=silent)
         return kTv
 
