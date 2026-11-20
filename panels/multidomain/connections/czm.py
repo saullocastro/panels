@@ -403,10 +403,9 @@ class CohesiveInterface(object):
         Damage variables of the last converged state, same shape.
     dissipated : float
         Energy dissipated up to the last converged state, force*length,
-        `\sum_g w_g \sum_\ell \int Y_\ell \, \mathrm{d} d_\ell`, integrated
-        with the trapezoidal rule between converged states, with `Y_\ell =
-        \frac{1}{2} (k_{sh} \Delta_{sh}^2 + k_I \langle \Delta_w
-        \rangle^2)`.
+        `\sum_g w_g \sum_\ell \int G_{c,\ell}(B) \, \mathrm{d} r_\ell`, with
+        `G_c` at the mode ratio of the end of each increment, see the
+        Notes.
     Bu, Bv, Bw : scipy.sparse.csr_matrix
         Separation operators, ``Bu @ c`` the separation `\Delta_u` at the
         points, shape ``(nr_y_gauss*nr_x_gauss, size)``.
@@ -444,6 +443,17 @@ class CohesiveInterface(object):
         \boldsymbol{B}_j
 
     with `i, j = u, v, w` and `\boldsymbol{W}` the diagonal of the weights.
+
+    The energy dissipated by a law at a point is `\int Y \, \mathrm{d}d`,
+    with the thermodynamic force `Y = \frac{1}{2} (k_{sh} \Delta_{sh}^2 +
+    k_I \langle \Delta_w \rangle^2) = \frac{1}{2} k_B \Delta_{eq}^2`. While
+    the damage grows, `\Delta_{eq} = \Delta_o (1 + r(\rho - 1))` with `\rho
+    = \Delta_f/\Delta_o = G_c/G_o`, and `\mathrm{d}d/\mathrm{d}r = \rho/(1 +
+    r(\rho - 1))^2`, such that `Y \, \mathrm{d}d = G_o \rho \, \mathrm{d}r =
+    G_c \, \mathrm{d}r`: the threshold `r` is the fraction of `G_c`
+    dissipated, as noted by Turon et al. (2018) after their Eq. (20). With
+    `\partial d/\partial B = 0` this holds for any path, the mode ratio
+    entering through `G_c(B)`, taken at the end of each increment.
 
     """
     def __init__(self, p_top, p_bot, laws, nr_x_gauss, nr_y_gauss, size,
@@ -504,7 +514,6 @@ class CohesiveInterface(object):
         self.r = np.zeros((len(self.laws), self.npts), dtype=DOUBLE)
         self.d = np.zeros_like(self.r)
         self.dissipated = 0.
-        self._Y = np.zeros_like(self.r)
 
     def separations(self, c):
         r"""Separations `\Delta_u, \Delta_v, \Delta_w` at the points"""
@@ -566,12 +575,22 @@ class CohesiveInterface(object):
                 K = K + Bs[i].T @ diags(self.weights*tij) @ Bs[j]
         return K.tocsr()
 
-    def _Ylaws(self, c):
+    def _Gc_laws(self, c):
+        r"""`G_c(B)` of each law at the points, with the mode ratio of
+        ``mode_ratio``"""
         du, dv, dw = self.separations(c)
         S = du*du + dv*dv
         N = np.maximum(dw, 0.)**2
-        return np.array([0.5*(l.KII*S + l.KI*N) for l in self.laws]).reshape(
-            len(self.laws), self.npts)
+        KIs = sum(l.KI for l in self.laws)
+        KIIs = sum(l.KII for l in self.laws)
+        out = np.empty((len(self.laws), self.npts))
+        for i, law in enumerate(self.laws):
+            a, b = ((law.KII, law.KI) if self.mode_ratio == 'per-law'
+                    else (KIIs, KIs))
+            P = a*S + b*N
+            B = np.where(P > 0, a*S/np.where(P > 0, P, 1.), 0.)
+            out[i] = law.Gc(B)
+        return out
 
     def commit(self, c):
         r"""Updates the history with the converged state ``c``
@@ -584,13 +603,11 @@ class CohesiveInterface(object):
         if not self.laws:
             return
         _, _, r_new, d_new = self.state(c, tangent=False)
-        Y = self._Ylaws(c)
-        dd = d_new - self.d
-        self.dissipated += float(np.sum(self.weights*np.sum(
-            0.5*(Y + self._Y)*dd, axis=0)))
+        Gc = self._Gc_laws(c)
+        dr = r_new - self.r
+        self.dissipated += float(np.sum(self.weights*np.sum(Gc*dr, axis=0)))
         self.r = r_new
         self.d = d_new
-        self._Y = Y
 
     def energy(self, c):
         r"""Free energy stored in the interface at ``c`` with the damage of
