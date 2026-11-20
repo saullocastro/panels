@@ -312,15 +312,63 @@ def crack_length(md, info, threshold=1.):
     return a
 
 
+def load_line_control_vector(md, info):
+    r"""Control vector of the separation at the load line, in the reduced
+    unknowns
+
+    The controlled quantity is `q = s_w \bar\Delta_w(0) + s_u
+    \bar\Delta_u(0)`, the mean opening and sliding across the width at the
+    load line `x = 0` (the faces of the arms in contact, see
+    :mod:`.czm`), weighted by their values `s_w`, `s_u` in the linear
+    solution for a unit load parameter, such that `q` grows from the start.
+    Returns ``psi`` with ``psi @ c_r`` the part of `q` that depends on the
+    reduced unknowns, see :meth:`.MultiDomain.get_Z`.
+
+    Notes
+    -----
+    The crack opens and slides at the load line monotonically while it
+    grows, also when the load and the load-point displacement decrease, so
+    that `q` can control the analysis through the snap-backs of the
+    load-displacement curve (indirect displacement control, de Borst
+    1987). The part `\lambda\,\partial q/\partial \lambda` of the
+    prescribed displacement is left out of ``psi``; it decreases the
+    controlled quantity where the load-point displacement decreases, so
+    that ``psi @ c_r`` grows at least as fast as `q` there.
+
+    """
+    from panels.multidomain.connections import nullspace, kCsdt
+    size = md.get_size()
+    top, bot = info['top'][0], info['bot'][0]
+    rows = {}
+    for comp, zt, zb in ((nullspace.W, 0., 0.),
+                         (nullspace.U, kCsdt._face(top, -1),
+                          kCsdt._face(bot, +1))):
+        rows[comp] = (nullspace.mean_row(top, comp, 0., None, size, zt)
+                      - nullspace.mean_row(bot, comp, 0., None, size, zb))
+    c_lin = md.linear_static(lbd=1.)
+    sw = float((rows[nullspace.W] @ c_lin)[0])
+    su = float((rows[nullspace.U] @ c_lin)[0])
+    row = sw*rows[nullspace.W] + su*rows[nullspace.U]
+    psi = np.asarray((md.get_Z().T @ row.T).todense()).ravel()
+    return psi
+
+
 def solve_coupon(md, info, delta_max, initialInc=0.05, maxInc=None,
                  minInc=1e-6, NL_method='NR', NLgeom=True, relTOL=1e-9,
-                 maxNumIter=40, record=None, silent=True, **analysis_kw):
+                 maxNumIter=40, record=None, silent=True, control='load',
+                 a_stop=None, max_steps=2000, **analysis_kw):
     r"""Load-displacement curve of a coupon of :func:`.create_coupon`
 
-    Displacement control, `\delta = \lambda`, up to ``delta_max``, with the
-    Newton-Raphson method of ``structsolve`` and its automatic cutting of
-    the increments; the cohesive history is updated at the converged
-    increments only, see :meth:`.MultiDomain.get_on_converged`.
+    With ``control='load'`` (default), displacement control, `\delta =
+    \lambda`, up to ``delta_max``, with the Newton-Raphson method of
+    ``structsolve`` and its automatic cutting of the increments. With
+    ``control='load-line'``, indirect displacement control of the separation
+    at the load line, :func:`.load_line_control_vector`, which follows the
+    snap-backs of unstable crack growth, until `\delta` reaches
+    ``delta_max`` or the crack length reaches ``a_stop``; the step lengths
+    are in the units of `\delta` in the linear regime. The cohesive history
+    is updated at the converged increments only, see
+    :meth:`.MultiDomain.get_on_converged`.
 
     Parameters
     ----------
@@ -371,6 +419,22 @@ def solve_coupon(md, info, delta_max, initialInc=0.05, maxInc=None,
     an.relTOL = relTOL
     an.maxNumIter = maxNumIter
     an.on_converged = md.get_on_converged(callback=on_converged)
+    if control == 'load-line':
+        an.NL_method = 'displacement_control'
+        an.control_vector = load_line_control_vector(md, info)
+        an.final_load_factor = None
+        an.maxArcLength = 1e9
+
+        def stop(an):
+            if len(rows) >= max_steps:
+                return True
+            r = rows[-1]
+            if r['delta'] >= delta_max:
+                return True
+            return a_stop is not None and r['a'] >= a_stop
+        an.stop_criterion = stop
+    elif control != 'load':
+        raise ValueError("control must be 'load' or 'load-line'")
     for k, v in analysis_kw.items():
         setattr(an, k, v)
     an.static(NLgeom=NLgeom, silent=silent)
