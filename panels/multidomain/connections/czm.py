@@ -157,6 +157,23 @@ class BilinearLaw(object):
         \approx 0` for a law without shear strength. The tractions keep the
         total slip, so that the undamaged response is unchanged. Default
         ``False``.
+    opening_driven : bool, optional
+        If ``True``, the damage of the law is driven by the opening alone,
+        `\Delta_{eq} = \langle \Delta_w \rangle` and `B = 0`, with the onset
+        and the toughness of mode I, e.g. fibre bridging, which needs an
+        open crack and has no shear toughness: the sliding of a closed or
+        open interface neither damages the law nor changes its mode ratio,
+        and the damage does not grow while `\Delta_w \le 0`. Both traction
+        components keep the factor `1 - d` on the stiffnesses of the law,
+        so that the undamaged response is unchanged. The energy released by
+        the damage, `\int Y \mathrm{d}d` with `Y = (k_{sh} \Delta_{sh}^2 +
+        k_I \langle \Delta_w \rangle^2)/2`, then exceeds the `G_{Ic}` of the
+        bookkeeping of :meth:`.CohesiveInterface.commit` by the shear part,
+        `\int k_{sh} \Delta_{sh}^2/2 \, \mathrm{d}d`, unless the interface
+        does not slide or ``KII = 0``: with ``KII = 0`` the law carries a
+        normal traction only and dissipates exactly `G_{Ic}` for any path,
+        which a law with ``KII = 0`` and the per-law mode ratio does
+        without this flag. Default ``False``.
 
     Raises
     ------
@@ -167,11 +184,15 @@ class BilinearLaw(object):
 
     """
     def __init__(self, GIc, GIIc, tauI, tauII, KI, eta, KII=None, name='',
-                 open_only=False, slip_offset=False):
+                 open_only=False, slip_offset=False, opening_driven=False):
         self.open_only = bool(open_only)
         self.slip_offset = bool(slip_offset)
+        self.opening_driven = bool(opening_driven)
         if self.slip_offset and not self.open_only:
             raise ValueError('slip_offset requires open_only=True')
+        if self.slip_offset and self.opening_driven:
+            raise ValueError('slip_offset and opening_driven exclude each '
+                             'other')
         self.GIc = float(GIc)
         self.GIIc = float(GIIc)
         self.tauI = float(tauI)
@@ -200,7 +221,8 @@ class BilinearLaw(object):
                           'separations, see the notes of '
                           'panels.multidomain.connections.czm'.format(
                               self.eta), UserWarning, stacklevel=2)
-        if self.GoII == 0. and self.KII > 0. and not self.open_only:
+        if (self.GoII == 0. and self.KII > 0. and not self.open_only
+                and not self.opening_driven):
             warnings.warn('Law without shear strength: its onset separation '
                           'is zero at B = 1, so any sliding of a closed '
                           'interface, round-off included, fails it without '
@@ -215,7 +237,9 @@ class BilinearLaw(object):
                     self.GIc, self.GIIc, self.tauI, self.tauII, self.KI,
                     self.eta, self.KII,
                     ', open_only=True' if self.open_only else '')
-                + (', slip_offset=True' if self.slip_offset else '') + ')')
+                + (', slip_offset=True' if self.slip_offset else '')
+                + (', opening_driven=True' if self.opening_driven else '')
+                + ')')
 
     def consistency_error(self):
         r"""Relative violation of `G_{Ic}/G_{oI} = G_{IIc}/G_{oII}`, Eq. (1)
@@ -234,7 +258,8 @@ class BilinearLaw(object):
 
 
 def law_with_ratio(GIc, GIIc, tauI, KI, eta, kappa, name='',
-                   open_only=False, slip_offset=False):
+                   open_only=False, slip_offset=False, opening_driven=False,
+                   shear_free=False):
     r"""Bilinear law with the ratio of stiffnesses ``kappa`` and the shear
     strength of Eq. (1) of Turon et al. (2018)
 
@@ -242,12 +267,21 @@ def law_with_ratio(GIc, GIIc, tauI, KI, eta, kappa, name='',
     `\tau_{o,II} = \tau_{o,I} \sqrt{\kappa G_{IIc}/G_{Ic}}`, zero for
     ``GIIc = 0``. Superposed laws built with the same ``kappa`` share the
     equivalent separation and the mode ratio, see the module notes.
+    ``shear_free=True``, only with ``GIIc = 0``, gives `k_{sh} = 0`: a law
+    with a normal traction only, see ``opening_driven`` of
+    :class:`.BilinearLaw`.
 
     """
     tauII = tauI*np.sqrt(kappa*GIIc/GIc)
-    return BilinearLaw(GIc, GIIc, tauI, tauII, KI, eta, KII=kappa*KI,
+    KII = kappa*KI
+    if shear_free:
+        if GIIc != 0.:
+            raise ValueError('shear_free requires GIIc = 0')
+        KII = 0.
+    return BilinearLaw(GIc, GIIc, tauI, tauII, KI, eta, KII=KII,
                        name=name, open_only=open_only,
-                       slip_offset=slip_offset)
+                       slip_offset=slip_offset,
+                       opening_driven=opening_driven)
 
 
 def _dbeta(B, eta):
@@ -313,6 +347,7 @@ def evaluate_laws(laws, du, dv, dw, r_old, mode_ratio='per-law',
     KIsum = sum(l.KI for l in laws)
     KIIsum = sum(l.KII for l in laws)
     S_tot, su, sv = S, du, dv
+    zero = np.zeros(npts)
     if s0 is not None and any(getattr(l, 'slip_offset', False)
                               for l in laws):
         su_rel = du - s0[0]
@@ -329,7 +364,10 @@ def evaluate_laws(laws, du, dv, dw, r_old, mode_ratio='per-law',
         #     closed converged state; the offset is constant within the
         #     increment, and where the point is closed the damage of an
         #     open_only law does not grow, so the offset does not matter
-        if s0 is not None and getattr(law, 'slip_offset', False):
+        if getattr(law, 'opening_driven', False):
+            # damage driven by <dw> alone: no slip in Delta_eq and B
+            S, su, sv = zero, zero, zero
+        elif s0 is not None and getattr(law, 'slip_offset', False):
             S, su, sv = S_rel, su_rel, sv_rel
         else:
             S, su, sv = S_tot, du, dv
@@ -745,6 +783,9 @@ class CohesiveInterface(object):
         for i, law in enumerate(self.laws):
             a, b = ((law.KII, law.KI) if self.mode_ratio == 'per-law'
                     else (KIIs, KIs))
+            if law.opening_driven:
+                out[i] = law.GIc
+                continue
             S = S_rel if law.slip_offset else S_tot
             P = a*S + b*N
             B = np.where(P > 0, a*S/np.where(P > 0, P, 1.), 0.)

@@ -411,3 +411,185 @@ def test_slip_offset_commit_interface():
         law.GIc*np.sum(iface.weights*(iface.r - r_pre)[0]), rtol=1e-12)
     iface.reset()
     assert np.all(iface.s0 == 0)
+
+
+def _opening_driven(shear_free=False):
+    return law_with_ratio(0.25, 0., 5.5, 9.17e4, 2.9, 0.2112,
+                          opening_driven=True, shear_free=shear_free)
+
+
+def test_opening_driven_options():
+    with pytest.raises(ValueError, match='exclude'):
+        BilinearLaw(0.25, 0., 5.5, 0., 9.17e4, 2.9, KII=1e4, open_only=True,
+                    slip_offset=True, opening_driven=True)
+    with pytest.raises(ValueError, match='shear_free'):
+        law_with_ratio(0.25, 1e-4, 5.5, 9.17e4, 2.9, 0.2, shear_free=True)
+    assert _opening_driven(True).KII == 0.
+    assert 'opening_driven=True' in repr(_opening_driven())
+
+
+@pytest.mark.parametrize('shear_free', [False, True])
+def test_opening_driven_pristine_and_unflagged_unchanged(shear_free):
+    """Below onset the flagged law has the undamaged tractions (K_II du,
+    K_II dv, K_I dw), and the other laws are unchanged"""
+    rng = np.random.default_rng(5)
+    n = 300
+    law = _opening_driven(shear_free)
+    lo = law.tauI/law.KI
+    d = rng.uniform(-1, 1, (3, n))*0.9*lo
+    d[:2] *= 100.
+    t, _, r, _ = evaluate_laws([law], *d, np.zeros((1, n)))
+    assert np.all(r == 0)
+    K = np.array([law.KII, law.KII, law.KI])[:, None]
+    np.testing.assert_allclose(t, K*d, rtol=1e-14, atol=0)
+    others = laws_B()[:2]
+    r_old = rng.uniform(0, 0.5, (3, n))
+    a = evaluate_laws(others + [law], *(d*20), r_old)
+    b = evaluate_laws(others, *(d*20), r_old[:2])
+    a1 = evaluate_laws([law], *(d*20), r_old[2:])
+    np.testing.assert_allclose(a[0], b[0] + a1[0], rtol=1e-13, atol=1e-13)
+    np.testing.assert_allclose(a[1], b[1] + a1[1], rtol=1e-13, atol=1e-9)
+    np.testing.assert_array_equal(a[2][:2], b[2])
+    np.testing.assert_array_equal(a[3][:2], b[3])
+
+
+@pytest.mark.parametrize('shear_free', [False, True])
+def test_opening_driven_mode_I_dissipation(shear_free):
+    """DCB-type monotonic opening: the work is G_Ic (trapezoidal rule exact
+    with the breakpoints of the law)"""
+    law = _opening_driven(shear_free)
+    lo = law.tauI/law.KI
+    lf = 2*law.GIc/law.tauI
+    w = np.unique(np.concatenate([np.linspace(0, 1.2*lf, 2001), [lo, lf]]))
+    W, D = run([law], [np.array([0., 0., x]) for x in w])
+    assert D[-1, 0] == 1.
+    assert abs(W - law.GIc) < 1e-10*law.GIc
+
+
+def test_opening_driven_shear_free_any_path():
+    """K_II = 0: the work to failure is G_Ic for a mixed path: opening
+    with slip, sliding while open, closing, sliding while closed and
+    reopening with slip"""
+    law = _opening_driven(True)
+    lo = law.tauI/law.KI
+    lf = 2*law.GIc/law.tauI
+    s = np.linspace(0., 1., 4001)
+    w1 = lo + 0.4*(lf - lo)
+    path = ([np.array([x*1e-2, x*3e-3, x*w1]) for x in s]
+            + [np.array([1e-2 + x*5e-2, 3e-3, w1]) for x in s]
+            + [np.array([6e-2, 3e-3, w1 - x*(w1 + 1e-5)]) for x in s]
+            + [np.array([6e-2 - x*0.1, 3e-3, -1e-5]) for x in s]
+            + [np.array([-4e-2 + x*1e-2, 3e-3, -1e-5 + x*(1.5*lf + 1e-5)])
+               for x in s])
+    W, D = run([law], path)
+    assert D[-1, 0] == 1.
+    # trapezoidal rule across the kinks at onset and failure
+    assert abs(W - law.GIc) < 1e-4*law.GIc
+
+
+@pytest.mark.parametrize('shear_free', [False, True])
+def test_opening_driven_sliding_does_not_damage(shear_free):
+    """Closed sliding, and open sliding below the opening at onset, leave
+    the threshold unchanged, however large the slip"""
+    law = _opening_driven(shear_free)
+    lo = law.tauI/law.KI
+    r0 = np.full((1, 4), 0.1)
+    du = np.array([1e-3, 1., 1e-3, 1.])
+    dw = np.array([-1e-4, 0., 0.5*lo, 0.5*lo])
+    # threshold 0.1 corresponds to an opening above lo
+    _, T, r, d = evaluate_laws([law], du, np.zeros(4), dw, r0)
+    assert np.all(r == 0.1)
+    assert np.all(np.isfinite(T))
+    _, _, r, _ = evaluate_laws([law], du, np.zeros(4), dw, np.zeros((1, 4)),
+                               tangent=False)
+    assert np.all(r == 0.)
+
+
+@pytest.mark.parametrize('nsteps', [50, 400])
+def test_opening_driven_closed_slide_reopen(nsteps):
+    """Opened to r_pre, closed, slid while closed, reopened with the slip
+    kept: the threshold stays at r_pre, then grows continuously; the
+    bookkeeping is G_Ic, for any step size"""
+    law = _opening_driven()
+    lo = law.tauI/law.KI
+    lf = 2*law.GIc/law.tauI
+    w1 = lo + 0.3*(lf - lo)
+    up = [(0., 0., w) for w in np.linspace(0, w1, nsteps)]
+    close = [(0., 0., w) for w in np.linspace(w1, -1e-5, nsteps)]
+    slide = [(s, 0., -1e-5) for s in np.linspace(0, 1e-3, nsteps)]
+    reopen = [(1e-3, 0., w) for w in np.linspace(1e-6, 1.2*lf, 4*nsteps)]
+    path = up + close + slide + reopen
+    r = np.zeros((1, 1))
+    rs, diss = [], 0.
+    for du, dv, dw in path:
+        sep = [np.array([x]) for x in (du, dv, dw)]
+        _, _, r_new, _ = evaluate_laws([law], *sep, r, tangent=False)
+        diss += law.GIc*(r_new[0, 0] - r[0, 0])
+        r = r_new
+        rs.append(r[0, 0])
+    rs = np.array(rs)
+    i_re = len(up) + len(close) + len(slide)
+    r_pre = rs[len(up) - 1]
+    assert 0.25 < r_pre < 0.35
+    assert np.all(rs[len(up):i_re + 1] == r_pre)
+    assert np.all(np.diff(rs) >= 0)
+    assert np.max(np.diff(rs)) < 2./nsteps
+    assert rs[-1] == 1.
+    assert abs(diss - law.GIc) < 1e-12*law.GIc
+
+
+@pytest.mark.parametrize('shear_free', [False, True])
+def test_opening_driven_tangent_finite_differences(shear_free):
+    laws = laws_B()[:2] + [_opening_driven(shear_free)]
+    rng = np.random.default_rng(6)
+    scale = max(l.tauI/l.KI for l in laws)*5
+    n = 400
+    d = rng.normal(size=(3, n))*scale
+    d[2] = np.where(rng.uniform(size=n) < 0.8, abs(d[2]), d[2])
+    r_old = rng.uniform(0, 0.6, (len(laws), n))
+    _, T, r_new, _ = evaluate_laws(laws, *d, r_old)
+    h = 1e-5*np.linalg.norm(d, axis=0)
+    Tfd = np.zeros_like(T)
+    ok = np.ones(n, bool)
+    for j in range(3):
+        e = np.zeros((3, n))
+        e[j] = h
+        tp, _, rp, _ = evaluate_laws(laws, *(d + e), r_old, tangent=False)
+        tm, _, rm, _ = evaluate_laws(laws, *(d - e), r_old, tangent=False)
+        ok &= np.all((rp > r_old) == (rm > r_old), axis=0)
+        ok &= np.all((rp >= 1) == (rm >= 1), axis=0)
+        ok &= np.sign(d[2] + h) == np.sign(d[2] - h)
+        Tfd[:, j] = (tp - tm)/(2*h)
+    grows = (r_new[2] > r_old[2]) & (r_new[2] < 1) & ok
+    assert grows.sum() > 20
+    # with shear stiffness, the shear traction depends on the opening
+    if not shear_free:
+        sel = grows & (np.abs(d[0]) > 0.1*scale)
+        assert np.all(np.abs(T[0, 2, sel]) > 0)
+    scale_T = np.abs(Tfd).max(axis=(0, 1))
+    ok &= scale_T > 0
+    err = np.abs(T - Tfd).max(axis=(0, 1))[ok]/scale_T[ok]
+    assert ok.sum() > n/2
+    assert err.max() < 1e-7
+
+
+def test_opening_driven_commit_interface():
+    """The bookkeeping of CohesiveInterface uses G_Ic for the flagged law,
+    whatever the slip"""
+    top, bot = _plates('plate_clpt_donnell')
+    law = _opening_driven()
+    conn = [dict(p1=top, p2=bot, func='CZM', laws=[law], nr_x_gauss=4,
+                 nr_y_gauss=2)]
+    md = MultiDomain([bot, top], conn, conn_method='penalty',
+                     pd_method='penalty')
+    iface = md.cohesive_interfaces()[0]
+    npts = iface.npts
+    lo = law.tauI/law.KI
+    lf = 2*law.GIc/law.tauI
+    one = np.ones(npts)
+    sep = {0: (5e-3*one, 0*one, (lo + 0.3*(lf - lo))*one)}
+    iface.separations = lambda c: sep[c]
+    iface.commit(0)
+    assert np.all(iface.r > 0.29) and np.all(iface.r < 0.31)
+    np.testing.assert_allclose(iface.dissipated,
+        law.GIc*np.sum(iface.weights*iface.r[0]), rtol=1e-12)
