@@ -72,7 +72,7 @@ def create_coupon(kind, laminaprop, plyt, stack, b, a0, laws, L=None, c=None,
                   nr_y_gauss=10, k_contact=None, mode_ratio='per-law',
                   lever='mean', u_hinge_z=0., fsdt_shear_correction=5/6.,
                   dcb_bc='hinge', far='czm', conn_method='null-space',
-                  penalty_factor=1.):
+                  penalty_factor=1., contact_eps=1e-3):
     r"""DCB, ENF or MMB coupon with cohesive interfaces
 
     Parameters
@@ -143,6 +143,9 @@ def create_coupon(kind, laminaprop, plyt, stack, b, a0, laws, L=None, c=None,
     penalty_factor : float, optional
         With ``conn_method='penalty'``, factor on the penalties of
         :func:`.calc_kt_kr` (``'SSxcte'``) and of the default ``'SB'``.
+    contact_eps : float, optional
+        Penetration over which the contact stiffness over the pre-crack is
+        phased in, see :func:`.czm.contact_traction`.
 
     Returns
     -------
@@ -216,8 +219,8 @@ def create_coupon(kind, laminaprop, plyt, stack, b, a0, laws, L=None, c=None,
     if k_contact is None:
         k_contact = sum(law.KI for law in laws)
     conn.append(dict(p1=top[0], p2=bot[0], func='CZM', laws=[],
-                     k_contact=k_contact, nr_x_gauss=4*m_crack,
-                     nr_y_gauss=nr_y_gauss))
+                     k_contact=k_contact, contact_eps=contact_eps,
+                     nr_x_gauss=4*m_crack, nr_y_gauss=nr_y_gauss))
     cohesive = []
     for i in range(1, len(top)):
         if i > nd and far == 'sb':
