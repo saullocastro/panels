@@ -593,3 +593,116 @@ def test_opening_driven_commit_interface():
     assert np.all(iface.r > 0.29) and np.all(iface.r < 0.31)
     np.testing.assert_allclose(iface.dissipated,
         law.GIc*np.sum(iface.weights*iface.r[0]), rtol=1e-12)
+
+
+def _wake(kappa=0.2112):
+    return law_with_ratio(0.25, 0., 5.5, 9.17e4, 2.9, kappa, open_only=True,
+                          wake_offset=True)
+
+
+def test_wake_offset_options():
+    with pytest.raises(ValueError, match='open_only'):
+        law_with_ratio(0.25, 0., 5.5, 9.17e4, 2.9, 0.2, wake_offset=True)
+    with pytest.raises(ValueError, match='exclude'):
+        law_with_ratio(0.25, 0., 5.5, 9.17e4, 2.9, 0.2, open_only=True,
+                       wake_offset=True, slip_offset=True)
+    assert 'wake_offset=True' in repr(_wake())
+
+
+def test_wake_offset_zero_offsets_is_open_only_and_others_unchanged():
+    rng = np.random.default_rng(7)
+    n = 200
+    d = rng.normal(size=(3, n))*1e-3
+    s0w = rng.normal(size=(2, n))*1e-3
+    r_old = rng.uniform(0, 0.5, (1, n))
+    for a, b in zip(evaluate_laws([_wake()], *d, r_old,
+                                  s0_wake=np.zeros((2, n))),
+                    evaluate_laws([_bridging(False)], *d, r_old)):
+        assert np.array_equal(a, b)
+    laws = laws_B()
+    r3 = rng.uniform(0, 0.5, (3, n))
+    for a, b in zip(evaluate_laws(laws, *d, r3),
+                    evaluate_laws(laws, *d, r3, s0_wake=s0w)):
+        assert np.array_equal(a, b)
+
+
+def test_wake_offset_tangent_finite_differences():
+    laws = laws_B()[:2] + [_wake()]
+    rng = np.random.default_rng(8)
+    scale = max(l.tauI/l.KI for l in laws)*5
+    n = 400
+    d = rng.normal(size=(3, n))*scale
+    d[2] = np.where(rng.uniform(size=n) < 0.8, abs(d[2]), d[2])
+    s0w = d[:2] + rng.normal(size=(2, n))*scale*0.3
+    r_old = rng.uniform(0, 0.6, (len(laws), n))
+    _, T, r_new, _ = evaluate_laws(laws, *d, r_old, s0_wake=s0w)
+    h = 1e-5*np.linalg.norm(d, axis=0)
+    Tfd = np.zeros_like(T)
+    ok = np.ones(n, bool)
+    for j in range(3):
+        e = np.zeros((3, n))
+        e[j] = h
+        tp, _, rp, _ = evaluate_laws(laws, *(d + e), r_old, tangent=False,
+                                     s0_wake=s0w)
+        tm, _, rm, _ = evaluate_laws(laws, *(d - e), r_old, tangent=False,
+                                     s0_wake=s0w)
+        ok &= np.all((rp > r_old) == (rm > r_old), axis=0)
+        ok &= np.all((rp >= 1) == (rm >= 1), axis=0)
+        ok &= np.sign(d[2] + h) == np.sign(d[2] - h)
+        Tfd[:, j] = (tp - tm)/(2*h)
+    grows = (r_new[2] > r_old[2]) & (r_new[2] < 1) & ok
+    assert grows.sum() > 20
+    scale_T = np.abs(Tfd).max(axis=(0, 1))
+    ok &= scale_T > 0
+    err = np.abs(T - Tfd).max(axis=(0, 1))[ok]/scale_T[ok]
+    assert ok.sum() > n/2
+    assert err.max() < 1e-7
+
+
+def test_wake_offset_commit_interface():
+    """The wake offset follows the slip, open or closed, until the
+    crack-tip law has failed at the point, and is fixed afterwards"""
+    top, bot = _plates('plate_clpt_donnell')
+    kappa = 0.2112
+    tip = law_with_ratio(0.28, 1.24, 62., 1e6, 2.9, kappa)
+    br = _wake(kappa)
+    conn = [dict(p1=top, p2=bot, func='CZM', laws=[tip, br], nr_x_gauss=4,
+                 nr_y_gauss=2)]
+    md = MultiDomain([bot, top], conn, conn_method='penalty',
+                     pd_method='penalty')
+    iface = md.cohesive_interfaces()[0]
+    npts = iface.npts
+    one = np.ones(npts)
+    lo = br.tauI/br.KI
+    lf_tip = 2*tip.GIc/tip.tauI
+    sep = {0: (1e-3*one, 0*one, 0.5*lf_tip*one),     # open, tip damaged
+           1: (2e-3*one, 0*one, -1e-5*one),          # closed, slides
+           2: (3e-3*one, 0*one, 2*lf_tip*one),       # tip fails
+           3: (8e-3*one, 0*one, -1e-5*one),          # closed, slides
+           4: (8e-3*one, 0*one, (2*lf_tip + 2*lo)*one)}  # reopens
+    iface.separations = lambda c: sep[c]
+    iface.commit(0)
+    assert np.all(iface.d[0] < 1) and np.all(iface.s0w[0] == 1e-3)
+    iface.commit(1)
+    assert np.all(iface.s0w[0] == 2e-3)
+    iface.commit(2)
+    assert np.all(iface.d[0] == 1.)
+    # offset of the state where the tip failed is not taken: fixed at the
+    # last state with the tip intact
+    assert np.all(iface.s0w[0] == 2e-3)
+    r2 = iface.r[1].copy()
+    iface.commit(3)
+    assert np.all(iface.s0w[0] == 2e-3)
+    assert np.array_equal(iface.r[1], r2)
+    # on reopening, B of the bridging law follows the slip since the wake
+    # formed (6e-3), not zero as with slip_offset
+    diss = iface.dissipated
+    iface.commit(4)
+    assert np.all(iface.r[1] >= r2)
+    du = 6e-3
+    P = br.KII*du**2 + br.KI*(2*lf_tip + 2*lo)**2
+    B = br.KII*du**2/P
+    np.testing.assert_allclose(iface.dissipated - diss,
+        br.Gc(B)*np.sum(iface.weights*(iface.r[1] - r2)), rtol=1e-12)
+    iface.reset()
+    assert np.all(iface.s0w == 0)

@@ -174,6 +174,16 @@ class BilinearLaw(object):
         normal traction only and dissipates exactly `G_{Ic}` for any path,
         which a law with ``KII = 0`` and the per-law mode ratio does
         without this flag. Default ``False``.
+    wake_offset : bool, optional
+        Only with ``open_only=True``. As ``slip_offset``, but the offset
+        `\boldsymbol{\Delta}_{s0}` of :attr:`.CohesiveInterface.s0w`
+        follows the slip of the point, open or closed, until all the laws
+        without ``wake_offset`` (the crack-tip laws) have failed there, `d
+        = 1`, and is fixed afterwards: the damage of the law is driven by
+        the opening and by the slip gained since the wake of the crack
+        reached the point, for a mechanism that exists in the wake only,
+        e.g. fibre bridging. The tractions keep the total slip. Default
+        ``False``.
 
     Raises
     ------
@@ -184,15 +194,19 @@ class BilinearLaw(object):
 
     """
     def __init__(self, GIc, GIIc, tauI, tauII, KI, eta, KII=None, name='',
-                 open_only=False, slip_offset=False, opening_driven=False):
+                 open_only=False, slip_offset=False, opening_driven=False,
+                 wake_offset=False):
         self.open_only = bool(open_only)
         self.slip_offset = bool(slip_offset)
         self.opening_driven = bool(opening_driven)
         if self.slip_offset and not self.open_only:
             raise ValueError('slip_offset requires open_only=True')
-        if self.slip_offset and self.opening_driven:
-            raise ValueError('slip_offset and opening_driven exclude each '
-                             'other')
+        self.wake_offset = bool(wake_offset)
+        if self.wake_offset and not self.open_only:
+            raise ValueError('wake_offset requires open_only=True')
+        if (self.slip_offset + self.opening_driven + self.wake_offset) > 1:
+            raise ValueError('slip_offset, opening_driven and wake_offset '
+                             'exclude each other')
         self.GIc = float(GIc)
         self.GIIc = float(GIIc)
         self.tauI = float(tauI)
@@ -239,6 +253,7 @@ class BilinearLaw(object):
                     ', open_only=True' if self.open_only else '')
                 + (', slip_offset=True' if self.slip_offset else '')
                 + (', opening_driven=True' if self.opening_driven else '')
+                + (', wake_offset=True' if self.wake_offset else '')
                 + ')')
 
     def consistency_error(self):
@@ -259,7 +274,7 @@ class BilinearLaw(object):
 
 def law_with_ratio(GIc, GIIc, tauI, KI, eta, kappa, name='',
                    open_only=False, slip_offset=False, opening_driven=False,
-                   shear_free=False):
+                   shear_free=False, wake_offset=False):
     r"""Bilinear law with the ratio of stiffnesses ``kappa`` and the shear
     strength of Eq. (1) of Turon et al. (2018)
 
@@ -281,7 +296,8 @@ def law_with_ratio(GIc, GIIc, tauI, KI, eta, kappa, name='',
     return BilinearLaw(GIc, GIIc, tauI, tauII, KI, eta, KII=KII,
                        name=name, open_only=open_only,
                        slip_offset=slip_offset,
-                       opening_driven=opening_driven)
+                       opening_driven=opening_driven,
+                       wake_offset=wake_offset)
 
 
 def _dbeta(B, eta):
@@ -295,7 +311,7 @@ def _dbeta(B, eta):
 
 
 def evaluate_laws(laws, du, dv, dw, r_old, mode_ratio='per-law',
-                  tangent=True, s0=None):
+                  tangent=True, s0=None, s0_wake=None):
     r"""Tractions, tangent, thresholds and damage of superposed laws at
     many points
 
@@ -318,6 +334,9 @@ def evaluate_laws(laws, du, dv, dw, r_old, mode_ratio='per-law',
         their `\Delta_{eq}` and `B` take the shear separations `\Delta_u -
         \Delta_{u0}`, `\Delta_v - \Delta_{v0}`; the tractions keep `\Delta_u`,
         `\Delta_v`. ``None`` for zero offsets.
+    s0_wake : np.ndarray or None, optional
+        The same for the laws with ``wake_offset``, see
+        :attr:`.CohesiveInterface.s0w`.
 
     Returns
     -------
@@ -353,6 +372,11 @@ def evaluate_laws(laws, du, dv, dw, r_old, mode_ratio='per-law',
         su_rel = du - s0[0]
         sv_rel = dv - s0[1]
         S_rel = su_rel*su_rel + sv_rel*sv_rel
+    if s0_wake is not None and any(getattr(l, 'wake_offset', False)
+                                   for l in laws):
+        su_w = du - s0_wake[0]
+        sv_w = dv - s0_wake[1]
+        S_w = su_w*su_w + sv_w*sv_w
     for i, law in enumerate(laws):
         if mode_ratio == 'per-law':
             a, b = law.KII, law.KI
@@ -369,6 +393,8 @@ def evaluate_laws(laws, du, dv, dw, r_old, mode_ratio='per-law',
             S, su, sv = zero, zero, zero
         elif s0 is not None and getattr(law, 'slip_offset', False):
             S, su, sv = S_rel, su_rel, sv_rel
+        elif s0_wake is not None and getattr(law, 'wake_offset', False):
+            S, su, sv = S_w, su_w, sv_w
         else:
             S, su, sv = S_tot, du, dv
         P = a*S + b*N
@@ -512,6 +538,11 @@ class CohesiveInterface(object):
         closed, `\Delta_w \le 0`, zero for a pristine interface. One offset
         per point serves all such laws, since it depends on the separations
         only. Updated by :meth:`commit`; unused without such laws.
+    s0w : np.ndarray
+        Slip offsets of the laws with ``wake_offset``, same shape: the shear
+        separations of the last converged state in which some law without
+        ``wake_offset`` was not failed at the point, `d < 1`. Updated by
+        :meth:`commit`; unused without such laws.
     dissipated : float
         Energy dissipated up to the last converged state, force*length,
         `\sum_g w_g \sum_\ell \int G_{c,\ell}(B) \, \mathrm{d} r_\ell`, with
@@ -627,6 +658,8 @@ class CohesiveInterface(object):
                           "mode ratio is not the sum of the B-K toughnesses",
                           UserWarning, stacklevel=2)
         self._slip_offset = any(l.slip_offset for l in self.laws)
+        self._wake_offset = any(l.wake_offset for l in self.laws)
+        self._tip = [i for i, l in enumerate(self.laws) if not l.wake_offset]
         self.reset()
 
     def reset(self):
@@ -635,6 +668,7 @@ class CohesiveInterface(object):
         self.r = np.zeros((len(self.laws), self.npts), dtype=DOUBLE)
         self.d = np.zeros_like(self.r)
         self.s0 = np.zeros((2, self.npts), dtype=DOUBLE)
+        self.s0w = np.zeros((2, self.npts), dtype=DOUBLE)
         self.dissipated = 0.
 
     def separations(self, c):
@@ -658,7 +692,8 @@ class CohesiveInterface(object):
             return tau, T, empty, empty
         return evaluate_laws(self.laws, du, dv, dw, self.r,
                              self.mode_ratio, tangent=tangent,
-                             s0=self.s0 if self._slip_offset else None)
+                             s0=self.s0 if self._slip_offset else None,
+                             s0_wake=self.s0w if self._wake_offset else None)
 
     def fint(self, c):
         r"""Internal force vector of the interface at ``c``"""
@@ -776,6 +811,7 @@ class CohesiveInterface(object):
         du, dv, dw = self.separations(c)
         S_tot = du*du + dv*dv
         S_rel = (du - self.s0[0])**2 + (dv - self.s0[1])**2
+        S_w = (du - self.s0w[0])**2 + (dv - self.s0w[1])**2
         N = np.maximum(dw, 0.)**2
         KIs = sum(l.KI for l in self.laws)
         KIIs = sum(l.KII for l in self.laws)
@@ -786,7 +822,8 @@ class CohesiveInterface(object):
             if law.opening_driven:
                 out[i] = law.GIc
                 continue
-            S = S_rel if law.slip_offset else S_tot
+            S = (S_rel if law.slip_offset else S_w if law.wake_offset
+                 else S_tot)
             P = a*S + b*N
             B = np.where(P > 0, a*S/np.where(P > 0, P, 1.), 0.)
             out[i] = law.Gc(B)
@@ -800,7 +837,9 @@ class CohesiveInterface(object):
         ``dissipated``. For laws with ``slip_offset``, the offsets of the
         points closed at ``c``, `\Delta_w \le 0`, become their shear
         separations at ``c``, after the thresholds are evaluated with the
-        previous offsets, as in the iterations.
+        previous offsets, as in the iterations; for laws with
+        ``wake_offset``, those of the points where a law without
+        ``wake_offset`` has not failed at ``c``.
 
         """
         if not self.laws:
@@ -816,6 +855,14 @@ class CohesiveInterface(object):
             closed = dw <= 0
             self.s0[0, closed] = du[closed]
             self.s0[1, closed] = dv[closed]
+        if self._wake_offset:
+            du, dv, dw = self.separations(c)
+            if self._tip:
+                follow = ~np.all(self.d[self._tip] >= 1., axis=0)
+            else:
+                follow = np.zeros(self.npts, bool)
+            self.s0w[0, follow] = du[follow]
+            self.s0w[1, follow] = dv[follow]
 
     def energy(self, c):
         r"""Free energy stored in the interface at ``c`` with the damage of
