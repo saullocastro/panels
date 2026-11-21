@@ -346,7 +346,10 @@ def load_line_control_vector(md, info):
         rows[comp] = (nullspace.mean_row(top, comp, 0., None, size, zt)
                       - nullspace.mean_row(bot, comp, 0., None, size, zb))
     c_lin = md.linear_static(lbd=1.)
-    sw = float((rows[nullspace.W] @ c_lin)[0])
+    #NOTE the linear analysis treats the pre-crack as open (no contact):
+    #     where the arms would close, e.g. the ENF, its negative opening is
+    #     an interpenetration and must not weigh the control
+    sw = max(float((rows[nullspace.W] @ c_lin)[0]), 0.)
     su = float((rows[nullspace.U] @ c_lin)[0])
     row = sw*rows[nullspace.W] + su*rows[nullspace.U]
     psi = np.asarray((md.get_Z().T @ row.T).todense()).ravel()
