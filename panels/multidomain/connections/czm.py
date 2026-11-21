@@ -147,6 +147,16 @@ class BilinearLaw(object):
         ahead of the crack tip, where `B = 1`. The thresholds are frozen
         there, so that no energy is dissipated and the damage does not
         decrease. Default ``False``, the law of Turon et al. (2018).
+    slip_offset : bool, optional
+        Only with ``open_only=True``. If ``True``, the damage of the law is
+        driven by the slip gained since the point was last closed,
+        `\Delta_{sh} = |\boldsymbol{\Delta}_s - \boldsymbol{\Delta}_{s0}|`,
+        in `\Delta_{eq}` and `B`, with the offset `\boldsymbol{\Delta}_{s0}`
+        of :attr:`.CohesiveInterface.s0`: a point that slid while closed and
+        reopens starts at `B = 0`, instead of `B \approx 1` and `G_o
+        \approx 0` for a law without shear strength. The tractions keep the
+        total slip, so that the undamaged response is unchanged. Default
+        ``False``.
 
     Raises
     ------
@@ -157,8 +167,11 @@ class BilinearLaw(object):
 
     """
     def __init__(self, GIc, GIIc, tauI, tauII, KI, eta, KII=None, name='',
-                 open_only=False):
+                 open_only=False, slip_offset=False):
         self.open_only = bool(open_only)
+        self.slip_offset = bool(slip_offset)
+        if self.slip_offset and not self.open_only:
+            raise ValueError('slip_offset requires open_only=True')
         self.GIc = float(GIc)
         self.GIIc = float(GIIc)
         self.tauI = float(tauI)
@@ -198,10 +211,11 @@ class BilinearLaw(object):
 
     def __repr__(self):
         return ('BilinearLaw(GIc={0}, GIIc={1}, tauI={2}, tauII={3}, KI={4}, '
-                'eta={5}, KII={6}{7})'.format(
+                'eta={5}, KII={6}{7}'.format(
                     self.GIc, self.GIIc, self.tauI, self.tauII, self.KI,
                     self.eta, self.KII,
-                    ', open_only=True' if self.open_only else ''))
+                    ', open_only=True' if self.open_only else '')
+                + (', slip_offset=True' if self.slip_offset else '') + ')')
 
     def consistency_error(self):
         r"""Relative violation of `G_{Ic}/G_{oI} = G_{IIc}/G_{oII}`, Eq. (1)
@@ -220,7 +234,7 @@ class BilinearLaw(object):
 
 
 def law_with_ratio(GIc, GIIc, tauI, KI, eta, kappa, name='',
-                   open_only=False):
+                   open_only=False, slip_offset=False):
     r"""Bilinear law with the ratio of stiffnesses ``kappa`` and the shear
     strength of Eq. (1) of Turon et al. (2018)
 
@@ -232,7 +246,8 @@ def law_with_ratio(GIc, GIIc, tauI, KI, eta, kappa, name='',
     """
     tauII = tauI*np.sqrt(kappa*GIIc/GIc)
     return BilinearLaw(GIc, GIIc, tauI, tauII, KI, eta, KII=kappa*KI,
-                       name=name, open_only=open_only)
+                       name=name, open_only=open_only,
+                       slip_offset=slip_offset)
 
 
 def _dbeta(B, eta):
@@ -246,7 +261,7 @@ def _dbeta(B, eta):
 
 
 def evaluate_laws(laws, du, dv, dw, r_old, mode_ratio='per-law',
-                  tangent=True):
+                  tangent=True, s0=None):
     r"""Tractions, tangent, thresholds and damage of superposed laws at
     many points
 
@@ -263,6 +278,12 @@ def evaluate_laws(laws, du, dv, dw, r_old, mode_ratio='per-law',
         ``'per-law'`` (default) or ``'summed'``, see the module notes.
     tangent : bool, optional
         Whether the tangent is computed.
+    s0 : np.ndarray or None, optional
+        Slip offsets `(\Delta_{u0}, \Delta_{v0})` of the last converged
+        state, shape ``(2, npts)``, used by the laws with ``slip_offset``:
+        their `\Delta_{eq}` and `B` take the shear separations `\Delta_u -
+        \Delta_{u0}`, `\Delta_v - \Delta_{v0}`; the tractions keep `\Delta_u`,
+        `\Delta_v`. ``None`` for zero offsets.
 
     Returns
     -------
@@ -291,6 +312,12 @@ def evaluate_laws(laws, du, dv, dw, r_old, mode_ratio='per-law',
     sep = np.vstack((du, dv, wp))
     KIsum = sum(l.KI for l in laws)
     KIIsum = sum(l.KII for l in laws)
+    S_tot, su, sv = S, du, dv
+    if s0 is not None and any(getattr(l, 'slip_offset', False)
+                              for l in laws):
+        su_rel = du - s0[0]
+        sv_rel = dv - s0[1]
+        S_rel = su_rel*su_rel + sv_rel*sv_rel
     for i, law in enumerate(laws):
         if mode_ratio == 'per-law':
             a, b = law.KII, law.KI
@@ -298,6 +325,14 @@ def evaluate_laws(laws, du, dv, dw, r_old, mode_ratio='per-law',
             a, b = KIIsum, KIsum
         else:
             raise ValueError("mode_ratio must be 'per-law' or 'summed'")
+        #NOTE slip_offset: the damage driver uses the slip since the last
+        #     closed converged state; the offset is constant within the
+        #     increment, and where the point is closed the damage of an
+        #     open_only law does not grow, so the offset does not matter
+        if s0 is not None and getattr(law, 'slip_offset', False):
+            S, su, sv = S_rel, su_rel, sv_rel
+        else:
+            S, su, sv = S_tot, du, dv
         P = a*S + b*N
         Q = a*a*S + b*b*N
         sep_nz = P > 0
@@ -369,8 +404,9 @@ def evaluate_laws(laws, du, dv, dw, r_old, mode_ratio='per-law',
             - (lamL/loL - 1.)/(rhoL - 1.)**2*drho_dB
         dH_dS = dH_dlam*dlam_dS + dH_dB*dB_dS
         dH_dN = dH_dlam*dlam_dN + dH_dB*dB_dN
-        # dS/d(du, dv, dw) = (2du, 2dv, 0), dN/d(du, dv, dw) = (0, 0, 2<dw>)
-        dH = np.vstack((2*du[L]*dH_dS, 2*dv[L]*dH_dS, 2*wp[L]*dH_dN))
+        # dS/d(du, dv, dw) = (2du, 2dv, 0), dN/d(du, dv, dw) = (0, 0, 2<dw>),
+        # du, dv less the constant offsets for slip_offset
+        dH = np.vstack((2*su[L]*dH_dS, 2*sv[L]*dH_dS, 2*wp[L]*dH_dN))
         rL = ri[L]
         dd_dr = rhoL/(rL*rhoL + 1. - rL)**2
         t_undamaged = Keff[:, L]*sep[:, L]
@@ -431,6 +467,13 @@ class CohesiveInterface(object):
         nr_y_gauss*nr_x_gauss)``.
     d : np.ndarray
         Damage variables of the last converged state, same shape.
+    s0 : np.ndarray
+        Slip offsets `(\Delta_{u0}, \Delta_{v0})` of the laws with
+        ``slip_offset``, shape ``(2, nr_y_gauss*nr_x_gauss)``: the shear
+        separations of the last converged state in which the point was
+        closed, `\Delta_w \le 0`, zero for a pristine interface. One offset
+        per point serves all such laws, since it depends on the separations
+        only. Updated by :meth:`commit`; unused without such laws.
     dissipated : float
         Energy dissipated up to the last converged state, force*length,
         `\sum_g w_g \sum_\ell \int G_{c,\ell}(B) \, \mathrm{d} r_\ell`, with
@@ -545,6 +588,7 @@ class CohesiveInterface(object):
                           "of the laws: the energy dissipated under a constant "
                           "mode ratio is not the sum of the B-K toughnesses",
                           UserWarning, stacklevel=2)
+        self._slip_offset = any(l.slip_offset for l in self.laws)
         self.reset()
 
     def reset(self):
@@ -552,6 +596,7 @@ class CohesiveInterface(object):
         dissipated"""
         self.r = np.zeros((len(self.laws), self.npts), dtype=DOUBLE)
         self.d = np.zeros_like(self.r)
+        self.s0 = np.zeros((2, self.npts), dtype=DOUBLE)
         self.dissipated = 0.
 
     def separations(self, c):
@@ -574,7 +619,8 @@ class CohesiveInterface(object):
             empty = np.zeros((0, self.npts))
             return tau, T, empty, empty
         return evaluate_laws(self.laws, du, dv, dw, self.r,
-                             self.mode_ratio, tangent=tangent)
+                             self.mode_ratio, tangent=tangent,
+                             s0=self.s0 if self._slip_offset else None)
 
     def fint(self, c):
         r"""Internal force vector of the interface at ``c``"""
@@ -690,7 +736,8 @@ class CohesiveInterface(object):
         r"""`G_c(B)` of each law at the points, with the mode ratio of
         ``mode_ratio``"""
         du, dv, dw = self.separations(c)
-        S = du*du + dv*dv
+        S_tot = du*du + dv*dv
+        S_rel = (du - self.s0[0])**2 + (dv - self.s0[1])**2
         N = np.maximum(dw, 0.)**2
         KIs = sum(l.KI for l in self.laws)
         KIIs = sum(l.KII for l in self.laws)
@@ -698,6 +745,7 @@ class CohesiveInterface(object):
         for i, law in enumerate(self.laws):
             a, b = ((law.KII, law.KI) if self.mode_ratio == 'per-law'
                     else (KIIs, KIs))
+            S = S_rel if law.slip_offset else S_tot
             P = a*S + b*N
             B = np.where(P > 0, a*S/np.where(P > 0, P, 1.), 0.)
             out[i] = law.Gc(B)
@@ -708,7 +756,10 @@ class CohesiveInterface(object):
 
         The thresholds and the damage variables become those of ``c``, and
         the energy dissipated since the last converged state is added to
-        ``dissipated``.
+        ``dissipated``. For laws with ``slip_offset``, the offsets of the
+        points closed at ``c``, `\Delta_w \le 0`, become their shear
+        separations at ``c``, after the thresholds are evaluated with the
+        previous offsets, as in the iterations.
 
         """
         if not self.laws:
@@ -719,6 +770,11 @@ class CohesiveInterface(object):
         self.dissipated += float(np.sum(self.weights*np.sum(Gc*dr, axis=0)))
         self.r = r_new
         self.d = d_new
+        if self._slip_offset:
+            du, dv, dw = self.separations(c)
+            closed = dw <= 0
+            self.s0[0, closed] = du[closed]
+            self.s0[1, closed] = dv[closed]
 
     def energy(self, c):
         r"""Free energy stored in the interface at ``c`` with the damage of

@@ -244,3 +244,170 @@ def test_open_only_law_does_not_grow_damage_when_closed():
     _, _, r2, _ = evaluate_laws([ref], du, du, dw, np.zeros((1, 2)),
                                 tangent=False)
     assert np.allclose(r1, r2) and np.all(r1 > 0)
+
+def _bridging(slip_offset):
+    kappa = 0.2112
+    return law_with_ratio(0.25, 0., 5.5, 9.17e4, 2.9, kappa, open_only=True,
+                          slip_offset=slip_offset)
+
+
+def test_slip_offset_requires_open_only():
+    with pytest.raises(ValueError, match='open_only'):
+        law_with_ratio(0.25, 1e-4, 5.5, 9.17e4, 2.9, 0.2, slip_offset=True)
+
+
+def test_slip_offset_leaves_other_laws_unchanged():
+    """Offsets change nothing for laws without slip_offset, and a
+    slip_offset law with zero offsets is the open_only law"""
+    rng = np.random.default_rng(3)
+    n = 200
+    d = rng.normal(size=(3, n))*1e-3
+    s0 = rng.normal(size=(2, n))*1e-3
+    r_old = rng.uniform(0, 0.5, (3, n))
+    laws = laws_B()
+    out0 = evaluate_laws(laws, *d, r_old)
+    out1 = evaluate_laws(laws, *d, r_old, s0=s0)
+    for a, b in zip(out0, out1):
+        assert np.array_equal(a, b)
+    oo = [_bridging(False)]
+    so = [_bridging(True)]
+    for a, b in zip(evaluate_laws(oo, *d, r_old[:1]),
+                    evaluate_laws(so, *d, r_old[:1], s0=np.zeros((2, n)))):
+        assert np.array_equal(a, b)
+    # undamaged tractions do not depend on the offsets
+    t0, _, _, _ = evaluate_laws(so, *d, np.zeros((1, n)), tangent=False)
+    t1, _, _, _ = evaluate_laws(so, *d, np.zeros((1, n)), s0=s0,
+                                tangent=False)
+    closed = d[2] <= 0
+    assert np.array_equal(t0[:, closed], t1[:, closed])
+
+
+def _point_history(laws, path):
+    """Converged history of one point along ``path``, with the commit
+    rule of CohesiveInterface: thresholds from the previous offset, then
+    the offset follows the slip where the point is closed"""
+    r = np.zeros((len(laws), 1))
+    s0 = np.zeros((2, 1))
+    rs, diss = [], 0.
+    for du, dv, dw in path:
+        sep = [np.array([x]) for x in (du, dv, dw)]
+        _, _, r_new, _ = evaluate_laws(laws, *sep, r, tangent=False, s0=s0)
+        S = (du - s0[0, 0])**2 + (dv - s0[1, 0])**2 if laws[0].slip_offset \
+            else du**2 + dv**2
+        N = max(dw, 0.)**2
+        law = laws[0]
+        P = law.KII*S + law.KI*N
+        B = law.KII*S/P if P > 0 else 0.
+        diss += law.Gc(B)*(r_new[0, 0] - r[0, 0])
+        r = r_new
+        if dw <= 0:
+            s0[:, 0] = du, dv
+        rs.append(r[0, 0])
+    return np.array(rs), diss
+
+
+@pytest.mark.parametrize('nsteps', [50, 400])
+def test_slip_offset_closed_slide_reopen(nsteps):
+    """A point opened to r = r_pre, closed, slid while closed and reopened:
+    open_only alone fails it at once without dissipation; with slip_offset
+    the threshold stays at r_pre and grows continuously to failure, the
+    dissipation is G_Ic, the same for any step size"""
+    law = _bridging(True)
+    lo = law.tauI/law.KI
+    lf = 2*law.GIc/law.tauI
+    w1 = lo + 0.3*(lf - lo)
+    up = [(0., 0., w) for w in np.linspace(0, w1, nsteps)]
+    close = [(0., 0., w) for w in np.linspace(w1, -1e-5, nsteps)]
+    slide = [(s, 0., -1e-5) for s in np.linspace(0, 1e-3, nsteps)]
+    # first reopened state with an opening of 1e-3 times the slip, the
+    # limit of small increments
+    reopen = [(1e-3, 0., 1e-6)] +         [(1e-3, 0., w) for w in np.linspace(1e-6, 1.2*lf, 4*nsteps)[1:]]
+    path = up + close + slide + reopen
+    i_re = len(up) + len(close) + len(slide)
+    r, diss = _point_history([law], path)
+    r_pre = r[len(up) - 1]
+    assert 0.25 < r_pre < 0.35
+    assert np.all(r[len(up):i_re] == r_pre)
+    # first reopened states: no jump
+    first = i_re
+    assert abs(r[first] - r_pre) < 1e-12
+    assert np.all(np.diff(r) >= 0)
+    assert np.max(np.diff(r)) < 2./nsteps
+    assert r[-1] == 1.
+    assert abs(diss - law.GIc) < 1e-12*law.GIc
+    # the open_only law without the offset fails at once on reopening
+    r_oo, diss_oo = _point_history([_bridging(False)], path)
+    assert r_oo[first] == 1.
+    assert diss_oo < 0.4*law.GIc
+
+
+def test_slip_offset_tangent_finite_differences():
+    laws = laws_B()[:2] + [_bridging(True)]
+    rng = np.random.default_rng(4)
+    scale = max(l.tauI/l.KI for l in laws)*5
+    n = 400
+    d = rng.normal(size=(3, n))*scale
+    d[2] = np.where(rng.uniform(size=n) < 0.8, abs(d[2]), d[2])
+    s0 = d[:2] + rng.normal(size=(2, n))*scale*0.3
+    r_old = rng.uniform(0, 0.6, (len(laws), n))
+    _, T, r_new, _ = evaluate_laws(laws, *d, r_old, s0=s0)
+    h = 1e-5*np.linalg.norm(d, axis=0)
+    Tfd = np.zeros_like(T)
+    ok = np.ones(n, bool)
+    for j in range(3):
+        e = np.zeros((3, n))
+        e[j] = h
+        tp, _, rp, _ = evaluate_laws(laws, *(d + e), r_old, tangent=False,
+                                     s0=s0)
+        tm, _, rm, _ = evaluate_laws(laws, *(d - e), r_old, tangent=False,
+                                     s0=s0)
+        ok &= np.all((rp > r_old) == (rm > r_old), axis=0)
+        ok &= np.all((rp >= 1) == (rm >= 1), axis=0)
+        ok &= np.sign(d[2] + h) == np.sign(d[2] - h)
+        Tfd[:, j] = (tp - tm)/(2*h)
+    # the bridging law grows damage at some of the compared points
+    grows = (r_new[2] > r_old[2]) & (r_new[2] < 1) & ok
+    assert grows.sum() > 20
+    scale_T = np.abs(Tfd).max(axis=(0, 1))
+    ok &= scale_T > 0
+    err = np.abs(T - Tfd).max(axis=(0, 1))[ok]/scale_T[ok]
+    assert ok.sum() > n/2
+    assert err.max() < 1e-7
+
+
+def test_slip_offset_commit_interface():
+    """CohesiveInterface keeps the offsets as converged history: updated
+    only by commit, where the point is closed"""
+    top, bot = _plates('plate_clpt_donnell')
+    law = _bridging(True)
+    conn = [dict(p1=top, p2=bot, func='CZM', laws=[law], nr_x_gauss=4,
+                 nr_y_gauss=2)]
+    md = MultiDomain([bot, top], conn, conn_method='penalty',
+                     pd_method='penalty')
+    iface = md.cohesive_interfaces()[0]
+    npts = iface.npts
+    sep = {}
+    iface.separations = lambda c: sep[c]
+    lo = law.tauI/law.KI
+    lf = 2*law.GIc/law.tauI
+    one = np.ones(npts)
+    sep[0] = (0*one, 0*one, (lo + 0.3*(lf - lo))*one)
+    sep[1] = (1e-3*one, 0*one, -1e-5*one)
+    sep[2] = (1e-3*one, 0*one, 1.01*(lo + 0.3*(lf - lo))*one)
+    iface.commit(0)
+    r_pre = iface.r.copy()
+    assert np.all(iface.s0 == 0)
+    iface.state(1)
+    assert np.all(iface.s0 == 0)
+    iface.commit(1)
+    assert np.all(iface.s0[0] == 1e-3) and np.all(iface.s0[1] == 0)
+    assert np.array_equal(iface.r, r_pre)
+    diss = iface.dissipated
+    iface.commit(2)
+    assert np.all(iface.s0[0] == 1e-3)
+    assert np.all(iface.r > r_pre) and np.all(iface.r < r_pre + 0.02)
+    # pure mode I growth, G_c = G_Ic
+    np.testing.assert_allclose(iface.dissipated - diss,
+        law.GIc*np.sum(iface.weights*(iface.r - r_pre)[0]), rtol=1e-12)
+    iface.reset()
+    assert np.all(iface.s0 == 0)
