@@ -224,3 +224,23 @@ def test_law_without_shear_strength_fails_on_closed_sliding():
         _, _, r, d = evaluate_laws([law], du, dv, dw, np.zeros((1, 1)),
                                    tangent=False)
         assert r[0, 0] == r_exp
+
+def test_open_only_law_does_not_grow_damage_when_closed():
+    """open_only: closed sliding leaves the threshold unchanged, also for
+    G_IIc = 0; an opening grows it as for the default law"""
+    kappa = 0.2
+    law = law_with_ratio(0.25, 0., 5.5, 9.17e4, 2.9, kappa, open_only=True)
+    ref = law_with_ratio(0.25, 1e-4, 5.5, 9.17e4, 2.9, kappa)
+    r0 = np.full((1, 2), 0.1)
+    du = np.array([1e-3, 1e-3])
+    dw = np.array([-1e-4, 0.])
+    _, T, r, _ = evaluate_laws([law], du, np.zeros(2), dw, r0)
+    assert np.all(r == 0.1)
+    assert np.all(np.isfinite(T))
+    dw = np.array([5e-3, 5e-3])
+    du = np.zeros(2)
+    _, _, r1, _ = evaluate_laws([law], du, du, dw, np.zeros((1, 2)),
+                                tangent=False)
+    _, _, r2, _ = evaluate_laws([ref], du, du, dw, np.zeros((1, 2)),
+                                tangent=False)
+    assert np.allclose(r1, r2) and np.all(r1 > 0)

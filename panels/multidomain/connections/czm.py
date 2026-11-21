@@ -140,6 +140,13 @@ class BilinearLaw(object):
         Turon et al. (2018), see the module notes.
     name : str, optional
         Label.
+    open_only : bool, optional
+        If ``True``, the damage of the law grows only where the interface
+        is open, `\Delta_w > 0`: a mechanism that needs an open crack, e.g.
+        fibre bridging, is not damaged by the sliding of a closed interface
+        ahead of the crack tip, where `B = 1`. The thresholds are frozen
+        there, so that no energy is dissipated and the damage does not
+        decrease. Default ``False``, the law of Turon et al. (2018).
 
     Raises
     ------
@@ -149,7 +156,9 @@ class BilinearLaw(object):
         ``KII`` cannot be found from Eq. (1).
 
     """
-    def __init__(self, GIc, GIIc, tauI, tauII, KI, eta, KII=None, name=''):
+    def __init__(self, GIc, GIIc, tauI, tauII, KI, eta, KII=None, name='',
+                 open_only=False):
+        self.open_only = bool(open_only)
         self.GIc = float(GIc)
         self.GIIc = float(GIIc)
         self.tauI = float(tauI)
@@ -178,7 +187,7 @@ class BilinearLaw(object):
                           'separations, see the notes of '
                           'panels.multidomain.connections.czm'.format(
                               self.eta), UserWarning, stacklevel=2)
-        if self.GoII == 0. and self.KII > 0.:
+        if self.GoII == 0. and self.KII > 0. and not self.open_only:
             warnings.warn('Law without shear strength: its onset separation '
                           'is zero at B = 1, so any sliding of a closed '
                           'interface, round-off included, fails it without '
@@ -189,9 +198,10 @@ class BilinearLaw(object):
 
     def __repr__(self):
         return ('BilinearLaw(GIc={0}, GIIc={1}, tauI={2}, tauII={3}, KI={4}, '
-                'eta={5}, KII={6})'.format(self.GIc, self.GIIc, self.tauI,
-                                           self.tauII, self.KI, self.eta,
-                                           self.KII))
+                'eta={5}, KII={6}{7})'.format(
+                    self.GIc, self.GIIc, self.tauI, self.tauII, self.KI,
+                    self.eta, self.KII,
+                    ', open_only=True' if self.open_only else ''))
 
     def consistency_error(self):
         r"""Relative violation of `G_{Ic}/G_{oI} = G_{IIc}/G_{oII}`, Eq. (1)
@@ -209,7 +219,8 @@ class BilinearLaw(object):
         return self.GoI + (self.GoII - self.GoI)*B**self.eta
 
 
-def law_with_ratio(GIc, GIIc, tauI, KI, eta, kappa, name=''):
+def law_with_ratio(GIc, GIIc, tauI, KI, eta, kappa, name='',
+                   open_only=False):
     r"""Bilinear law with the ratio of stiffnesses ``kappa`` and the shear
     strength of Eq. (1) of Turon et al. (2018)
 
@@ -221,7 +232,7 @@ def law_with_ratio(GIc, GIIc, tauI, KI, eta, kappa, name=''):
     """
     tauII = tauI*np.sqrt(kappa*GIIc/GIc)
     return BilinearLaw(GIc, GIIc, tauI, tauII, KI, eta, KII=kappa*KI,
-                       name=name)
+                       name=name, open_only=open_only)
 
 
 def _dbeta(B, eta):
@@ -300,7 +311,11 @@ def evaluate_laws(laws, du, dv, dw, r_old, mode_ratio='per-law',
         Gc = law.GIc + (law.GIIc - law.GIc)*Bn
         KB = law.KI*(1. - B) + law.KII*B
         no_capacity = Go <= 0.
-        rho = np.full(npts, np.inf)
+        #NOTE where G_o = 0 (B = 1 for a law without shear strength),
+        #     G_c/G_o is 0/0; its limit for a law that satisfies Eq. (1) is
+        #     the constant G_Ic/G_oI, which gives the damage of a frozen
+        #     threshold (open_only)
+        rho = np.full(npts, law.GIc/law.GoI)
         cap = ~no_capacity
         rho[cap] = Gc[cap]/Go[cap]
         lo = np.zeros(npts)
@@ -309,6 +324,9 @@ def evaluate_laws(laws, du, dv, dw, r_old, mode_ratio='per-law',
         act = cap & sep_nz
         H[act] = (lam[act]/lo[act] - 1.)/(rho[act] - 1.)
         H[no_capacity] = np.inf
+        if law.open_only:
+            # no damage growth where the interface is closed
+            H[~opening] = -np.inf
         Hc = np.clip(H, 0., 1.)
         ri = np.maximum(r_old[i], Hc)
         r_new[i] = ri
