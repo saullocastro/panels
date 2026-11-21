@@ -210,3 +210,17 @@ def test_pristine_interface_tends_to_sb(model):
     # converges to the exact bond, the error decreasing with the stiffness
     assert errs[0] > errs[1] > errs[2]
     assert errs[2] < 1e-3
+
+
+def test_law_without_shear_strength_fails_on_closed_sliding():
+    """A law with G_IIc = 0 fails on round-off sliding of a closed
+    interface (B = 1, zero onset); a small positive G_IIc does not"""
+    kappa = 0.2
+    with pytest.warns(UserWarning, match='shear strength'):
+        zero = law_with_ratio(0.25, 0., 5.5, 9.17e4, 2.9, kappa)
+    small = law_with_ratio(0.25, 1e-4, 5.5, 9.17e4, 2.9, kappa)
+    du, dv, dw = np.array([1e-10]), np.zeros(1), np.array([-1e-5])
+    for law, r_exp in ((zero, 1.), (small, 0.)):
+        _, _, r, d = evaluate_laws([law], du, dv, dw, np.zeros((1, 1)),
+                                   tangent=False)
+        assert r[0, 0] == r_exp

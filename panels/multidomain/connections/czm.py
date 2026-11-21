@@ -124,7 +124,11 @@ class BilinearLaw(object):
         Fracture toughnesses in mode I and in shear (modes II and III),
         force/length. ``GIIc`` may be zero for a law that represents a
         mechanism active in mode I only, e.g. fibre bridging, together with
-        ``tauII = 0`` and an explicit ``KII``.
+        ``tauII = 0`` and an explicit ``KII``. Such a law fails at once
+        wherever the interface is closed and slides, since `B = 1` there and
+        its onset separation is zero; round-off sliding suffices, e.g. ahead
+        of the crack tip of a symmetric DCB. A small positive ``GIIc`` with
+        ``tauII`` from Eq. (1) avoids this (a warning is issued).
     tauI, tauII : float
         Strengths, the tractions at damage onset in pure mode, stress.
     KI : float
@@ -174,6 +178,14 @@ class BilinearLaw(object):
                           'separations, see the notes of '
                           'panels.multidomain.connections.czm'.format(
                               self.eta), UserWarning, stacklevel=2)
+        if self.GoII == 0. and self.KII > 0.:
+            warnings.warn('Law without shear strength: its onset separation '
+                          'is zero at B = 1, so any sliding of a closed '
+                          'interface, round-off included, fails it without '
+                          'dissipating energy, e.g. ahead of a crack tip. '
+                          'Prefer a small positive GIIc and tauII from '
+                          'Eq. (1), see law_with_ratio', UserWarning,
+                          stacklevel=2)
 
     def __repr__(self):
         return ('BilinearLaw(GIc={0}, GIIc={1}, tauI={2}, tauII={3}, KI={4}, '

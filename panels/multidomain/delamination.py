@@ -292,14 +292,22 @@ def create_coupon(kind, laminaprop, plyt, stack, b, a0, laws, L=None, c=None,
 def crack_length(md, info, threshold=1.):
     r"""Crack length from the load line: the largest `x` up to which all
     the points of the cohesive interfaces across the width have every damage
-    variable at ``threshold`` or above, plus `a_0`"""
+    variable at ``threshold`` or above, plus `a_0`
+
+    With superposed laws that include bridging laws, the crack tip is where
+    the crack-tip laws have failed, while the bridging laws still carry
+    traction in the wake: give their indices in ``info['tip_laws']``
+    (default: all laws).
+    """
     a = info['a0']
+    tip = info.get('tip_laws')
     for ci in info['cohesive']:
         iface = md._czm.get(id(ci))
         if iface is None or iface.d.size == 0:
             continue
         nx, ny = iface.nr_x_gauss, iface.nr_y_gauss
-        dmin = iface.d.min(axis=0).reshape(ny, nx)
+        dd = iface.d if tip is None else iface.d[list(tip)]
+        dmin = dd.min(axis=0).reshape(ny, nx)
         failed = np.all(dmin >= threshold, axis=0)
         x = iface.p_top.x0 + iface.x[:nx]
         if failed.all():
