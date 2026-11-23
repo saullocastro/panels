@@ -738,3 +738,25 @@ def test_save_and_load():
     assert q.point_pds_values == p.point_pds_values
     assert q.point_pds_values_inc == p.point_pds_values_inc
     assert np.allclose(md2.get_cp()[1], md.get_cp()[1])
+
+
+def test_messages_offset_and_undefined_resultant():
+    r"""The error of inconsistent prescriptions of `u` at a thickness
+    coordinate names the coordinate; the resultant of a prescribed line
+    whose end is shared with a prescription not selected is not defined and
+    raises an error"""
+    p = plate(1., 0.6)
+    p.add_distr_pd_fixed_x(1., ku=1., funcu=lambda y: -1e-3, z=1e-3)
+    p.add_distr_pd_fixed_y(0., ku=1., funcu=lambda x: 0., z=1e-3)
+    md = MultiDomain([p], conn=[], pd_method='null-space')
+    with pytest.raises(ValueError, match=r'u at z = 0\.001 along'):
+        md.get_cp()
+    p.clear_disps()
+    p.add_distr_pd_fixed_x(1., ku=1., funcu=lambda y: -1e-3*y)
+    p.add_distr_pd_fixed_y(0., ku=1., funcu=lambda x: 0.)
+    p.add_point_pd(0., 0.3, None, None, 1., 0., None, None)
+    md = MultiDomain([p], conn=[], pd_method='null-space')
+    c = md.linear_static()
+    with pytest.raises(ValueError, match='reaction resultant of the '
+                                         'selected lines is not defined'):
+        md.reaction_resultant(c, [(p, 'x', 1.)], NLgeom=False)

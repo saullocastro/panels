@@ -8,7 +8,11 @@ Verification of :mod:`panels.multidomain.connections.czm`:
 - along paths that change the mode ratio, including unloading and closure,
   no damage variable decreases, and the dissipated energy at failure lies
   between the sums of the pure-mode toughnesses of the laws;
-- the consistent tangent equals central finite differences of the tractions;
+- the consistent tangent equals central finite differences of the tractions,
+  also with ``mode_ratio='summed'`` and `\eta = 1`, and that of a
+  contact-only interface those of its internal force vector;
+- the free energy and the resultants of a uniform separation are those of
+  the closed form, for a law and for the contact;
 - the separation operators of ``'CZM'`` are those of ``'SB_TSL'`` for the
   classical laminated plate theory, and a pristine ``'CZM'`` interface
   between two FSDT plates tends to the perfect bond ``'SB'`` as the penalty
@@ -706,3 +710,175 @@ def test_wake_offset_commit_interface():
         br.Gc(B)*np.sum(iface.weights*(iface.r[1] - r2)), rtol=1e-12)
     iface.reset()
     assert np.all(iface.s0w == 0)
+
+
+def test_law_input_errors():
+    """Each invalid law raises its error: no shear toughness without
+    ``KII``, `G_{Ic}` not above the elastic energy at onset, `G_{IIc}` not
+    above it; and an unknown ``mode_ratio`` of :func:`.evaluate_laws`"""
+    with pytest.raises(ValueError, match='needs KII'):
+        BilinearLaw(0.25, 0., 5.5, 0., 9e4, 2.)
+    with pytest.raises(ValueError, match='G_Ic = 0.0001 must exceed'):
+        BilinearLaw(1e-4, 1., 80., 100., 1e5, 2.)
+    with pytest.raises(ValueError, match='G_IIc = 0.01 must exceed'):
+        BilinearLaw(1., 0.01, 30., 100., 1e5, 2., KII=1e5)
+    z = np.zeros(1)
+    with pytest.raises(ValueError, match="mode_ratio must be 'per-law' or "
+                                         "'summed'"):
+        evaluate_laws(laws_A(), z, z, z, np.zeros((1, 1)), mode_ratio='max')
+
+
+def laws_eta1():
+    kappa = 0.5
+    return [law_with_ratio(0.5, 1.5, 60., 1e5, 1., kappa),
+            law_with_ratio(0.2, 0.4, 20., 1e4, 1., kappa)]
+
+
+@pytest.mark.parametrize('laws', [laws_B, laws_eta1])
+def test_tangent_finite_differences_summed(laws):
+    """``mode_ratio='summed'``, also with the linear Benzeggagh-Kenane
+    exponent `\\eta = 1`, whose derivative of `B^\\eta` is 1 at `B = 0`
+    (closed form): the consistent tangent equals central finite differences
+    of the tractions, as in test_tangent_finite_differences"""
+    from panels.multidomain.connections.czm import _dbeta
+    np.testing.assert_array_equal(_dbeta(np.array([0., 0.3]), 1.), [1., 1.])
+    laws = laws()
+    rng = np.random.default_rng(3)
+    scale = max(l.tauI/l.KI for l in laws)*5
+    n = 400
+    d = rng.normal(size=(3, n))*scale
+    d[2] = np.where(rng.uniform(size=n) < 0.8, abs(d[2]), d[2])
+    r_old = rng.uniform(0, 0.6, (len(laws), n))
+    _, T, r_new, _ = evaluate_laws(laws, *d, r_old, 'summed')
+    h = 1e-5*np.linalg.norm(d, axis=0)
+    Tfd = np.zeros_like(T)
+    ok = np.ones(n, bool)
+    for j in range(3):
+        e = np.zeros((3, n))
+        e[j] = h
+        tp, _, rp, _ = evaluate_laws(laws, *(d + e), r_old, 'summed',
+                                     tangent=False)
+        tm, _, rm, _ = evaluate_laws(laws, *(d - e), r_old, 'summed',
+                                     tangent=False)
+        ok &= np.all((rp > r_old) == (rm > r_old), axis=0)
+        ok &= np.all((rp >= 1) == (rm >= 1), axis=0)
+        ok &= np.sign(d[2] + h) == np.sign(d[2] - h)
+        Tfd[:, j] = (tp - tm)/(2*h)
+    assert np.any(r_new[:, ok] > r_old[:, ok])
+    scale_T = np.abs(Tfd).max(axis=(0, 1))
+    ok &= scale_T > 0
+    err = np.abs(T - Tfd).max(axis=(0, 1))[ok]/scale_T[ok]
+    assert ok.sum() > n/2
+    assert err.max() < 1e-7
+
+
+def test_tangent_at_zero_separation_is_pristine():
+    """At zero separation the tangent of a pristine law is
+    `\\mathrm{diag}(K_{II}, K_{II}, K_I)`, the limit of the tangent for an
+    opening and for a closure (closed form), which the linear analyses use"""
+    law = laws_A()[0]
+    z = np.zeros(1)
+    _, T, _, _ = evaluate_laws([law], z, z, z, np.zeros((1, 1)))
+    np.testing.assert_array_equal(T[:, :, 0],
+                                  np.diag([law.KII, law.KII, law.KI]))
+
+
+def test_interface_input_errors_and_warnings():
+    """:class:`.CohesiveInterface` raises its errors, for domains of
+    different positions, without ``col_start`` and for a contact-only
+    interface without ``k_contact``, and warns for a law that violates Eq.
+    (1) of Turon et al. (2018) and for ``mode_ratio='summed'`` with
+    different ratios `K_{II}/K_I`; an assembly without connections has no
+    cohesive interface"""
+    top, bot = _plates('plate_clpt_donnell')
+    with pytest.raises(ValueError, match='col_start of the domains'):
+        CohesiveInterface(top, bot, laws_A(), 4, 2, 10)
+    other = Shell(group='o', x0=1., y0=0, a=top.a, b=top.b, m=4, n=4,
+                  plyt=0.14, stack=[0]*8, laminaprop=top.laminaprop,
+                  model='plate_clpt_donnell')
+    with pytest.raises(ValueError, match="must have the same x0"):
+        CohesiveInterface(top, other, laws_A(), 4, 2, 10)
+    md = MultiDomain([bot, top])
+    assert md.cohesive_interfaces() == []
+    size = md.get_size()
+    with pytest.raises(ValueError, match='contact-only interface needs '
+                                         'k_contact'):
+        CohesiveInterface(top, bot, [], 4, 2, size)
+    bad = BilinearLaw(0.969, 1.719, 80., 100., 1e5, 2., KII=1e5)
+    assert bad.consistency_error() > 1e-6
+    with pytest.warns(UserWarning, match='violates Eq. \\(1\\)'):
+        CohesiveInterface(top, bot, [bad], 4, 2, size)
+    with pytest.warns(UserWarning, match="mode_ratio='summed' with different"):
+        CohesiveInterface(top, bot, laws_A() + [laws_B()[0]], 4, 2, size,
+                          mode_ratio='summed')
+
+
+def test_contact_only_tangent_finite_differences():
+    """Contact-only interface, ``laws=[]``: the tangent of the closed
+    points equals central finite differences of the internal force vector,
+    and its product by a vector equals that of :meth:`.kTv` (other
+    formulation); without contact the tangent is null"""
+    top, bot = _plates('plate_clpt_donnell', m=6, n=4)
+    md = MultiDomain([bot, top])
+    md.get_size()
+    iface = CohesiveInterface(top, bot, [], 6, 3, md.get_size(),
+                              k_contact=1e5, contact_eps=1e-5)
+    rng = np.random.default_rng(4)
+    c = rng.normal(size=iface.size)*1e-3
+    _, _, dw = iface.separations(c)
+    assert np.any(dw < -1e-5) and np.any(dw > 0)
+    K = iface.kT(c)
+    v = rng.normal(size=iface.size)*1e-3
+    h = 1e-6
+    fd = (iface.fint(c + h*v) - iface.fint(c - h*v))/(2*h)
+    np.testing.assert_allclose(K @ v, fd, rtol=1e-6, atol=1e-6*abs(fd).max())
+    np.testing.assert_allclose(K @ v, iface.kTv(c, v), rtol=1e-10,
+                               atol=1e-10*abs(fd).max())
+    assert iface.kT(np.zeros(iface.size)).nnz == 0
+
+
+@pytest.mark.parametrize('contact', [False, True])
+def test_energy_and_resultants_uniform_separation(contact):
+    """Uniform separation of a pristine interface, closed form over the
+    area `a b`: free energy `\\frac{1}{2} (K_{II} \\Delta_u^2 + K_I
+    \\Delta_w^2) a b` and resultants `-(K_{II} \\Delta_u, 0, K_I \\Delta_w)
+    a b` of a law below its onset; for a contact-only interface with the
+    penetration `x > \\epsilon`, energy `k (x^2/2 - \\epsilon x/2 +
+    \\epsilon^2/6) a b` and normal resultant `k (x - \\epsilon/2) a b`,
+    :func:`.contact_traction`"""
+    top, bot = _plates('plate_clpt_donnell', m=4, n=4)
+    md = MultiDomain([bot, top])
+    size = md.get_size()
+    area = top.a*top.b
+    one = np.ones(4*3)
+    if contact:
+        k, eps, x = 1e5, 1e-3, 5e-3
+        iface = CohesiveInterface(top, bot, [], 4, 3, size, k_contact=k,
+                                  contact_eps=eps)
+        iface.separations = lambda c: (0*one, 0*one, -x*one)
+        energy = k*(x*x/2 - eps*x/2 + eps*eps/6)*area
+        res = np.array([0., 0., k*(x - eps/2)*area])
+    else:
+        law = laws_A()[0]
+        iface = CohesiveInterface(top, bot, [law], 4, 3, size)
+        du, dw = 1e-4, 2e-4
+        iface.separations = lambda c: (du*one, 0*one, dw*one)
+        energy = 0.5*(law.KII*du**2 + law.KI*dw**2)*area
+        res = -np.array([law.KII*du, 0., law.KI*dw])*area
+    assert iface.energy(None) == pytest.approx(energy, rel=1e-12)
+    np.testing.assert_allclose(iface.resultants(None), res, rtol=1e-12,
+                               atol=1e-12*abs(res).max())
+
+
+def test_wake_offset_without_crack_tip_law_is_fixed():
+    """Interface with ``wake_offset`` laws only: no law marks the crack
+    tip, so the wake offsets do not follow the slip and stay zero (the
+    offsets follow where a law without ``wake_offset`` has not failed)"""
+    top, bot = _plates('plate_clpt_donnell')
+    md = MultiDomain([bot, top])
+    iface = CohesiveInterface(top, bot, [_wake()], 4, 2, md.get_size())
+    one = np.ones(iface.npts)
+    iface.separations = lambda c: (2e-3*one, 0*one, -1e-5*one)
+    iface.commit(None)
+    assert iface._tip == []
+    assert np.all(iface.s0w == 0.)

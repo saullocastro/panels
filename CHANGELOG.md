@@ -21,6 +21,17 @@
 - Documentation page `cohesive_zone_mixed_mode`.
 - Requires `structsolve>=0.12.0` (`pyproject.toml`, `requirements.txt`), for
   `Analysis.on_converged`.
+- Normal tangent of `czm.evaluate_laws` at a zero separation, `dw = 0`: the
+  contact stiffness `K_I`, where it was zero. The tangent of the pristine
+  interface, at `c = 0`, is that of the linear analysis, and the first
+  predictor of `solve_coupon(..., control='load-line')` no longer diverges;
+  the converged states do not change (a stored MMB run repeated within
+  3e-8 N).
+- Tests of the `'CZM'` input errors and warnings, the `'summed'` mode ratio,
+  the contact-only tangent, the energy and the resultants under a uniform
+  separation, and of the DCB, ENF and MMB coupon options (supports, rigid
+  lever, penalty connections, perfectly bonded far domain, `crack_length`,
+  errors of the linear constraints, load-line control).
 
 ## 0.16.0 (2026-11-13)
 

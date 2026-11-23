@@ -443,7 +443,10 @@ def evaluate_laws(laws, du, dv, dw, r_old, mode_ratio='per-law',
             continue
         for j in range(3):
             T[j, j] += (1. - di)*Keff[j]
-        T[2, 2] += np.where(dw < 0, law.KI, 0.)
+        #NOTE at dw = 0 the traction is zero from both sides; the contact
+        #     stiffness is taken there, such that the tangent of the
+        #     pristine interface, e.g. at c = 0, is K_I and not zero
+        T[2, 2] += np.where(dw <= 0, law.KI, 0.)
         loading = act & (H > r_old[i]) & (H > 0.) & (H < 1.)
         if not np.any(loading):
             continue
