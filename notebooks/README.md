@@ -53,7 +53,6 @@ against the literature.
 | `dcb_tijs2023_phd.ipynb` | Tijs (2023), PhD thesis: compliance calibration and conduction-welded DCB |
 | `dcb_lecinana2023.ipynb` | Leciñana et al. (2023): initial compliance of AS4D/PEKK-FC DCB specimens (linear analysis) |
 | `dcb_mode_I_validation_summary.ipynb` | Table of the peak loads of the notebooks above |
-| `krueger2012_mmb_benchmark.ipynb` | Krueger (2012), NASA/CR-2012-217562: mixed-mode bending benchmark data, recorded but not run, the damage of `'SB_TSL'` being driven by the normal separation only |
 | `dcb_mode_I_convergence_study.py` | Convergence study of the discretisation of the cohesive domain on the reference DCB, results in `results/dcb_mode_I_convergence_study.json` |
 | `dcb_mode_I_solver_study.py` | Solution procedure on the reference DCB: consistent tangent against the secant stiffness, with and without line search and bisection |
 | `dcb_mode_I_validation_rerun.py` | Runs the nonlinear runs of the DCB notebooks again, in parallel, overwriting `results/*.npz` |
@@ -63,6 +62,32 @@ folders at the root of the repository (`dcb_mode_I_convergence_study_runs`,
 `dcb_mode_I_solver_study_runs`, `dcb_mode_I_validation_rerun_runs`), which are
 not part of the repository; only the results used by the documentation are
 kept, in `results/`.
+
+## Mixed-mode cohesive zone model: DCB, ENF and MMB coupons
+
+The mixed-mode cohesive interface (`'CZM'` connection) and the coupons of
+`panels.multidomain.delamination` are described in
+`doc/source/cohesive_zone_mixed_mode.rst`. Each notebook below is one
+validation case, with the tests and the published analyses of its references
+and LEFM (ASTM D6671); the digitised curves of the literature are in
+`reference_data/<case>/`, and the runs in `results/`.
+
+| File | Content |
+|---|---|
+| `mmb_utils.py` | DCB, ENF and MMB coupons with mixed-mode cohesive laws: model from a dict of inputs (`build_coupon`, `discretisation`, `law_dict`), stored runs (`run_or_load`, `solve`, `load`), runs with the energy dissipated and the failure front of each law (`run_or_load_laws`, `solve_laws`), conversion of runs made outside the notebooks with checks of their inputs (`convert_study_run`), LEFM of ASTM D6671 (`lefm_curve`, `chi`, `bk`, `lever_length`, `compliance`, `critical_load`), peak loads, initial stiffness, tables and plots |
+| `mmb_camanho2003_as4peek.ipynb` | Camanho et al. (2003), Turon et al. (2006): AS4/PEEK DCB, MMB 20/50/80% and ENF tests of Reeder and Crews, mixed-mode bilinear law, CLPT and FSDT arms, LEFM |
+| `mmb_ratcliffe2014_im78552.ipynb` | Ratcliffe and Johnston (2014), Murri (2013), O'Brien et al. (2010): IM7/8552 DCB, MMB 20/50/80% and ENF tests, mixed-mode bilinear law, CLPT and FSDT arms, LEFM |
+| `krueger2012_mmb_benchmark.ipynb` | Krueger (2012), NASA/CR-2012-217562 and -217588: IM7/8552 MMB 20/50/80% VCCT benchmark, compared with the mixed-mode cohesive coupons (CLPT and FSDT) and LEFM |
+| `mmb_tijs2022_as4dpekk.ipynb` | Tijs et al. (2022), Abdel-Monsef et al. (2023): AS4D/PEKK-FC DCB (a0 = 48, 40 mm) and MMB 50% with the five superposed laws of Leciñana et al. (2023), bridging laws opening-driven without shear stiffness; energy dissipated per law; bilinear law and LEFM for comparison |
+| `mmb_cho2025_glassepoxy.ipynb` | Cho et al. (2025): glass/epoxy DCB, ENF and MMB 20/40/60% with fibre bridging (trilinear law), arm thickness identified from the DCB |
+| `mmb_gong2017_t700qy9511.ipynb` | Gong et al. (2017): T700/QY9511 MMB 25-75% at a 45//-45 interface with large-scale bridging, bridging law identified from the DCB |
+| `mmb_raimondo2021_im78552.ipynb` | Raimondo et al. (2021): IM7/8552 DCB and MMB 20/50%, DCB crack length identified, lever weight applied in post-processing |
+
+The runs of these notebooks are made by the notebooks themselves, with
+`MMB_RERUN=1` in the environment (`MMB_TESTS` selects some of them, e.g.
+`MMB50_clpt`), or converted from runs of the same model made outside them,
+with `mmb_utils.convert_study_run`; the run table of each notebook gives the
+commit of `panels`, the machine and the run time of each run.
 
 ## Penalty and null-space connections
 

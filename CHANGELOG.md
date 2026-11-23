@@ -32,6 +32,16 @@
   separation, and of the DCB, ENF and MMB coupon options (supports, rigid
   lever, penalty connections, perfectly bonded far domain, `crack_length`,
   errors of the linear constraints, load-line control).
+- Validation notebooks of the mixed-mode cohesive coupons, one per test
+  campaign, with the tests and the published analyses of their references
+  and LEFM (ASTM D6671): `mmb_camanho2003_as4peek` (AS4/PEEK),
+  `mmb_ratcliffe2014_im78552` (IM7/8552), `krueger2012_mmb_benchmark`
+  (IM7/8552 VCCT benchmark, now run with `panels`), `mmb_tijs2022_as4dpekk`
+  (AS4D/PEKK-FC, five superposed laws with bridging, energy dissipated per
+  law), `mmb_cho2025_glassepoxy` (glass/epoxy, trilinear law),
+  `mmb_gong2017_t700qy9511` (T700/QY9511, large-scale bridging) and
+  `mmb_raimondo2021_im78552` (IM7/8552); helpers `notebooks/mmb_utils.py`;
+  digitised curves of the literature in `notebooks/reference_data/`.
 
 ## 0.16.0 (2026-11-13)
 
