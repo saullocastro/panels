@@ -19,7 +19,8 @@
   (`create_coupon`, `solve_coupon`, `crack_length`), with the lever of the
   MMB apparatus as a linear constraint.
 - Documentation page `cohesive_zone_mixed_mode`.
-- Requires `structsolve` with `Analysis.on_converged`.
+- Requires `structsolve>=0.12.0` (`pyproject.toml`, `requirements.txt`), for
+  `Analysis.on_converged`.
 
 ## 0.16.0 (2026-11-13)
 
