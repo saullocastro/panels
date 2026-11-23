@@ -512,7 +512,9 @@ def test_analyses_side():
             assert len(bf) == 4
             assert all(c['ycte1'] == 0 and c['ycte2'] == ycte2 for c in bf)
             ev[side] = eigvals[0]
-        assert ev[None] == ev['internal']
+        # same model solved twice: equal up to the round-off of the
+        # iterative eigensolver, which is not bit-reproducible (macOS)
+        assert np.isclose(ev[None], ev['internal'], rtol=1e-10, atol=0)
         assert not np.isclose(ev['external'], ev['internal'], rtol=1e-3)
 
 
