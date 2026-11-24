@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.17.0 (2026-11-24)
 
 ### Added: mixed-mode multilinear cohesive interface `'CZM'` and delamination coupons
 
