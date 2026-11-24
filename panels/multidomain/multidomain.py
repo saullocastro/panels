@@ -27,6 +27,7 @@ from panels.shell import DOUBLE, check_c, Shell
 import panels.modelDB as modelDB
 from panels.multidomain import connections
 from panels.multidomain.connections import nullspace
+from panels.multidomain.connections import czm
 
 
 def load(name, max_size=json_io.MAX_SIZE):
@@ -552,6 +553,11 @@ class MultiDomain(object):
         self.c_p1 = None
         self._conn_used = None
         self._conn_terms_warned = None
+        #NOTE the interfaces of the 'CZM' connections, with their history,
+        #     keyed by the id of the connection dictionary
+        self._czm = {}
+        #NOTE the linear constraints of add_linear_constraint()
+        self._linear_constraints = []
         self.panels = panels
         self.size = None
         self.out_num_cores = 4
@@ -857,7 +863,98 @@ class MultiDomain(object):
                             (False, p.point_pds_values_inc
                                     + p.distr_pds_values_inc))
                         for values in values_list)
-        return sig_conn, tuple(sig_panels), sig_pds
+        #NOTE the rows of the linear constraints define [Z], their values
+        #     only the particular solutions
+        sig_lc = tuple((lc['cte'], tuple((id(p), comp, x, y, z, coeff)
+                                         for p, comp, x, y, z, coeff
+                                         in lc['terms']))
+                       for lc in self._linear_constraints)
+        return sig_conn, tuple(sig_panels), sig_pds, sig_lc
+
+
+    def add_linear_constraint(self, terms, value=0., cte=False, label=''):
+        r"""Adds a linear constraint between components of any panels
+
+        The constraint `\sum_k \alpha_k \bar{q}_k = q`, where each
+        `\bar{q}_k` is a component of a panel at a point, or its mean along
+        a line, is imposed exactly with the null-space method together with
+        the prescribed displacements, ``pd_method='null-space'``: with
+        ``cte=False`` the value is multiplied by the load factor, with
+        ``cte=True`` it is constant, see :meth:`.get_cp`. For instance, the
+        rigid lever of the mixed-mode bending test, which relates the mean
+        deflections of the upper arm at the load line, `x = 0`, and at the
+        saddle, `x = L`, to the displacement `\delta` of the load point::
+
+            md.add_linear_constraint([(top_a, 'w', 0., None, 0., c/L),
+                                      (top_b, 'w', L - top_b.x0, None, 0.,
+                                       -(1 + c/L))], value=1.)
+
+        with the lever displacement `\delta = \lambda` and the lever load the
+        generalized reaction of the incremented prescriptions,
+        :meth:`.reaction_pd`.
+
+        Parameters
+        ----------
+        terms : list of tuple
+            ``(panel, comp, x, y, z, coeff)``: the panel, the component,
+            ``'u'``, ``'v'``, ``'w'``, ``'phix'`` or ``'phiy'``, the point
+            ``(x, y)`` in the coordinates of the panel, or the line ``x``
+            with ``y=None`` or ``y`` with ``x=None`` for the mean along it,
+            the thickness coordinate ``z`` of ``'u'`` and ``'v'``, and the
+            coefficient `\alpha_k`.
+        value : float, optional
+            Right-hand side `q`.
+        cte : bool, optional
+            Whether the value is constant or multiplied by the load factor.
+        label : str, optional
+            Name used in the messages.
+
+        Returns
+        -------
+        constraint : dict
+            The constraint, with the keys ``'terms'``, ``'value'``, ``'cte'``
+            and ``'label'``. Changing ``'value'`` changes the particular
+            solutions only, see :meth:`.get_cp`.
+
+        Notes
+        -----
+        The row of the constraint is `\sum_k \alpha_k \boldsymbol{s}_k`,
+        with `\boldsymbol{s}_k` the row of the component at the point, or the
+        mean of its rows at the Gauss-Legendre points of the line, which is
+        exact since the component is a polynomial along the line, see
+        :func:`.nullspace.mean_row`. The rows are eliminated after those of
+        the prescribed displacements of the panels, see :meth:`.get_Z`, and
+        the work-conjugate force of the constraint is part of the reaction
+        :meth:`.reaction_pd` of its set, constant or incremented.
+
+        """
+        comps = {name: i for i, name in enumerate(nullspace.PD_COMPONENTS)}
+        out = []
+        for p, comp, x, y, z, coeff in terms:
+            if not any(p is q for q in self.panels):
+                raise ValueError('The panel of a linear constraint is not '
+                                 'part of the assembly')
+            if isinstance(comp, str):
+                comp = comps[comp]
+            out.append((p, comp, x, y, float(z), float(coeff)))
+        lc = dict(terms=out, value=float(value), cte=bool(cte), label=label)
+        self._linear_constraints.append(lc)
+        self.Z = None
+        self._Z_key = None
+        return lc
+
+
+    def _linear_constraint_blocks(self, size):
+        r"""Blocks of :meth:`.get_Z` of the linear constraints"""
+        blocks = []
+        for lc in self._linear_constraints:
+            row = csr_matrix((1, size))
+            for p, comp, x, y, z, coeff in lc['terms']:
+                row = row + coeff*nullspace.mean_row(p, comp, x, y, size, z)
+            blocks.append(dict(user=True, label=lc['label'], cte=lc['cte'],
+                               value=lc['value'], B=csr_matrix(row),
+                               panel=None, x=None, y=None, z=0., comp=None))
+        return blocks
 
 
     def get_Z(self, conn=None, tol=None, rhs_tol=None):
@@ -972,6 +1069,10 @@ class MultiDomain(object):
         if self.pd_method == 'null-space':
             for p in self.panels:
                 blocks += nullspace.pd_blocks(p, size)
+            blocks += self._linear_constraint_blocks(size)
+        elif self._linear_constraints:
+            raise NotImplementedError('The linear constraints of '
+                    'add_linear_constraint() require pd_method="null-space"')
         if blocks:
             elim = nullspace.Elimination(size, tol)
             for B in Bs:
@@ -996,6 +1097,9 @@ class MultiDomain(object):
 
 
     def _pd_label(self, block):
+        if block.get('user'):
+            return "linear constraint '{0}' (cte={1})".format(block['label'],
+                                                              block['cte'])
         comp = nullspace.PD_COMPONENTS[block['comp']]
         if block['z'] != 0 and block['comp'] in (nullspace.U, nullspace.V):
             comp = '{0} at z = {1:g}'.format(comp, block['z'])
@@ -1014,6 +1118,8 @@ class MultiDomain(object):
         r"""Boundary condition flags equal to zero that restrain the
         prescribed component at its points, with ``ends=False`` only those
         that restrain it along the whole line"""
+        if block.get('user'):
+            return []
         p = block['panel']
         flags = []
         for field, der_x, der_y, _ in nullspace._pd_terms(p, block['comp'],
@@ -1042,6 +1148,11 @@ class MultiDomain(object):
             p = block['panel']
             k = int(np.argmax(np.abs(res)))
             label = self._pd_label(block)
+            if block.get('user'):
+                return ('The {0} is not consistent with the constraints '
+                        'imposed before it: it is a combination of them with '
+                        'the residual {1:.2e} > {2:.2e}'.format(label,
+                        abs(res[k]), atol))
             flags = self._pd_zero_flags(block)
             if resultant:
                 return ('The reaction resultant of the selected lines is not '
@@ -1157,9 +1268,14 @@ class MultiDomain(object):
         #NOTE [Z] is reused while the positions and the components do not
         #     change, the values are read again from the panels
         entries = [e for p in self.panels for e in nullspace.pd_entries(p)]
-        assert len(entries) == len(blocks)
-        for block, entry in zip(blocks, entries):
+        pblocks = [b for b in blocks if not b.get('user')]
+        ublocks = [b for b in blocks if b.get('user')]
+        assert len(entries) == len(pblocks)
+        assert len(ublocks) == len(self._linear_constraints)
+        for block, entry in zip(pblocks, entries):
             block['value'] = entry[4]
+        for block, lc in zip(ublocks, self._linear_constraints):
+            block['value'] = lc['value']
         ds = [nullspace.pd_rhs(b) for b in blocks]
         key = np.concatenate(ds)
         if (self._cp_cache is not None
@@ -3493,6 +3609,10 @@ class MultiDomain(object):
         for connecti in conn:
             if self._null_space(connecti):
                 continue
+            #NOTE the cohesive interfaces 'CZM' enter calc_fint, calc_kC,
+            #     calc_kT and calc_kTv directly, see cohesive_interfaces()
+            if connecti['func'] == 'CZM':
+                continue
             if connecti['func'] != 'SB_force':
                 #NOTE a local copy is used, because the coordinates of the
                 #     connection are swapped below when p1 comes after p2 in
@@ -3921,6 +4041,7 @@ class MultiDomain(object):
         kC_conn = self.get_kC_conn(conn=conn, c=c)
 
         kC += kC_conn
+        kC = kC + self._czm_stiffness(c, conn=conn)
 
         #NOTE unsymmetric, added after the symmetrization, see Shell.calc_kC
         if NLgeom and finalize:
@@ -3930,6 +4051,109 @@ class MultiDomain(object):
         msg('finished!', level=2, silent=silent)
 
         return kC
+
+
+    def cohesive_interfaces(self, conn=None):
+        r"""Interfaces of the cohesive connections ``'CZM'``
+
+        One :class:`.czm.CohesiveInterface` per connection ``'CZM'`` of
+        ``conn``, created at the first call and kept, with its history,
+        while the size of the assembly does not change.
+
+        A connection ``'CZM'`` has the keys ``'p1'`` (the domain on the
+        positive side of the interface along `z`) and ``'p2'``, as for
+        ``'SB'``, ``'laws'`` (a list of :class:`.czm.BilinearLaw`, empty for
+        a contact-only interface with the key ``'k_contact'``),
+        ``'nr_x_gauss'`` and ``'nr_y_gauss'``, and optionally
+        ``'mode_ratio'``, see :mod:`panels.multidomain.connections.czm`.
+
+        Parameters
+        ----------
+        conn : list of dict or None, optional
+            The connections, by default those of the assembly, see
+            :meth:`.get_kC_conn`.
+
+        Returns
+        -------
+        interfaces : list of :class:`.czm.CohesiveInterface`
+
+        Notes
+        -----
+        The interfaces contribute their internal force vector and their
+        consistent tangent stiffness matrix to :meth:`.calc_fint`,
+        :meth:`.calc_kC`, :meth:`.calc_kT` and :meth:`.calc_kTv`, evaluated
+        with the damage history of the last converged state, which only
+        :meth:`.commit_cohesive` updates, e.g. through the callable of
+        :meth:`.get_on_converged` given to ``structsolve.Analysis``. They are
+        neither penalty connections of :meth:`.get_kC_conn` nor
+        constraints of :meth:`.get_Z`.
+
+        """
+        try:
+            conn = self._resolve_conn(conn)
+        except RuntimeError:
+            return []
+        size = self.get_size()
+        out = []
+        for ci in conn:
+            if ci.get('func') != 'CZM':
+                continue
+            iface = self._czm.get(id(ci))
+            if iface is None or iface.size != size:
+                iface = czm.CohesiveInterface(ci['p1'], ci['p2'],
+                        ci['laws'], ci['nr_x_gauss'], ci['nr_y_gauss'],
+                        size, mode_ratio=ci.get('mode_ratio', 'per-law'),
+                        k_contact=ci.get('k_contact'),
+                        contact_eps=ci.get('contact_eps', 1e-3))
+                self._czm[id(ci)] = iface
+            out.append(iface)
+        return out
+
+
+    def _czm_stiffness(self, c, conn=None):
+        r"""Sum of the stiffness matrices of the cohesive interfaces: the
+        consistent tangent at ``c``, or, for ``c=None``, the secant stiffness
+        of the last converged state at zero separation"""
+        size = self.get_size()
+        K = csr_matrix((size, size))
+        for iface in self.cohesive_interfaces(conn):
+            K = K + (iface.kC0() if c is None else iface.kT(c))
+        return K
+
+
+    def commit_cohesive(self, c):
+        r"""Updates the damage history of the cohesive interfaces with the
+        converged configuration ``c`` (Ritz constants of the assembly), see
+        :meth:`.czm.CohesiveInterface.commit`"""
+        for iface in self.cohesive_interfaces():
+            iface.commit(c)
+
+
+    def reset_cohesive(self):
+        r"""Pristine cohesive interfaces, see
+        :meth:`.czm.CohesiveInterface.reset`"""
+        for iface in self.cohesive_interfaces():
+            iface.reset()
+
+
+    def get_on_converged(self, callback=None):
+        r"""Callable for ``structsolve.Analysis.on_converged`` with the
+        functions of :meth:`.get_reduced_functions`
+
+        Returns ``f(an)``, which expands the last converged state of the
+        analysis, ``an.cs[-1]`` at the load factor ``an.increments[-1]``, to
+        the Ritz constants of the assembly, see :meth:`.expand`, updates the
+        history of the cohesive interfaces, :meth:`.commit_cohesive`, and
+        then calls ``callback(an, c)`` when given, e.g. to record results.
+
+        """
+        def on_converged(an):
+            lbd = an.increments[-1] if self._pd_blocks else None
+            c = self.expand(an.cs[-1], lbd)
+            self.commit_cohesive(c)
+            if callback is not None:
+                callback(an, c)
+        return on_converged
 
 
     def calc_kG(self, c=None, silent=False, finalize=True, NLgeom=False):
@@ -4148,7 +4372,7 @@ class MultiDomain(object):
         if kC_conn is None:
             kC_conn = self.get_kC_conn(c=c)
         kT += kC_conn
-        # print(f'kCconn {np.max(kC_conn):.3e}')
+        kT = kT + self._czm_stiffness(c)
         self.kT = kT
         msg('finished!', level=2, silent=silent)
         return kT
@@ -4211,6 +4435,8 @@ class MultiDomain(object):
             kTv += p.calc_kTv(c, v, size=size, col0=p.col_start,
                               silent=silent, inc=inc)
         kTv += self.get_kC_conn(c=c) @ v
+        for iface in self.cohesive_interfaces():
+            kTv += iface.kTv(c, v)
         msg('finished!', level=2, silent=silent)
         return kTv
 
@@ -4276,6 +4502,8 @@ class MultiDomain(object):
         if kC_conn is None:
             kC_conn = self.get_kC_conn(c=c)
         fint += kC_conn*c
+        for iface in self.cohesive_interfaces():
+            fint += iface.fint(c)
         self.fint = fint
         msg('finished!', level=2, silent=silent)
         return fint

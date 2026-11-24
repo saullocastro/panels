@@ -29,7 +29,7 @@ The structural matrices are solved with
 Citing this library
 ===================
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.16.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.17.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Documentation
@@ -138,6 +138,11 @@ History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
+* version 0.17.0 (2026-11-24)
+    - New connection `'CZM'`, a mixed-mode multilinear cohesive interface: a superposition of bilinear laws with a mode-dependent penalty stiffness, each with its own Benzeggagh-Kenane exponent and damage, with contact and a consistent tangent, for the CLPT, FSDT and TSDT models; the history is updated with the converged states through `structsolve.Analysis.on_converged`
+    - New `MultiDomain.add_linear_constraint`, linear constraints between panels imposed exactly with the null-space method, and `panels.multidomain.delamination`, DCB, ENF and MMB coupons with the lever of the MMB apparatus as a linear constraint
+    - Requires `structsolve>=0.12.0`
+    - New validation notebooks of the mixed-mode cohesive coupons, one per test campaign: `mmb_camanho2003_as4peek`, `mmb_ratcliffe2014_im78552`, `krueger2012_mmb_benchmark`, `mmb_tijs2022_as4dpekk`, `mmb_cho2025_glassepoxy`, `mmb_gong2017_t700qy9511` and `mmb_raimondo2021_im78552`
 * version 0.16.0 (2026-11-13)
     - New models with transverse shear and Green-Lagrange membrane strains, `plate_fsdt_gl`, `plate_tsdt_gl`, `cylshell_fsdt_gl` and `cylshell_tsdt_gl`, total-Lagrangian models `plate_fsdt_tl`, `cylshell_fsdt_tl`, `plate_tsdt_tl` and `cylshell_tsdt_tl`, and the Kirchhoff-Love cylinders `cylshell_clpt_gl` and `cylshell_clpt_tl`
     - New annular-sector plate models: `annular_clpt_donnell`, `annular_clpt_gl`, `annular_clpt_tl`, `annular_fsdt_donnell`, `annular_fsdt_gl`, `annular_fsdt_tl`, `annular_tsdt_donnell`, `annular_tsdt_gl` and `annular_tsdt_tl`

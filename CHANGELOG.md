@@ -1,5 +1,48 @@
 # Changelog
 
+## 0.17.0 (2026-11-24)
+
+### Added: mixed-mode multilinear cohesive interface `'CZM'` and delamination coupons
+
+- Connection `'CZM'` (`panels.multidomain.connections.czm`): a superposition
+  of mixed-mode bilinear laws with a mode-dependent penalty stiffness
+  (Turon et al. 2018), each one with its own Benzeggagh-Kenane exponent and
+  damage variable (Abdel-Monsef et al. 2023), with contact, for all the
+  models (CLPT, FSDT, TSDT); separations of the perfect bond `'SB'`;
+  consistent tangent; one history per interface, updated with converged
+  states (`MultiDomain.commit_cohesive`, `MultiDomain.get_on_converged` for
+  `structsolve.Analysis.on_converged`); exact dissipated energy.
+- `MultiDomain.add_linear_constraint`: linear constraints between components
+  of any panels at points or as means along lines, imposed exactly with the
+  prescribed displacements; `nullspace.mean_row`.
+- `panels.multidomain.delamination`: DCB, ENF and MMB coupons
+  (`create_coupon`, `solve_coupon`, `crack_length`), with the lever of the
+  MMB apparatus as a linear constraint.
+- Documentation page `cohesive_zone_mixed_mode`.
+- Requires `structsolve>=0.12.0` (`pyproject.toml`, `requirements.txt`), for
+  `Analysis.on_converged`.
+- Normal tangent of `czm.evaluate_laws` at a zero separation, `dw = 0`: the
+  contact stiffness `K_I`, where it was zero. The tangent of the pristine
+  interface, at `c = 0`, is that of the linear analysis, and the first
+  predictor of `solve_coupon(..., control='load-line')` no longer diverges;
+  the converged states do not change (a stored MMB run repeated within
+  3e-8 N).
+- Tests of the `'CZM'` input errors and warnings, the `'summed'` mode ratio,
+  the contact-only tangent, the energy and the resultants under a uniform
+  separation, and of the DCB, ENF and MMB coupon options (supports, rigid
+  lever, penalty connections, perfectly bonded far domain, `crack_length`,
+  errors of the linear constraints, load-line control).
+- Validation notebooks of the mixed-mode cohesive coupons, one per test
+  campaign, with the tests and the published analyses of their references
+  and LEFM (ASTM D6671): `mmb_camanho2003_as4peek` (AS4/PEEK),
+  `mmb_ratcliffe2014_im78552` (IM7/8552), `krueger2012_mmb_benchmark`
+  (IM7/8552 VCCT benchmark, now run with `panels`), `mmb_tijs2022_as4dpekk`
+  (AS4D/PEKK-FC, five superposed laws with bridging, energy dissipated per
+  law), `mmb_cho2025_glassepoxy` (glass/epoxy, trilinear law),
+  `mmb_gong2017_t700qy9511` (T700/QY9511, large-scale bridging) and
+  `mmb_raimondo2021_im78552` (IM7/8552); helpers `notebooks/mmb_utils.py`;
+  digitised curves of the literature in `notebooks/reference_data/`.
+
 ## 0.16.0 (2026-11-13)
 
 ### Changed: validation runs of more than 30 s in the notebooks only
