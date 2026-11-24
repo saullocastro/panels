@@ -126,6 +126,7 @@ User guide
     tangent_product.rst
     tabulation.rst
     cohesive_zone.rst
+    cohesive_zone_mixed_mode.rst
     pyodide.rst
 
 
@@ -199,7 +200,13 @@ User guide
     notebooks/dcb_mode_I_convergence_study.nblink
     notebooks/dcb_mode_I_solver_study.nblink
     notebooks/cohesive_zone_verification.nblink
+    notebooks/mmb_camanho2003_as4peek.nblink
+    notebooks/mmb_ratcliffe2014_im78552.nblink
     notebooks/krueger2012_mmb_benchmark.nblink
+    notebooks/mmb_tijs2022_as4dpekk.nblink
+    notebooks/mmb_cho2025_glassepoxy.nblink
+    notebooks/mmb_gong2017_t700qy9511.nblink
+    notebooks/mmb_raimondo2021_im78552.nblink
     notebooks/conn_method_comparison.nblink
     notebooks/test_quadrature_partial_integration_matrix.nblink
     notebooks/test_quadrature_partial_integration_of_domain.nblink
@@ -255,7 +262,7 @@ License
 Citing this library
 -------------------
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.16.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.17.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 In BibTeX:
 
@@ -266,7 +273,7 @@ In BibTeX:
       title     = {Semi-analytical methods for plates, shells and stiffened
                    panels},
       year      = {2026},
-      version   = {0.16.0},
+      version   = {0.17.0},
       publisher = {Zenodo},
       doi       = {10.5281/zenodo.2541522},
       url       = {https://doi.org/10.5281/zenodo.2541522}

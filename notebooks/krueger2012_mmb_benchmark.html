@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Benchmark data: Krueger (2012), NASA/CR-2012-217562 &#8212; panels 0.16.0 documentation</title>
+    <title>MMB benchmark of Krueger (2012), NASA/CR-2012-217562 and NASA/CR-2012-217588 &#8212; panels 0.17.0 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=7de89ed4"></script>
+    <script src="../_static/documentation_options.js?v=0c3dd48d"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -48,12 +48,12 @@
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Benchmarks with the penalty and the null-space connections" href="conn_method_comparison.html" />
-    <link rel="prev" title="Cohesive connection &#39;SB_TSL&#39;: verification and linear measures of the DCB" href="cohesive_zone_verification.html" />
+    <link rel="next" title="Mixed-mode delamination of AS4D/PEKK-FC with fibre bridging: DCB and MMB tests of Tijs et al." href="mmb_tijs2022_as4dpekk.html" />
+    <link rel="prev" title="Mixed-mode delamination of IM7/8552: MMB tests of Ratcliffe and Johnston, DCB of Murri and ENF of O’Brien et al." href="mmb_ratcliffe2014_im78552.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.16.0" />
+  <meta name="docsearch:version" content="0.17.0" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">panels 0.16.0 documentation</p>
+    <p class="title logo__title">panels 0.17.0 documentation</p>
   
 </a></div>
     
@@ -278,6 +278,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="../cohesive_zone.html">
     Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../cohesive_zone_mixed_mode.html">
+    Mixed-mode multilinear cohesive interface 'CZM'
   </a>
 </li>
 
@@ -709,9 +716,51 @@
 </li>
 
 
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="mmb_camanho2003_as4peek.html">
+    Mixed-mode delamination of AS4/PEEK: DCB, MMB and ENF tests of Reeder and Crews
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="mmb_ratcliffe2014_im78552.html">
+    Mixed-mode delamination of IM7/8552: MMB tests of Ratcliffe and Johnston, DCB of Murri and ENF of O’Brien et al.
+  </a>
+</li>
+
+
 <li class=" current active">
   <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
-    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+    MMB benchmark of Krueger (2012), NASA/CR-2012-217562 and NASA/CR-2012-217588
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="mmb_tijs2022_as4dpekk.html">
+    Mixed-mode delamination of AS4D/PEKK-FC with fibre bridging: DCB and MMB tests of Tijs et al.
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="mmb_cho2025_glassepoxy.html">
+    Mixed-mode delamination of glass/epoxy with fibre bridging: DCB, ENF and MMB tests of Cho et al.
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="mmb_gong2017_t700qy9511.html">
+    Mixed-mode delamination with large-scale fibre bridging at a 45//-45 interface: MMB tests of T700/QY9511
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="mmb_raimondo2021_im78552.html">
+    Mixed-mode delamination of IM7/8552: DCB and MMB tests of Raimondo et al.
   </a>
 </li>
 
@@ -983,6 +1032,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../cohesive_zone.html">
     Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cohesive_zone_mixed_mode.html">
+    Mixed-mode multilinear cohesive interface 'CZM'
   </a>
 </li>
 
@@ -1414,9 +1470,51 @@
 </li>
 
 
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="mmb_camanho2003_as4peek.html">
+    Mixed-mode delamination of AS4/PEEK: DCB, MMB and ENF tests of Reeder and Crews
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="mmb_ratcliffe2014_im78552.html">
+    Mixed-mode delamination of IM7/8552: MMB tests of Ratcliffe and Johnston, DCB of Murri and ENF of O’Brien et al.
+  </a>
+</li>
+
+
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="#" aria-current="page">
-    Benchmark data: Krueger (2012), NASA/CR-2012-217562
+    MMB benchmark of Krueger (2012), NASA/CR-2012-217562 and NASA/CR-2012-217588
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="mmb_tijs2022_as4dpekk.html">
+    Mixed-mode delamination of AS4D/PEKK-FC with fibre bridging: DCB and MMB tests of Tijs et al.
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="mmb_cho2025_glassepoxy.html">
+    Mixed-mode delamination of glass/epoxy with fibre bridging: DCB, ENF and MMB tests of Cho et al.
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="mmb_gong2017_t700qy9511.html">
+    Mixed-mode delamination with large-scale fibre bridging at a 45//-45 interface: MMB tests of T700/QY9511
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="mmb_raimondo2021_im78552.html">
+    Mixed-mode delamination of IM7/8552: DCB and MMB tests of Raimondo et al.
   </a>
 </li>
 
@@ -1550,7 +1648,7 @@
         <i class="fa-solid fa-house"></i>
       </a>
     </li>
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Benchmark data: Krueger (2012), NASA/CR-2012-217562</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">MMB benchmark of Krueger (2012), NASA/CR-2012-217562 and NASA/CR-2012-217588</span></li>
   </ul>
 </nav>
 </div>
@@ -1567,18 +1665,18 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="Benchmark-data:-Krueger-(2012),-NASA/CR-2012-217562">
-<h1>Benchmark data: Krueger (2012), NASA/CR-2012-217562<a class="headerlink" href="#Benchmark-data:-Krueger-(2012),-NASA/CR-2012-217562" title="Link to this heading">#</a></h1>
+  <section id="MMB-benchmark-of-Krueger-(2012),-NASA/CR-2012-217562-and-NASA/CR-2012-217588">
+<h1>MMB benchmark of Krueger (2012), NASA/CR-2012-217562 and NASA/CR-2012-217588<a class="headerlink" href="#MMB-benchmark-of-Krueger-(2012),-NASA/CR-2012-217562-and-NASA/CR-2012-217588" title="Link to this heading">#</a></h1>
 <ol class="upperalpha simple" start="18">
 <li><p>Krueger, <em>Development and Application of Benchmark Examples for Mixed-Mode I/II Quasi-Static Delamination Propagation Predictions</em>, NASA/CR-2012-217562, NIA Report No. 2012-01, 2012.</p></li>
 </ol>
-<p><strong>This report contains no DCB case.</strong> Its benchmarks are for the mixed-mode bending (MMB) specimen at <span class="math notranslate nohighlight">\(G_{II}/G_T\)</span> = 0.2, 0.5 and 0.8, created with 2D plane strain FE models and the virtual crack closure technique (VCCT), and used to assess the VCCT propagation of ABAQUS. The DCB benchmarks of the same series, R. Krueger, <em>An Approach to Assess Delamination Propagation Simulation Capabilities in Commercial Finite Element Codes</em>, NASA/TM-2008-215123 (reference [3] of the report), are
-compared with <code class="docutils literal notranslate"><span class="pre">panels</span></code> in <a class="reference internal" href="dcb_krueger2008.html"><span class="doc">dcb_krueger2008</span></a>.</p>
-<p>The MMB data are recorded in <code class="docutils literal notranslate"><span class="pre">mmb_cases</span></code> below for a future comparison. <code class="docutils literal notranslate"><span class="pre">panels</span></code> cannot be run on these cases:</p>
-<ul class="simple">
-<li><p>the damage of the <code class="docutils literal notranslate"><span class="pre">SB_TSL</span></code> connection is driven by the normal separation only, while the MMB needs a mixed-mode law, e.g. the Benzeggagh-Kenane criterion with <span class="math notranslate nohighlight">\(\eta = 2.1\)</span> used in the report;</p></li>
-<li><p>the loading lever of the MMB apparatus is not modelled.</p></li>
-</ul>
+<ol class="upperalpha simple" start="18">
+<li><p>Krueger, <em>Application of Benchmark Examples to Assess the Single and Mixed-Mode Static Delamination Propagation Capabilities in ANSYS</em>, NASA/CR-2012-217588, NIA Report No. 2012-04, 2012.</p></li>
+</ol>
+<p><strong>This report contains no DCB case.</strong> Its benchmarks are for the mixed-mode bending (MMB) specimen at <span class="math notranslate nohighlight">\(G_{II}/G_T\)</span> = 0.2, 0.5 and 0.8, created with 2D plane strain FE models and the virtual crack closure technique (VCCT), and used to assess the VCCT propagation of ABAQUS; the second report applies the same benchmarks to ANSYS. The DCB benchmarks of the same series, R. Krueger, <em>An Approach to Assess Delamination Propagation Simulation Capabilities in Commercial Finite Element Codes</em>,
+NASA/TM-2008-215123 (reference [3] of the report), are compared with <code class="docutils literal notranslate"><span class="pre">panels</span></code> in <a class="reference internal" href="dcb_krueger2008.html"><span class="doc">dcb_krueger2008</span></a>.</p>
+<p>The MMB data are recorded in <code class="docutils literal notranslate"><span class="pre">mmb_cases</span></code> below. The first version of this notebook could not run <code class="docutils literal notranslate"><span class="pre">panels</span></code> on these cases, because the damage of the <code class="docutils literal notranslate"><span class="pre">SB_TSL</span></code> connection was driven by the normal separation only and the loading lever was not modelled. The mixed-mode cohesive interface <code class="docutils literal notranslate"><span class="pre">'CZM'</span></code> (theory: <a class="reference internal" href="../cohesive_zone_mixed_mode.html"><span class="doc">mixed-mode cohesive zone</span></a>) and the MMB coupon of <code class="docutils literal notranslate"><span class="pre">panels.multidomain.delamination.create_coupon</span></code>, with the lever as a linear constraint, now allow it:
+the section <a class="reference internal" href="#panels-model"><span class="std std-ref">panels model</span></a> compares <code class="docutils literal notranslate"><span class="pre">panels</span></code>, with CLPT and FSDT arms, with the benchmark and with linear elastic fracture mechanics (LEFM). The tests of the same material and apparatus are compared with <code class="docutils literal notranslate"><span class="pre">panels</span></code> in <a class="reference internal" href="mmb_ratcliffe2014_im78552.html"><span class="doc">mmb_ratcliffe2014_im78552</span></a>.</p>
 <p><strong>Digitised data.</strong> The benchmark curves of Figs. 10, 14 and 19 were read by eye, <span class="math notranslate nohighlight">\(\pm 0.1\)</span> mm and <span class="math notranslate nohighlight">\(\pm 3\)</span>% of the load. The critical points <span class="math notranslate nohighlight">\((w_{crit}, P_{crit})\)</span> are given in the text and are exact.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -1594,7 +1692,16 @@ from IPython.display import Markdown, display
 
 sys.path.insert(0, os.path.abspath('.'))
 import dcb_utils as du
-<br/></pre></div>
+import mmb_utils as mu
+from panels.multidomain.connections.czm import BilinearLaw
+
+# True runs panels and saves the results in RESULTS, False loads them
+RERUN = bool(int(os.environ.get('MMB_RERUN', '0')))
+RESULTS = 'results'
+# comma-separated keys, e.g. MMB50_clpt, runs only these (used to run in parallel)
+ONLY = os.environ.get('MMB_TESTS')
+ONLY = ONLY.split(',') if ONLY else None
+</pre></div>
 </div>
 </div>
 <section id="MMB-benchmark-data">
@@ -1721,9 +1828,380 @@ plt.show()
 </div>
 </div>
 </section>
+<section id="panels-model">
+<h2>panels model<a class="headerlink" href="#panels-model" title="Link to this heading">#</a></h2>
+<p><strong>Inputs.</strong> The ply properties, toughnesses, <span class="math notranslate nohighlight">\(\eta\)</span> and geometry of the benchmark (<code class="docutils literal notranslate"><span class="pre">im7_8552</span></code>, <code class="docutils literal notranslate"><span class="pre">mmb_geometry</span></code> and <code class="docutils literal notranslate"><span class="pre">mmb_cases</span></code> above): 12 plies of 0.1875 mm per arm (4.5 mm/24, inferred, the report gives the total thickness), half-span <span class="math notranslate nohighlight">\(L\)</span> = 50.4 mm (half of <span class="math notranslate nohighlight">\(2L\)</span> = 100.8 mm, Fig. 1, p. 28 of the PDF), <span class="math notranslate nohighlight">\(a_0\)</span> = 25.4 mm. The benchmark is a VCCT analysis and has no strengths; the strength of the tests of the same material,
+<a class="reference internal" href="mmb_ratcliffe2014_im78552.html"><span class="doc">mmb_ratcliffe2014_im78552</span></a>, is used: <span class="math notranslate nohighlight">\(\tau_I\)</span> = 60 MPa (chosen), <span class="math notranslate nohighlight">\(\tau_{II} = \tau_I\sqrt{G_{IIc}/G_{Ic}}\)</span> = 114.5 MPa (equal penalty stiffnesses, Turon et al. 2010, Eq. 23), <span class="math notranslate nohighlight">\(k_I = 10^5\)</span> N/mm<span class="math notranslate nohighlight">\(^3\)</span> and the consistent shear stiffness. The lever has no weight (it is modelled with rigid elements in the report, p. 7 of the PDF, and no weight is mentioned). The length outside the supports (<span class="math notranslate nohighlight">\(2L^*\)</span> = 152.4 mm) is not modelled: the
+coupon ends at the supports.</p>
+<p><strong>Coupons</strong> of <code class="docutils literal notranslate"><span class="pre">create_coupon</span></code>, as in <a class="reference internal" href="mmb_camanho2003_as4peek.html"><span class="doc">mmb_camanho2003_as4peek</span></a>: each arm is a cracked domain, cohesive domains from the crack tip and a far domain with the same law; contact over the pre-crack; null-space connections; the lever constraint on the mean deflections across the width.</p>
+<p><strong>Discretisation</strong>, the rules of the study of the mixed-mode model (<code class="docutils literal notranslate"><span class="pre">mmb_utils.discretisation</span></code>), with <span class="math notranslate nohighlight">\(n\)</span> = 4 terms and 6 Gauss points across the width and 10 terms in the cracked and far domains:</p>
+<ul class="simple">
+<li><p>CLPT arms: three cohesive domains over 40 mm (13.3 mm each), <span class="math notranslate nohighlight">\(m\)</span> = 25 terms, 334 Gauss points per domain (25 per mm);</p></li>
+<li><p>FSDT arms: seven cohesive domains over 30 mm (4.29 mm each), <span class="math notranslate nohighlight">\(m\)</span> = 25 terms, 108 Gauss points per domain (25 per mm), sized with the fast decay rate of the opening of shear-deformable arms, 4.5 mm<span class="math notranslate nohighlight">\(^{-1}\)</span>.</p></li>
+</ul>
+<p><strong>Solver</strong> (<code class="docutils literal notranslate"><span class="pre">solve_coupon</span></code>): Newton-Raphson, displacement increments of 0.1 mm (the largest; cut automatically down to <span class="math notranslate nohighlight">\(10^{-5}\)</span> mm), relative tolerance <span class="math notranslate nohighlight">\(10^{-9}\)</span>; at 80% control of the separation at the load line (<code class="docutils literal notranslate"><span class="pre">control='load-line'</span></code>) up to a crack length of 50 mm, which follows the snap-back after the peak. The last displacement is twice the displacement at the LEFM peak. The peak loads are taken before the crack reaches the saddle, <span class="math notranslate nohighlight">\(a &lt; L\)</span>. These are the settings of
+the runs reported in the study of the mixed-mode model; the runs were made four at a time, one thread each, on a laptop shared with other runs, and the table at the end gives their run times and the computer.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>laminaprop = tuple(im7_8552[k] for k in ('E11', 'E22', 'nu12', 'G12', 'G13', 'G23'))
+plyt, stack = mmb_geometry['h_total']/24, [0]*12        # arm: 12 plies, h = 2.25 mm
+b, L = mmb_geometry['b'], mmb_geometry['L2']/2
+GIc, GIIc, eta, tauI, KI = im7_8552['GIc'], im7_8552['GIIc'], im7_8552['eta_BK'], 60., 1.e5
+tauII = 114.5                                        # tauI*sqrt(GIIc/GIc) = 114.6, as 114.5 in the study
+law = BilinearLaw(GIc, GIIc, tauI, tauII, KI, eta)
+print(law)
+h = plyt*len(stack)
+
+# B = G_II/G (nominal); delta_max: last load-point displacement of the runs
+tests = {
+    'MMB20': dict(case='MMB_GII_GT_0.2', B=0.2, delta_max=3.2172),
+    'MMB50': dict(case='MMB_GII_GT_0.5', B=0.5, delta_max=2.6032),
+    'MMB80': dict(case='MMB_GII_GT_0.8', B=0.8, delta_max=3.1101),
+}
+for t in tests.values():
+    t.update(a0=mmb_cases[t['case']]['a0'], c=mmb_cases[t['case']]['c'], L=L)
+
+DISC = {'clpt': dict(L_coh=40., nd=3, nr_x_gauss=334), 'fsdt': dict(L_coh=30., nd=7, nr_x_gauss=108)}
+for model, dk in DISC.items():
+    disc = mu.discretisation(laminaprop, h, [law], dk['L_coh'], dk['nd'], model=model,
+                             nr_x_gauss=dk['nr_x_gauss'])
+    print(model, {k: round(v, 3) if isinstance(v, float) else v for k, v in disc.items()})
+
+
+def inputs_of(key, model):
+    t, dk = tests[key], DISC[model]
+    disc = mu.discretisation(laminaprop, h, [law], dk['L_coh'], dk['nd'], model=model,
+                             nr_x_gauss=dk['nr_x_gauss'])
+    return dict(kind='MMB', laminaprop=laminaprop, plyt=plyt, stack=stack, b=b, a0=t['a0'],
+                laws=[mu.law_dict(law)], model=model, nd=disc['nd'], L_coh=dk['L_coh'], m_crack=10,
+                m_coh=disc['m_coh'], m_far=10, n=4, nr_x_gauss=disc['nr_x_gauss'], nr_y_gauss=6,
+                L=t['L'], c=t['c'])
+
+
+def solver_of(key):
+    s = dict(delta_max=tests[key]['delta_max'], inc=0.1, min_inc=1e-5, relTOL=1e-9)
+    if key == 'MMB80':
+        s.update(control='load-line', a_stop=50.)
+    return s
+
+
+runs = {}
+for key in tests:
+    for model in ('fsdt', 'clpt'):
+        name = '{0}_{1}'.format(key, model)
+        if ONLY is not None and name not in ONLY:
+            continue
+        path = os.path.join(RESULTS, 'krueger2012_mmb_benchmark_{0}.npz'.format(name))
+        runs[name] = mu.run_or_load(inputs_of(key, model), solver_of(key), path, rerun=RERUN)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+BilinearLaw(GIc=0.212, GIIc=0.774, tauI=60.0, tauII=114.5, KI=100000.0, eta=2.1, KII=99747.81079529143)
+clpt {&#39;lambda_I&#39;: 0.756, &#39;mu&#39;: 1.484, &#39;r_fast_fsdt&#39;: 0.0, &#39;l_cz&#39;: 0.59, &#39;L_dom&#39;: 13.333, &#39;nd&#39;: 3, &#39;m_coh&#39;: 25, &#39;nr_x_gauss&#39;: 334}
+fsdt {&#39;lambda_I&#39;: 0.756, &#39;mu&#39;: 1.484, &#39;r_fast_fsdt&#39;: 4.527, &#39;l_cz&#39;: 0.59, &#39;L_dom&#39;: 4.286, &#39;nd&#39;: 7, &#39;m_coh&#39;: 25, &#39;nr_x_gauss&#39;: 108}
+</pre></div></div>
+</div>
+</section>
+<section id="Linear-elastic-fracture-mechanics">
+<h2>Linear elastic fracture mechanics<a class="headerlink" href="#Linear-elastic-fracture-mechanics" title="Link to this heading">#</a></h2>
+<p>Corrected beam theory of ASTM D6671/D6671M-22 (<code class="docutils literal notranslate"><span class="pre">mmb_utils.lefm_curve</span></code>), as in <a class="reference internal" href="mmb_camanho2003_as4peek.html"><span class="doc">mmb_camanho2003_as4peek</span></a>: self-similar growth at the Benzeggagh-Kenane toughness at the nominal mode ratio up to <span class="math notranslate nohighlight">\(a = L\)</span>, without lever weight.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>E11, E22, _, _, G13, _ = laminaprop
+print('chi = {0:.3f}, chi h = {1:.3f} mm'.format(mu.chi(E11, E22, G13), mu.chi(E11, E22, G13)*h))
+lefm = {}
+for key, t in tests.items():
+    Gc = mu.bk(GIc, GIIc, eta, t['B'])
+    lefm[key] = mu.lefm_curve('MMB', E11, E22, G13, b, h, t['a0'], Gc, L=t['L'], c=t['c'])
+    print('{0}: lever length of D6671 Eq. 5 for B = {1}: {2:.1f} mm (used: {3} mm)'.format(
+          key, t['B'], mu.lever_length(t['B'], t['a0'], h, mu.chi(E11, E22, G13), t['L']), t['c']))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+chi = 1.954, chi h = 4.396 mm
+MMB20: lever length of D6671 Eq. 5 for B = 0.2: 92.0 mm (used: 92.9 mm)
+MMB50: lever length of D6671 Eq. 5 for B = 0.5: 40.9 mm (used: 41.3 mm)
+MMB80: lever length of D6671 Eq. 5 for B = 0.8: 27.0 mm (used: 27.3 mm)
+</pre></div></div>
+</div>
+</section>
+<section id="Results">
+<h2>Results<a class="headerlink" href="#Results" title="Link to this heading">#</a></h2>
+<p>Critical loads of the benchmark: ABAQUS, Krueger (2012, NASA/CR-2012-217562), Figs. 10, 14 and 19, pp. 34, 36 and 39 of the PDF, with the text, pp. 15 and 18; ANSYS, Krueger (2012, NASA/CR-2012-217588), Figs. 38-39, 44 and 50, pp. 59, 62 and 65 of the PDF. The differences are to LEFM. The benchmark curves are the digitised curves of <code class="docutils literal notranslate"><span class="pre">mmb_cases</span></code>, with the load against the applied displacement <span class="math notranslate nohighlight">\(w\)</span> of the lever.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ref_peaks = {
+    'MMB20': [('VCCT ABAQUS, CR-2012-217562 Fig. 10', 128.5), ('VCCT ANSYS, CR-2012-217588 Figs. 38-39', 128.6)],
+    'MMB50': [('VCCT ABAQUS, CR-2012-217562 Fig. 14', 385.), ('VCCT ANSYS, CR-2012-217588 Fig. 44', 375.)],
+    'MMB80': [('VCCT ABAQUS, CR-2012-217562 Fig. 19', 751.), ('VCCT ANSYS, CR-2012-217588 Fig. 50', 729.)],
+}
+rows = []
+for key, t in tests.items():
+    for s, p in ref_peaks[key]:
+        rows.append((key, s, p))
+    rows.append((key, 'LEFM (ASTM D6671)', float(lefm[key][1].max())))
+    for model in ('fsdt', 'clpt'):
+        res = runs.get('{0}_{1}'.format(key, model))
+        if res is not None:
+            rows.append((key, 'panels ' + model.upper(), mu.peak_load(res, t['L'])[0]))
+display(Markdown(mu.peaks_table(rows, ref='LEFM (ASTM D6671)')))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>test</p></th>
+<th class="head"><p>source</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(P_{max}\)</span> (N)</p></th>
+<th class="head"><p>vs LEFM (ASTM D6671)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>MMB20</p></td>
+<td><p>VCCT ABAQUS, CR-2012-217562 Fig. 10</p></td>
+<td><p>128.5</p></td>
+<td><p>+1.4%</p></td>
+</tr>
+<tr class="row-odd"><td><p>MMB20</p></td>
+<td><p>VCCT ANSYS, CR-2012-217588 Figs. 38-39</p></td>
+<td><p>128.6</p></td>
+<td><p>+1.5%</p></td>
+</tr>
+<tr class="row-even"><td><p>MMB20</p></td>
+<td><p>LEFM (ASTM D6671)</p></td>
+<td><p>126.7</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>MMB20</p></td>
+<td><p>panels FSDT</p></td>
+<td><p>124.4</p></td>
+<td><p>-1.8%</p></td>
+</tr>
+<tr class="row-even"><td><p>MMB20</p></td>
+<td><p>panels CLPT</p></td>
+<td><p>131.5</p></td>
+<td><p>+3.8%</p></td>
+</tr>
+<tr class="row-odd"><td><p>MMB50</p></td>
+<td><p>VCCT ABAQUS, CR-2012-217562 Fig. 14</p></td>
+<td><p>385.0</p></td>
+<td><p>+1.1%</p></td>
+</tr>
+<tr class="row-even"><td><p>MMB50</p></td>
+<td><p>VCCT ANSYS, CR-2012-217588 Fig. 44</p></td>
+<td><p>375.0</p></td>
+<td><p>-1.5%</p></td>
+</tr>
+<tr class="row-odd"><td><p>MMB50</p></td>
+<td><p>LEFM (ASTM D6671)</p></td>
+<td><p>380.9</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>MMB50</p></td>
+<td><p>panels FSDT</p></td>
+<td><p>366.5</p></td>
+<td><p>-3.8%</p></td>
+</tr>
+<tr class="row-odd"><td><p>MMB50</p></td>
+<td><p>panels CLPT</p></td>
+<td><p>395.4</p></td>
+<td><p>+3.8%</p></td>
+</tr>
+<tr class="row-even"><td><p>MMB80</p></td>
+<td><p>VCCT ABAQUS, CR-2012-217562 Fig. 19</p></td>
+<td><p>751.0</p></td>
+<td><p>+2.9%</p></td>
+</tr>
+<tr class="row-odd"><td><p>MMB80</p></td>
+<td><p>VCCT ANSYS, CR-2012-217588 Fig. 50</p></td>
+<td><p>729.0</p></td>
+<td><p>-0.1%</p></td>
+</tr>
+<tr class="row-even"><td><p>MMB80</p></td>
+<td><p>LEFM (ASTM D6671)</p></td>
+<td><p>729.7</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>MMB80</p></td>
+<td><p>panels FSDT</p></td>
+<td><p>702.1</p></td>
+<td><p>-3.8%</p></td>
+</tr>
+<tr class="row-even"><td><p>MMB80</p></td>
+<td><p>panels CLPT</p></td>
+<td><p>735.6</p></td>
+<td><p>+0.8%</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig, axes = plt.subplots(1, 3, figsize=(13, 4.3))
+for ax, (key, t) in zip(axes.flat, tests.items()):
+    w, P = mmb_cases[t['case']]['benchmark']
+    cs = {'VCCT benchmark (digitised)': (w, P, dict(color='0.45', lw=1.5, marker='o', ms=3))}
+    cs['LEFM (ASTM D6671)'] = (lefm[key][0], lefm[key][1], dict(color='C1', ls=':', lw=2))
+    for model, col in (('fsdt', 'C0'), ('clpt', 'C3')):
+        res = runs.get('{0}_{1}'.format(key, model))
+        if res is not None:
+            cs['panels ' + model.upper()] = (np.r_[0., res['delta']], np.r_[0., res['P']],
+                                             dict(color=col, lw=2, ls='-' if model == 'fsdt' else '-.'))
+    mu.plot_test(ax, cs, title='{0}, $c$ = {1} mm'.format(key, t['c']))
+    xs = [np.nanmax(v[0]) for k, v in cs.items() if k.startswith('panels')]
+    ax.set_xlim(0, 1.3*max(xs) if xs else 4.)
+    ax.legend(fontsize=7)
+plt.tight_layout()
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_krueger2012_mmb_benchmark_12_0.png" src="../_images/notebooks_krueger2012_mmb_benchmark_12_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>info = ['| run | status | increments | last crack length (mm) | size | run time (min) | panels | machine |',
+        '|---|---|---|---|---|---|---|---|']
+for name, res in runs.items():
+    info.append('| {0} | {1} | {2} | {3:.1f} | {4} | {5:.1f} | {6} ({7}) | {8} |'.format(
+        name, res['status'], len(res['delta']), res['a'][-1], res['size'], res['time']/60,
+        res['panels_version'], res['panels_commit'][:7], res['machine']))
+display(Markdown('\n'.join(info)))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>run</p></th>
+<th class="head"><p>status</p></th>
+<th class="head"><p>increments</p></th>
+<th class="head"><p>last crack length (mm)</p></th>
+<th class="head"><p>size</p></th>
+<th class="head"><p>run time (min)</p></th>
+<th class="head"><p>panels</p></th>
+<th class="head"><p>machine</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>MMB20_fsdt</p></td>
+<td><p>stopped at delta = 2.2929</p></td>
+<td><p>149</p></td>
+<td><p>36.1</p></td>
+<td><p>7800</p></td>
+<td><p>72.5</p></td>
+<td><p>0.16.0 (439b8fb)</p></td>
+<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
+processors, Windows 11</p></td>
+</tr>
+<tr class="row-odd"><td><p>MMB20_clpt</p></td>
+<td><p>finished</p></td>
+<td><p>35</p></td>
+<td><p>47.9</p></td>
+<td><p>2280</p></td>
+<td><p>7.2</p></td>
+<td><p>0.16.0 (439b8fb)</p></td>
+<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
+processors, Windows 11</p></td>
+</tr>
+<tr class="row-even"><td><p>MMB50_fsdt</p></td>
+<td><p>stopped at delta = 1.3193</p></td>
+<td><p>20</p></td>
+<td><p>25.4</p></td>
+<td><p>7800</p></td>
+<td><p>15.1</p></td>
+<td><p>0.16.0 (cb23e30)</p></td>
+<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
+processors, Windows 11</p></td>
+</tr>
+<tr class="row-odd"><td><p>MMB50_clpt</p></td>
+<td><p>finished</p></td>
+<td><p>40</p></td>
+<td><p>52.4</p></td>
+<td><p>2280</p></td>
+<td><p>4.9</p></td>
+<td><p>0.16.0 (439b8fb)</p></td>
+<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
+processors, Windows 11</p></td>
+</tr>
+<tr class="row-even"><td><p>MMB80_fsdt</p></td>
+<td><p>finished</p></td>
+<td><p>237</p></td>
+<td><p>50.0</p></td>
+<td><p>7800</p></td>
+<td><p>106.4</p></td>
+<td><p>0.16.0 (439b8fb)</p></td>
+<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
+processors, Windows 11</p></td>
+</tr>
+<tr class="row-odd"><td><p>MMB80_clpt</p></td>
+<td><p>finished</p></td>
+<td><p>98</p></td>
+<td><p>50.2</p></td>
+<td><p>2280</p></td>
+<td><p>10.1</p></td>
+<td><p>0.16.0 (cb23e30)</p></td>
+<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
+processors, Windows 11</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
 <section id="Discussion">
 <h2>Discussion<a class="headerlink" href="#Discussion" title="Link to this heading">#</a></h2>
-<p>The three benchmarks start with the critical point of delamination onset, followed by a load drop and, at larger displacements, a rising branch; the higher the mode II share, the larger the critical load. A comparison with <code class="docutils literal notranslate"><span class="pre">panels</span></code> needs a mixed-mode damage criterion in <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code> and a model of the loading lever.</p>
+<ul class="simple">
+<li><p><strong>panels and the VCCT benchmark.</strong> The FSDT peak loads are 3.2% (20%), 4.8% (50%) and 6.5% (80%) below the ABAQUS benchmark and 3.3, 2.3 and 3.7% below the ANSYS benchmark, which differ from each other by up to 3% (2.9% at 80%). The CLPT peak loads are 2.3, 2.7 and <span class="math notranslate nohighlight">\(-2.1\)</span>% from the ABAQUS benchmark and 2.3, 5.4 and 0.9% from the ANSYS benchmark. After the critical point, both models follow the benchmark curves, read by eye, as far as they run (the FSDT run at 50% stops at the onset of
+propagation); the initial stiffness of the FSDT model matches the benchmark and LEFM, the CLPT model is stiffer.</p></li>
+<li><p><strong>panels and LEFM.</strong> The FSDT peaks are 1.8, 3.8 and 3.8% below LEFM, a cohesive process zone ahead of the tip lowering the peak in the mixed-mode cases as in <a class="reference internal" href="mmb_camanho2003_as4peek.html"><span class="doc">mmb_camanho2003_as4peek</span></a>; LEFM and the VCCT benchmark, which have no process zone, agree within 3%. The strengths, chosen because the benchmark has none, therefore affect the comparison, the more so at 80%, where the process zone is longest.</p></li>
+<li><p><strong>CLPT and FSDT arms.</strong> The CLPT arms give peak loads 5.7, 7.9 and 4.8% above the FSDT arms, as for the tests of the same material in <a class="reference internal" href="mmb_ratcliffe2014_im78552.html"><span class="doc">mmb_ratcliffe2014_im78552</span></a>: the arms are thick (<span class="math notranslate nohighlight">\(h\)</span> = 2.25 mm) and CLPT neglects their transverse shear.</p></li>
+<li><p><strong>Robustness.</strong> With FSDT arms under control of the load-point displacement, the MMB at 20% slows down after the peak to increments of <span class="math notranslate nohighlight">\(10^{-5}\)</span> mm and stops at <span class="math notranslate nohighlight">\(a\)</span> = 36.1 mm; the MMB at 50% stops just after the peak, at the onset of propagation (<span class="math notranslate nohighlight">\(a \approx a_0\)</span>), so its peak is a lower bound. The MMB at 80% passes the snap-back with the control of the separation at the load line, in both theories.</p></li>
+</ul>
 </section>
 </section>
 
@@ -1738,20 +2216,20 @@ plt.show()
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="cohesive_zone_verification.html"
+       href="mmb_ratcliffe2014_im78552.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Cohesive connection <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code>: verification and linear measures of the DCB</p>
+        <p class="prev-next-title">Mixed-mode delamination of IM7/8552: MMB tests of Ratcliffe and Johnston, DCB of Murri and ENF of O’Brien et al.</p>
       </div>
     </a>
     <a class="right-next"
-       href="conn_method_comparison.html"
+       href="mmb_tijs2022_as4dpekk.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Benchmarks with the penalty and the null-space connections</p>
+        <p class="prev-next-title">Mixed-mode delamination of AS4D/PEKK-FC with fibre bridging: DCB and MMB tests of Tijs et al.</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -1776,6 +2254,9 @@ plt.show()
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#MMB-benchmark-data">MMB benchmark data</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Table-and-plot-of-the-benchmark-data">Table and plot of the benchmark data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#panels-model">panels model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Linear-elastic-fracture-mechanics">Linear elastic fracture mechanics</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Results">Results</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Discussion">Discussion</a></li>
 </ul>
   </nav></div>
