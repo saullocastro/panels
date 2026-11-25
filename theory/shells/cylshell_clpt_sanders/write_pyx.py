@@ -28,7 +28,7 @@ REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                     '..', '..', '..'))
 sys.path.insert(0, REPO)
 
-from panels.dev.tabulate import tabulate_basis
+from panels.dev.tabulate import keep_tables, tabulate_basis
 
 HEADER = """#cython: boundscheck=False
 #cython: wraparound=False
@@ -1250,13 +1250,13 @@ LINSTRAIN = """{ind}exx += cs[col+0]*(2/a)*fAu_xi*gAu
 
 if __name__ == '__main__':
     with open(os.path.join(REPO, 'panels', 'models', 'cylshell_clpt_sanders.pyx'), 'w', newline='\n') as f:
-        f.write(analytical_module())
+        f.write(keep_tables(analytical_module()))
     with open(os.path.join(REPO, 'panels', 'models', 'cylshell_clpt_sanders_num.pyx'), 'w', newline='\n') as f:
         #NOTE the follower-pressure kernels, see
         #     theory/shells/follower_pressure/write_pyx.py
         #NOTE the approximation functions evaluated once per integration
         #     point, see panels/dev/tabulate.py
-        f.write(tabulate_basis(numerical_module()) + '\n\n'
+        f.write(keep_tables(tabulate_basis(numerical_module()) + '\n\n'
                 + follower_block('cylshell_clpt_sanders') + '\n\n'
-                + tangent_block('cylshell_clpt_sanders'))
+                + tangent_block('cylshell_clpt_sanders')))
     print('written')

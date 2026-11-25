@@ -39,6 +39,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
 sys.path.insert(0, HERE)
 sys.path.insert(0, REPO)
+from panels.dev.tabulate import keep_tables
 
 import cylshell_clpt_gl as th
 
@@ -232,12 +233,12 @@ moments of the density to be constant over the domain.
 def generate():
     path = os.path.join(REPO, 'panels', 'models', MODEL + '.pyx')
     with open(path, 'w', encoding='utf-8', newline='\n') as f:
-        f.write(analytical_module())
+        f.write(keep_tables(analytical_module()))
     print(MODEL, 'analytical written')
     path = os.path.join(REPO, 'panels', 'models', MODEL + '_num.pyx')
     with open(path, 'w', encoding='utf-8', newline='\n') as f:
-        f.write(numerical_module() + '\n\n' + gw.follower_block(MODEL)
-                + '\n\n' + gw.tangent_block(MODEL))
+        f.write(keep_tables(numerical_module() + '\n\n' + gw.follower_block(MODEL)
+                + '\n\n' + gw.tangent_block(MODEL)))
     print(MODEL, 'numerical written')
 
 

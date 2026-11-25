@@ -22,6 +22,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
 sys.path.insert(0, HERE)
 sys.path.insert(0, REPO)
+from panels.dev.tabulate import keep_tables
 
 import tangent_product as th
 from panels.dev.matrixtools import pow2mult
@@ -374,7 +375,7 @@ def insert_block(model):
         text = text[:start].rstrip('\n') + '\n\n\n' + text[end:].lstrip('\n')
     text = text.rstrip('\n') + '\n\n\n' + pyx_block(model)
     with open(path, 'w', newline='\n') as f:
-        f.write(text)
+        f.write(keep_tables(text))
     print(model, 'tangent stiffness product kernel written')
 
 

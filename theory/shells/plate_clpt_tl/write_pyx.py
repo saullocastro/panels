@@ -38,6 +38,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
 sys.path.insert(0, HERE)
 sys.path.insert(0, REPO)
+from panels.dev.tabulate import keep_tables
 
 import plate_clpt_tl as th
 
@@ -619,7 +620,7 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
 def generate():
     path = os.path.join(REPO, 'panels', 'models', MODEL + '_num.pyx')
     with open(path, 'w', newline='\n') as f:
-        f.write(numerical_module() + '\n\n' + gw.follower_block(MODEL))
+        f.write(keep_tables(numerical_module() + '\n\n' + gw.follower_block(MODEL)))
     print(MODEL, 'numerical written')
 
 
