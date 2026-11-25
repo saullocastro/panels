@@ -29,6 +29,30 @@ The defaults are unchanged and reproduce the results of 0.17.0 bit for bit.
   "Options for speed" of `cohesive_zone_mixed_mode`; notebook
   `coupon_speed_options`; tests `tests/multidomain/test_plate_blas.py`.
 
+### Changed: tables of the approximation functions kept across calls
+
+On by default; the matrices and vectors are those of 0.17.0, bit for bit.
+
+- The kernels of the 30 modules `panels/models/<model>_num.pyx` (`fkC_num`,
+  `fkG_num`, `fkM_num`, `fkAx_num`, `fkAy_num`, `calc_fint`, `calc_kTv`,
+  `calc_fext_follower`, `fkCfollower_num`) keep their tables of Bardell's
+  functions on the shell, filled at the first call for all the integration
+  points and only read afterwards, with a key of all the values they depend
+  on (numbers of terms and of points, abscissae, limits of the integration
+  domain, boundary flags, dimensions): a change of any of them fills new
+  tables. New module `panels.basis_tables` (`lookup_table`, `store_table`,
+  `clear_tables`) and slot `Shell._basis_tables`. For a coupon-sized domain
+  (240 x 6 points, m = 24, n = 4), `fkC_num(NLgeom=1)` + `fkG_num` +
+  `calc_fint` take 16 % (`plate_clpt_donnell`) and 29 %
+  (`plate_fsdt_donnell`) less time from the second call on.
+- `panels.dev.tabulate.keep_tables`, applied by `tabulate_basis` and by all
+  the generators of `theory/shells`, rewrites the kernels; the modules were
+  regenerated with it.
+- Tests `tests/tests_shell/test_kernel_references.py` (all the kernels of
+  the 30 modules against stored outputs of 0.17.0,
+  `kernel_references.npz`, written by `kernel_references.py`) and
+  `test_basis_tables.py` (invalidation); documentation in `tabulation`.
+
 ## 0.17.0 (2026-11-24)
 
 ### Added: mixed-mode multilinear cohesive interface `'CZM'` and delamination coupons

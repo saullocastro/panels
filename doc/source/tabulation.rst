@@ -7,8 +7,9 @@ The numerically integrated matrices and vectors of ``panels`` are sums over
 the integration points of products of the approximation functions of the
 Ritz method. This page describes how the kernels evaluate these functions:
 once per integration point and term, in tables, instead of again in every
-loop over the terms of the matrix, the innermost loop included. The results
-are the same, bit for bit, and the assembly is several times faster.
+loop over the terms of the matrix, the innermost loop included, and keep
+these tables on the shell from one call to the next. The results are the
+same, bit for bit, and the assembly is several times faster.
 
 Integrands
 ----------
@@ -120,6 +121,63 @@ The kernels that integrate along a line, e.g. the connections at a constant
 line at a single coordinate: their tables are filled once, before the
 outermost loop over the terms.
 
+Tables kept per domain across calls
+-----------------------------------
+
+The integration points of a shell, its numbers of terms and its boundary
+flags do not change from one call of a kernel to the next, e.g. between the
+iterations of a non-linear analysis, and neither do the tables. The kernels
+of the models, ``panels/models/<model>_num.pyx``, therefore keep them on
+the shell, with one row per integration point along `x` (or `y`)::
+
+    ftab, ftab_new = lookup_table(shell, __name__, 'fkC_num', 'ftab',
+                                  ftab_key, (nx, 7, m))
+    ...
+    with nogil:
+        for ptx in range(nx):
+            for pty in range(ny):
+                xi, eta, weight = ...
+                if ftab_new:
+                    for i in range(m):
+                        ftab[ptx, 0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
+                        ...
+                for i in range(m):
+                    fAu = ftab[ptx, 0, i]
+                    ...
+    if ftab_new:
+        store_table(shell, __name__, 'fkC_num', 'ftab', ftab_key, ftab)
+
+The first call fills the tables, at all the points, and stores them on the
+shell; the next calls only read them. The values are computed by the same
+code, at the same coordinates, as when they were filled at every call, such
+that the matrices and vectors are again identical, bit for bit.
+
+Each table is stored with a key of all the values it depends on, see
+:mod:`panels.basis_tables`:
+
+- the numbers of terms, ``m`` or ``n``, and of integration points, ``nx``
+  or ``ny``;
+- the Gauss-Legendre abscissae and the limits of the integration domain in
+  natural coordinates, ``xi1, xi2`` or ``eta1, eta2``, which follow from
+  :meth:`.Shell.integration_limits`;
+- the boundary flags of the fields of its rows, e.g. ``x1u, x1ur, x2u,
+  x2ur``;
+- the dimensions entering its rows, e.g. ``a`` of the derivatives
+  ``(2/a)*fp(...)``.
+
+A call whose key differs from the stored one, after a change of any of
+these values, fills a new table and replaces the stored one: a shell keeps
+at most one table per kernel and table name, a few tens of kilobytes, e.g.
+`240 \times 7 \times 24` values along `x` for a domain of 240 points and
+`m = 24`. The tables are looked up and stored while the kernel holds the
+GIL; a stored table is never modified, only replaced, such that kernels
+running at the same time in several threads read consistent tables.
+:func:`.basis_tables.clear_tables` removes the tables of a shell.
+
+The tables of the functions at a single point given as argument, e.g. for
+the field outputs, and those of the connections and of the stiffeners,
+which depend on several domains, are still filled at every call.
+
 Kernels
 -------
 
@@ -163,10 +221,18 @@ written by hand. For each kernel it
 3. fills the tables right before the loops over the terms of the loop over
    the integration points, after checking that the coordinates are not
    modified afterwards, and replaces each call by the read of the table;
-4. declares and allocates the tables outside the ``nogil`` block.
+4. declares and allocates the tables outside the ``nogil`` block;
+5. for a kernel with a ``shell`` argument, keeps the tables on the shell,
+   see :func:`panels.dev.tabulate.keep_tables`: the key gathers the names
+   that the rows of each table depend on, following the assignments of the
+   coordinates in the loops over the points back to the values set before
+   the ``nogil`` block, and it fails when this dependence cannot be
+   established, e.g. for a coordinate assigned conditionally.
 
 A kernel already tabulated is left unchanged, such that applying it twice
-does nothing. The helper ``_terms_sdt`` of the connections of the shear
+does nothing. The generators of all the modules
+``panels/models/<model>_num.pyx`` apply :func:`.keep_tables` to the text
+they write. The helper ``_terms_sdt`` of the connections of the shear
 deformation theories, whose flags come from an array, was tabulated by
 hand in the same way. The matrices and vectors of the tabulated kernels
 are identical, bit for bit, to those of the direct implementation, the
@@ -182,6 +248,16 @@ the integrands with more arithmetic per pair of terms, e.g. the constitutive
 stiffness matrix ``fkC_num`` of the shear deformation theories: for
 `m = n = 12` it is about 30 to 60 for the geometric stiffness matrices and
 3.5 to 17 for the non-linear constitutive stiffness matrices.
+
+Keeping the tables across calls removes the remaining `O(m + n)`
+evaluations per point. Their share is largest for many points and few
+terms per point, as in the long domains of the coupons: for a domain of
+`240 \times 6` points and `m = 24`, `n = 4`, ``fkC_num`` with ``NLgeom=1``,
+``fkG_num`` and ``calc_fint`` together take 16 % less time for
+``'plate_clpt_donnell'`` and 29 % less for ``'plate_fsdt_donnell'`` from the
+second call on (Windows, MSVC). The gain is larger where the
+polynomials of the functions are slower to evaluate, e.g. with the ``pow``
+of older C libraries.
 
 Operators per domain
 --------------------

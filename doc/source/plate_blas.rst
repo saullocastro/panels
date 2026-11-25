@@ -3,8 +3,9 @@
 Plate kernels as matrix products
 ================================
 
-The tables of :ref:`tabulation` remove the evaluations of the approximation
-functions from the loops over the pairs of terms, but the loops remain:
+The tables of :ref:`tabulation`, kept on each shell across calls, remove
+the evaluations of the approximation functions from the loops over the
+pairs of terms and from all the calls but the first, but the loops remain:
 per integration point, the Cython kernels of the tangent stiffness matrix
 add one product of scalars for each pair of terms and each pair of degrees
 of freedom, `O(m^2 n^2)` operations of a few flops each, in a scalar loop.
@@ -25,7 +26,8 @@ derivatives of the fields at the integration point, `u_{,x}, u_{,y},
 the Ritz constants of the domain. The values of the approximation functions
 and of their derivatives at the points, the tables of :ref:`tabulation`,
 depend only on the number of terms, the dimensions of the domain, the
-boundary flags and the points, not on the configuration. They are therefore
+boundary flags and the points, not on the configuration: the Cython
+kernels keep them on the shell for this reason, and here they are
 combined once per domain into the operator `\boldsymbol{D}` that maps the
 Ritz constants to the generalized derivatives at all the points, see
 :class:`.plate_blas.PlateOperators`, and kept with the assembly while the
