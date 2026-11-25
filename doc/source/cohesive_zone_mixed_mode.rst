@@ -71,6 +71,40 @@ including the lever of the MMB apparatus, a linear constraint of
                              model='plate_fsdt_donnell', nd=7, L_coh=67.5)
     res, an = solve_coupon(md, info, delta_max=8.)
 
+Options for speed
+-----------------
+
+The defaults reproduce the results of the previous versions bit for bit.
+Three options give the same increments, the same Newton-Raphson iterations
+and the same loads, to the round-off, in less time; they matter for the
+coupons, whose tangent stiffness matrix is assembled and factorized at
+every iteration:
+
+- ``create_coupon(..., plate_kernels='blas')``, or ``MultiDomain(...,
+  plate_kernels='blas')``: the plate matrices and vectors as products of
+  dense matrices, see :ref:`plate_blas`;
+- ``solve_coupon(..., reuse_kT=True)``, or
+  :meth:`.MultiDomain.get_reduced_functions` with ``reuse_kT=True``: the
+  load vector of the prescribed displacement, `oldsymbol{K}_T
+  oldsymbol{c}_{p1}`, from the tangent stiffness matrix already assembled
+  at the same configuration;
+- ``solve_coupon(..., linear_solver='pardiso_lu')``, with oneMKL, or
+  ``'dense_lu'`` otherwise, both of ``structsolve>=0.13.0``: the
+  factorization of the tangent stiffness matrix, forwarded to
+  ``structsolve.Analysis``.
+
+::
+
+    md, info = create_coupon('MMB', laminaprop, plyt, [0]*12, b=25.4,
+                             a0=34.1, laws=[law], L=50.8, c=44.4,
+                             model='plate_fsdt_donnell', nd=7, L_coh=67.5,
+                             plate_kernels='blas')
+    res, an = solve_coupon(md, info, delta_max=8., reuse_kT=True,
+                           linear_solver='pardiso_lu')
+
+``tests/multidomain/test_plate_blas.py`` compares a DCB coupon with these
+options to the defaults.
+
 Verification
 ------------
 

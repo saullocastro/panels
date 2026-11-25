@@ -182,3 +182,14 @@ the integrands with more arithmetic per pair of terms, e.g. the constitutive
 stiffness matrix ``fkC_num`` of the shear deformation theories: for
 `m = n = 12` it is about 30 to 60 for the geometric stiffness matrices and
 3.5 to 17 for the non-linear constitutive stiffness matrices.
+
+Operators per domain
+--------------------
+
+For the flat plates ``'plate_clpt_donnell'`` and ``'plate_fsdt_donnell'``
+the tables can be taken one step further: the products of the tabulated
+functions at all the points, which do not change from one evaluation to
+the next, are kept once per domain as the operators of the generalized
+derivatives, and the loops over the pairs of terms become products of dense
+matrices. This is the option ``plate_kernels='blas'`` of
+:class:`.MultiDomain`, see :ref:`plate_blas`.

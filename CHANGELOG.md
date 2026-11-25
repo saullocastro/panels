@@ -1,5 +1,34 @@
 # Changelog
 
+## Unreleased
+
+### Added: options for speed of the cohesive coupons
+
+The defaults are unchanged and reproduce the results of 0.17.0 bit for bit.
+
+- `MultiDomain(..., plate_kernels='blas')` (default `'cython'`), also
+  `create_coupon(..., plate_kernels='blas')`: the tangent stiffness matrices
+  (`calc_kC`, `calc_kG` with `NLgeom=True`), the internal force vector and
+  the tangent-vector product of the domains of `plate_clpt_donnell` and
+  `plate_fsdt_donnell` as products of dense matrices with the operators of
+  the generalized derivatives tabulated once per domain
+  (`panels.multidomain.plate_blas`), equal to the Cython kernels to the
+  round-off; the Cython kernels for the other domains (constitutive matrix
+  per point, partial domain, constant membrane stresses, follower loads,
+  other models). Not stored by `MultiDomain.save`.
+- `MultiDomain.get_reduced_functions(reuse_kT=False)` and
+  `solve_coupon(..., reuse_kT=False)`: with `True`, the load vector of the
+  prescribed displacement uses the tangent stiffness matrix assembled at the
+  same configuration instead of a new `calc_kTv`.
+- `solve_coupon` documents `**analysis_kw`, e.g. the linear solvers
+  `linear_solver='pardiso_lu'` (oneMKL) or `'dense_lu'` of structsolve
+  0.13.0.
+- Requires `structsolve>=0.13.0` (`pyproject.toml`, `requirements.txt`); the
+  workflows install it from its pull request branch until it is on PyPI.
+- Documentation page `plate_blas`, linked from `tabulation`, and the section
+  "Options for speed" of `cohesive_zone_mixed_mode`; notebook
+  `coupon_speed_options`; tests `tests/multidomain/test_plate_blas.py`.
+
 ## 0.17.0 (2026-11-24)
 
 ### Added: mixed-mode multilinear cohesive interface `'CZM'` and delamination coupons

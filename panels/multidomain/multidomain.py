@@ -4056,7 +4056,10 @@ class MultiDomain(object):
         of the panels is added last. The penalty stiffnesses of the
         prescribed displacements are not included. The result is stored in
         the attribute ``kC``, and the matrix of the connections in
-        ``kC_conn``.
+        ``kC_conn``. With ``plate_kernels='blas'``, ``NLgeom=True`` and
+        ``c``, the matrices of the domains of
+        :func:`.plate_blas.is_eligible` come from
+        :meth:`.plate_blas.PlateOperators.kC`, with the same pattern.
 
         Parameters
         ----------
@@ -4277,7 +4280,10 @@ class MultiDomain(object):
         The matrices :meth:`.Shell.calc_kG` of the panels are assembled at
         their offsets ``row_start`` and ``col_start`` and symmetrized when
         ``finalize=True``. The connections do not contribute. The result is
-        stored in the attribute ``kG``.
+        stored in the attribute ``kG``. With ``plate_kernels='blas'``,
+        ``NLgeom=True`` and ``c``, the matrices of the domains of
+        :func:`.plate_blas.is_eligible` come from
+        :meth:`.plate_blas.PlateOperators.kG`, with the same pattern.
 
         Parameters
         ----------
@@ -4515,7 +4521,9 @@ class MultiDomain(object):
         derivative of :meth:`.calc_fint` along ``v``. The product of each
         panel comes from :meth:`.Shell.calc_kTv`, whose cost is about that
         of :meth:`.Shell.calc_fint`, and the connections add
-        ``get_kC_conn(c=c) @ v``.
+        ``get_kC_conn(c=c) @ v``. With ``plate_kernels='blas'``, the
+        product of the domains of :func:`.plate_blas.is_eligible` comes from
+        :meth:`.plate_blas.PlateOperators.kTv`.
 
         Parameters
         ----------
@@ -4582,7 +4590,9 @@ class MultiDomain(object):
         depends on the configuration, assembled at the offset ``col_start``
         of the panel, and of the product of the matrix of the connections,
         :meth:`.get_kC_conn`, by ``c``. :meth:`.MultiDomain.calc_kT` gives
-        its tangent stiffness matrix.
+        its tangent stiffness matrix. With ``plate_kernels='blas'``, the
+        vector of the domains of :func:`.plate_blas.is_eligible` comes from
+        :meth:`.plate_blas.PlateOperators.fint`.
 
         Parameters
         ----------
