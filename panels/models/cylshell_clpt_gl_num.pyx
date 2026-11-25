@@ -79,6 +79,7 @@ import numpy as np
 from scipy.special import roots_legendre
 
 from panels import INT, DOUBLE
+from panels.basis_tables import lookup_table, store_table
 #NOTE the linear kernels, independent of the non-linear strains, are those
 #     of the Sanders-Koiter cylinder
 from .cylshell_clpt_sanders_num import fkM_num, fkAx_num, fkAy_num
@@ -179,7 +180,10 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     cdef int i, j, k, l, c, p, q, r, s, row, col, ptx, pty
     cdef double xi, eta, weight
     cdef double xi1, xi2, eta1, eta2
-    cdef double [:, ::1] ftab, gtab
+    cdef double [:, :, ::1] gtab
+    cdef int gtab_new
+    cdef double [:, :, ::1] ftab
+    cdef int ftab_new
     cdef double [::1] xis, etas, weights_xi, weights_eta
     cdef double radius
 
@@ -255,14 +259,17 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     intx = x2 - x1
     inty = y2 - y1
 
-    ftab = np.zeros((7, m), dtype=DOUBLE)
-    gtab = np.zeros((7, n), dtype=DOUBLE)
-
     fdim = 9*m*m*n*n
     kCr = np.zeros((fdim,), dtype=INT)
     kCc = np.zeros((fdim,), dtype=INT)
     kCv = np.zeros((fdim,), dtype=DOUBLE)
 
+    # tables of the approximation functions kept across calls, see panels/dev/tabulate.py
+    ftab_key = (nx, m, x1u, x1ur, x2u, x2ur, a, x1v, x1vr, x2v, x2vr, x1w, x1wr, x2w, x2wr, xis, xi2, xi1)
+    ftab, ftab_new = lookup_table(shell, __name__, 'fkC_num', 'ftab', ftab_key, (nx, 7, m))
+    # tables of the approximation functions kept across calls, see panels/dev/tabulate.py
+    gtab_key = (ny, n, y1u, y1ur, y2u, y2ur, b, y1v, y1vr, y2v, y2vr, y1w, y1wr, y2w, y2wr, etas, eta2, eta1)
+    gtab, gtab_new = lookup_table(shell, __name__, 'fkC_num', 'gtab', gtab_key, (ny, 7, n))
     with nogil:
         for ptx in range(nx):
             for pty in range(ny):
@@ -280,22 +287,24 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                             F[i*6 + j] = Fnxny[ptx, pty, i, j]
 
                 # approximation functions and their derivatives in x and y
-                for i in range(m):
-                    ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[6, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
-                for j in range(n):
-                    gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[6, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
+                if ftab_new:
+                    for i in range(m):
+                        ftab[ptx, 0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
+                        ftab[ptx, 1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
+                        ftab[ptx, 2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
+                        ftab[ptx, 3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
+                        ftab[ptx, 4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
+                        ftab[ptx, 5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
+                        ftab[ptx, 6, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
+                if gtab_new:
+                    for j in range(n):
+                        gtab[pty, 0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
+                        gtab[pty, 1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
+                        gtab[pty, 2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+                        gtab[pty, 3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
+                        gtab[pty, 4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+                        gtab[pty, 5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
+                        gtab[pty, 6, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
 
                 # displacement gradients at the point, zero when NLgeom == 0
                 u_x = 0.
@@ -308,21 +317,21 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                 w = 0.
                 if NLgeom == 1:
                     for j in range(n):
-                        gAu = gtab[0, j]
-                        gAu_y = gtab[1, j]
-                        gAv = gtab[2, j]
-                        gAv_y = gtab[3, j]
-                        gAw = gtab[4, j]
-                        gAw_y = gtab[5, j]
-                        gAw_yy = gtab[6, j]
+                        gAu = gtab[pty, 0, j]
+                        gAu_y = gtab[pty, 1, j]
+                        gAv = gtab[pty, 2, j]
+                        gAv_y = gtab[pty, 3, j]
+                        gAw = gtab[pty, 4, j]
+                        gAw_y = gtab[pty, 5, j]
+                        gAw_yy = gtab[pty, 6, j]
                         for i in range(m):
-                            fAu = ftab[0, i]
-                            fAu_x = ftab[1, i]
-                            fAv = ftab[2, i]
-                            fAv_x = ftab[3, i]
-                            fAw = ftab[4, i]
-                            fAw_x = ftab[5, i]
-                            fAw_xx = ftab[6, i]
+                            fAu = ftab[ptx, 0, i]
+                            fAu_x = ftab[ptx, 1, i]
+                            fAv = ftab[ptx, 2, i]
+                            fAv_x = ftab[ptx, 3, i]
+                            fAw = ftab[ptx, 4, i]
+                            fAw_x = ftab[ptx, 5, i]
+                            fAw_xx = ftab[ptx, 6, i]
                             col = col0 + DOF*(j*m + i)
                             u_x += fAu_x*gAu*cs[col+0]
                             u_y += fAu*gAu_y*cs[col+0]
@@ -409,21 +418,21 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 
                 c = -1
                 for j in range(n):
-                    gAu = gtab[0, j]
-                    gAu_y = gtab[1, j]
-                    gAv = gtab[2, j]
-                    gAv_y = gtab[3, j]
-                    gAw = gtab[4, j]
-                    gAw_y = gtab[5, j]
-                    gAw_yy = gtab[6, j]
+                    gAu = gtab[pty, 0, j]
+                    gAu_y = gtab[pty, 1, j]
+                    gAv = gtab[pty, 2, j]
+                    gAv_y = gtab[pty, 3, j]
+                    gAw = gtab[pty, 4, j]
+                    gAw_y = gtab[pty, 5, j]
+                    gAw_yy = gtab[pty, 6, j]
                     for i in range(m):
-                        fAu = ftab[0, i]
-                        fAu_x = ftab[1, i]
-                        fAv = ftab[2, i]
-                        fAv_x = ftab[3, i]
-                        fAw = ftab[4, i]
-                        fAw_x = ftab[5, i]
-                        fAw_xx = ftab[6, i]
+                        fAu = ftab[ptx, 0, i]
+                        fAu_x = ftab[ptx, 1, i]
+                        fAv = ftab[ptx, 2, i]
+                        fAv_x = ftab[ptx, 3, i]
+                        fAw = ftab[ptx, 4, i]
+                        fAw_x = ftab[ptx, 5, i]
+                        fAw_xx = ftab[ptx, 6, i]
                         row = row0 + DOF*(j*m + i)
                         pA[0] = fAu_x*gAu
                         pA[1] = fAu*gAu_y
@@ -471,25 +480,25 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                         TA[31] = pA[4]*K[53] + pA[5]*K[64] + pA[7]*K[86] + pA[8]*K[97] + pA[9]*K[108] + pA[10]*K[119]
                         TA[32] = pA[4]*K[54] + pA[5]*K[65] + pA[7]*K[87] + pA[8]*K[98] + pA[9]*K[109] + pA[10]*K[120]
                         for l in range(n):
-                            gBu = gtab[0, l]
-                            gBu_y = gtab[1, l]
-                            gBv = gtab[2, l]
-                            gBv_y = gtab[3, l]
-                            gBw = gtab[4, l]
-                            gBw_y = gtab[5, l]
-                            gBw_yy = gtab[6, l]
+                            gBu = gtab[pty, 0, l]
+                            gBu_y = gtab[pty, 1, l]
+                            gBv = gtab[pty, 2, l]
+                            gBv_y = gtab[pty, 3, l]
+                            gBw = gtab[pty, 4, l]
+                            gBw_y = gtab[pty, 5, l]
+                            gBw_yy = gtab[pty, 6, l]
                             for k in range(m):
                                 col = col0 + DOF*(l*m + k)
                                 #NOTE symmetry assumption True if no follower forces are used
                                 if row > col:
                                     continue
-                                fBu = ftab[0, k]
-                                fBu_x = ftab[1, k]
-                                fBv = ftab[2, k]
-                                fBv_x = ftab[3, k]
-                                fBw = ftab[4, k]
-                                fBw_x = ftab[5, k]
-                                fBw_xx = ftab[6, k]
+                                fBu = ftab[ptx, 0, k]
+                                fBu_x = ftab[ptx, 1, k]
+                                fBv = ftab[ptx, 2, k]
+                                fBv_x = ftab[ptx, 3, k]
+                                fBw = ftab[ptx, 4, k]
+                                fBw_x = ftab[ptx, 5, k]
+                                fBw_xx = ftab[ptx, 6, k]
                                 pB[0] = fBu_x*gBu
                                 pB[1] = fBu*gBu_y
                                 pB[2] = fBv_x*gBv
@@ -546,6 +555,10 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                                     kCr[c] = row+2
                                     kCc[c] = col+2
                                 kCv[c] += weight*(TA[26]*pB[4] + TA[27]*pB[5] + TA[29]*pB[7] + TA[30]*pB[8] + TA[31]*pB[9] + TA[32]*pB[10])
+    if gtab_new:
+        store_table(shell, __name__, 'fkC_num', 'gtab', gtab_key, gtab)
+    if ftab_new:
+        store_table(shell, __name__, 'fkC_num', 'ftab', ftab_key, ftab)
 
     kC = coo_matrix((kCv, (kCr, kCc)), shape=(size, size))
 
@@ -641,7 +654,10 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     cdef int i, j, k, l, c, p, q, r, s, row, col, ptx, pty
     cdef double xi, eta, weight
     cdef double xi1, xi2, eta1, eta2
-    cdef double [:, ::1] ftab, gtab
+    cdef double [:, :, ::1] gtab
+    cdef int gtab_new
+    cdef double [:, :, ::1] ftab
+    cdef int ftab_new
     cdef double [::1] xis, etas, weights_xi, weights_eta
     cdef double radius
 
@@ -715,14 +731,17 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     intx = x2 - x1
     inty = y2 - y1
 
-    ftab = np.zeros((7, m), dtype=DOUBLE)
-    gtab = np.zeros((7, n), dtype=DOUBLE)
-
     fdim = 5*m*m*n*n
     kGr = np.zeros((fdim,), dtype=INT)
     kGc = np.zeros((fdim,), dtype=INT)
     kGv = np.zeros((fdim,), dtype=DOUBLE)
 
+    # tables of the approximation functions kept across calls, see panels/dev/tabulate.py
+    ftab_key = (nx, m, x1u, x1ur, x2u, x2ur, a, x1v, x1vr, x2v, x2vr, x1w, x1wr, x2w, x2wr, xis, xi2, xi1)
+    ftab, ftab_new = lookup_table(shell, __name__, 'fkG_num', 'ftab', ftab_key, (nx, 7, m))
+    # tables of the approximation functions kept across calls, see panels/dev/tabulate.py
+    gtab_key = (ny, n, y1u, y1ur, y2u, y2ur, b, y1v, y1vr, y2v, y2vr, y1w, y1wr, y2w, y2wr, etas, eta2, eta1)
+    gtab, gtab_new = lookup_table(shell, __name__, 'fkG_num', 'gtab', gtab_key, (ny, 7, n))
     with nogil:
         for ptx in range(nx):
             for pty in range(ny):
@@ -740,22 +759,24 @@ def fkG_num(double [::1] cs, object Finput, object shell,
                             F[i*6 + j] = Fnxny[ptx, pty, i, j]
 
                 # approximation functions and their derivatives in x and y
-                for i in range(m):
-                    ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[6, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
-                for j in range(n):
-                    gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[6, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
+                if ftab_new:
+                    for i in range(m):
+                        ftab[ptx, 0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
+                        ftab[ptx, 1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
+                        ftab[ptx, 2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
+                        ftab[ptx, 3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
+                        ftab[ptx, 4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
+                        ftab[ptx, 5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
+                        ftab[ptx, 6, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
+                if gtab_new:
+                    for j in range(n):
+                        gtab[pty, 0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
+                        gtab[pty, 1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
+                        gtab[pty, 2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+                        gtab[pty, 3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
+                        gtab[pty, 4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+                        gtab[pty, 5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
+                        gtab[pty, 6, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
 
                 # generalized derivatives at the point
                 u_x = 0.
@@ -770,21 +791,21 @@ def fkG_num(double [::1] cs, object Finput, object shell,
                 w_yy = 0.
                 w_xy = 0.
                 for j in range(n):
-                    gAu = gtab[0, j]
-                    gAu_y = gtab[1, j]
-                    gAv = gtab[2, j]
-                    gAv_y = gtab[3, j]
-                    gAw = gtab[4, j]
-                    gAw_y = gtab[5, j]
-                    gAw_yy = gtab[6, j]
+                    gAu = gtab[pty, 0, j]
+                    gAu_y = gtab[pty, 1, j]
+                    gAv = gtab[pty, 2, j]
+                    gAv_y = gtab[pty, 3, j]
+                    gAw = gtab[pty, 4, j]
+                    gAw_y = gtab[pty, 5, j]
+                    gAw_yy = gtab[pty, 6, j]
                     for i in range(m):
-                        fAu = ftab[0, i]
-                        fAu_x = ftab[1, i]
-                        fAv = ftab[2, i]
-                        fAv_x = ftab[3, i]
-                        fAw = ftab[4, i]
-                        fAw_x = ftab[5, i]
-                        fAw_xx = ftab[6, i]
+                        fAu = ftab[ptx, 0, i]
+                        fAu_x = ftab[ptx, 1, i]
+                        fAv = ftab[ptx, 2, i]
+                        fAv_x = ftab[ptx, 3, i]
+                        fAw = ftab[ptx, 4, i]
+                        fAw_x = ftab[ptx, 5, i]
+                        fAw_xx = ftab[ptx, 6, i]
                         col = col0 + DOF*(j*m + i)
                         u_x += fAu_x*gAu*cs[col+0]
                         u_y += fAu*gAu_y*cs[col+0]
@@ -839,21 +860,21 @@ def fkG_num(double [::1] cs, object Finput, object shell,
 
                 c = -1
                 for j in range(n):
-                    gAu = gtab[0, j]
-                    gAu_y = gtab[1, j]
-                    gAv = gtab[2, j]
-                    gAv_y = gtab[3, j]
-                    gAw = gtab[4, j]
-                    gAw_y = gtab[5, j]
-                    gAw_yy = gtab[6, j]
+                    gAu = gtab[pty, 0, j]
+                    gAu_y = gtab[pty, 1, j]
+                    gAv = gtab[pty, 2, j]
+                    gAv_y = gtab[pty, 3, j]
+                    gAw = gtab[pty, 4, j]
+                    gAw_y = gtab[pty, 5, j]
+                    gAw_yy = gtab[pty, 6, j]
                     for i in range(m):
-                        fAu = ftab[0, i]
-                        fAu_x = ftab[1, i]
-                        fAv = ftab[2, i]
-                        fAv_x = ftab[3, i]
-                        fAw = ftab[4, i]
-                        fAw_x = ftab[5, i]
-                        fAw_xx = ftab[6, i]
+                        fAu = ftab[ptx, 0, i]
+                        fAu_x = ftab[ptx, 1, i]
+                        fAv = ftab[ptx, 2, i]
+                        fAv_x = ftab[ptx, 3, i]
+                        fAw = ftab[ptx, 4, i]
+                        fAw_x = ftab[ptx, 5, i]
+                        fAw_xx = ftab[ptx, 6, i]
                         row = row0 + DOF*(j*m + i)
                         pA[0] = fAu_x*gAu
                         pA[1] = fAu*gAu_y
@@ -882,25 +903,25 @@ def fkG_num(double [::1] cs, object Finput, object shell,
                         TA[28] = pA[4]*K[50] + pA[5]*K[61]
                         TA[29] = pA[7]*K[84]
                         for l in range(n):
-                            gBu = gtab[0, l]
-                            gBu_y = gtab[1, l]
-                            gBv = gtab[2, l]
-                            gBv_y = gtab[3, l]
-                            gBw = gtab[4, l]
-                            gBw_y = gtab[5, l]
-                            gBw_yy = gtab[6, l]
+                            gBu = gtab[pty, 0, l]
+                            gBu_y = gtab[pty, 1, l]
+                            gBv = gtab[pty, 2, l]
+                            gBv_y = gtab[pty, 3, l]
+                            gBw = gtab[pty, 4, l]
+                            gBw_y = gtab[pty, 5, l]
+                            gBw_yy = gtab[pty, 6, l]
                             for k in range(m):
                                 col = col0 + DOF*(l*m + k)
                                 #NOTE symmetry assumption True if no follower forces are used
                                 if row > col:
                                     continue
-                                fBu = ftab[0, k]
-                                fBu_x = ftab[1, k]
-                                fBv = ftab[2, k]
-                                fBv_x = ftab[3, k]
-                                fBw = ftab[4, k]
-                                fBw_x = ftab[5, k]
-                                fBw_xx = ftab[6, k]
+                                fBu = ftab[ptx, 0, k]
+                                fBu_x = ftab[ptx, 1, k]
+                                fBv = ftab[ptx, 2, k]
+                                fBv_x = ftab[ptx, 3, k]
+                                fBw = ftab[ptx, 4, k]
+                                fBw_x = ftab[ptx, 5, k]
+                                fBw_xx = ftab[ptx, 6, k]
                                 pB[0] = fBu_x*gBu
                                 pB[1] = fBu*gBu_y
                                 pB[2] = fBv_x*gBv
@@ -937,6 +958,10 @@ def fkG_num(double [::1] cs, object Finput, object shell,
                                     kGr[c] = row+2
                                     kGc[c] = col+2
                                 kGv[c] += weight*(TA[26]*pB[4] + TA[27]*pB[5] + TA[29]*pB[7])
+    if gtab_new:
+        store_table(shell, __name__, 'fkG_num', 'gtab', gtab_key, gtab)
+    if ftab_new:
+        store_table(shell, __name__, 'fkG_num', 'ftab', ftab_key, ftab)
 
     kG = coo_matrix((kGv, (kGr, kGc)), shape=(size, size))
 
@@ -1017,7 +1042,10 @@ def calc_fint(double [::1] cs, object Finput, object shell,
     cdef int i, j, k, l, c, p, q, r, s, row, col, ptx, pty
     cdef double xi, eta, weight
     cdef double xi1, xi2, eta1, eta2
-    cdef double [:, ::1] ftab, gtab
+    cdef double [:, :, ::1] gtab
+    cdef int gtab_new
+    cdef double [:, :, ::1] ftab
+    cdef int ftab_new
     cdef double [::1] xis, etas, weights_xi, weights_eta
     cdef double radius
 
@@ -1086,11 +1114,14 @@ def calc_fint(double [::1] cs, object Finput, object shell,
     intx = x2 - x1
     inty = y2 - y1
 
-    ftab = np.zeros((7, m), dtype=DOUBLE)
-    gtab = np.zeros((7, n), dtype=DOUBLE)
-
     fint = np.zeros(size, dtype=DOUBLE)
 
+    # tables of the approximation functions kept across calls, see panels/dev/tabulate.py
+    ftab_key = (nx, m, x1u, x1ur, x2u, x2ur, a, x1v, x1vr, x2v, x2vr, x1w, x1wr, x2w, x2wr, xis, xi2, xi1)
+    ftab, ftab_new = lookup_table(shell, __name__, 'calc_fint', 'ftab', ftab_key, (nx, 7, m))
+    # tables of the approximation functions kept across calls, see panels/dev/tabulate.py
+    gtab_key = (ny, n, y1u, y1ur, y2u, y2ur, b, y1v, y1vr, y2v, y2vr, y1w, y1wr, y2w, y2wr, etas, eta2, eta1)
+    gtab, gtab_new = lookup_table(shell, __name__, 'calc_fint', 'gtab', gtab_key, (ny, 7, n))
     with nogil:
         for ptx in range(nx):
             for pty in range(ny):
@@ -1108,22 +1139,24 @@ def calc_fint(double [::1] cs, object Finput, object shell,
                             F[i*6 + j] = Fnxny[ptx, pty, i, j]
 
                 # approximation functions and their derivatives in x and y
-                for i in range(m):
-                    ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[6, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
-                for j in range(n):
-                    gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[6, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
+                if ftab_new:
+                    for i in range(m):
+                        ftab[ptx, 0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
+                        ftab[ptx, 1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
+                        ftab[ptx, 2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
+                        ftab[ptx, 3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
+                        ftab[ptx, 4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
+                        ftab[ptx, 5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
+                        ftab[ptx, 6, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
+                if gtab_new:
+                    for j in range(n):
+                        gtab[pty, 0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
+                        gtab[pty, 1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
+                        gtab[pty, 2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+                        gtab[pty, 3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
+                        gtab[pty, 4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+                        gtab[pty, 5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
+                        gtab[pty, 6, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
 
                 # generalized derivatives at the point
                 u_x = 0.
@@ -1138,21 +1171,21 @@ def calc_fint(double [::1] cs, object Finput, object shell,
                 w_yy = 0.
                 w_xy = 0.
                 for j in range(n):
-                    gAu = gtab[0, j]
-                    gAu_y = gtab[1, j]
-                    gAv = gtab[2, j]
-                    gAv_y = gtab[3, j]
-                    gAw = gtab[4, j]
-                    gAw_y = gtab[5, j]
-                    gAw_yy = gtab[6, j]
+                    gAu = gtab[pty, 0, j]
+                    gAu_y = gtab[pty, 1, j]
+                    gAv = gtab[pty, 2, j]
+                    gAv_y = gtab[pty, 3, j]
+                    gAw = gtab[pty, 4, j]
+                    gAw_y = gtab[pty, 5, j]
+                    gAw_yy = gtab[pty, 6, j]
                     for i in range(m):
-                        fAu = ftab[0, i]
-                        fAu_x = ftab[1, i]
-                        fAv = ftab[2, i]
-                        fAv_x = ftab[3, i]
-                        fAw = ftab[4, i]
-                        fAw_x = ftab[5, i]
-                        fAw_xx = ftab[6, i]
+                        fAu = ftab[ptx, 0, i]
+                        fAu_x = ftab[ptx, 1, i]
+                        fAv = ftab[ptx, 2, i]
+                        fAv_x = ftab[ptx, 3, i]
+                        fAw = ftab[ptx, 4, i]
+                        fAw_x = ftab[ptx, 5, i]
+                        fAw_xx = ftab[ptx, 6, i]
                         col = col0 + DOF*(j*m + i)
                         u_x += fAu_x*gAu*cs[col+0]
                         u_y += fAu*gAu_y*cs[col+0]
@@ -1190,21 +1223,21 @@ def calc_fint(double [::1] cs, object Finput, object shell,
                 S[10] = -2*sg[5]
 
                 for j in range(n):
-                    gAu = gtab[0, j]
-                    gAu_y = gtab[1, j]
-                    gAv = gtab[2, j]
-                    gAv_y = gtab[3, j]
-                    gAw = gtab[4, j]
-                    gAw_y = gtab[5, j]
-                    gAw_yy = gtab[6, j]
+                    gAu = gtab[pty, 0, j]
+                    gAu_y = gtab[pty, 1, j]
+                    gAv = gtab[pty, 2, j]
+                    gAv_y = gtab[pty, 3, j]
+                    gAw = gtab[pty, 4, j]
+                    gAw_y = gtab[pty, 5, j]
+                    gAw_yy = gtab[pty, 6, j]
                     for i in range(m):
-                        fAu = ftab[0, i]
-                        fAu_x = ftab[1, i]
-                        fAv = ftab[2, i]
-                        fAv_x = ftab[3, i]
-                        fAw = ftab[4, i]
-                        fAw_x = ftab[5, i]
-                        fAw_xx = ftab[6, i]
+                        fAu = ftab[ptx, 0, i]
+                        fAu_x = ftab[ptx, 1, i]
+                        fAv = ftab[ptx, 2, i]
+                        fAv_x = ftab[ptx, 3, i]
+                        fAw = ftab[ptx, 4, i]
+                        fAw_x = ftab[ptx, 5, i]
+                        fAw_xx = ftab[ptx, 6, i]
                         col = col0 + DOF*(j*m + i)
                         pA[0] = fAu_x*gAu
                         pA[1] = fAu*gAu_y
@@ -1220,6 +1253,10 @@ def calc_fint(double [::1] cs, object Finput, object shell,
                         fint[col+0] += weight*(pA[0]*S[0] + pA[1]*S[1])
                         fint[col+1] += weight*(pA[2]*S[2] + pA[3]*S[3] + pA[6]*S[6])
                         fint[col+2] += weight*(pA[4]*S[4] + pA[5]*S[5] + pA[7]*S[7] + pA[8]*S[8] + pA[9]*S[9] + pA[10]*S[10])
+    if gtab_new:
+        store_table(shell, __name__, 'calc_fint', 'gtab', gtab_key, gtab)
+    if ftab_new:
+        store_table(shell, __name__, 'calc_fint', 'ftab', ftab_key, ftab)
 
     return fint
 
@@ -1305,7 +1342,10 @@ def calc_fext_follower(double [::1] cs, double [:, ::1] pnxny,
     neglect.
 
     """
-    cdef double [:, ::1] gtab, ftab
+    cdef double [:, :, ::1] ftab
+    cdef int ftab_new
+    cdef double [:, :, ::1] gtab
+    cdef int gtab_new
     cdef double a, b, pintx, pinty, qf
     cdef double r
     cdef int m, n, nx, ny
@@ -1350,9 +1390,12 @@ def calc_fext_follower(double [::1] cs, double [:, ::1] pnxny,
 
     fext = np.zeros(size, dtype=DOUBLE)
 
-    gtab = np.zeros((6, n), dtype=DOUBLE)
-    ftab = np.zeros((6, m), dtype=DOUBLE)
-
+    # tables of the approximation functions kept across calls, see panels/dev/tabulate.py
+    gtab_key = (ny, n, y1u, y1ur, y2u, y2ur, y1v, y1vr, y2v, y2vr, y1w, y1wr, y2w, y2wr, py1, etas, pinty, b)
+    gtab, gtab_new = lookup_table(shell, __name__, 'calc_fext_follower', 'gtab', gtab_key, (ny, 6, n))
+    # tables of the approximation functions kept across calls, see panels/dev/tabulate.py
+    ftab_key = (nx, m, x1u, x1ur, x2u, x2ur, x1v, x1vr, x2v, x2vr, x1w, x1wr, x2w, x2wr, px1, xis, pintx, a)
+    ftab, ftab_new = lookup_table(shell, __name__, 'calc_fext_follower', 'ftab', ftab_key, (nx, 6, m))
     with nogil:
         for ptx in range(nx):
             for pty in range(ny):
@@ -1367,35 +1410,37 @@ def calc_fext_follower(double [::1] cs, double [:, ::1] pnxny,
                 # displacement gradients at the Gauss point
                 u_x = u_y = v_x = v_y = vv = ww = w_x = w_y = 0.
                 # approximation functions evaluated once, see panels/dev/tabulate.py
-                for j in range(n):
-                    gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[1, j] = fp(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[3, j] = fp(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[5, j] = fp(j, eta, y1w, y1wr, y2w, y2wr)
-                for i in range(m):
-                    ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[1, i] = fp(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[3, i] = fp(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[5, i] = fp(i, xi, x1w, x1wr, x2w, x2wr)
+                if gtab_new:
+                    for j in range(n):
+                        gtab[pty, 0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
+                        gtab[pty, 1, j] = fp(j, eta, y1u, y1ur, y2u, y2ur)
+                        gtab[pty, 2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+                        gtab[pty, 3, j] = fp(j, eta, y1v, y1vr, y2v, y2vr)
+                        gtab[pty, 4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+                        gtab[pty, 5, j] = fp(j, eta, y1w, y1wr, y2w, y2wr)
+                if ftab_new:
+                    for i in range(m):
+                        ftab[ptx, 0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
+                        ftab[ptx, 1, i] = fp(i, xi, x1u, x1ur, x2u, x2ur)
+                        ftab[ptx, 2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
+                        ftab[ptx, 3, i] = fp(i, xi, x1v, x1vr, x2v, x2vr)
+                        ftab[ptx, 4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
+                        ftab[ptx, 5, i] = fp(i, xi, x1w, x1wr, x2w, x2wr)
 
                 for j in range(n):
-                    gAu = gtab[0, j]
-                    gAu_eta = gtab[1, j]
-                    gAv = gtab[2, j]
-                    gAv_eta = gtab[3, j]
-                    gAw = gtab[4, j]
-                    gAw_eta = gtab[5, j]
+                    gAu = gtab[pty, 0, j]
+                    gAu_eta = gtab[pty, 1, j]
+                    gAv = gtab[pty, 2, j]
+                    gAv_eta = gtab[pty, 3, j]
+                    gAw = gtab[pty, 4, j]
+                    gAw_eta = gtab[pty, 5, j]
                     for i in range(m):
-                        fAu = ftab[0, i]
-                        fAu_xi = ftab[1, i]
-                        fAv = ftab[2, i]
-                        fAv_xi = ftab[3, i]
-                        fAw = ftab[4, i]
-                        fAw_xi = ftab[5, i]
+                        fAu = ftab[ptx, 0, i]
+                        fAu_xi = ftab[ptx, 1, i]
+                        fAv = ftab[ptx, 2, i]
+                        fAv_xi = ftab[ptx, 3, i]
+                        fAw = ftab[ptx, 4, i]
+                        fAw_xi = ftab[ptx, 5, i]
                         col = col0 + DOF*(j*m + i)
                         u_x += cs[col+0]*(2/a)*fAu_xi*gAu
                         u_y += cs[col+0]*(2/b)*fAu*gAu_eta
@@ -1411,17 +1456,21 @@ def calc_fext_follower(double [::1] cs, double [:, ::1] pnxny,
                 az = qf*u_x*v_y - qf*u_y*v_x + qf*u_x*ww/r + ref + u_x + v_y + ww/r
 
                 for j in range(n):
-                    gAu = gtab[0, j]
-                    gAv = gtab[2, j]
-                    gAw = gtab[4, j]
+                    gAu = gtab[pty, 0, j]
+                    gAv = gtab[pty, 2, j]
+                    gAw = gtab[pty, 4, j]
                     for i in range(m):
-                        fAu = ftab[0, i]
-                        fAv = ftab[2, i]
-                        fAw = ftab[4, i]
+                        fAu = ftab[ptx, 0, i]
+                        fAv = ftab[ptx, 2, i]
+                        fAw = ftab[ptx, 4, i]
                         col = col0 + DOF*(j*m + i)
                         fext[col+0] += weight*fAu*gAu*ax
                         fext[col+1] += weight*fAv*gAv*ay
                         fext[col+2] += weight*fAw*gAw*az
+    if ftab_new:
+        store_table(shell, __name__, 'calc_fext_follower', 'ftab', ftab_key, ftab)
+    if gtab_new:
+        store_table(shell, __name__, 'calc_fext_follower', 'gtab', gtab_key, gtab)
 
     return fext
 
@@ -1492,7 +1541,10 @@ def fkCfollower_num(double [::1] cs, double [:, ::1] pnxny,
     unsymmetric.
 
     """
-    cdef double [:, ::1] gtab, ftab
+    cdef double [:, :, ::1] ftab
+    cdef int ftab_new
+    cdef double [:, :, ::1] gtab
+    cdef int gtab_new
     cdef double a, b, pintx, pinty, qf
     cdef double r
     cdef int m, n, nx, ny
@@ -1539,9 +1591,12 @@ def fkCfollower_num(double [::1] cs, double [:, ::1] pnxny,
     kCc = np.zeros((fdim,), dtype=INT)
     kCv = np.zeros((fdim,), dtype=DOUBLE)
 
-    gtab = np.zeros((6, n), dtype=DOUBLE)
-    ftab = np.zeros((6, m), dtype=DOUBLE)
-
+    # tables of the approximation functions kept across calls, see panels/dev/tabulate.py
+    gtab_key = (ny, n, y1u, y1ur, y2u, y2ur, y1v, y1vr, y2v, y2vr, y1w, y1wr, y2w, y2wr, py1, etas, pinty, b)
+    gtab, gtab_new = lookup_table(shell, __name__, 'fkCfollower_num', 'gtab', gtab_key, (ny, 6, n))
+    # tables of the approximation functions kept across calls, see panels/dev/tabulate.py
+    ftab_key = (nx, m, x1u, x1ur, x2u, x2ur, x1v, x1vr, x2v, x2vr, x1w, x1wr, x2w, x2wr, px1, xis, pintx, a)
+    ftab, ftab_new = lookup_table(shell, __name__, 'fkCfollower_num', 'ftab', ftab_key, (nx, 6, m))
     with nogil:
         for ptx in range(nx):
             for pty in range(ny):
@@ -1557,36 +1612,38 @@ def fkCfollower_num(double [::1] cs, double [:, ::1] pnxny,
                 # quadratic area vector
                 u_x = u_y = v_x = v_y = vv = ww = w_x = w_y = 0.
                 # approximation functions evaluated once, see panels/dev/tabulate.py
-                for j in range(n):
-                    gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[1, j] = fp(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[3, j] = fp(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[5, j] = fp(j, eta, y1w, y1wr, y2w, y2wr)
-                for i in range(m):
-                    ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[1, i] = fp(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[3, i] = fp(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[5, i] = fp(i, xi, x1w, x1wr, x2w, x2wr)
+                if gtab_new:
+                    for j in range(n):
+                        gtab[pty, 0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
+                        gtab[pty, 1, j] = fp(j, eta, y1u, y1ur, y2u, y2ur)
+                        gtab[pty, 2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+                        gtab[pty, 3, j] = fp(j, eta, y1v, y1vr, y2v, y2vr)
+                        gtab[pty, 4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+                        gtab[pty, 5, j] = fp(j, eta, y1w, y1wr, y2w, y2wr)
+                if ftab_new:
+                    for i in range(m):
+                        ftab[ptx, 0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
+                        ftab[ptx, 1, i] = fp(i, xi, x1u, x1ur, x2u, x2ur)
+                        ftab[ptx, 2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
+                        ftab[ptx, 3, i] = fp(i, xi, x1v, x1vr, x2v, x2vr)
+                        ftab[ptx, 4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
+                        ftab[ptx, 5, i] = fp(i, xi, x1w, x1wr, x2w, x2wr)
 
                 if quadratic == 1:
                     for j in range(n):
-                        gAu = gtab[0, j]
-                        gAu_eta = gtab[1, j]
-                        gAv = gtab[2, j]
-                        gAv_eta = gtab[3, j]
-                        gAw = gtab[4, j]
-                        gAw_eta = gtab[5, j]
+                        gAu = gtab[pty, 0, j]
+                        gAu_eta = gtab[pty, 1, j]
+                        gAv = gtab[pty, 2, j]
+                        gAv_eta = gtab[pty, 3, j]
+                        gAw = gtab[pty, 4, j]
+                        gAw_eta = gtab[pty, 5, j]
                         for i in range(m):
-                            fAu = ftab[0, i]
-                            fAu_xi = ftab[1, i]
-                            fAv = ftab[2, i]
-                            fAv_xi = ftab[3, i]
-                            fAw = ftab[4, i]
-                            fAw_xi = ftab[5, i]
+                            fAu = ftab[ptx, 0, i]
+                            fAu_xi = ftab[ptx, 1, i]
+                            fAv = ftab[ptx, 2, i]
+                            fAv_xi = ftab[ptx, 3, i]
+                            fAw = ftab[ptx, 4, i]
+                            fAw_xi = ftab[ptx, 5, i]
                             col = col0 + DOF*(j*m + i)
                             u_x += cs[col+0]*(2/a)*fAu_xi*gAu
                             u_y += cs[col+0]*(2/b)*fAu*gAu_eta
@@ -1599,33 +1656,33 @@ def fkCfollower_num(double [::1] cs, double [:, ::1] pnxny,
 
                 c = -1
                 for i in range(m):
-                    fAu = ftab[0, i]
-                    fAu_xi = ftab[1, i]
-                    fAv = ftab[2, i]
-                    fAv_xi = ftab[3, i]
-                    fAw = ftab[4, i]
-                    fAw_xi = ftab[5, i]
+                    fAu = ftab[ptx, 0, i]
+                    fAu_xi = ftab[ptx, 1, i]
+                    fAv = ftab[ptx, 2, i]
+                    fAv_xi = ftab[ptx, 3, i]
+                    fAw = ftab[ptx, 4, i]
+                    fAw_xi = ftab[ptx, 5, i]
                     for k in range(m):
-                        fBu = ftab[0, k]
-                        fBu_xi = ftab[1, k]
-                        fBv = ftab[2, k]
-                        fBv_xi = ftab[3, k]
-                        fBw = ftab[4, k]
-                        fBw_xi = ftab[5, k]
+                        fBu = ftab[ptx, 0, k]
+                        fBu_xi = ftab[ptx, 1, k]
+                        fBv = ftab[ptx, 2, k]
+                        fBv_xi = ftab[ptx, 3, k]
+                        fBw = ftab[ptx, 4, k]
+                        fBw_xi = ftab[ptx, 5, k]
                         for j in range(n):
-                            gAu = gtab[0, j]
-                            gAu_eta = gtab[1, j]
-                            gAv = gtab[2, j]
-                            gAv_eta = gtab[3, j]
-                            gAw = gtab[4, j]
-                            gAw_eta = gtab[5, j]
+                            gAu = gtab[pty, 0, j]
+                            gAu_eta = gtab[pty, 1, j]
+                            gAv = gtab[pty, 2, j]
+                            gAv_eta = gtab[pty, 3, j]
+                            gAw = gtab[pty, 4, j]
+                            gAw_eta = gtab[pty, 5, j]
                             for l in range(n):
-                                gBu = gtab[0, l]
-                                gBu_eta = gtab[1, l]
-                                gBv = gtab[2, l]
-                                gBv_eta = gtab[3, l]
-                                gBw = gtab[4, l]
-                                gBw_eta = gtab[5, l]
+                                gBu = gtab[pty, 0, l]
+                                gBu_eta = gtab[pty, 1, l]
+                                gBv = gtab[pty, 2, l]
+                                gBv_eta = gtab[pty, 3, l]
+                                gBw = gtab[pty, 4, l]
+                                gBw_eta = gtab[pty, 5, l]
                                 row = row0 + DOF*(j*m + i)
                                 col = col0 + DOF*(l*m + k)
                                 c += 1
@@ -1668,6 +1725,10 @@ def fkCfollower_num(double [::1] cs, double [:, ::1] pnxny,
                                     kCr[c] = row+2
                                     kCc[c] = col+2
                                 kCv[c] += weight*( -fAw*fBw*gAw*gBw*qf*u_x/r - fAw*fBw*gAw*gBw/r )
+    if ftab_new:
+        store_table(shell, __name__, 'fkCfollower_num', 'ftab', ftab_key, ftab)
+    if gtab_new:
+        store_table(shell, __name__, 'fkCfollower_num', 'gtab', gtab_key, gtab)
 
     kC = coo_matrix((kCv, (kCr, kCc)), shape=(size, size))
 
@@ -1768,7 +1829,10 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
     cdef double gAu, gAu_eta, gAv, gAv_eta, gAw, gAw_eta
     cdef double gAw_etaeta
 
-    cdef double [:, ::1] ftab, gtab
+    cdef double [:, :, ::1] gtab
+    cdef int gtab_new
+    cdef double [:, :, ::1] ftab
+    cdef int ftab_new
     cdef double [::1] xis, etas, weights_xi, weights_eta, kTv
 
     # F as 4-D matrix, must be [nx, ny, 6, 6], when there is one
@@ -1817,8 +1881,6 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
 
     kTv = np.zeros(size, dtype=DOUBLE)
     # basis functions at the integration point
-    ftab = np.zeros((7, m), dtype=DOUBLE)
-    gtab = np.zeros((7, n), dtype=DOUBLE)
 
     xinf = 0
     xsup = shell.a
@@ -1833,6 +1895,12 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
     intx = x2 - x1
     inty = y2 - y1
 
+    # tables of the approximation functions kept across calls, see panels/dev/tabulate.py
+    ftab_key = (nx, m, x1u, x1ur, x2u, x2ur, x1v, x1vr, x2v, x2vr, x1w, x1wr, x2w, x2wr, xis, xi2, xi1)
+    ftab, ftab_new = lookup_table(shell, __name__, 'calc_kTv', 'ftab', ftab_key, (nx, 7, m))
+    # tables of the approximation functions kept across calls, see panels/dev/tabulate.py
+    gtab_key = (ny, n, y1u, y1ur, y2u, y2ur, y1v, y1vr, y2v, y2vr, y1w, y1wr, y2w, y2wr, etas, eta2, eta1)
+    gtab, gtab_new = lookup_table(shell, __name__, 'calc_kTv', 'gtab', gtab_key, (ny, 7, n))
     with nogil:
         for ptx in range(nx):
             for pty in range(ny):
@@ -1849,22 +1917,24 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
                         for j in range(6):
                             F[i*6 + j] = Fnxny[ptx, pty, i, j]
 
-                for i in range(m):
-                    ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[1, i] = fp(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[3, i] = fp(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[5, i] = fp(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[6, i] = fpp(i, xi, x1w, x1wr, x2w, x2wr)
-                for j in range(n):
-                    gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[1, j] = fp(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[3, j] = fp(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[5, j] = fp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[6, j] = fpp(j, eta, y1w, y1wr, y2w, y2wr)
+                if ftab_new:
+                    for i in range(m):
+                        ftab[ptx, 0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
+                        ftab[ptx, 1, i] = fp(i, xi, x1u, x1ur, x2u, x2ur)
+                        ftab[ptx, 2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
+                        ftab[ptx, 3, i] = fp(i, xi, x1v, x1vr, x2v, x2vr)
+                        ftab[ptx, 4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
+                        ftab[ptx, 5, i] = fp(i, xi, x1w, x1wr, x2w, x2wr)
+                        ftab[ptx, 6, i] = fpp(i, xi, x1w, x1wr, x2w, x2wr)
+                if gtab_new:
+                    for j in range(n):
+                        gtab[pty, 0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
+                        gtab[pty, 1, j] = fp(j, eta, y1u, y1ur, y2u, y2ur)
+                        gtab[pty, 2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+                        gtab[pty, 3, j] = fp(j, eta, y1v, y1vr, y2v, y2vr)
+                        gtab[pty, 4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+                        gtab[pty, 5, j] = fp(j, eta, y1w, y1wr, y2w, y2wr)
+                        gtab[pty, 6, j] = fpp(j, eta, y1w, y1wr, y2w, y2wr)
 
                 # rotations of cs and vs
                 b0 = 0.
@@ -1880,19 +1950,19 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
                 db4 = 0.
                 db5 = 0.
                 for j in range(n):
-                    gAu = gtab[0, j]
-                    gAu_eta = gtab[1, j]
-                    gAv = gtab[2, j]
-                    gAv_eta = gtab[3, j]
-                    gAw = gtab[4, j]
-                    gAw_eta = gtab[5, j]
+                    gAu = gtab[pty, 0, j]
+                    gAu_eta = gtab[pty, 1, j]
+                    gAv = gtab[pty, 2, j]
+                    gAv_eta = gtab[pty, 3, j]
+                    gAw = gtab[pty, 4, j]
+                    gAw_eta = gtab[pty, 5, j]
                     for i in range(m):
-                        fAu = ftab[0, i]
-                        fAu_xi = ftab[1, i]
-                        fAv = ftab[2, i]
-                        fAv_xi = ftab[3, i]
-                        fAw = ftab[4, i]
-                        fAw_xi = ftab[5, i]
+                        fAu = ftab[ptx, 0, i]
+                        fAu_xi = ftab[ptx, 1, i]
+                        fAv = ftab[ptx, 2, i]
+                        fAv_xi = ftab[ptx, 3, i]
+                        fAw = ftab[ptx, 4, i]
+                        fAw_xi = ftab[ptx, 5, i]
                         col = col0 + DOF*(j*m + i)
                         b0 += 2*fAu_xi*gAu/a*cs[col+0]
                         b1 += 2*fAu*gAu_eta/b*cs[col+0]
@@ -1913,21 +1983,21 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
                     e[i] = 0.
                     de[i] = 0.
                 for j in range(n):
-                    gAu = gtab[0, j]
-                    gAu_eta = gtab[1, j]
-                    gAv = gtab[2, j]
-                    gAv_eta = gtab[3, j]
-                    gAw = gtab[4, j]
-                    gAw_eta = gtab[5, j]
-                    gAw_etaeta = gtab[6, j]
+                    gAu = gtab[pty, 0, j]
+                    gAu_eta = gtab[pty, 1, j]
+                    gAv = gtab[pty, 2, j]
+                    gAv_eta = gtab[pty, 3, j]
+                    gAw = gtab[pty, 4, j]
+                    gAw_eta = gtab[pty, 5, j]
+                    gAw_etaeta = gtab[pty, 6, j]
                     for i in range(m):
-                        fAu = ftab[0, i]
-                        fAu_xi = ftab[1, i]
-                        fAv = ftab[2, i]
-                        fAv_xi = ftab[3, i]
-                        fAw = ftab[4, i]
-                        fAw_xi = ftab[5, i]
-                        fAw_xixi = ftab[6, i]
+                        fAu = ftab[ptx, 0, i]
+                        fAu_xi = ftab[ptx, 1, i]
+                        fAv = ftab[ptx, 2, i]
+                        fAv_xi = ftab[ptx, 3, i]
+                        fAw = ftab[ptx, 4, i]
+                        fAw_xi = ftab[ptx, 5, i]
+                        fAw_xixi = ftab[ptx, 6, i]
                         col = col0 + DOF*(j*m + i)
                         e[0] += (b0*fAu_xi*gAu/a + 2*fAu_xi*gAu/a)*cs[col+0] + b2*fAv_xi*gAv/a*cs[col+1] + b4*fAw_xi*gAw/a*cs[col+2]
                         e[1] += b1*fAu*gAu_eta/b*cs[col+0] + (-0.5*b5*fAv*gAv/r + b3*fAv*gAv_eta/b + 2*fAv*gAv_eta/b)*cs[col+1] + (0.5*b3*fAw*gAw/r + fAw*gAw/r + b5*fAw*gAw_eta/b)*cs[col+2]
@@ -1955,25 +2025,29 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
 
                 # ([B_L] + [B_NL])^T ds + [G]^T [N] [G] vs
                 for j in range(n):
-                    gAu = gtab[0, j]
-                    gAu_eta = gtab[1, j]
-                    gAv = gtab[2, j]
-                    gAv_eta = gtab[3, j]
-                    gAw = gtab[4, j]
-                    gAw_eta = gtab[5, j]
-                    gAw_etaeta = gtab[6, j]
+                    gAu = gtab[pty, 0, j]
+                    gAu_eta = gtab[pty, 1, j]
+                    gAv = gtab[pty, 2, j]
+                    gAv_eta = gtab[pty, 3, j]
+                    gAw = gtab[pty, 4, j]
+                    gAw_eta = gtab[pty, 5, j]
+                    gAw_etaeta = gtab[pty, 6, j]
                     for i in range(m):
-                        fAu = ftab[0, i]
-                        fAu_xi = ftab[1, i]
-                        fAv = ftab[2, i]
-                        fAv_xi = ftab[3, i]
-                        fAw = ftab[4, i]
-                        fAw_xi = ftab[5, i]
-                        fAw_xixi = ftab[6, i]
+                        fAu = ftab[ptx, 0, i]
+                        fAu_xi = ftab[ptx, 1, i]
+                        fAv = ftab[ptx, 2, i]
+                        fAv_xi = ftab[ptx, 3, i]
+                        fAw = ftab[ptx, 4, i]
+                        fAw_xi = ftab[ptx, 5, i]
+                        fAw_xixi = ftab[ptx, 6, i]
                         col = col0 + DOF*(j*m + i)
                         kTv[col+0] += weight*(2*Nxx*db0*fAu_xi*gAu/a + Nxy*(2*db0*fAu*gAu_eta/b + 2*db1*fAu_xi*gAu/a) + 2*Nyy*db1*fAu*gAu_eta/b + ds[0]*(2*b0*fAu_xi*gAu/a + 2*fAu_xi*gAu/a) + ds[2]*(2*b0*fAu*gAu_eta/b + 2*fAu*gAu_eta/b + 2*b1*fAu_xi*gAu/a) + 2*b1*ds[1]*fAu*gAu_eta/b - ds[5]*fAu*gAu_eta/(b*r))
                         kTv[col+1] += weight*(2*Nxx*db2*fAv_xi*gAv/a + Nxy*(-db4*fAv*gAv/r + 2*db2*fAv*gAv_eta/b + 2*db3*fAv_xi*gAv/a) + Nyy*(-db5*fAv*gAv/r + 2*db3*fAv*gAv_eta/b) + ds[1]*(-b5*fAv*gAv/r + 2*b3*fAv*gAv_eta/b + 2*fAv*gAv_eta/b) + ds[2]*(-b4*fAv*gAv/r + 2*b2*fAv*gAv_eta/b + 2*b3*fAv_xi*gAv/a + 2*fAv_xi*gAv/a) + 2*ds[4]*fAv*gAv_eta/(b*r) + 2*b2*ds[0]*fAv_xi*gAv/a + 3*ds[5]*fAv_xi*gAv/(a*r))
                         kTv[col+2] += weight*(2*Nxx*db4*fAw_xi*gAw/a + Nxy*(db2*fAw*gAw/r + 2*db4*fAw*gAw_eta/b + 2*db5*fAw_xi*gAw/a) + Nyy*(db3*fAw*gAw/r + 2*db5*fAw*gAw_eta/b) + ds[1]*(b3*fAw*gAw/r + fAw*gAw/r + 2*b5*fAw*gAw_eta/b) + ds[2]*(b2*fAw*gAw/r + 2*b4*fAw*gAw_eta/b + 2*b5*fAw_xi*gAw/a) - 4*ds[4]*fAw*gAw_etaeta/(b*b) + 2*b4*ds[0]*fAw_xi*gAw/a - 8*ds[5]*fAw_xi*gAw_eta/(a*b) - 4*ds[3]*fAw_xixi*gAw/(a*a))
+    if gtab_new:
+        store_table(shell, __name__, 'calc_kTv', 'gtab', gtab_key, gtab)
+    if ftab_new:
+        store_table(shell, __name__, 'calc_kTv', 'ftab', ftab_key, ftab)
 
     return np.asarray(kTv)
 
