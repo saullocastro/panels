@@ -41,16 +41,8 @@ jobs:
     #      accepted by PyPI. The tests run in Node.js with Pyodide; numpy,
     #      scipy and matplotlib come with Pyodide, structsolve is pure Python
     #      and composites has its WebAssembly wheel on PyPI (>= 0.9.21)
-    # NOTE structsolve>=0.13.0 from its pull request branch, a pure Python
-    #      wheel found by pip through PIP_FIND_LINKS; reverted once
-    #      structsolve 0.13.0 is on PyPI
-    - name: Build the wheel of structsolve
-      run: |
-        python -m pip wheel --no-deps -w structsolve_wheel "structsolve @ git+https://github.com/saullocastro/structsolve@perf-linear-solvers"
-
     - name: Build and test the WebAssembly wheel
       env:
-        PIP_FIND_LINKS: ${{ github.workspace }}/structsolve_wheel
         CIBW_PLATFORM: pyodide
         CIBW_BUILD: cp314-pyodide_wasm32
         CIBW_TEST_REQUIRES: pytest plotly
