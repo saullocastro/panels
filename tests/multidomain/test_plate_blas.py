@@ -74,9 +74,11 @@ def test_unsymmetric_laminate_has_coupling():
 def test_blas_equals_cython(model, finalize):
     r"""``kC``, ``kG`` (``NLgeom=True``), ``fint`` and ``kTv`` of
     ``plate_kernels='blas'`` against the Cython kernels: within ``1e-12``
-    of the largest entry, and with the same pattern of non-zero entries,
-    which with ``finalize=False`` is the upper triangle by pairs of terms
-    of the Cython kernels"""
+    of the largest entry, and with the same pattern of the entries larger
+    than ``1e-10`` of the largest one, which with ``finalize=False`` is the
+    upper triangle by pairs of terms of the Cython kernels; an entry null
+    in exact arithmetic may be an exact zero in one implementation and a
+    round-off in the other, depending on the platform and the BLAS"""
     mc = _assembly(model, 'cython')
     mb = _assembly(model, 'blas')
     c, v = _state(mc.get_size())
@@ -86,7 +88,8 @@ def test_blas_equals_cython(model, finalize):
         scale = np.abs(rc[k]).max()
         assert scale > 0
         assert np.abs(rb[k] - rc[k]).max() <= 1e-12*scale, k
-        assert np.array_equal(rb[k] != 0, rc[k] != 0), k
+        tol = 1e-10*scale
+        assert np.array_equal(np.abs(rb[k]) > tol, np.abs(rc[k]) > tol), k
     assert all(i in mb._plate_ops for i in range(len(mb.panels)))
 
 
