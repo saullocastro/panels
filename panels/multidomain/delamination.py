@@ -72,7 +72,7 @@ def create_coupon(kind, laminaprop, plyt, stack, b, a0, laws, L=None, c=None,
                   nr_y_gauss=10, k_contact=None, mode_ratio='per-law',
                   lever='mean', u_hinge_z=0., fsdt_shear_correction=5/6.,
                   dcb_bc='hinge', far='czm', conn_method='null-space',
-                  penalty_factor=1., contact_eps=1e-3):
+                  penalty_factor=1., contact_eps=1e-3, plate_kernels='cython'):
     r"""DCB, ENF or MMB coupon with cohesive interfaces
 
     Parameters
@@ -146,6 +146,10 @@ def create_coupon(kind, laminaprop, plyt, stack, b, a0, laws, L=None, c=None,
     contact_eps : float, optional
         Penetration over which the contact stiffness over the pre-crack is
         phased in, see :func:`.czm.contact_traction`.
+    plate_kernels : str, optional
+        ``'cython'`` (default) or ``'blas'``, the kernels of the domains,
+        see :class:`.MultiDomain`; ``'blas'`` gives the same results to the
+        round-off, faster.
 
     Returns
     -------
@@ -233,7 +237,8 @@ def create_coupon(kind, laminaprop, plyt, stack, b, a0, laws, L=None, c=None,
         conn.append(ci)
         cohesive.append(ci)
 
-    md = MultiDomain(bot + top, conn, conn_method=conn_method)
+    md = MultiDomain(bot + top, conn, conn_method=conn_method,
+                     plate_kernels=plate_kernels)
 
     # supports, exact, constant
     symmetric = kind == 'DCB' and dcb_bc == 'symmetric'
@@ -370,7 +375,8 @@ def load_line_control_vector(md, info):
 def solve_coupon(md, info, delta_max, initialInc=0.05, maxInc=None,
                  minInc=1e-6, NL_method='NR', NLgeom=True, relTOL=1e-9,
                  maxNumIter=40, record=None, silent=True, control='load',
-                 a_stop=None, max_steps=2000, **analysis_kw):
+                 a_stop=None, max_steps=2000, reuse_kT=False,
+                 **analysis_kw):
     r"""Load-displacement curve of a coupon of :func:`.create_coupon`
 
     With ``control='load'`` (default), displacement control, `\delta =
@@ -398,6 +404,17 @@ def solve_coupon(md, info, delta_max, initialInc=0.05, maxInc=None,
     record : callable, optional
         ``record(an, c, row)`` called after each converged increment with
         the row of results.
+    reuse_kT : bool, optional
+        Passed to :meth:`.MultiDomain.get_reduced_functions`: the load
+        vector of the prescribed displacement uses the tangent stiffness
+        matrix already assembled at the same configuration. Same results to
+        the round-off, faster. Default ``False``.
+    **analysis_kw
+        Other attributes of ``structsolve.Analysis``, set before the
+        analysis, e.g. ``linear_solver='dense_lu'`` or, with oneMKL,
+        ``'pardiso_lu'`` (``structsolve>=0.13.0``), the factorizations of
+        the tangent stiffness matrix of ``structsolve`` that are faster for
+        these coupons than the default ``'splu'``.
 
     Returns
     -------
@@ -424,7 +441,7 @@ def solve_coupon(md, info, delta_max, initialInc=0.05, maxInc=None,
         if record is not None:
             record(an, c, row)
 
-    an = Analysis(*md.get_reduced_functions())
+    an = Analysis(*md.get_reduced_functions(reuse_kT=reuse_kT))
     an.NL_method = NL_method
     an.initialInc = initialInc
     an.maxInc = maxInc if maxInc is not None else initialInc
