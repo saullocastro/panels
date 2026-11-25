@@ -1,8 +1,9 @@
 r"""The approximation functions of the numerical kernels are tabulated
 
-See :mod:`panels.dev.tabulate`. Here the rewriting itself is checked, and
-that no kernel of the package evaluates the approximation functions in its
-loops over the terms.
+See :mod:`panels.dev.tabulate`. Here the rewriting itself is checked, also
+the one that keeps the tables on the shell across calls, against the
+expected lines of code, and that no kernel of the package evaluates the
+approximation functions in its loops over the terms.
 """
 import os
 import re
@@ -10,7 +11,7 @@ import subprocess
 
 import pytest
 
-from panels.dev.tabulate import tabulate_basis, MARK
+from panels.dev.tabulate import tabulate_basis, keep_tables, MARK, IMPORT
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -86,6 +87,99 @@ def test_unexpected_form_raises():
     with pytest.raises(ValueError, match='assigned after'):
         tabulate_basis(KERNEL.replace('out += fA*fB*gA*gB_eta',
                                       'xi = 0.'))
+
+
+SHELL_KERNEL = '''from panels import INT, DOUBLE
+
+
+def fk(object shell, int size, int nx, int ny):
+    cdef int i, j, k, l, ptx, pty
+    cdef double xi, eta, fA, fB, gA, gB_eta, a
+    cdef double [::1] xis, etas, weights_xi, weights_eta
+    m = shell.m
+    n = shell.n
+    a = shell.a
+    with nogil:
+        for ptx in range(nx):
+            for pty in range(ny):
+                xi = xis[ptx]
+                xi = (xi + 1)/2*(xi2 - xi1) + xi1
+                eta = etas[pty]
+                for i in range(m):
+                    fA = f(i, xi, x1u, x1ur, x2u, x2ur)
+                    for k in range(m):
+                        fB = fp(k, xi, x1w, x1wr, x2w, x2wr)
+                        for j in range(n):
+                            gA = f(j, eta, y1u, y1ur, y2u, y2ur)
+                            for l in range(n):
+                                gB_eta = fp(l, eta, y1w, y1wr, y2w, y2wr)
+                                out += fA*fB*gA*gB_eta
+    return out
+'''
+
+
+def test_tables_kept_across_calls():
+    """A kernel with a shell keeps its tables on the shell, see
+    :func:`panels.dev.tabulate.keep_tables`: one row per point of the loop
+    that the coordinate depends on, the key of every value they depend on,
+    filled only when new, stored after the nogil block"""
+    out = tabulate_basis(SHELL_KERNEL)
+    assert IMPORT in out
+    for line in (
+            '    cdef double [:, :, ::1] ftab',
+            '    cdef int ftab_new',
+            '    ftab_key = (nx, m, x1u, x1ur, x2u, x2ur, x1w, x1wr, x2w, '
+            'x2wr, xis, xi2, xi1)',
+            "    ftab, ftab_new = lookup_table(shell, __name__, 'fk', 'ftab', "
+            "ftab_key, (nx, 2, m))",
+            '    gtab_key = (ny, n, y1u, y1ur, y2u, y2ur, y1w, y1wr, y2w, '
+            'y2wr, etas)',
+            '                if ftab_new:',
+            '                        ftab[ptx, 1, i] = fp(i, xi, x1w, x1wr, '
+            'x2w, x2wr)',
+            '                        gtab[pty, 0, j] = f(j, eta, y1u, y1ur, '
+            'y2u, y2ur)',
+            '                    fA = ftab[ptx, 0, i]',
+            '                                gB_eta = gtab[pty, 1, l]',
+            '    if ftab_new:',
+            "        store_table(shell, __name__, 'fk', 'ftab', ftab_key, "
+            "ftab)"):
+        assert line in out.split('\n'), line
+    assert 'np.zeros' not in out
+    # the store after the nogil block, before the return
+    lines = out.split('\n')
+    assert lines.index('    return out') > lines.index(
+        "        store_table(shell, __name__, 'fk', 'gtab', gtab_key, gtab)")
+    # already rewritten: unchanged
+    assert tabulate_basis(out) == out
+    assert keep_tables(out) == out
+
+
+def test_tables_not_kept():
+    """Tables of a kernel without a shell, e.g. of the connections, or
+    filled outside the loops over the points are filled at every call"""
+    assert keep_tables(tabulate_basis(KERNEL)) == tabulate_basis(KERNEL)
+    out = tabulate_basis(LINE_KERNEL)
+    assert keep_tables(out.replace('object p1', 'object shell')) == \
+        out.replace('object p1', 'object shell')
+
+
+def test_unknown_dependence_raises():
+    """The key of a table is not established: a coordinate assigned
+    conditionally, depending on the previous point, or a value modified in
+    the nogil block"""
+    with pytest.raises(ValueError, match='conditionally'):
+        tabulate_basis(SHELL_KERNEL.replace(
+            '                xi = (xi + 1)/2*(xi2 - xi1) + xi1',
+            '                if pty > 0:\n'
+            '                    xi = (xi + 1)/2*(xi2 - xi1) + xi1'))
+    with pytest.raises(ValueError, match='previous point'):
+        tabulate_basis(SHELL_KERNEL.replace(
+            '                xi = xis[ptx]\n', ''))
+    with pytest.raises(ValueError, match='modified in the nogil'):
+        tabulate_basis(SHELL_KERNEL.replace(
+            '                                out += fA*fB*gA*gB_eta',
+            '                                x1u = 0.'))
 
 
 @pytest.mark.slow
