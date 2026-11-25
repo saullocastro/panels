@@ -22,15 +22,17 @@ Horner's rule evaluates `p(t) = \sum_{k=0}^{n} a_k t^k` as
 `a_0 + t(a_1 + t(a_2 + \dots + t a_n))`, with `n` multiplications and `n`
 additions, and its computed value is the exact value of a polynomial whose
 coefficients are perturbed by at most `\gamma_{2n} |a_k|`, with
-`\gamma_{2n} = 2nu/(1 - 2nu)` and `u` the unit round-off [1]_; it is backward
-stable, and its error bound is not larger than that of the sum of the terms
-`a_k t^k` with the powers computed separately.
+`\gamma_{2n} = 2nu/(1 - 2nu)` and `u` the unit round-off, such that
+`|p(t) - \hat{p}(t)| \le \gamma_{2n} \sum_k |a_k| |t|^k` [1]_. It needs no
+``pow()`` and is backward stable; the error bound has the same form as that
+of the sum of the monomials, and the cancellation between the large
+coefficients of alternating sign of the terms of high degree remains.
 
 References
 ----------
 .. [1] Higham, N. J., "Accuracy and Stability of Numerical Algorithms", 2nd
-   ed., SIAM, Philadelphia, 2002, Chapter 5 (Polynomials), Section 5.1.
-   https://doi.org/10.1137/1.9780898718027
+   ed., SIAM, Philadelphia, 2002, Chapter 5, Polynomials, pp. 93-104.
+   https://doi.org/10.1137/1.9780898718027.ch5
 
 """
 import os

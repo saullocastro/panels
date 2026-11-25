@@ -9,7 +9,8 @@ Ritz method. This page describes how the kernels evaluate these functions:
 once per integration point and term, in tables, instead of again in every
 loop over the terms of the matrix, the innermost loop included, and keep
 these tables on the shell from one call to the next. The results are the
-same, bit for bit, and the assembly is several times faster.
+same, bit for bit, as with the functions evaluated in the loops, and the
+assembly is several times faster.
 
 Integrands
 ----------
@@ -64,9 +65,9 @@ The value of `P_l(\eta_q)` does not depend on `i`, `k` or `j`, but it was
 computed again for each of them: per integration point, `7 m^2 n^2`
 evaluations in the innermost loop, `7 m^2 n` in the loop over `j`, and so
 on, for only `7 (m + n)` distinct values. Each evaluation is a polynomial
-of degree up to 29 in `\xi`, selected by the index of the term, see
-``panels/core/src/bardell_functions.cpp``, which costs much more than the
-arithmetic of the entry itself. For `m = n = 12` this is about 10^5
+of degree up to 29 in `\xi`, selected by the index of the term and
+evaluated by Horner's rule, see :ref:`theory_func_bardell`, which costs
+much more than the arithmetic of the entry itself. For `m = n = 12` this is about 10^5
 evaluations per integration point, against 168 distinct values.
 
 The internal force vector, ``calc_fint``, has three loops over the `m n`
@@ -247,17 +248,20 @@ The speed-up therefore grows with the number of terms, and it is smaller for
 the integrands with more arithmetic per pair of terms, e.g. the constitutive
 stiffness matrix ``fkC_num`` of the shear deformation theories: for
 `m = n = 12` it is about 30 to 60 for the geometric stiffness matrices and
-3.5 to 17 for the non-linear constitutive stiffness matrices.
+3.5 to 17 for the non-linear constitutive stiffness matrices, measured
+when the functions were evaluated with ``pow()``.
 
 Keeping the tables across calls removes the remaining `O(m + n)`
 evaluations per point. Their share is largest for many points and few
 terms per point, as in the long domains of the coupons: for a domain of
 `240 \times 6` points and `m = 24`, `n = 4`, ``fkC_num`` with ``NLgeom=1``,
 ``fkG_num`` and ``calc_fint`` together take 16 % less time for
-``'plate_clpt_donnell'`` and 29 % less for ``'plate_fsdt_donnell'`` from the
-second call on (Windows, MSVC). The gain is larger where the
-polynomials of the functions are slower to evaluate, e.g. with the ``pow``
-of older C libraries.
+``'plate_clpt_donnell'`` and 28 % less for ``'plate_fsdt_donnell'`` from the
+second call on than with panels 0.17.0, which filled the tables at every
+call (Windows, MSVC). The evaluation by Horner's rule, see
+:ref:`theory_func_bardell`, makes filling the tables at the first call
+cheap as well: the first call takes 14 % and 27 % less time than with
+0.17.0, which evaluated the polynomials with ``pow()``.
 
 Operators per domain
 --------------------

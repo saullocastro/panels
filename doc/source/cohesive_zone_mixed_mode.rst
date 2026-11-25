@@ -74,24 +74,28 @@ including the lever of the MMB apparatus, a linear constraint of
 Options for speed
 -----------------
 
-The defaults reproduce the results of the previous versions bit for bit.
-Three options give the same increments, the same Newton-Raphson iterations
-and the same loads, to the round-off, in less time; they matter for the
-coupons, whose tangent stiffness matrix is assembled and factorized at
-every iteration:
+With the defaults, the plate kernels keep the tables of the approximation
+functions across the iterations, see :ref:`tabulation`, and evaluate the
+functions by Horner's rule, see :ref:`theory_func_bardell`: the results
+differ from those of panels 0.17.0 at round-off level only. Three options,
+off by default, give the same increments, the same Newton-Raphson
+iterations and the same loads, to the round-off, in less time; they matter
+for the coupons, whose tangent stiffness matrix is assembled and factorized
+at every iteration:
 
 - ``create_coupon(..., plate_kernels='blas')``, or ``MultiDomain(...,
   plate_kernels='blas')``: the plate matrices and vectors as products of
   dense matrices, see :ref:`plate_blas`;
 - ``solve_coupon(..., reuse_kT=True)``, or
   :meth:`.MultiDomain.get_reduced_functions` with ``reuse_kT=True``: the
-  load vector of the prescribed displacement, `oldsymbol{K}_T
-  oldsymbol{c}_{p1}`, from the tangent stiffness matrix already assembled
+  load vector of the prescribed displacement, `\boldsymbol{K}_T
+  \boldsymbol{c}_{p1}`, from the tangent stiffness matrix already assembled
   at the same configuration;
 - ``solve_coupon(..., linear_solver='pardiso_lu')``, with oneMKL, or
   ``'dense_lu'`` otherwise, both of ``structsolve>=0.13.0``: the
   factorization of the tangent stiffness matrix, forwarded to
-  ``structsolve.Analysis``.
+  ``structsolve.Analysis``, see the `linear solvers of structsolve
+  <https://saullocastro.github.io/structsolve/linear_solvers.html>`_.
 
 ::
 

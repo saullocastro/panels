@@ -52,6 +52,24 @@ term, only scaling it. For example, ``x1t = 0, x1r = 1`` gives a simply
 supported end at `\xi = -1` for `w`, ``x1t = x1r = 0`` a clamped end and
 ``x1t = x1r = 1`` a free end.
 
+Each polynomial, `p(\xi) = \sum_{k=0}^{d} a_k \xi^k`, is evaluated by
+Horner's rule [3]_,
+
+.. math::
+
+    p(\xi) = a_0 + \xi \left(a_1 + \xi \left(a_2 + \dots
+             + \xi \, a_d\right)\right)
+
+with `d` multiplications and `d` additions and no power function. The
+terms `i \ge 4` and their derivatives are even or odd in `\xi`, and are
+evaluated in `t = \xi^2`, as `q(t)` or `\xi \, q(t)`, with half the
+operations. The computed value `\hat{p}` satisfies
+`|p(\xi) - \hat{p}(\xi)| \le \gamma_{2d} \sum_k |a_k| |\xi|^k`, with
+`\gamma_{2d} = 2du/(1 - 2du)` and `u` the unit round-off [3]_: the error
+is small relative to `\sum_k |a_k| |\xi|^k`, but not to `|p(\xi)|` when the
+coefficients, of alternating sign and growing with the degree, cancel, as
+for the terms of high degree.
+
 References
 ----------
 .. [1] Bardell, N. S., "Free vibration analysis of a flat plate using the
@@ -61,6 +79,9 @@ References
    models to Address Linear Buckling and Vibration of Stiffened Composite
    Panels with Debonding Defect", Composite Structures, 2017.
    https://doi.org/10.1016/j.compstruct.2016.10.026
+.. [3] Higham, N. J., "Accuracy and Stability of Numerical Algorithms",
+   2nd ed., SIAM, Philadelphia, 2002, Chapter 5, Polynomials,
+   pp. 93-104. https://doi.org/10.1137/1.9780898718027.ch5
 
 """
 import numpy as np
