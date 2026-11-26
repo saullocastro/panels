@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Mixed-mode delamination with large-scale fibre bridging at a 45//-45 interface: MMB tests of T700/QY9511 &#8212; panels 0.18.0 documentation</title>
+    <title>Mixed-mode delamination with large-scale fibre bridging at a 45//-45 interface: MMB tests of T700/QY9511 &#8212; panels 0.18.1 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=ba2e7b09"></script>
+    <script src="../_static/documentation_options.js?v=1e56ff10"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -53,7 +53,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.0" />
+  <meta name="docsearch:version" content="0.18.1" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.0 documentation</p>
+    <p class="title logo__title">panels 0.18.1 documentation</p>
   
 </a></div>
     
@@ -1738,8 +1738,8 @@ ONLY = ONLY.split(',') if ONLY else None
 <li><p>Crack-tip law: <span class="math notranslate nohighlight">\(G_{Ic}\)</span> = 0.100 N/mm (DCB initiation, Gong et al. 2017, p. 4), <span class="math notranslate nohighlight">\(G_{IIc}\)</span> = 0.7833 N/mm (see below), exponent <span class="math notranslate nohighlight">\(\eta\)</span> = 3.75 (Gong et al. 2017, p. 6, fitted with the R-curves; the only published exponent), <span class="math notranslate nohighlight">\(\tau_I\)</span> = 50 and <span class="math notranslate nohighlight">\(\tau_{II}\)</span> = 90 MPa (Gong et al. 2017, p. 5; numerical choices of the authors), <span class="math notranslate nohighlight">\(K_I = 10^5\)</span> N/mm<span class="math notranslate nohighlight">\(^3\)</span> (production value of the study; the papers use <span class="math notranslate nohighlight">\(10^6\)</span> N/mm<span class="math notranslate nohighlight">\(^3\)</span>).</p></li>
 <li><p><strong>Bridging law, identified from the DCB:</strong> strength <span class="math notranslate nohighlight">\(\sigma_b\)</span> = 2.1 MPa (Gong et al. 2020, Table 1, p. 5, DCB of the same <span class="math notranslate nohighlight">\(45//-45\)</span> laminate; also Fu and Wang 2022, Table 2) and toughness <span class="math notranslate nohighlight">\(G_{br} = G_{prop} - G_{init}\)</span> = 0.890 - 0.100 = 0.790 N/mm (Gong et al. 2017, p. 4); linear softening that starts where the crack-tip law fails, <span class="math notranslate nohighlight">\(\delta_b = 2G_{Ic}/\tau_I\)</span> = 0.004 mm (Gong et al. 2020, Sec. 2.2), so its stiffness is <span class="math notranslate nohighlight">\(\sigma_b/\delta_b\)</span> = 525 N/mm<span class="math notranslate nohighlight">\(^3\)</span>,
 and ends at <span class="math notranslate nohighlight">\(2G_{br}/\sigma_b\)</span> = 0.752 mm. The bridging length of 26 mm is not an input but an outcome of the model. No MMB result was used, so the MMB analyses are predictions.</p></li>
-<li><p>Laws in <code class="docutils literal notranslate"><span class="pre">panels</span></code>: the bridging law is driven by the opening alone and has no shear stiffness or toughness (<code class="docutils literal notranslate"><span class="pre">opening_driven=True</span></code>, <code class="docutils literal notranslate"><span class="pre">shear_free=True</span></code>, <code class="docutils literal notranslate"><span class="pre">GIIc=0</span></code>, see the CHANGELOG). The crack-tip law is entered as two identical halves (half the toughnesses, strengths and stiffness each, <span class="math notranslate nohighlight">\(\tau_{II}\)</span> = 45 MPa each), as in the study, whose driver treats the first two laws as crack-tip laws; superposed identical laws are the same law. Both halves define the crack tip
-(<code class="docutils literal notranslate"><span class="pre">tip_laws=[0,</span> <span class="pre">1]</span></code>).</p></li>
+<li><p>Laws in <code class="docutils literal notranslate"><span class="pre">panels</span></code>: the bridging law is driven by the opening alone and has no shear stiffness or toughness (<code class="docutils literal notranslate"><span class="pre">opening_driven=True</span></code>, <code class="docutils literal notranslate"><span class="pre">shear_free=True</span></code>, <code class="docutils literal notranslate"><span class="pre">GIIc=0</span></code>, the options of <code class="docutils literal notranslate"><span class="pre">law_with_ratio</span></code> and <code class="docutils literal notranslate"><span class="pre">BilinearLaw</span></code>). The crack-tip law is entered as two identical halves (half the toughnesses, strengths and stiffness each, <span class="math notranslate nohighlight">\(\tau_{II}\)</span> = 45 MPa each), as in the study, whose driver treats the first two laws as crack-tip laws; superposed identical laws are the same law. Both halves
+define the crack tip (<code class="docutils literal notranslate"><span class="pre">tip_laws=[0,</span> <span class="pre">1]</span></code>).</p></li>
 </ul>
 <section id="Conflicting-published-data:-identifications">
 <h3>Conflicting published data: identifications<a class="headerlink" href="#Conflicting-published-data:-identifications" title="Link to this heading">#</a></h3>

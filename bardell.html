@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Bardell’s hierarchical functions &#8212; panels 0.18.0 documentation</title>
+    <title>Bardell’s hierarchical functions &#8212; panels 0.18.1 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=ba2e7b09"></script>
+    <script src="_static/documentation_options.js?v=1e56ff10"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -52,7 +52,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.0" />
+  <meta name="docsearch:version" content="0.18.1" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -120,7 +120,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.0 documentation</p>
+    <p class="title logo__title">panels 0.18.1 documentation</p>
   
 </a></div>
     
@@ -1786,12 +1786,42 @@ Against the exact value, computed in rational arithmetic, the error
 relative to the largest absolute value of each term grows by a factor of
 about 2.5 per term, from one unit round-off for the first terms to about
 <span class="math notranslate nohighlight">\(7 \times 10^{-7}\)</span> for <span class="math notranslate nohighlight">\(P_{29}\)</span>, <span class="math notranslate nohighlight">\(4 \times 10^{-7}\)</span> for <span class="math notranslate nohighlight">\(P_{29}'\)</span> and
-<span class="math notranslate nohighlight">\(7 \times 10^{-8}\)</span> for <span class="math notranslate nohighlight">\(P_{29}''\)</span>. Up to panels 0.17.0 the monomials were
-summed with <code class="docutils literal notranslate"><span class="pre">pow()</span></code> and coefficients printed with 15 significant digits,
-with errors up to <span class="math notranslate nohighlight">\(1.6 \times 10^{-5}\)</span>. The matrices and vectors therefore
-differ from those of 0.17.0 at round-off level, more with more terms, e.g.
-by about <span class="math notranslate nohighlight">\(10^{-15}\)</span> of the largest entry for <span class="math notranslate nohighlight">\(m = 3\)</span>, <span class="math notranslate nohighlight">\(n = 4\)</span> and up to
-<span class="math notranslate nohighlight">\(10^{-9}\)</span> for <span class="math notranslate nohighlight">\(m = 24\)</span>, <span class="math notranslate nohighlight">\(n = 4\)</span>.</p>
+<span class="math notranslate nohighlight">\(7 \times 10^{-8}\)</span> for <span class="math notranslate nohighlight">\(P_{29}''\)</span>.</p>
+<section id="horner-s-rule-against-the-sum-of-monomials">
+<h3>Horner’s rule against the sum of monomials<a class="headerlink" href="#horner-s-rule-against-the-sum-of-monomials" title="Link to this heading">#</a></h3>
+<p>A polynomial <span class="math notranslate nohighlight">\(p(\xi) = \sum_k a_k \xi^k\)</span> of degree <span class="math notranslate nohighlight">\(d\)</span> can be evaluated in
+two mathematically equivalent forms: as the sum of its monomials, each
+power computed with <code class="docutils literal notranslate"><span class="pre">pow()</span></code>, or by Horner’s rule, <span class="math notranslate nohighlight">\(a_0 + \xi (a_1 + \xi
+(a_2 + \dots))\)</span>. <code class="docutils literal notranslate"><span class="pre">panels</span></code> uses Horner’s rule, for three reasons:</p>
+<ul class="simple">
+<li><p>cost: <span class="math notranslate nohighlight">\(d\)</span> multiplications and <span class="math notranslate nohighlight">\(d\)</span> additions and no call of <code class="docutils literal notranslate"><span class="pre">pow()</span></code>,
+against one call of <code class="docutils literal notranslate"><span class="pre">pow()</span></code> per monomial; the terms <span class="math notranslate nohighlight">\(i \ge 4\)</span> and their
+derivatives, even or odd in <span class="math notranslate nohighlight">\(\xi\)</span>, are evaluated in <span class="math notranslate nohighlight">\(\xi^2\)</span>, which halves
+the operations;</p></li>
+<li><p>a known error bound, proportional to the unit round-off and to <span class="math notranslate nohighlight">\(\sum_k
+|a_k| |\xi|^k\)</span>, see the Notes of <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.bardell</span></code>, whereas the sum
+of monomials adds the rounding of each power to the cancellation;</p></li>
+<li><p>coefficients correctly rounded from the exact rationals of the
+definition, instead of decimal coefficients printed with 15 significant
+digits, which carry their own rounding into the sum.</p></li>
+</ul>
+<p>The two forms were compared against the exact value, obtained with the
+rational coefficients in rational arithmetic at the same double-precision
+<span class="math notranslate nohighlight">\(\xi\)</span> and rounded at the end, at 401 points of <span class="math notranslate nohighlight">\(-1 \le \xi \le 1\)</span> (201
+equally spaced and 200 random), for the 30 terms and their first and
+second derivatives. For every term and derivative the largest error of
+Horner’s rule is within <span class="math notranslate nohighlight">\(2u \sum_k |a_k|\)</span>, with <span class="math notranslate nohighlight">\(u\)</span> the unit round-off,
+and it is not larger than that of the sum of monomials with <code class="docutils literal notranslate"><span class="pre">pow()</span></code> and
+coefficients of 15 significant digits, or than <span class="math notranslate nohighlight">\(u \sum_k |a_k|\)</span>, the scale
+of the round-off of any evaluation of the monomial form. Over all the
+terms, the largest error of Horner’s rule is smaller than that of the sum
+of monomials, both in absolute value and relative to the largest absolute
+value of the term; the errors of the sum of monomials reach <span class="math notranslate nohighlight">\(1.6 \times
+10^{-5}\)</span>. The matrices and vectors
+computed with the two evaluations differ at round-off level, more with
+more terms, e.g. by about <span class="math notranslate nohighlight">\(10^{-15}\)</span> of the largest entry for <span class="math notranslate nohighlight">\(m = 3\)</span>,
+<span class="math notranslate nohighlight">\(n = 4\)</span> and up to <span class="math notranslate nohighlight">\(10^{-9}\)</span> for <span class="math notranslate nohighlight">\(m = 24\)</span>, <span class="math notranslate nohighlight">\(n = 4\)</span>.</p>
+</section>
 </section>
 <section id="boundary-flags">
 <h2>Boundary flags<a class="headerlink" href="#boundary-flags" title="Link to this heading">#</a></h2>
@@ -1920,7 +1950,10 @@ Eq. <a class="reference internal" href="#equation-bardell-separation">(1)</a> gi
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-functions">The functions</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluation-in-floating-point">Evaluation in floating point</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluation-in-floating-point">Evaluation in floating point</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#horner-s-rule-against-the-sum-of-monomials">Horner’s rule against the sum of monomials</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#boundary-flags">Boundary flags</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#integrals-and-structural-matrices">Integrals and structural matrices</a></li>
 </ul>

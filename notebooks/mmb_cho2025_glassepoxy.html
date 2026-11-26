@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Mixed-mode delamination of glass/epoxy with fibre bridging: DCB, ENF and MMB tests of Cho et al. &#8212; panels 0.18.0 documentation</title>
+    <title>Mixed-mode delamination of glass/epoxy with fibre bridging: DCB, ENF and MMB tests of Cho et al. &#8212; panels 0.18.1 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=ba2e7b09"></script>
+    <script src="../_static/documentation_options.js?v=1e56ff10"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -53,7 +53,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.0" />
+  <meta name="docsearch:version" content="0.18.1" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.0 documentation</p>
+    <p class="title logo__title">panels 0.18.1 documentation</p>
   
 </a></div>
     
@@ -1738,8 +1738,8 @@ ONLY = ONLY.split(',') if ONLY else None
 below repeats the identification. The other 15 records (ENF and MMB) give 1.96-2.19 mm with the same method; the ply thickness is <span class="math notranslate nohighlight">\(h/16\)</span>.</p></li>
 <li><p>Interface, Cho et al. (2025), Tables 3-6, pp. 7-8: crack-tip law <span class="math notranslate nohighlight">\(G_{Ic}\)</span> = 0.377 N/mm (initiation, mean of three DCB tests), <span class="math notranslate nohighlight">\(\tau_I\)</span> = 60 MPa, <span class="math notranslate nohighlight">\(K_I = 10^6\)</span> N/mm<span class="math notranslate nohighlight">\(^3\)</span> (Table 4), <span class="math notranslate nohighlight">\(G_{IIc}\)</span> = 1.789 N/mm (ENF without pre-crack, Tables 5-6, the value the authors use for the MMB), <span class="math notranslate nohighlight">\(\tau_{II}\)</span> = 80 MPa (Table 6), Benzeggagh-Kenane exponent <span class="math notranslate nohighlight">\(\eta\)</span> = 1.2191 (p. 7 and Fig. 17); bridging law <span class="math notranslate nohighlight">\(G_{br}\)</span> = 0.1182 N/mm (Table 3, mean), strength
 <span class="math notranslate nohighlight">\(\sigma_b\)</span> = 0.4164 MPa and stiffness <span class="math notranslate nohighlight">\(K_{I,2}\)</span> = 33.1353 N/mm<span class="math notranslate nohighlight">\(^3\)</span> (Table 4). <span class="math notranslate nohighlight">\(G_{Ic} + G_{br}\)</span> = 0.4952 N/mm, the propagation toughness of Table 3, and <span class="math notranslate nohighlight">\(K_{I,2} = \sigma_b/\delta_b\)</span> with <span class="math notranslate nohighlight">\(\delta_b = 2G_{Ic}/\tau_I\)</span>, the separation at which the crack-tip law fails: the two superposed laws are the trilinear law of Cho et al.</p></li>
-<li><p>Laws in <code class="docutils literal notranslate"><span class="pre">panels</span></code>: the crack-tip law with the ratio <span class="math notranslate nohighlight">\(\kappa = (\tau_{II}/\tau_I)^2 G_{Ic}/G_{IIc}\)</span> of <code class="docutils literal notranslate"><span class="pre">law_with_ratio</span></code> (it gives <span class="math notranslate nohighlight">\(\tau_{II}\)</span> = 80 MPa and the consistent shear stiffness); the bridging law driven by the opening alone, without shear stiffness and toughness (<code class="docutils literal notranslate"><span class="pre">opening_driven=True</span></code>, <code class="docutils literal notranslate"><span class="pre">shear_free=True</span></code>, <code class="docutils literal notranslate"><span class="pre">GIIc=0</span></code>, see the CHANGELOG), the counterpart of the bridging law without shear strength of Cho et al. Only the crack-tip law defines the crack tip
-(<code class="docutils literal notranslate"><span class="pre">tip_laws=[0]</span></code>). The ENF, without bridging, uses the crack-tip law alone.</p></li>
+<li><p>Laws in <code class="docutils literal notranslate"><span class="pre">panels</span></code>: the crack-tip law with the ratio <span class="math notranslate nohighlight">\(\kappa = (\tau_{II}/\tau_I)^2 G_{Ic}/G_{IIc}\)</span> of <code class="docutils literal notranslate"><span class="pre">law_with_ratio</span></code> (it gives <span class="math notranslate nohighlight">\(\tau_{II}\)</span> = 80 MPa and the consistent shear stiffness); the bridging law driven by the opening alone, without shear stiffness and toughness (<code class="docutils literal notranslate"><span class="pre">opening_driven=True</span></code>, <code class="docutils literal notranslate"><span class="pre">shear_free=True</span></code>, <code class="docutils literal notranslate"><span class="pre">GIIc=0</span></code>, the options of <code class="docutils literal notranslate"><span class="pre">law_with_ratio</span></code> and <code class="docutils literal notranslate"><span class="pre">BilinearLaw</span></code>), the counterpart of the bridging law without shear strength of Cho et al. Only the crack-tip law
+defines the crack tip (<code class="docutils literal notranslate"><span class="pre">tip_laws=[0]</span></code>). The ENF, without bridging, uses the crack-tip law alone.</p></li>
 <li><p>Penalty stiffness: the CLPT runs of the DCB and MMB use <span class="math notranslate nohighlight">\(K_I = 10^6\)</span> N/mm<span class="math notranslate nohighlight">\(^3\)</span> of Table 4; the FSDT runs and the ENF use <span class="math notranslate nohighlight">\(10^5\)</span> N/mm<span class="math notranslate nohighlight">\(^3\)</span>, the production value of the study of the mixed-mode model, because the FSDT DCB with <span class="math notranslate nohighlight">\(10^6\)</span> N/mm<span class="math notranslate nohighlight">\(^3\)</span> stalled after the peak. The two values change the peak loads by at most 0.16% (CLPT DCB and MMB 40%).</p></li>
 <li><p>MMB lever weight: not published; not modelled.</p></li>
 </ul>

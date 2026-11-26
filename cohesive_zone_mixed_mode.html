@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Mixed-mode multilinear cohesive interface &#39;CZM&#39; &#8212; panels 0.18.0 documentation</title>
+    <title>Mixed-mode multilinear cohesive interface &#39;CZM&#39; &#8212; panels 0.18.1 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=ba2e7b09"></script>
+    <script src="_static/documentation_options.js?v=1e56ff10"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -52,7 +52,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.0" />
+  <meta name="docsearch:version" content="0.18.1" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -120,7 +120,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.0 documentation</p>
+    <p class="title logo__title">panels 0.18.1 documentation</p>
   
 </a></div>
     
@@ -1765,8 +1765,7 @@ including the lever of the MMB apparatus, a linear constraint of
 <h2>Options for speed<a class="headerlink" href="#options-for-speed" title="Link to this heading">#</a></h2>
 <p>With the defaults, the plate kernels keep the tables of the approximation
 functions across the iterations, see <a class="reference internal" href="tabulation.html#tabulation"><span class="std std-ref">Approximation functions tabulated at the integration points</span></a>, and evaluate the
-functions by Horner’s rule, see <a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s hierarchical functions</span></a>: the results
-differ from those of panels 0.17.0 at round-off level only. Three options,
+functions by Horner’s rule, see <a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s hierarchical functions</span></a>. Three options,
 off by default, give the same increments, the same Newton-Raphson
 iterations and the same loads, to the round-off, in less time; they matter
 for the coupons, whose tangent stiffness matrix is assembled and factorized
@@ -1781,7 +1780,7 @@ load vector of the prescribed displacement, <span class="math notranslate nohigh
 \boldsymbol{c}_{p1}\)</span>, from the tangent stiffness matrix already assembled
 at the same configuration;</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">solve_coupon(...,</span> <span class="pre">linear_solver='pardiso_lu')</span></code>, with oneMKL, or
-<code class="docutils literal notranslate"><span class="pre">'dense_lu'</span></code> otherwise, both of <code class="docutils literal notranslate"><span class="pre">structsolve&gt;=0.13.0</span></code>: the
+<code class="docutils literal notranslate"><span class="pre">'dense_lu'</span></code> otherwise, both of <code class="docutils literal notranslate"><span class="pre">structsolve</span></code>: the
 factorization of the tangent stiffness matrix, forwarded to
 <code class="docutils literal notranslate"><span class="pre">structsolve.Analysis</span></code>, see the <a class="reference external" href="https://saullocastro.github.io/structsolve/linear_solvers.html">linear solvers of structsolve</a>.</p></li>
 </ul>

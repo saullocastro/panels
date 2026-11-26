@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Approximation functions tabulated at the integration points &#8212; panels 0.18.0 documentation</title>
+    <title>Approximation functions tabulated at the integration points &#8212; panels 0.18.1 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=ba2e7b09"></script>
+    <script src="_static/documentation_options.js?v=1e56ff10"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -52,7 +52,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.0" />
+  <meta name="docsearch:version" content="0.18.1" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -120,7 +120,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.0 documentation</p>
+    <p class="title logo__title">panels 0.18.1 documentation</p>
   
 </a></div>
     
@@ -1929,11 +1929,11 @@ terms per point, as in the long domains of the coupons: for a domain of
 <span class="math notranslate nohighlight">\(240 \times 6\)</span> points and <span class="math notranslate nohighlight">\(m = 24\)</span>, <span class="math notranslate nohighlight">\(n = 4\)</span>, <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> with <code class="docutils literal notranslate"><span class="pre">NLgeom=1</span></code>,
 <code class="docutils literal notranslate"><span class="pre">fkG_num</span></code> and <code class="docutils literal notranslate"><span class="pre">calc_fint</span></code> together take 16 % less time for
 <code class="docutils literal notranslate"><span class="pre">'plate_clpt_donnell'</span></code> and 28 % less for <code class="docutils literal notranslate"><span class="pre">'plate_fsdt_donnell'</span></code> from the
-second call on than with panels 0.17.0, which filled the tables at every
-call (Windows, MSVC). The evaluation by Horner’s rule, see
-<a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s hierarchical functions</span></a>, makes filling the tables at the first call
-cheap as well: the first call takes 14 % and 27 % less time than with
-0.17.0, which evaluated the polynomials with <code class="docutils literal notranslate"><span class="pre">pow()</span></code>.</p>
+second call on than with the tables filled at every call (Windows, MSVC).
+The evaluation by Horner’s rule, see <a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s hierarchical functions</span></a>, makes
+filling the tables at the first call cheap as well: the first call takes
+14 % and 27 % less time than with the tables filled from the polynomials
+evaluated with <code class="docutils literal notranslate"><span class="pre">pow()</span></code>.</p>
 </section>
 <section id="operators-per-domain">
 <h2>Operators per domain<a class="headerlink" href="#operators-per-domain" title="Link to this heading">#</a></h2>

@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Notes &#8212; panels 0.18.0 documentation</title>
+    <title>Notes &#8212; panels 0.18.1 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=ba2e7b09"></script>
+    <script src="_static/documentation_options.js?v=1e56ff10"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -52,7 +52,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.0" />
+  <meta name="docsearch:version" content="0.18.1" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -120,7 +120,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.0 documentation</p>
+    <p class="title logo__title">panels 0.18.1 documentation</p>
   
 </a></div>
     
@@ -1772,6 +1772,11 @@ kernel running in another thread keeps reading the table it started with.</p>
 <dt class="sig sig-object py" id="panels.basis_tables.lookup_table">
 <span class="sig-prename descclassname"><span class="pre">panels.basis_tables.</span></span><span class="sig-name descname"><span class="pre">lookup_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.basis_tables.lookup_table" title="Link to this definition">#</a></dt>
 <dd><p>Table of approximation functions of a kernel, stored or new</p>
+<p>The table stored on the shell under the names <code class="docutils literal notranslate"><span class="pre">module</span></code>, <code class="docutils literal notranslate"><span class="pre">function</span></code>
+and <code class="docutils literal notranslate"><span class="pre">table</span></code> is returned when its shape is <code class="docutils literal notranslate"><span class="pre">shape</span></code> and its key equals
+<code class="docutils literal notranslate"><span class="pre">key</span></code>, every value compared to the bit. Otherwise, and for an object
+without stored tables, a new array is returned; nothing is stored by
+this function.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
@@ -1806,6 +1811,10 @@ stored table.</p>
 <dt class="sig sig-object py" id="panels.basis_tables.store_table">
 <span class="sig-prename descclassname"><span class="pre">panels.basis_tables.</span></span><span class="sig-name descname"><span class="pre">store_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tab</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.basis_tables.store_table" title="Link to this definition">#</a></dt>
 <dd><p>Store a table filled by a kernel, replacing the stored one</p>
+<p>The table is kept in the attribute <code class="docutils literal notranslate"><span class="pre">_basis_tables</span></code> of the shell, a
+dictionary created at the first call, under the names <code class="docutils literal notranslate"><span class="pre">module</span></code>,
+<code class="docutils literal notranslate"><span class="pre">function</span></code> and <code class="docutils literal notranslate"><span class="pre">table</span></code>, together with its key. A table already
+stored under the same names is replaced, not modified.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>

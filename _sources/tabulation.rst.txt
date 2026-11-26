@@ -257,11 +257,11 @@ terms per point, as in the long domains of the coupons: for a domain of
 `240 \times 6` points and `m = 24`, `n = 4`, ``fkC_num`` with ``NLgeom=1``,
 ``fkG_num`` and ``calc_fint`` together take 16 % less time for
 ``'plate_clpt_donnell'`` and 28 % less for ``'plate_fsdt_donnell'`` from the
-second call on than with panels 0.17.0, which filled the tables at every
-call (Windows, MSVC). The evaluation by Horner's rule, see
-:ref:`theory_func_bardell`, makes filling the tables at the first call
-cheap as well: the first call takes 14 % and 27 % less time than with
-0.17.0, which evaluated the polynomials with ``pow()``.
+second call on than with the tables filled at every call (Windows, MSVC).
+The evaluation by Horner's rule, see :ref:`theory_func_bardell`, makes
+filling the tables at the first call cheap as well: the first call takes
+14 % and 27 % less time than with the tables filled from the polynomials
+evaluated with ``pow()``.
 
 Operators per domain
 --------------------
