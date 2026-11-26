@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.18.0 (2026-11-26)
 
 ### Added: options for speed of the cohesive coupons
 
