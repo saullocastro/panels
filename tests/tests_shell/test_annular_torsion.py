@@ -93,8 +93,8 @@ D = E*H**3/(12*(1 - NU**2))
 #: flags (w, w_rho) of the clamped (C), simply supported (SS) and free (F)
 #: edges, 0 for a zero value
 EDGE = {'C': (0, 0), 'SS': (0, 1), 'F': (1, 1)}
-#: Irie, Yamada and Tsujino (1983), Table 1, `\tau_B` for `\beta = 0.3` and
-#: `0.5`, edges (inner, outer), `\nu = 0.3`
+#: tabulated `\tau_B` for `\beta = 0.3` and `0.5`, edges (inner, outer),
+#: `\nu = 0.3` (Table 1 of the first source named in the module docstring)
 IRIE = {
     ('SS', 'F'): (7.319, 17.26),
     ('F', 'SS'): (7.330, 19.03),

@@ -82,7 +82,8 @@ Yamaki [2]_ tabulates `k = a \sqrt{p/D}`. The free vibration of the annulus
 clamped at the outer radius and free at the inner radius has the frequency
 parameters `\lambda^2 = \omega a^2 \sqrt{\rho_m h/D}` at the roots of the
 determinant of Leissa [1]_, Eqs. (1.11)-(1.13) and (1.17), computed by
-:func:`exact_lambda2`.
+:func:`exact_lambda2`; the roots of `n = 0, 1, 2` are searched within 10 %
+of the values of his Table 2.21.
 
 A rigid rotation `t` of the plane about its axis has `u = (r - x)(1 - \cos
 t)`, `v = (r - x) \sin t`, `w = \phi_x = \phi_y = 0`, linear in `x`; the
@@ -135,7 +136,7 @@ within the bounds `-10^{-4}` and `2 \times 10^{-3}`.
 References
 ----------
 .. [1] Leissa, A. W., Vibration of Plates, NASA SP-160, 1969, Eqs.
-   (1.11)-(1.13) and (1.17), p. 2.
+   (1.11)-(1.13) and (1.17), p. 2, and Table 2.21, p. 23.
 .. [2] Yamaki, N., "Buckling of a thin annular plate under uniform
    compression", Journal of Applied Mechanics, Vol. 25, 1958, pp. 267-273,
    Table 1. https://doi.org/10.1115/1.4011755
@@ -259,16 +260,17 @@ def exact_lambda2(n, beta, lo, hi):
     return brentq(_det, lo, hi, args=(n, beta))
 
 
-#: Irie, Yamada and Tsujino (1983), Table 1, `\tau` for `\beta = 0.3` and
-#: `0.5`, edges (inner, outer), `\nu = 0.3`
+#: tabulated `\tau` of the classical theory for `\beta = 0.3` and `0.5`,
+#: edges (inner, outer), `\nu = 0.3` (source named in the module docstring)
 IRIE = {
     ('C', 'C'): (61.97, 186.1),
     ('S', 'S'): (37.10, 110.6),
     ('C', 'F'): (12.80, 35.80),
     ('F', 'C'): (10.60, 32.05),
     }
-#: Bagheri, Kiani and Eslami (2019), Table 2, `\tau` for `\beta = 0.3` and
-#: `0.5`, edges (inner, outer), `h/a = 0.05` and `0.10`, `\nu = 0.3`
+#: tabulated `\tau` with transverse shear for `\beta = 0.3` and `0.5`, edges
+#: (inner, outer), `h/a = 0.05` and `0.10`, `\nu = 0.3` (source named in the
+#: module docstring)
 BAGHERI = {
     (('C', 'C'), 0.05): (53.758, 150.414),
     (('C', 'C'), 0.10): (39.261, 98.436),
@@ -279,8 +281,8 @@ BAGHERI = {
     (('F', 'C'), 0.05): (9.904, 29.607),
     (('F', 'C'), 0.10): (8.877, 25.626),
     }
-#: Yamaki (1958), Table 1, `k` for `\beta = 0.3` and `0.5`, edges (outer,
-#: inner), `\nu = 0.3`
+#: tabulated `k` for `\beta = 0.3` and `0.5`, edges (outer, inner), `\nu =
+#: 0.3` (source named in the module docstring)
 YAMAKI = {
     ('C', 'C'): (8.63, 12.15),
     ('C', 'S'): (7.06, 9.42),
@@ -357,7 +359,7 @@ def test_leissa_thin(beta):
                       md.reduce(md.calc_kM(silent=True)),
                       sparse_solver=False, silent=True, num_eigvalues=8)
     l2 = np.sort(np.sqrt(-eigvals.real))*A**2*np.sqrt(RHO*h/bending_D(h))
-    #NOTE roots of n = 0, 1, 2 within 10 % of Leissa (1969), Table 2.21
+    #NOTE roots of n = 0, 1, 2 within 10 % of the tabulated values below
     guess = {0.4: (13.54, 19.80, 31.34), 0.6: (25.60, 28.52, 36.60)}[beta]
     ref = [exact_lambda2(n, beta, 0.9*guess[n], 1.1*guess[n])
            for n in (0, 1, 1, 2, 2)]

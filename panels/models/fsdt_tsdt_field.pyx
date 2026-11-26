@@ -193,6 +193,9 @@ def is_tl(object s):
     r'''Tell whether the model of ``s`` is a total-Lagrangian FSDT or TSDT
     model
 
+    The name of the model is compared with those of the four
+    total-Lagrangian models listed below.
+
     Parameters
     ----------
     s : :class:`.Shell`

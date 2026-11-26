@@ -100,8 +100,9 @@ D = E*H**3/(12*(1 - NU**2))
 #: flags (w, w_rho) of the clamped (C), simply supported (S), free (F) and
 #: movable (M) edges, 0 for a zero value
 EDGE = {'C': (0, 0), 'S': (0, 1), 'F': (1, 1), 'M': (1, 0)}
-#: Yamaki (1958), Table 1, least `k` for `\beta = 0.3` and `0.5`, by case
-#: number and (outer, inner) edges, `\nu = 0.3`
+#: tabulated least `k` for `\beta = 0.3` and `0.5`, by case number and
+#: (outer, inner) edges, `\nu = 0.3` (Table 1 of the source named in the
+#: module docstring)
 YAMAKI = {
     (1, 'C', 'C'): (8.63, 12.15),
     (2, 'C', 'S'): (7.06, 9.42),

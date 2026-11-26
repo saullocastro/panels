@@ -91,7 +91,8 @@ from panels import modelDB
 E, NU, H, RHO = 70e9, 1/3, 1e-3, 2700.
 R = 1.
 D = E*H**3/(12*(1 - NU**2))
-#: Leissa (1969), Table 2.21, lambda^2 for n = 0, 1, 2 nodal diameters
+#: tabulated lambda^2 for n = 0, 1, 2 nodal diameters, by beta (Table 2.21
+#: of the source named in the module docstring)
 LEISSA = {0.4: (13.54, 19.80, 31.34), 0.6: (25.60, 28.52, 36.60)}
 
 
