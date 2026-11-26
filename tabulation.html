@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Approximation functions tabulated at the integration points &#8212; panels 0.17.0 documentation</title>
+    <title>Approximation functions tabulated at the integration points &#8212; panels 0.18.0 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=0c3dd48d"></script>
+    <script src="_static/documentation_options.js?v=ba2e7b09"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -47,12 +47,12 @@
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Cohesive zone model of the multi-domain approach" href="cohesive_zone.html" />
+    <link rel="next" title="Plate kernels as matrix products" href="plate_blas.html" />
     <link rel="prev" title="Tangent stiffness matrix and its product by a vector" href="tangent_product.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.17.0" />
+  <meta name="docsearch:version" content="0.18.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -120,7 +120,7 @@
   
   
   
-    <p class="title logo__title">panels 0.17.0 documentation</p>
+    <p class="title logo__title">panels 0.18.0 documentation</p>
   
 </a></div>
     
@@ -270,6 +270,13 @@
 <li class=" current active">
   <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
     Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="plate_blas.html">
+    Plate kernels as matrix products
   </a>
 </li>
 
@@ -765,6 +772,13 @@
 
 
 <li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/coupon_speed_options.html">
+    Speed of the cohesive coupons: the defaults against 0.17.0 and the options for speed
+  </a>
+</li>
+
+
+<li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="notebooks/conn_method_comparison.html">
     Benchmarks with the penalty and the null-space connections
   </a>
@@ -1024,6 +1038,13 @@
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="#" aria-current="page">
     Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="plate_blas.html">
+    Plate kernels as matrix products
   </a>
 </li>
 
@@ -1519,6 +1540,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/coupon_speed_options.html">
+    Speed of the cohesive coupons: the defaults against 0.17.0 and the options for speed
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="notebooks/conn_method_comparison.html">
     Benchmarks with the penalty and the null-space connections
   </a>
@@ -1670,8 +1698,10 @@
 the integration points of products of the approximation functions of the
 Ritz method. This page describes how the kernels evaluate these functions:
 once per integration point and term, in tables, instead of again in every
-loop over the terms of the matrix, the innermost loop included. The results
-are the same, bit for bit, and the assembly is several times faster.</p>
+loop over the terms of the matrix, the innermost loop included, and keep
+these tables on the shell from one call to the next. The results are the
+same, bit for bit, as with the functions evaluated in the loops, and the
+assembly is several times faster.</p>
 <section id="integrands">
 <h2>Integrands<a class="headerlink" href="#integrands" title="Link to this heading">#</a></h2>
 <p>Each field of a panel is approximated with the products of the hierarchical
@@ -1717,9 +1747,9 @@ non-linear matrices, with the displacement gradients at the point.</p>
 computed again for each of them: per integration point, <span class="math notranslate nohighlight">\(7 m^2 n^2\)</span>
 evaluations in the innermost loop, <span class="math notranslate nohighlight">\(7 m^2 n\)</span> in the loop over <span class="math notranslate nohighlight">\(j\)</span>, and so
 on, for only <span class="math notranslate nohighlight">\(7 (m + n)\)</span> distinct values. Each evaluation is a polynomial
-of degree up to 29 in <span class="math notranslate nohighlight">\(\xi\)</span>, selected by the index of the term, see
-<code class="docutils literal notranslate"><span class="pre">panels/core/src/bardell_functions.cpp</span></code>, which costs much more than the
-arithmetic of the entry itself. For <span class="math notranslate nohighlight">\(m = n = 12\)</span> this is about 10^5
+of degree up to 29 in <span class="math notranslate nohighlight">\(\xi\)</span>, selected by the index of the term and
+evaluated by Horner’s rule, see <a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s hierarchical functions</span></a>, which costs
+much more than the arithmetic of the entry itself. For <span class="math notranslate nohighlight">\(m = n = 12\)</span> this is about 10^5
 evaluations per integration point, against 168 distinct values.</p>
 <p>The internal force vector, <code class="docutils literal notranslate"><span class="pre">calc_fint</span></code>, has three loops over the <span class="math notranslate nohighlight">\(m n\)</span>
 terms per integration point (the rotations, the strains, the forces), with
@@ -1771,6 +1801,60 @@ those of the direct implementation.</p>
 line at a single coordinate: their tables are filled once, before the
 outermost loop over the terms.</p>
 </section>
+<section id="tables-kept-per-domain-across-calls">
+<h2>Tables kept per domain across calls<a class="headerlink" href="#tables-kept-per-domain-across-calls" title="Link to this heading">#</a></h2>
+<p>The integration points of a shell, its numbers of terms and its boundary
+flags do not change from one call of a kernel to the next, e.g. between the
+iterations of a non-linear analysis, and neither do the tables. The kernels
+of the models, <code class="docutils literal notranslate"><span class="pre">panels/models/&lt;model&gt;_num.pyx</span></code>, therefore keep them on
+the shell, with one row per integration point along <span class="math notranslate nohighlight">\(x\)</span> (or <span class="math notranslate nohighlight">\(y\)</span>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ftab</span><span class="p">,</span> <span class="n">ftab_new</span> <span class="o">=</span> <span class="n">lookup_table</span><span class="p">(</span><span class="n">shell</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">,</span> <span class="s1">'fkC_num'</span><span class="p">,</span> <span class="s1">'ftab'</span><span class="p">,</span>
+                              <span class="n">ftab_key</span><span class="p">,</span> <span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="n">m</span><span class="p">))</span>
+<span class="o">...</span>
+<span class="k">with</span> <span class="n">nogil</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">ptx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nx</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">pty</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ny</span><span class="p">):</span>
+            <span class="n">xi</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">weight</span> <span class="o">=</span> <span class="o">...</span>
+            <span class="k">if</span> <span class="n">ftab_new</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+                    <span class="n">ftab</span><span class="p">[</span><span class="n">ptx</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">x1u</span><span class="p">,</span> <span class="n">x1ur</span><span class="p">,</span> <span class="n">x2u</span><span class="p">,</span> <span class="n">x2ur</span><span class="p">)</span>
+                    <span class="o">...</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+                <span class="n">fAu</span> <span class="o">=</span> <span class="n">ftab</span><span class="p">[</span><span class="n">ptx</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+                <span class="o">...</span>
+<span class="k">if</span> <span class="n">ftab_new</span><span class="p">:</span>
+    <span class="n">store_table</span><span class="p">(</span><span class="n">shell</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">,</span> <span class="s1">'fkC_num'</span><span class="p">,</span> <span class="s1">'ftab'</span><span class="p">,</span> <span class="n">ftab_key</span><span class="p">,</span> <span class="n">ftab</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The first call fills the tables, at all the points, and stores them on the
+shell; the next calls only read them. The values are computed by the same
+code, at the same coordinates, as when they were filled at every call, such
+that the matrices and vectors are again identical, bit for bit.</p>
+<p>Each table is stored with a key of all the values it depends on, see
+<a class="reference internal" href="basis_tables_api.html#module-panels.basis_tables" title="panels.basis_tables"><code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.basis_tables</span></code></a>:</p>
+<ul class="simple">
+<li><p>the numbers of terms, <code class="docutils literal notranslate"><span class="pre">m</span></code> or <code class="docutils literal notranslate"><span class="pre">n</span></code>, and of integration points, <code class="docutils literal notranslate"><span class="pre">nx</span></code>
+or <code class="docutils literal notranslate"><span class="pre">ny</span></code>;</p></li>
+<li><p>the Gauss-Legendre abscissae and the limits of the integration domain in
+natural coordinates, <code class="docutils literal notranslate"><span class="pre">xi1,</span> <span class="pre">xi2</span></code> or <code class="docutils literal notranslate"><span class="pre">eta1,</span> <span class="pre">eta2</span></code>, which follow from
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.integration_limits()</span></code>;</p></li>
+<li><p>the boundary flags of the fields of its rows, e.g. <code class="docutils literal notranslate"><span class="pre">x1u,</span> <span class="pre">x1ur,</span> <span class="pre">x2u,</span>
+<span class="pre">x2ur</span></code>;</p></li>
+<li><p>the dimensions entering its rows, e.g. <code class="docutils literal notranslate"><span class="pre">a</span></code> of the derivatives
+<code class="docutils literal notranslate"><span class="pre">(2/a)*fp(...)</span></code>.</p></li>
+</ul>
+<p>A call whose key differs from the stored one, after a change of any of
+these values, fills a new table and replaces the stored one: a shell keeps
+at most one table per kernel and table name, a few tens of kilobytes, e.g.
+<span class="math notranslate nohighlight">\(240 \times 7 \times 24\)</span> values along <span class="math notranslate nohighlight">\(x\)</span> for a domain of 240 points and
+<span class="math notranslate nohighlight">\(m = 24\)</span>. The tables are looked up and stored while the kernel holds the
+GIL; a stored table is never modified, only replaced, such that kernels
+running at the same time in several threads read consistent tables.
+<a class="reference internal" href="basis_tables_api.html#panels.basis_tables.clear_tables" title="panels.basis_tables.clear_tables"><code class="xref py py-func docutils literal notranslate"><span class="pre">basis_tables.clear_tables()</span></code></a> removes the tables of a shell.</p>
+<p>The tables of the functions at a single point given as argument, e.g. for
+the field outputs, and those of the connections and of the stiffeners,
+which depend on several domains, are still filled at every call.</p>
+</section>
 <section id="kernels">
 <h2>Kernels<a class="headerlink" href="#kernels" title="Link to this heading">#</a></h2>
 <p>All the kernels that evaluate the approximation functions in their loops
@@ -1812,10 +1896,18 @@ row per function and as many columns as the loop over <code class="docutils lite
 <li><p>fills the tables right before the loops over the terms of the loop over
 the integration points, after checking that the coordinates are not
 modified afterwards, and replaces each call by the read of the table;</p></li>
-<li><p>declares and allocates the tables outside the <code class="docutils literal notranslate"><span class="pre">nogil</span></code> block.</p></li>
+<li><p>declares and allocates the tables outside the <code class="docutils literal notranslate"><span class="pre">nogil</span></code> block;</p></li>
+<li><p>for a kernel with a <code class="docutils literal notranslate"><span class="pre">shell</span></code> argument, keeps the tables on the shell,
+see <a class="reference internal" href="dev.html#panels.dev.tabulate.keep_tables" title="panels.dev.tabulate.keep_tables"><code class="xref py py-func docutils literal notranslate"><span class="pre">panels.dev.tabulate.keep_tables()</span></code></a>: the key gathers the names
+that the rows of each table depend on, following the assignments of the
+coordinates in the loops over the points back to the values set before
+the <code class="docutils literal notranslate"><span class="pre">nogil</span></code> block, and it fails when this dependence cannot be
+established, e.g. for a coordinate assigned conditionally.</p></li>
 </ol>
 <p>A kernel already tabulated is left unchanged, such that applying it twice
-does nothing. The helper <code class="docutils literal notranslate"><span class="pre">_terms_sdt</span></code> of the connections of the shear
+does nothing. The generators of all the modules
+<code class="docutils literal notranslate"><span class="pre">panels/models/&lt;model&gt;_num.pyx</span></code> apply <a class="reference internal" href="dev.html#panels.dev.tabulate.keep_tables" title="panels.dev.tabulate.keep_tables"><code class="xref py py-func docutils literal notranslate"><span class="pre">keep_tables()</span></code></a> to the text
+they write. The helper <code class="docutils literal notranslate"><span class="pre">_terms_sdt</span></code> of the connections of the shear
 deformation theories, whose flags come from an array, was tabulated by
 hand in the same way. The matrices and vectors of the tabulated kernels
 are identical, bit for bit, to those of the direct implementation, the
@@ -1829,7 +1921,29 @@ The speed-up therefore grows with the number of terms, and it is smaller for
 the integrands with more arithmetic per pair of terms, e.g. the constitutive
 stiffness matrix <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> of the shear deformation theories: for
 <span class="math notranslate nohighlight">\(m = n = 12\)</span> it is about 30 to 60 for the geometric stiffness matrices and
-3.5 to 17 for the non-linear constitutive stiffness matrices.</p>
+3.5 to 17 for the non-linear constitutive stiffness matrices, measured
+when the functions were evaluated with <code class="docutils literal notranslate"><span class="pre">pow()</span></code>.</p>
+<p>Keeping the tables across calls removes the remaining <span class="math notranslate nohighlight">\(O(m + n)\)</span>
+evaluations per point. Their share is largest for many points and few
+terms per point, as in the long domains of the coupons: for a domain of
+<span class="math notranslate nohighlight">\(240 \times 6\)</span> points and <span class="math notranslate nohighlight">\(m = 24\)</span>, <span class="math notranslate nohighlight">\(n = 4\)</span>, <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> with <code class="docutils literal notranslate"><span class="pre">NLgeom=1</span></code>,
+<code class="docutils literal notranslate"><span class="pre">fkG_num</span></code> and <code class="docutils literal notranslate"><span class="pre">calc_fint</span></code> together take 16 % less time for
+<code class="docutils literal notranslate"><span class="pre">'plate_clpt_donnell'</span></code> and 28 % less for <code class="docutils literal notranslate"><span class="pre">'plate_fsdt_donnell'</span></code> from the
+second call on than with panels 0.17.0, which filled the tables at every
+call (Windows, MSVC). The evaluation by Horner’s rule, see
+<a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s hierarchical functions</span></a>, makes filling the tables at the first call
+cheap as well: the first call takes 14 % and 27 % less time than with
+0.17.0, which evaluated the polynomials with <code class="docutils literal notranslate"><span class="pre">pow()</span></code>.</p>
+</section>
+<section id="operators-per-domain">
+<h2>Operators per domain<a class="headerlink" href="#operators-per-domain" title="Link to this heading">#</a></h2>
+<p>For the flat plates <code class="docutils literal notranslate"><span class="pre">'plate_clpt_donnell'</span></code> and <code class="docutils literal notranslate"><span class="pre">'plate_fsdt_donnell'</span></code>
+the tables can be taken one step further: the products of the tabulated
+functions at all the points, which do not change from one evaluation to
+the next, are kept once per domain as the operators of the generalized
+derivatives, and the loops over the pairs of terms become products of dense
+matrices. This is the option <code class="docutils literal notranslate"><span class="pre">plate_kernels='blas'</span></code> of
+<code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDomain</span></code>, see <a class="reference internal" href="plate_blas.html#plate-blas"><span class="std std-ref">Plate kernels as matrix products</span></a>.</p>
 </section>
 </section>
 
@@ -1853,11 +1967,11 @@ stiffness matrix <code class="docutils literal notranslate"><span class="pre">fk
       </div>
     </a>
     <a class="right-next"
-       href="cohesive_zone.html"
+       href="plate_blas.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Cohesive zone model of the multi-domain approach</p>
+        <p class="prev-next-title">Plate kernels as matrix products</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -1883,9 +1997,11 @@ stiffness matrix <code class="docutils literal notranslate"><span class="pre">fk
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#integrands">Integrands</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#functions-evaluated-in-the-innermost-loop">Functions evaluated in the innermost loop</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tables-per-integration-point">Tables per integration point</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tables-kept-per-domain-across-calls">Tables kept per domain across calls</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kernels">Kernels</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation">Implementation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance">Performance</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#operators-per-domain">Operators per domain</a></li>
 </ul>
   </nav></div>
 

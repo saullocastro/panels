@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Bardell’s hierarchical functions &#8212; panels 0.17.0 documentation</title>
+    <title>Bardell’s hierarchical functions &#8212; panels 0.18.0 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=0c3dd48d"></script>
+    <script src="_static/documentation_options.js?v=ba2e7b09"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -52,7 +52,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.17.0" />
+  <meta name="docsearch:version" content="0.18.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -120,7 +120,7 @@
   
   
   
-    <p class="title logo__title">panels 0.17.0 documentation</p>
+    <p class="title logo__title">panels 0.18.0 documentation</p>
   
 </a></div>
     
@@ -270,6 +270,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="tabulation.html">
     Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="plate_blas.html">
+    Plate kernels as matrix products
   </a>
 </li>
 
@@ -765,6 +772,13 @@
 
 
 <li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/coupon_speed_options.html">
+    Speed of the cohesive coupons: the defaults against 0.17.0 and the options for speed
+  </a>
+</li>
+
+
+<li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="notebooks/conn_method_comparison.html">
     Benchmarks with the penalty and the null-space connections
   </a>
@@ -1024,6 +1038,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="tabulation.html">
     Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="plate_blas.html">
+    Plate kernels as matrix products
   </a>
 </li>
 
@@ -1519,6 +1540,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/coupon_speed_options.html">
+    Speed of the cohesive coupons: the defaults against 0.17.0 and the options for speed
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="notebooks/conn_method_comparison.html">
     Benchmarks with the penalty and the null-space connections
   </a>
@@ -1737,9 +1765,33 @@ each one at one end only:</p>
 <p>where the prime is the derivative with respect to <span class="math notranslate nohighlight">\(\xi\)</span>, and
 <span class="math notranslate nohighlight">\(\partial/\partial x = (2/a) \, \partial/\partial \xi\)</span>. The set is
 hierarchical: increasing the number of terms, <code class="docutils literal notranslate"><span class="pre">m</span></code> along <span class="math notranslate nohighlight">\(x\)</span> and <code class="docutils literal notranslate"><span class="pre">n</span></code>
-along <span class="math notranslate nohighlight">\(y\)</span>, adds functions without changing the previous ones. Evaluated in
-floating point, the terms of high degree carry a round-off that grows with
-the degree, below <span class="math notranslate nohighlight">\(10^{-4}\)</span> of the largest value of each term at the ends.</p>
+along <span class="math notranslate nohighlight">\(y\)</span>, adds functions without changing the previous ones.</p>
+</section>
+<section id="evaluation-in-floating-point">
+<h2>Evaluation in floating point<a class="headerlink" href="#evaluation-in-floating-point" title="Link to this heading">#</a></h2>
+<p>The C++ functions <code class="docutils literal notranslate"><span class="pre">f</span></code>, <code class="docutils literal notranslate"><span class="pre">fp</span></code> and <code class="docutils literal notranslate"><span class="pre">fpp</span></code> (one term) and <code class="docutils literal notranslate"><span class="pre">vec_f</span></code>,
+<code class="docutils literal notranslate"><span class="pre">vec_fp</span></code> and <code class="docutils literal notranslate"><span class="pre">vec_fpp</span></code> (all the terms), in
+<code class="docutils literal notranslate"><span class="pre">panels/core/src/bardell_functions.cpp</span></code>, evaluate each polynomial by
+Horner’s rule, without <code class="docutils literal notranslate"><span class="pre">pow()</span></code>: the first four terms in <span class="math notranslate nohighlight">\(\xi\)</span>, the terms
+<span class="math notranslate nohighlight">\(i \ge 4\)</span> and their derivatives, which are even or odd in <span class="math notranslate nohighlight">\(\xi\)</span>, in
+<span class="math notranslate nohighlight">\(\xi^2\)</span>; see the Notes of <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.bardell</span></code>. The coefficients are the
+exact rationals of the definition rounded to double precision. The file is
+generated with SymPy by <code class="docutils literal notranslate"><span class="pre">theory/func/bardell/bardell_functions_C.py</span></code> and
+is not edited by hand.</p>
+<p>The terms of high degree have large coefficients of alternating sign, e.g.
+up to about <span class="math notranslate nohighlight">\(1.3 \times 10^6\)</span> for <span class="math notranslate nohighlight">\(P_{29}\)</span>, whose largest absolute value
+over <span class="math notranslate nohighlight">\(-1 \le \xi \le 1\)</span> is about <span class="math notranslate nohighlight">\(2 \times 10^{-4}\)</span>: any evaluation of
+these monomial forms in double precision loses digits by cancellation.
+Against the exact value, computed in rational arithmetic, the error
+relative to the largest absolute value of each term grows by a factor of
+about 2.5 per term, from one unit round-off for the first terms to about
+<span class="math notranslate nohighlight">\(7 \times 10^{-7}\)</span> for <span class="math notranslate nohighlight">\(P_{29}\)</span>, <span class="math notranslate nohighlight">\(4 \times 10^{-7}\)</span> for <span class="math notranslate nohighlight">\(P_{29}'\)</span> and
+<span class="math notranslate nohighlight">\(7 \times 10^{-8}\)</span> for <span class="math notranslate nohighlight">\(P_{29}''\)</span>. Up to panels 0.17.0 the monomials were
+summed with <code class="docutils literal notranslate"><span class="pre">pow()</span></code> and coefficients printed with 15 significant digits,
+with errors up to <span class="math notranslate nohighlight">\(1.6 \times 10^{-5}\)</span>. The matrices and vectors therefore
+differ from those of 0.17.0 at round-off level, more with more terms, e.g.
+by about <span class="math notranslate nohighlight">\(10^{-15}\)</span> of the largest entry for <span class="math notranslate nohighlight">\(m = 3\)</span>, <span class="math notranslate nohighlight">\(n = 4\)</span> and up to
+<span class="math notranslate nohighlight">\(10^{-9}\)</span> for <span class="math notranslate nohighlight">\(m = 24\)</span>, <span class="math notranslate nohighlight">\(n = 4\)</span>.</p>
 </section>
 <section id="boundary-flags">
 <h2>Boundary flags<a class="headerlink" href="#boundary-flags" title="Link to this heading">#</a></h2>
@@ -1868,6 +1920,7 @@ Eq. <a class="reference internal" href="#equation-bardell-separation">(1)</a> gi
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-functions">The functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluation-in-floating-point">Evaluation in floating point</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#boundary-flags">Boundary flags</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#integrals-and-structural-matrices">Integrals and structural matrices</a></li>
 </ul>

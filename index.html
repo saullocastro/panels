@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Semi-analytical methods for plates, shells and stiffened panels - panels &#8212; panels 0.17.0 documentation</title>
+    <title>Semi-analytical methods for plates, shells and stiffened panels - panels &#8212; panels 0.18.0 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=0c3dd48d"></script>
+    <script src="_static/documentation_options.js?v=ba2e7b09"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -49,7 +49,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.17.0" />
+  <meta name="docsearch:version" content="0.18.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -117,7 +117,7 @@
   
   
   
-    <p class="title logo__title">panels 0.17.0 documentation</p>
+    <p class="title logo__title">panels 0.18.0 documentation</p>
   
 </a></div>
     
@@ -267,6 +267,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="tabulation.html">
     Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="plate_blas.html">
+    Plate kernels as matrix products
   </a>
 </li>
 
@@ -762,6 +769,13 @@
 
 
 <li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/coupon_speed_options.html">
+    Speed of the cohesive coupons: the defaults against 0.17.0 and the options for speed
+  </a>
+</li>
+
+
+<li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="notebooks/conn_method_comparison.html">
     Benchmarks with the penalty and the null-space connections
   </a>
@@ -1023,6 +1037,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="tabulation.html">
     Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="plate_blas.html">
+    Plate kernels as matrix products
   </a>
 </li>
 
@@ -1518,6 +1539,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/coupon_speed_options.html">
+    Speed of the cohesive coupons: the defaults against 0.17.0 and the options for speed
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="notebooks/conn_method_comparison.html">
     Benchmarks with the penalty and the null-space connections
   </a>
@@ -1738,6 +1766,7 @@ together is described in the user guide, starting with
 <li class="toctree-l1"><a class="reference internal" href="multidomain_null_space.html">Exact connections with the null-space method</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tangent_product.html">Tangent stiffness matrix and its product by a vector</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tabulation.html">Approximation functions tabulated at the integration points</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plate_blas.html">Plate kernels as matrix products</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cohesive_zone.html">Cohesive zone model of the multi-domain approach</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cohesive_zone_mixed_mode.html">Mixed-mode multilinear cohesive interface <code class="docutils literal notranslate"><span class="pre">'CZM'</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="pyodide.html">Running in the browser with Pyodide</a></li>
@@ -1818,6 +1847,7 @@ together is described in the user guide, starting with
 <li class="toctree-l1"><a class="reference internal" href="notebooks/mmb_cho2025_glassepoxy.html">Mixed-mode delamination of glass/epoxy with fibre bridging: DCB, ENF and MMB tests of Cho et al.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/mmb_gong2017_t700qy9511.html">Mixed-mode delamination with large-scale fibre bridging at a 45//-45 interface: MMB tests of T700/QY9511</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/mmb_raimondo2021_im78552.html">Mixed-mode delamination of IM7/8552: DCB and MMB tests of Raimondo et al.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/coupon_speed_options.html">Speed of the cohesive coupons: the defaults against 0.17.0 and the options for speed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/conn_method_comparison.html">Benchmarks with the penalty and the null-space connections</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/test_quadrature_partial_integration_matrix.html">Partial integration of a matrix with Gauss-Legendre points</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/test_quadrature_partial_integration_of_domain.html">Partial integration of a polynomial over part of the domain</a></li>
@@ -1837,6 +1867,10 @@ together is described in the user guide, starting with
 <li class="toctree-l2"><a class="reference internal" href="models.html#field-variables-panels-models-clpt-field-panels-models-fsdt-tsdt-field">Field variables (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.models.clpt_field</span></code>, <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.models.fsdt_tsdt_field</span></code>)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="models.html#kernels-of-the-structural-matrices">Kernels of the structural matrices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="bardell_api.html">Bardell’s functions (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.bardell</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basis_tables_api.html">Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basis_tables_api.html#panels.basis_tables.clear_tables"><code class="docutils literal notranslate"><span class="pre">clear_tables()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="basis_tables_api.html#panels.basis_tables.lookup_table"><code class="docutils literal notranslate"><span class="pre">lookup_table()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="basis_tables_api.html#panels.basis_tables.store_table"><code class="docutils literal notranslate"><span class="pre">store_table()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="multidomain.html">Multi-domain assemblies (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain</span></code>)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="multidomain_connections.html">Multidomain connections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="multidomain_cylinder.html">Cylinders modeled as multi-domain assemblies</a></li>
@@ -1899,14 +1933,14 @@ the WebAssembly wheel published on PyPI is installed with <code class="docutils 
 </section>
 <section id="citing-this-library">
 <h2>Citing this library<a class="headerlink" href="#citing-this-library" title="Link to this heading">#</a></h2>
-<p>Saullo G. P. Castro, Nathan D’Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.17.0). Zenodo. DOI: <a class="reference external" href="https://doi.org/10.5281/zenodo.2541522">https://doi.org/10.5281/zenodo.2541522</a>.</p>
+<p>Saullo G. P. Castro, Nathan D’Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.18.0). Zenodo. DOI: <a class="reference external" href="https://doi.org/10.5281/zenodo.2541522">https://doi.org/10.5281/zenodo.2541522</a>.</p>
 <p>In BibTeX:</p>
 <div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span class="nc">@misc</span><span class="p">{</span><span class="nl">castro_panels</span><span class="p">,</span>
 <span class="w">  </span><span class="na">author</span><span class="w">    </span><span class="p">=</span><span class="w"> </span><span class="s">{Castro, Saullo G. P. and D'Souza, Nathan}</span><span class="p">,</span>
 <span class="w">  </span><span class="na">title</span><span class="w">     </span><span class="p">=</span><span class="w"> </span><span class="s">{Semi-analytical methods for plates, shells and stiffened</span>
 <span class="s">               panels}</span><span class="p">,</span>
 <span class="w">  </span><span class="na">year</span><span class="w">      </span><span class="p">=</span><span class="w"> </span><span class="s">{2026}</span><span class="p">,</span>
-<span class="w">  </span><span class="na">version</span><span class="w">   </span><span class="p">=</span><span class="w"> </span><span class="s">{0.17.0}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">version</span><span class="w">   </span><span class="p">=</span><span class="w"> </span><span class="s">{0.18.0}</span><span class="p">,</span>
 <span class="w">  </span><span class="na">publisher</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Zenodo}</span><span class="p">,</span>
 <span class="w">  </span><span class="na">doi</span><span class="w">       </span><span class="p">=</span><span class="w"> </span><span class="s">{10.5281/zenodo.2541522}</span><span class="p">,</span>
 <span class="w">  </span><span class="na">url</span><span class="w">       </span><span class="p">=</span><span class="w"> </span><span class="s">{https://doi.org/10.5281/zenodo.2541522}</span>

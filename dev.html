@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Development tools (panels.dev) &#8212; panels 0.17.0 documentation</title>
+    <title>Development tools (panels.dev) &#8212; panels 0.18.0 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=0c3dd48d"></script>
+    <script src="_static/documentation_options.js?v=ba2e7b09"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -52,7 +52,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.17.0" />
+  <meta name="docsearch:version" content="0.18.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -120,7 +120,7 @@
   
   
   
-    <p class="title logo__title">panels 0.17.0 documentation</p>
+    <p class="title logo__title">panels 0.18.0 documentation</p>
   
 </a></div>
     
@@ -270,6 +270,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="tabulation.html">
     Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="plate_blas.html">
+    Plate kernels as matrix products
   </a>
 </li>
 
@@ -765,6 +772,13 @@
 
 
 <li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/coupon_speed_options.html">
+    Speed of the cohesive coupons: the defaults against 0.17.0 and the options for speed
+  </a>
+</li>
+
+
+<li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="notebooks/conn_method_comparison.html">
     Benchmarks with the penalty and the null-space connections
   </a>
@@ -1024,6 +1038,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="tabulation.html">
     Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="plate_blas.html">
+    Plate kernels as matrix products
   </a>
 </li>
 
@@ -1519,6 +1540,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/coupon_speed_options.html">
+    Speed of the cohesive coupons: the defaults against 0.17.0 and the options for speed
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="notebooks/conn_method_comparison.html">
     Benchmarks with the penalty and the null-space connections
   </a>
@@ -1616,6 +1644,10 @@
 
 
 <li class="toctree-l1"><a class="reference internal" href="bardell_api.html">Bardell’s functions (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.bardell</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_tables_api.html">Notes</a></li>
+
+
+
 <li class="toctree-l1"><a class="reference internal" href="multidomain.html">Multi-domain assemblies (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidomain_connections.html">Multidomain connections</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidomain_cylinder.html">Cylinders modeled as multi-domain assemblies</a></li>
@@ -1713,9 +1745,18 @@ with <code class="docutils literal notranslate"><span class="pre">IDX</span></co
 e.g. along a line of constant <span class="math notranslate nohighlight">\(\xi\)</span> of the connections, the tables are filled
 once, before the outermost loop over the terms. A kernel is left unchanged when it has
 no such call, or when it is already tabulated. A call in another form raises a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p>
+<p>The integration points, the numbers of terms and the boundary flags of a
+shell do not change from one call of a kernel to the next, nor do the
+tables. <a class="reference internal" href="#panels.dev.tabulate.keep_tables" title="panels.dev.tabulate.keep_tables"><code class="xref py py-func docutils literal notranslate"><span class="pre">keep_tables()</span></code></a>, applied last by <a class="reference internal" href="#panels.dev.tabulate.tabulate_basis" title="panels.dev.tabulate.tabulate_basis"><code class="xref py py-func docutils literal notranslate"><span class="pre">tabulate_basis()</span></code></a>,
+rewrites the kernels with a <code class="docutils literal notranslate"><span class="pre">shell</span></code> argument such that they keep their
+tables on the shell across calls, one row per integration point, with the
+key of all the values the tables depend on, see <a class="reference internal" href="basis_tables_api.html#module-panels.basis_tables" title="panels.basis_tables"><code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.basis_tables</span></code></a>:
+the tables are filled at the first call, or after a change of the key, and
+only read afterwards.</p>
 <p>The scripts that generate the kernel modules from the symbolic integrands
-apply it to their output; <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">panels.dev.tabulate</span> <span class="pre">&lt;file.pyx&gt;</span> <span class="pre">...</span></code>
-applies it to the modules written by hand.</p>
+apply <a class="reference internal" href="#panels.dev.tabulate.tabulate_basis" title="panels.dev.tabulate.tabulate_basis"><code class="xref py py-func docutils literal notranslate"><span class="pre">tabulate_basis()</span></code></a> or <a class="reference internal" href="#panels.dev.tabulate.keep_tables" title="panels.dev.tabulate.keep_tables"><code class="xref py py-func docutils literal notranslate"><span class="pre">keep_tables()</span></code></a> to their output;
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">panels.dev.tabulate</span> <span class="pre">&lt;file.pyx&gt;</span> <span class="pre">...</span></code> applies both to the
+modules written by hand.</p>
 <section id="notes">
 <h3>Notes<a class="headerlink" href="#notes" title="Link to this heading">#</a></h3>
 <p>An entry of a numerically integrated stiffness matrix between the terms
@@ -1730,10 +1771,52 @@ negligible against the <span class="math notranslate nohighlight">\(m^2 n^2\)</s
 not the operations on them, the results are identical.</p>
 </section>
 <dl class="py function">
+<dt class="sig sig-object py" id="panels.dev.tabulate.keep_tables">
+<span class="sig-prename descclassname"><span class="pre">panels.dev.tabulate.</span></span><span class="sig-name descname"><span class="pre">keep_tables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.dev.tabulate.keep_tables" title="Link to this definition">#</a></dt>
+<dd><p>Keep the tables of approximation functions of the kernels of the
+module <code class="docutils literal notranslate"><span class="pre">source</span></code> across calls, on the shell</p>
+<p>Each table <code class="docutils literal notranslate"><span class="pre">TAB</span></code> of shape <code class="docutils literal notranslate"><span class="pre">(rows,</span> <span class="pre">terms)</span></code> filled by a loop <code class="docutils literal notranslate"><span class="pre">for</span>
+<span class="pre">IDX</span> <span class="pre">in</span> <span class="pre">range(SIZE):</span></code> of rows <code class="docutils literal notranslate"><span class="pre">TAB[ROW,</span> <span class="pre">IDX]</span> <span class="pre">=</span> <span class="pre">EXPR</span></code> in the loops
+over the integration points of a <code class="docutils literal notranslate"><span class="pre">nogil</span></code> block becomes a table of
+shape <code class="docutils literal notranslate"><span class="pre">(points,</span> <span class="pre">rows,</span> <span class="pre">terms)</span></code>, with one entry per point of the loop
+over the integration points that its coordinate depends on, looked up
+with <a class="reference internal" href="basis_tables_api.html#panels.basis_tables.lookup_table" title="panels.basis_tables.lookup_table"><code class="xref py py-func docutils literal notranslate"><span class="pre">panels.basis_tables.lookup_table()</span></code></a> before the <code class="docutils literal notranslate"><span class="pre">nogil</span></code>
+block, filled only when it is new, stored with
+<a class="reference internal" href="basis_tables_api.html#panels.basis_tables.store_table" title="panels.basis_tables.store_table"><code class="xref py py-func docutils literal notranslate"><span class="pre">panels.basis_tables.store_table()</span></code></a> after the block and read as
+<code class="docutils literal notranslate"><span class="pre">TAB[PT,</span> <span class="pre">ROW,</span> <span class="pre">IDX]</span></code>. The key of the table gathers the names that
+<code class="docutils literal notranslate"><span class="pre">EXPR</span></code> depends on, through the assignments in the loops over the
+points, e.g. <code class="docutils literal notranslate"><span class="pre">xis,</span> <span class="pre">xi1,</span> <span class="pre">xi2</span></code> of the coordinate <code class="docutils literal notranslate"><span class="pre">xi</span></code>, the boundary
+flags and the dimensions, together with <code class="docutils literal notranslate"><span class="pre">SIZE</span></code> and the number of
+points; a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> is raised when this dependence cannot be
+established, e.g. for a name assigned conditionally, or modified in the
+<code class="docutils literal notranslate"><span class="pre">nogil</span></code> block. The functions already rewritten are left unchanged,
+and so are the tables filled outside the loops over the integration
+points, e.g. at a single point given as argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>source</strong><span class="classifier">str</span></dt><dd><p>The text of a <code class="docutils literal notranslate"><span class="pre">.pyx</span></code> module, with tabulated kernels, or of a part
+of a module.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>source</strong><span class="classifier">str</span></dt><dd><p>The rewritten text, with the import of the functions of
+<a class="reference internal" href="basis_tables_api.html#module-panels.basis_tables" title="panels.basis_tables"><code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.basis_tables</span></code></a> after the line <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">panels</span> <span class="pre">import</span>
+<span class="pre">...</span></code>, when there is one and the import is missing.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="panels.dev.tabulate.tabulate_basis">
 <span class="sig-prename descclassname"><span class="pre">panels.dev.tabulate.</span></span><span class="sig-name descname"><span class="pre">tabulate_basis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.dev.tabulate.tabulate_basis" title="Link to this definition">#</a></dt>
 <dd><p>Tabulate the approximation functions of every kernel of the module
-<code class="docutils literal notranslate"><span class="pre">source</span></code>, see the module docstring</p>
+<code class="docutils literal notranslate"><span class="pre">source</span></code>, see the module docstring, and keep the tables across calls,
+see <a class="reference internal" href="#panels.dev.tabulate.keep_tables" title="panels.dev.tabulate.keep_tables"><code class="xref py py-func docutils literal notranslate"><span class="pre">keep_tables()</span></code></a></p>
 <p>The source is split before each line starting with <code class="docutils literal notranslate"><span class="pre">def</span></code>, <code class="docutils literal notranslate"><span class="pre">cdef</span></code>
 or <code class="docutils literal notranslate"><span class="pre">cpdef</span></code>; only the parts that are <code class="docutils literal notranslate"><span class="pre">def</span></code> functions are rewritten,
 the others are kept as they are. A <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> is raised for a
@@ -1754,6 +1837,19 @@ kernel whose calls are not in the expected form.</p>
 </dl>
 </dd></dl>
 
+</section>
+<section id="generator-of-bardell-s-functions">
+<h2>Generator of Bardell’s functions<a class="headerlink" href="#generator-of-bardell-s-functions" title="Link to this heading">#</a></h2>
+<p>The C++ evaluation of Bardell’s functions,
+<code class="docutils literal notranslate"><span class="pre">panels/core/src/bardell_functions.cpp</span></code>, is written by the SymPy script
+<code class="docutils literal notranslate"><span class="pre">theory/func/bardell/bardell_functions_C.py</span></code>, which expands the exact
+polynomials of the definition and their derivatives and writes each one by
+Horner’s rule, see <a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s hierarchical functions</span></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">theory</span><span class="o">/</span><span class="n">func</span><span class="o">/</span><span class="n">bardell</span><span class="o">/</span><span class="n">bardell_functions_C</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>followed by a new build of the extensions. The script is not part of the
+package.</p>
 </section>
 </section>
 
@@ -1806,9 +1902,11 @@ kernel whose calls are not in the expected form.</p>
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-panels.dev.tabulate">Tabulation of the approximation functions (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.dev.tabulate</span></code>)</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#notes">Notes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.dev.tabulate.keep_tables"><code class="docutils literal notranslate"><span class="pre">keep_tables()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.dev.tabulate.tabulate_basis"><code class="docutils literal notranslate"><span class="pre">tabulate_basis()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generator-of-bardell-s-functions">Generator of Bardell’s functions</a></li>
 </ul>
   </nav></div>
 

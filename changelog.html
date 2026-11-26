@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Changelog &#8212; panels 0.17.0 documentation</title>
+    <title>Changelog &#8212; panels 0.18.0 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=0c3dd48d"></script>
+    <script src="_static/documentation_options.js?v=ba2e7b09"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -50,7 +50,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.17.0" />
+  <meta name="docsearch:version" content="0.18.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -118,7 +118,7 @@
   
   
   
-    <p class="title logo__title">panels 0.17.0 documentation</p>
+    <p class="title logo__title">panels 0.18.0 documentation</p>
   
 </a></div>
     
@@ -268,6 +268,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="tabulation.html">
     Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="plate_blas.html">
+    Plate kernels as matrix products
   </a>
 </li>
 
@@ -763,6 +770,13 @@
 
 
 <li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/coupon_speed_options.html">
+    Speed of the cohesive coupons: the defaults against 0.17.0 and the options for speed
+  </a>
+</li>
+
+
+<li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="notebooks/conn_method_comparison.html">
     Benchmarks with the penalty and the null-space connections
   </a>
@@ -1022,6 +1036,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="tabulation.html">
     Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="plate_blas.html">
+    Plate kernels as matrix products
   </a>
 </li>
 
@@ -1517,6 +1538,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/coupon_speed_options.html">
+    Speed of the cohesive coupons: the defaults against 0.17.0 and the options for speed
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="notebooks/conn_method_comparison.html">
     Benchmarks with the penalty and the null-space connections
   </a>
@@ -1667,6 +1695,96 @@
 <p>The changes of each version, from the file <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> of the
 <a class="reference external" href="https://github.com/saullocastro/panels/blob/main/CHANGELOG.md">repository</a>:</p>
 <div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Changelog</span>
+
+<span class="gu">## 0.18.0 (2026-11-26)</span>
+
+<span class="gu">### Added: options for speed of the cohesive coupons</span>
+
+All off by default; turning them on changes the results at round-off level
+only.
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain(..., plate_kernels='blas')`</span> (default <span class="sb">`'cython'`</span>), also
+  <span class="sb">`create_coupon(..., plate_kernels='blas')`</span>: the tangent stiffness matrices
+  (<span class="sb">`calc_kC`</span>, <span class="sb">`calc_kG`</span> with <span class="sb">`NLgeom=True`</span>), the internal force vector and
+  the tangent-vector product of the domains of <span class="sb">`plate_clpt_donnell`</span> and
+  <span class="sb">`plate_fsdt_donnell`</span> as products of dense matrices with the operators of
+  the generalized derivatives tabulated once per domain
+  (<span class="sb">`panels.multidomain.plate_blas`</span>), equal to the Cython kernels to the
+  round-off; the Cython kernels for the other domains (constitutive matrix
+  per point, partial domain, constant membrane stresses, follower loads,
+  other models). Not stored by <span class="sb">`MultiDomain.save`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.get_reduced_functions(reuse_kT=False)`</span> and
+  <span class="sb">`solve_coupon(..., reuse_kT=False)`</span>: with <span class="sb">`True`</span>, the load vector of the
+  prescribed displacement uses the tangent stiffness matrix assembled at the
+  same configuration instead of a new <span class="sb">`calc_kTv`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`solve_coupon`</span> documents <span class="sb">`**analysis_kw`</span>, e.g. the linear solvers
+  <span class="sb">`linear_solver='pardiso_lu'`</span> (oneMKL) or <span class="sb">`'dense_lu'`</span> of structsolve
+  0.13.0.
+<span class="k">-</span><span class="w"> </span>Requires <span class="sb">`structsolve&gt;=0.13.0`</span> (<span class="sb">`pyproject.toml`</span>, <span class="sb">`requirements.txt`</span>),
+  the release on PyPI with the linear solvers <span class="sb">`'pardiso_lu'`</span> and
+  <span class="sb">`'dense_lu'`</span>.
+<span class="k">-</span><span class="w"> </span>Documentation page <span class="sb">`plate_blas`</span>, linked from <span class="sb">`tabulation`</span>, and the section
+  "Options for speed" of <span class="sb">`cohesive_zone_mixed_mode`</span>; notebook
+  <span class="sb">`coupon_speed_options`</span>; tests <span class="sb">`tests/multidomain/test_plate_blas.py`</span>.
+
+<span class="gu">### Changed: tables of the approximation functions kept across calls</span>
+
+On by default; by itself it keeps the matrices and vectors of 0.17.0 bit
+for bit (the evaluation by Horner's rule below changes them at round-off
+level).
+
+<span class="k">-</span><span class="w"> </span>The kernels of the 30 modules <span class="sb">`panels/models/&lt;model&gt;_num.pyx`</span> (<span class="sb">`fkC_num`</span>,
+  <span class="sb">`fkG_num`</span>, <span class="sb">`fkM_num`</span>, <span class="sb">`fkAx_num`</span>, <span class="sb">`fkAy_num`</span>, <span class="sb">`calc_fint`</span>, <span class="sb">`calc_kTv`</span>,
+  <span class="sb">`calc_fext_follower`</span>, <span class="sb">`fkCfollower_num`</span>) keep their tables of Bardell's
+  functions on the shell, filled at the first call for all the integration
+  points and only read afterwards, with a key of all the values they depend
+  on (numbers of terms and of points, abscissae, limits of the integration
+  domain, boundary flags, dimensions): a change of any of them fills new
+  tables. New module <span class="sb">`panels.basis_tables`</span> (<span class="sb">`lookup_table`</span>, <span class="sb">`store_table`</span>,
+  <span class="sb">`clear_tables`</span>) and slot <span class="sb">`Shell._basis_tables`</span>. For a coupon-sized domain
+  (240 x 6 points, m = 24, n = 4), <span class="sb">`fkC_num(NLgeom=1)`</span> + <span class="sb">`fkG_num`</span> +
+  <span class="sb">`calc_fint`</span> take 16 % (<span class="sb">`plate_clpt_donnell`</span>) and 28 %
+  (<span class="sb">`plate_fsdt_donnell`</span>) less time than with 0.17.0 from the second call on.
+<span class="k">-</span><span class="w"> </span><span class="sb">`panels.dev.tabulate.keep_tables`</span>, applied by <span class="sb">`tabulate_basis`</span> and by all
+  the generators of <span class="sb">`theory/shells`</span>, rewrites the kernels; the modules were
+  regenerated with it.
+<span class="k">-</span><span class="w"> </span>Tests <span class="sb">`tests/tests_shell/test_kernel_references.py`</span> (all the kernels of
+  the 30 modules against stored outputs of 0.17.0,
+  <span class="sb">`kernel_references.npz`</span>, written by <span class="sb">`kernel_references.py`</span>) and
+  <span class="sb">`test_basis_tables.py`</span> (invalidation); documentation in <span class="sb">`tabulation`</span>.
+
+<span class="gu">### Changed: Bardell's functions evaluated by Horner's rule</span>
+
+On by default; <span class="gs">**results change at round-off level**</span> with respect to 0.17.0.
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`f`</span>, <span class="sb">`fp`</span>, <span class="sb">`fpp`</span>, <span class="sb">`vec_f`</span>, <span class="sb">`vec_fp`</span> and <span class="sb">`vec_fpp`</span> of
+  <span class="sb">`panels/core/src/bardell_functions.cpp`</span> evaluate each polynomial by
+  Horner's rule, in <span class="sb">`xi`</span> for the first four terms and in <span class="sb">`xi**2`</span> for the
+  others (even or odd in <span class="sb">`xi`</span>), without <span class="sb">`pow()`</span>, with the coefficients
+  correctly rounded to double instead of printed to 15 significant digits.
+  The file is generated by the new
+  <span class="sb">`theory/func/bardell/bardell_functions_C.py`</span>.
+<span class="k">-</span><span class="w"> </span>Against exact rational arithmetic at 4001 points of <span class="sb">`-1 &lt;= xi &lt;= 1`</span>, the
+  largest error over the 30 terms, relative to the largest value of each
+  term, decreases from 1.0e-5 to 6.6e-7 (<span class="sb">`f`</span>), 1.6e-5 to 3.9e-7 (<span class="sb">`fp`</span>) and
+  2.5e-7 to 6.6e-8 (<span class="sb">`fpp`</span>); what remains is the cancellation in the
+  monomial form of the terms of high degree, below one unit round-off times
+  the sum of the absolute values of the coefficients.
+<span class="k">-</span><span class="w"> </span>The kernels differ from those of 0.17.0 by at most about 1e-15 of the
+  largest entry for m = 3, n = 4 terms (<span class="sb">`kernel_references`</span>), and by up to
+  1e-9 for a domain of m = 24 terms, whose terms of high degree carried the
+  largest errors of 0.17.0. Together with the tables kept across calls, the
+  first call of <span class="sb">`fkC_num(NLgeom=1)`</span> + <span class="sb">`fkG_num`</span> + <span class="sb">`calc_fint`</span> of the
+  coupon-sized domain above takes 14 % (<span class="sb">`plate_clpt_donnell`</span>) and 27 %
+  (<span class="sb">`plate_fsdt_donnell`</span>) less time than with 0.17.0.
+<span class="k">-</span><span class="w"> </span>Tests <span class="sb">`tests/test_bardell_horner.py`</span> (Horner against the <span class="sb">`pow()`</span> form of
+  0.17.0, <span class="sb">`tests/bardell_functions_pow_0.17.0.txt`</span>, and exact arithmetic);
+  <span class="sb">`test_kernel_references.py`</span> now compares with 0.17.0 to <span class="sb">`1e-12`</span> of the
+  largest entry, and the second call with the first bit for bit.
+  Documentation in <span class="sb">`bardell`</span>, <span class="sb">`tabulation`</span>, <span class="sb">`dev`</span> and the Notes of
+  <span class="sb">`panels.bardell`</span>; the notebook <span class="sb">`coupon_speed_options`</span> compares the
+  defaults with 0.17.0, run in a separate process (helpers in
+  <span class="sb">`notebooks/coupon_speed_utils.py`</span>).
 
 <span class="gu">## 0.17.0 (2026-11-24)</span>
 

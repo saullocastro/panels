@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Mixed-mode multilinear cohesive interface &#39;CZM&#39; &#8212; panels 0.17.0 documentation</title>
+    <title>Mixed-mode multilinear cohesive interface &#39;CZM&#39; &#8212; panels 0.18.0 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=0c3dd48d"></script>
+    <script src="_static/documentation_options.js?v=ba2e7b09"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -52,7 +52,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.17.0" />
+  <meta name="docsearch:version" content="0.18.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -120,7 +120,7 @@
   
   
   
-    <p class="title logo__title">panels 0.17.0 documentation</p>
+    <p class="title logo__title">panels 0.18.0 documentation</p>
   
 </a></div>
     
@@ -270,6 +270,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="tabulation.html">
     Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="plate_blas.html">
+    Plate kernels as matrix products
   </a>
 </li>
 
@@ -765,6 +772,13 @@
 
 
 <li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/coupon_speed_options.html">
+    Speed of the cohesive coupons: the defaults against 0.17.0 and the options for speed
+  </a>
+</li>
+
+
+<li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="notebooks/conn_method_comparison.html">
     Benchmarks with the penalty and the null-space connections
   </a>
@@ -1024,6 +1038,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="tabulation.html">
     Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="plate_blas.html">
+    Plate kernels as matrix products
   </a>
 </li>
 
@@ -1519,6 +1540,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/coupon_speed_options.html">
+    Speed of the cohesive coupons: the defaults against 0.17.0 and the options for speed
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="notebooks/conn_method_comparison.html">
     Benchmarks with the penalty and the null-space connections
   </a>
@@ -1733,6 +1761,41 @@ including the lever of the MMB apparatus, a linear constraint of
 </pre></div>
 </div>
 </section>
+<section id="options-for-speed">
+<h2>Options for speed<a class="headerlink" href="#options-for-speed" title="Link to this heading">#</a></h2>
+<p>With the defaults, the plate kernels keep the tables of the approximation
+functions across the iterations, see <a class="reference internal" href="tabulation.html#tabulation"><span class="std std-ref">Approximation functions tabulated at the integration points</span></a>, and evaluate the
+functions by Horner’s rule, see <a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s hierarchical functions</span></a>: the results
+differ from those of panels 0.17.0 at round-off level only. Three options,
+off by default, give the same increments, the same Newton-Raphson
+iterations and the same loads, to the round-off, in less time; they matter
+for the coupons, whose tangent stiffness matrix is assembled and factorized
+at every iteration:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">create_coupon(...,</span> <span class="pre">plate_kernels='blas')</span></code>, or <code class="docutils literal notranslate"><span class="pre">MultiDomain(...,</span>
+<span class="pre">plate_kernels='blas')</span></code>: the plate matrices and vectors as products of
+dense matrices, see <a class="reference internal" href="plate_blas.html#plate-blas"><span class="std std-ref">Plate kernels as matrix products</span></a>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">solve_coupon(...,</span> <span class="pre">reuse_kT=True)</span></code>, or
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_reduced_functions()</span></code> with <code class="docutils literal notranslate"><span class="pre">reuse_kT=True</span></code>: the
+load vector of the prescribed displacement, <span class="math notranslate nohighlight">\(\boldsymbol{K}_T
+\boldsymbol{c}_{p1}\)</span>, from the tangent stiffness matrix already assembled
+at the same configuration;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">solve_coupon(...,</span> <span class="pre">linear_solver='pardiso_lu')</span></code>, with oneMKL, or
+<code class="docutils literal notranslate"><span class="pre">'dense_lu'</span></code> otherwise, both of <code class="docutils literal notranslate"><span class="pre">structsolve&gt;=0.13.0</span></code>: the
+factorization of the tangent stiffness matrix, forwarded to
+<code class="docutils literal notranslate"><span class="pre">structsolve.Analysis</span></code>, see the <a class="reference external" href="https://saullocastro.github.io/structsolve/linear_solvers.html">linear solvers of structsolve</a>.</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">create_coupon</span><span class="p">(</span><span class="s1">'MMB'</span><span class="p">,</span> <span class="n">laminaprop</span><span class="p">,</span> <span class="n">plyt</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">12</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">25.4</span><span class="p">,</span>
+                         <span class="n">a0</span><span class="o">=</span><span class="mf">34.1</span><span class="p">,</span> <span class="n">laws</span><span class="o">=</span><span class="p">[</span><span class="n">law</span><span class="p">],</span> <span class="n">L</span><span class="o">=</span><span class="mf">50.8</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mf">44.4</span><span class="p">,</span>
+                         <span class="n">model</span><span class="o">=</span><span class="s1">'plate_fsdt_donnell'</span><span class="p">,</span> <span class="n">nd</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">L_coh</span><span class="o">=</span><span class="mf">67.5</span><span class="p">,</span>
+                         <span class="n">plate_kernels</span><span class="o">=</span><span class="s1">'blas'</span><span class="p">)</span>
+<span class="n">res</span><span class="p">,</span> <span class="n">an</span> <span class="o">=</span> <span class="n">solve_coupon</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">delta_max</span><span class="o">=</span><span class="mf">8.</span><span class="p">,</span> <span class="n">reuse_kT</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                       <span class="n">linear_solver</span><span class="o">=</span><span class="s1">'pardiso_lu'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">tests/multidomain/test_plate_blas.py</span></code> compares a DCB coupon with these
+options to the defaults.</p>
+</section>
 <section id="verification">
 <h2>Verification<a class="headerlink" href="#verification" title="Link to this heading">#</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">tests/multidomain/test_czm.py</span></code> and <code class="docutils literal notranslate"><span class="pre">tests/multidomain/test_delamination.py</span></code>
@@ -1806,6 +1869,7 @@ lever.</p></li>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#usage">Usage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#options-for-speed">Options for speed</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verification">Verification</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api">API</a></li>
 </ul>

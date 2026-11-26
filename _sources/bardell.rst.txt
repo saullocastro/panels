@@ -39,9 +39,36 @@ term `i`    `P_i(-1)`      `P_i'(-1)`       `P_i(+1)`      `P_i'(+1)`       flag
 where the prime is the derivative with respect to `\xi`, and
 `\partial/\partial x = (2/a) \, \partial/\partial \xi`. The set is
 hierarchical: increasing the number of terms, ``m`` along `x` and ``n``
-along `y`, adds functions without changing the previous ones. Evaluated in
-floating point, the terms of high degree carry a round-off that grows with
-the degree, below `10^{-4}` of the largest value of each term at the ends.
+along `y`, adds functions without changing the previous ones.
+
+
+Evaluation in floating point
+----------------------------
+
+The C++ functions ``f``, ``fp`` and ``fpp`` (one term) and ``vec_f``,
+``vec_fp`` and ``vec_fpp`` (all the terms), in
+``panels/core/src/bardell_functions.cpp``, evaluate each polynomial by
+Horner's rule, without ``pow()``: the first four terms in `\xi`, the terms
+`i \ge 4` and their derivatives, which are even or odd in `\xi`, in
+`\xi^2`; see the Notes of :mod:`panels.bardell`. The coefficients are the
+exact rationals of the definition rounded to double precision. The file is
+generated with SymPy by ``theory/func/bardell/bardell_functions_C.py`` and
+is not edited by hand.
+
+The terms of high degree have large coefficients of alternating sign, e.g.
+up to about `1.3 \times 10^6` for `P_{29}`, whose largest absolute value
+over `-1 \le \xi \le 1` is about `2 \times 10^{-4}`: any evaluation of
+these monomial forms in double precision loses digits by cancellation.
+Against the exact value, computed in rational arithmetic, the error
+relative to the largest absolute value of each term grows by a factor of
+about 2.5 per term, from one unit round-off for the first terms to about
+`7 \times 10^{-7}` for `P_{29}`, `4 \times 10^{-7}` for `P_{29}'` and
+`7 \times 10^{-8}` for `P_{29}''`. Up to panels 0.17.0 the monomials were
+summed with ``pow()`` and coefficients printed with 15 significant digits,
+with errors up to `1.6 \times 10^{-5}`. The matrices and vectors therefore
+differ from those of 0.17.0 at round-off level, more with more terms, e.g.
+by about `10^{-15}` of the largest entry for `m = 3`, `n = 4` and up to
+`10^{-9}` for `m = 24`, `n = 4`.
 
 
 Boundary flags
