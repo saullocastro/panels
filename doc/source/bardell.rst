@@ -63,12 +63,43 @@ Against the exact value, computed in rational arithmetic, the error
 relative to the largest absolute value of each term grows by a factor of
 about 2.5 per term, from one unit round-off for the first terms to about
 `7 \times 10^{-7}` for `P_{29}`, `4 \times 10^{-7}` for `P_{29}'` and
-`7 \times 10^{-8}` for `P_{29}''`. The same monomials summed with
-``pow()`` and coefficients printed with 15 significant digits have errors
-up to `1.6 \times 10^{-5}`. The matrices and vectors computed with the two
-evaluations therefore differ at round-off level, more with more terms, e.g.
-by about `10^{-15}` of the largest entry for `m = 3`, `n = 4` and up to
-`10^{-9}` for `m = 24`, `n = 4`.
+`7 \times 10^{-8}` for `P_{29}''`.
+
+Horner's rule against the sum of monomials
+..........................................
+
+A polynomial `p(\xi) = \sum_k a_k \xi^k` of degree `d` can be evaluated in
+two mathematically equivalent forms: as the sum of its monomials, each
+power computed with ``pow()``, or by Horner's rule, `a_0 + \xi (a_1 + \xi
+(a_2 + \dots))`. ``panels`` uses Horner's rule, for three reasons:
+
+- cost: `d` multiplications and `d` additions and no call of ``pow()``,
+  against one call of ``pow()`` per monomial; the terms `i \ge 4` and their
+  derivatives, even or odd in `\xi`, are evaluated in `\xi^2`, which halves
+  the operations;
+- a known error bound, proportional to the unit round-off and to `\sum_k
+  |a_k| |\xi|^k`, see the Notes of :mod:`panels.bardell`, whereas the sum
+  of monomials adds the rounding of each power to the cancellation;
+- coefficients correctly rounded from the exact rationals of the
+  definition, instead of decimal coefficients printed with 15 significant
+  digits, which carry their own rounding into the sum.
+
+The two forms were compared against the exact value, obtained with the
+rational coefficients in rational arithmetic at the same double-precision
+`\xi` and rounded at the end, at 401 points of `-1 \le \xi \le 1` (201
+equally spaced and 200 random), for the 30 terms and their first and
+second derivatives. For every term and derivative the largest error of
+Horner's rule is within `2u \sum_k |a_k|`, with `u` the unit round-off,
+and it is not larger than that of the sum of monomials with ``pow()`` and
+coefficients of 15 significant digits, or than `u \sum_k |a_k|`, the scale
+of the round-off of any evaluation of the monomial form. Over all the
+terms, the largest error of Horner's rule is smaller than that of the sum
+of monomials, both in absolute value and relative to the largest absolute
+value of the term; the errors of the sum of monomials reach `1.6 \times
+10^{-5}`. The matrices and vectors
+computed with the two evaluations differ at round-off level, more with
+more terms, e.g. by about `10^{-15}` of the largest entry for `m = 3`,
+`n = 4` and up to `10^{-9}` for `m = 24`, `n = 4`.
 
 
 Boundary flags

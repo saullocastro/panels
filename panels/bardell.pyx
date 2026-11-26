@@ -70,6 +70,20 @@ is small relative to `\sum_k |a_k| |\xi|^k`, but not to `|p(\xi)|` when the
 coefficients, of alternating sign and growing with the degree, cancel, as
 for the terms of high degree.
 
+The coefficients `a_k` are the exact rationals of the definition rounded
+to double precision. Horner's rule is preferred to the sum of the
+monomials `a_k \xi^k` computed with a power function, which needs one call
+of the power function per monomial and adds the rounding of each power,
+and of coefficients written with fewer digits, to the same cancellation.
+Against the exact value, i.e. the rational coefficients evaluated in
+rational arithmetic at the same double-precision `\xi` and rounded at the
+end, the largest error of Horner's rule over `-1 \le \xi \le 1` is within
+`2u \sum_k |a_k|` for every term and derivative, and not larger than that
+of the sum of monomials with coefficients of 15 significant digits, or
+than `u \sum_k |a_k|`; relative to the largest absolute value of the
+term, it reaches about `7 \times 10^{-7}` for `P_{29}`, and the errors of
+the sum of monomials reach `1.6 \times 10^{-5}`.
+
 References
 ----------
 .. [1] Bardell, N. S., "Free vibration analysis of a flat plate using the
