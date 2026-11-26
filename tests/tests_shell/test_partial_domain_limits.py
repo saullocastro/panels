@@ -1,17 +1,14 @@
 r"""Limits of the integration domain, ``Shell.x1, x2, y1, y2``
 
-Up to panels 0.6.9 the full domain was given by the sentinels ``x1 = y1 =
--1`` and ``x2 = y2 = +1``, and a partial domain was recognized only when both
-limits of a pair departed from them. Two consequences are checked here not to
-come back:
+The full domain is given by ``None``; any other value of a limit is a
+coordinate. The checks:
 
-- ``x2 = 1.0`` is a coordinate like any other, it silently meant the full
-  domain on a shell with ``a > 1``.
-- One limit alone, e.g. ``x1 = 0.2``, integrates ``[0.2, a]``, it was silently
-  ignored.
-
-The full domain is now given by ``None``, and the matrices of the full domain
-are the same as before, see ``test_full_domain_*``.
+- ``x2 = 1.0`` is a coordinate like any other, also on a shell with
+  ``a > 1``, and not a mark of the full domain;
+- one limit alone, e.g. ``x1 = 0.2``, integrates ``[0.2, a]``;
+- ``None`` and the explicit edges give the same matrices, see
+  ``test_full_domain_*``;
+- ``-1`` is an invalid coordinate.
 
 """
 import numpy as np
@@ -55,8 +52,8 @@ def test_limit_at_one_is_a_coordinate(model, r, edge):
     """``a = 2.0, x1 = 0.2, x2 = 1.0`` is a partial domain
 
     A perturbation of 1e-9 of the limit must change the matrices by about
-    1e-9, and not by the 34 % that separated the full domain from the partial
-    one when ``x2 = 1.0`` was read as the full-domain sentinel.
+    1e-9, and not by the 34 % that separate the full domain from the partial
+    one.
 
     """
     lim = dict(x1=0.2, x2=1.0) if edge == 'x' else dict(y1=0.2, y2=1.0)
@@ -142,7 +139,7 @@ def test_full_domain_numerical_matches_analytical(model, r):
 @pytest.mark.parametrize('lim', [dict(x1=-1), dict(y1=-1),
                                  dict(x1=-1, x2=+1), dict(y1=-1, y2=+1)])
 def test_old_sentinels_are_rejected(lim):
-    """``-1`` was the full-domain sentinel and is now an invalid coordinate"""
+    """``-1`` is an invalid coordinate, the full domain is given by ``None``"""
     s = make('plate_clpt_donnell', None)
     for k, v in lim.items():
         setattr(s, k, v)

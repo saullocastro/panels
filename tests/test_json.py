@@ -323,8 +323,8 @@ def test_multidomain_conn_used():
 
 
 def test_multidomain_T_tol_of_older_files():
-    r"""The tolerance of the null-space basis saved as ``'T_tol'`` by panels
-    0.13.11 is read into ``MultiDomain._Z_tol``"""
+    r"""The tolerance of the null-space basis saved under the key ``'T_tol'``
+    is read into ``MultiDomain._Z_tol``"""
     md = _multidomain('null-space')
     md.get_Z(tol=1.e-8)
     data = _save(md)

@@ -14,7 +14,7 @@ r"""Options for speed: ``plate_kernels='blas'`` and ``reuse_kT=True``
 - The operators follow a change of the domain (boundary flags).
 - An end-to-end DCB coupon with cohesive interfaces, a few increments past
   the onset of damage, with ``plate_kernels='blas'``, ``reuse_kT=True`` and,
-  when ``structsolve>=0.13.0`` provides it, a faster linear solver, gives
+  when ``structsolve`` provides it, a faster linear solver, gives
   the same increments, the same number of Newton-Raphson iterations per
   increment and the same load within ``1e-6`` N as the defaults.
 
@@ -152,7 +152,7 @@ def test_plate_kernels_validated():
 
 def _linear_solver():
     r"""``'pardiso_lu'`` with oneMKL, else ``'dense_lu'``, when
-    ``structsolve`` has them (0.13.0 or newer), else ``None``"""
+    ``structsolve`` has them, else ``None``"""
     try:
         from structsolve.static import LINEAR_SOLVERS
     except ImportError:
@@ -212,7 +212,7 @@ def test_coupon_options_on_equal_off():
 def test_coupon_linear_solver_equal_default():
     r"""As :func:`test_coupon_options_on_equal_off`, also with the linear
     solver ``'pardiso_lu'`` (or ``'dense_lu'`` without oneMKL) of
-    ``structsolve>=0.13.0``, forwarded to ``structsolve.Analysis`` by
+    ``structsolve``, forwarded to ``structsolve.Analysis`` by
     :func:`.solve_coupon`"""
     solver = _linear_solver()
     if solver is None:

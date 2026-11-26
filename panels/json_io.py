@@ -126,7 +126,7 @@ _SHELL_ATTRS = (
     'num_eigvalues', 'num_eigvalues_print',
     'increments', 'results', 'fields', 'plot_mesh',
     )
-#NOTE in the files of panels < 0.13.9; Shell.ABD is calculated from
+#NOTE may be stored in a file; Shell.ABD is calculated from
 #     Shell.lam, so it is read, for the checks of the arrays, and discarded
 _SHELL_LEGACY_ATTRS = ('ABD', )
 _STIFFPANELBAY_ATTRS = (
@@ -368,17 +368,17 @@ def _shell_from_data(data, r):
                 + ('lam', 'derived_lists'), 'Shell')
     s = Shell()
     _decode_attrs(s, data, _SHELL_ATTRS, r)
-    # NOTE files of panels < 0.13.12 have no 'derived_lists', their lists
-    #      are then kept as given by the user
+    # NOTE the lists of a file without 'derived_lists' are kept as given by
+    #      the user
     for name in data.get('derived_lists', []):
         if name in ('plyts', 'laminaprops', 'rhos') and getattr(s, name):
             s._set_derived(name, getattr(s, name))
         # NOTE nx and ny follow m and n again; those of files without this
-        #      entry, e.g. of panels < 0.14.0, are kept as assigned values
+        #      entry are kept as assigned values
         if name in ('nx', 'ny'):
             setattr(s, name, None)
-    # NOTE files of panels < 0.14.0 have no thickness coordinate z in the
-    #      prescribed displacements, their u and v are those of the
+    # NOTE without the thickness coordinate z in the prescribed
+    #      displacements of a file, their u and v are those of the
     #      reference surface, z = 0
     for name, length in (('point_pds', 6), ('point_pds_inc', 6),
                          ('distr_pds', 6), ('distr_pds_inc', 6),
@@ -574,8 +574,8 @@ def _multidomain_from_data(data, r):
                      pd_method=pd_method)
     _decode_attrs(md, data, _MULTIDOMAIN_ATTRS, r)
     md._conn_used = _conn_from_data(data.get('conn_used'), panels, r)
-    # NOTE 'T_tol' is the key of the tolerance of the null-space basis Z in
-    #      the files written by panels 0.13.11
+    # NOTE 'T_tol' is also read as the key of the tolerance of the
+    #      null-space basis Z
     for key in ('Z_tol', 'T_tol'):
         if key in data:
             md._Z_tol = _decode(data[key], r)

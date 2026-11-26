@@ -82,7 +82,7 @@ and LEFM (ASTM D6671); the digitised curves of the literature are in
 | `mmb_cho2025_glassepoxy.ipynb` | Cho et al. (2025): glass/epoxy DCB, ENF and MMB 20/40/60% with fibre bridging (trilinear law), arm thickness identified from the DCB |
 | `mmb_gong2017_t700qy9511.ipynb` | Gong et al. (2017): T700/QY9511 MMB 25-75% at a 45//-45 interface with large-scale bridging, bridging law identified from the DCB |
 | `mmb_raimondo2021_im78552.ipynb` | Raimondo et al. (2021): IM7/8552 DCB and MMB 20/50%, DCB crack length identified, lever weight applied in post-processing |
-| `coupon_speed_options.ipynb` | Options for speed of the cohesive coupons, `plate_kernels='blas'`, `reuse_kT=True` and the linear solvers of structsolve 0.13.0: same increments, iterations and curves as the defaults, and the run times; runs `panels` at each execution, a few minutes |
+| `coupon_speed_options.ipynb` | Options for speed of the cohesive coupons, `plate_kernels='blas'`, `reuse_kT=True` and the linear solvers of structsolve: same increments, iterations and curves as the defaults, and the run times; runs `panels` at each execution, a few minutes |
 
 The runs of these notebooks are made by the notebooks themselves, with
 `MMB_RERUN=1` in the environment (`MMB_TESTS` selects some of them, e.g.

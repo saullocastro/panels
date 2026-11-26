@@ -1481,7 +1481,7 @@ class MultiDomain(object):
           (calc_fext(inc, c=c_full) - inc*calc_kTv(c_full, c_p1, inc=lbd))``
           at the configuration of the load factor ``lbd``, the product being
           computed only when ``c_p1`` is not null, which ``structsolve``
-          0.7.0 or newer passes in the non-linear analyses. The product of
+          passes in the non-linear analyses. The product of
           :meth:`.calc_kTv` avoids the assembly of the tangent stiffness
           matrix.
 
