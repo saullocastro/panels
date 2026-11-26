@@ -161,6 +161,9 @@ def is_sanders(object s):
 def is_gl(object s):
     r'''Tell whether the model of ``s`` has Green-Lagrange membrane strains
 
+    The name of the model is tested; the total-Lagrangian models of
+    :func:`.is_tl` are included.
+
     Parameters
     ----------
     s : :class:`.Shell`

@@ -62,6 +62,12 @@ def _normalized(value):
 def lookup_table(shell, module, function, table, key, shape):
     r"""Table of approximation functions of a kernel, stored or new
 
+    The table stored on the shell under the names ``module``, ``function``
+    and ``table`` is returned when its shape is ``shape`` and its key equals
+    ``key``, every value compared to the bit. Otherwise, and for an object
+    without stored tables, a new array is returned; nothing is stored by
+    this function.
+
     Parameters
     ----------
     shell : :class:`.Shell`
@@ -98,6 +104,11 @@ def lookup_table(shell, module, function, table, key, shape):
 
 def store_table(shell, module, function, table, key, tab):
     r"""Store a table filled by a kernel, replacing the stored one
+
+    The table is kept in the attribute ``_basis_tables`` of the shell, a
+    dictionary created at the first call, under the names ``module``,
+    ``function`` and ``table``, together with its key. A table already
+    stored under the same names is replaced, not modified.
 
     Parameters
     ----------
