@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.18.1 (2026-11-27)
+## 0.18.1 (2026-11-26)
 
 ### Added: options for speed of the cohesive coupons
 
