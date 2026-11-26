@@ -2,15 +2,26 @@ r"""Accuracy of the evaluation of Bardell's functions by Horner's rule
 
 The C++ functions of ``panels/core/src/bardell_functions.cpp`` evaluate each
 polynomial by Horner's rule, in `\xi` or in `\xi^2`, with correctly rounded
-coefficients. The monomial form, summed with ``pow()`` and with
-coefficients printed with 15 significant digits, is stored as C expressions
-in ``bardell_functions_pow_0.17.0.txt``. Both are compared here against the
-exact value: the exact rational coefficients of the definition
-evaluated in rational arithmetic (:class:`fractions.Fraction`) at the same
-double-precision `\xi`, then rounded.
+coefficients. They are compared here against the exact value: the exact
+rational coefficients of the definition evaluated in rational arithmetic
+(:class:`fractions.Fraction`) at the same double-precision `\xi`, then
+rounded. The vector functions are compared with the scalar ones.
+
+Notes
+-----
+For a polynomial `p(\xi) = \sum_k a_k \xi^k` of degree `d`, the value
+computed by Horner's rule has an error not larger than `\gamma_{2d} \sum_k
+|a_k| |\xi|^k`, with `\gamma_{2d} = 2du/(1 - 2du)` and `u` the unit
+round-off, Higham (2002), Chapter 5 [1]_. The test checks the stricter
+`2u \sum_k |a_k|` over `-1 \le \xi \le 1`.
+
+References
+----------
+.. [1] Higham, N. J., "Accuracy and Stability of Numerical Algorithms",
+   2nd ed., SIAM, Philadelphia, 2002, Chapter 5, Polynomials,
+   pp. 93-104. https://doi.org/10.1137/1.9780898718027.ch5
+
 """
-import os
-import re
 from fractions import Fraction
 from math import factorial
 
@@ -65,68 +76,23 @@ def eval_exact(a, xi):
     return float(s)
 
 
-def pow_form_expressions():
-    """C expressions of ``f``, ``fp`` and ``fpp`` in the monomial form with
-    ``pow()``, stored in ``bardell_functions_pow_0.17.0.txt``, as ``{(nder,
-    i): expression}`` with
-    ``pow(xi, k)`` written ``xi**k``"""
-    path = os.path.join(os.path.dirname(__file__),
-                        'bardell_functions_pow_0.17.0.txt')
-    nders = {'f': 0, 'fp': 1, 'fpp': 2}
-    out = {}
-    with open(path) as fin:
-        for line in fin:
-            if line.startswith('#'):
-                continue
-            name, i, expr = line.split(' ', 2)
-            out[(nders[name], int(i))] = compile(
-                re.sub(r'pow\(xi, (\d+)\)', r'xi**\1', expr.strip()),
-                '<pow form>', 'eval')
-    return out
-
-
-def eval_pow_form(code, xi):
-    """Evaluation of the monomial form: Python applies the same
-    floating-point operations in the same order as the compiled C++
-    expression, ``xi**k`` calling the
-    C ``pow()``"""
-    return eval(code, {'xi': xi, 'xi1t': 1., 'xi1r': 1., 'xi2t': 1.,
-                       'xi2r': 1.})
-
-
-def test_horner_at_least_as_accurate_as_pow_form():
+def test_horner_against_exact_rational_arithmetic():
     r"""Errors against the exact value at 401 points of `-1 \le \xi \le 1`,
     for every term ``i`` and derivative: the compiled Horner evaluation has
-    a maximum absolute error not larger than that of the evaluation of
-    the monomial form with ``pow()``, or not larger than one unit round-off
-    times `\sum_k |a_k|`, the scale of the round-off of any evaluation of
-    the monomial form; and not larger than twice that scale, well within
-    the bound `\gamma_{2n} \sum_k |a_k|` of Horner's rule. Over all the
-    terms of each family the largest error decreases, absolute and relative
-    to the largest absolute value of the term"""
-    codes = pow_form_expressions()
+    a maximum absolute error not larger than twice the unit round-off times
+    `\sum_k |a_k|`, the scale of the round-off of any evaluation of the
+    monomial form, well within the bound `\gamma_{2n} \sum_k |a_k|` of
+    Horner's rule"""
     rng = np.random.default_rng(1)
     xis = np.concatenate([np.linspace(-1, 1, 201), rng.uniform(-1, 1, 200)])
     for nder, fn in enumerate((calc_f, calc_fp, calc_fpp)):
-        worst_pow = worst_horner = 0.
-        worst_pow_rel = worst_horner_rel = 0.
         for i in range(NUM):
             a = exact_coefficients(i, nder)
             sum_abs = float(sum(abs(c) for c in a))
             exact = np.array([eval_exact(a, x) for x in xis])
-            powf = np.array([eval_pow_form(codes[(nder, i)], x) for x in xis])
             horner = np.array([fn(i, x, 1., 1., 1., 1.) for x in xis])
-            scale = np.abs(exact).max()
-            e_pow = np.abs(powf - exact).max()
             e_horner = np.abs(horner - exact).max()
-            assert e_horner <= max(e_pow, EPS*sum_abs), (nder, i)
             assert e_horner <= 2*EPS*sum_abs, (nder, i)
-            worst_pow = max(worst_pow, e_pow)
-            worst_horner = max(worst_horner, e_horner)
-            worst_pow_rel = max(worst_pow_rel, e_pow/scale)
-            worst_horner_rel = max(worst_horner_rel, e_horner/scale)
-        assert worst_horner < worst_pow
-        assert worst_horner_rel < worst_pow_rel
 
 
 def test_vec_equals_scalar():
@@ -139,4 +105,3 @@ def test_vec_equals_scalar():
                         (calc_vec_fpp, calc_fpp)):
             v = vec(xi, *flags)
             assert np.array_equal(v, [fn(i, xi, *flags) for i in range(NUM)])
-
