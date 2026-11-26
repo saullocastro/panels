@@ -75,63 +75,88 @@ def create_coupon(kind, laminaprop, plyt, stack, b, a0, laws, L=None, c=None,
                   penalty_factor=1., contact_eps=1e-3, plate_kernels='cython'):
     r"""DCB, ENF or MMB coupon with cohesive interfaces
 
+    Builds the two arms of the specimen as a :class:`.MultiDomain`: each
+    arm is split along `x` into a cracked domain, from the load line `x =
+    0` to the crack tip, ``nd`` cohesive domains over ``L_coh`` and, when
+    ``L_coh`` is shorter than the bonded length, a far domain up to
+    ``x_end``. The domains of an arm are joined by connections
+    ``'SSxcte'``, the arms by a contact-only connection ``'CZM'`` over the
+    pre-crack and by connections ``'CZM'`` with ``laws`` over the bonded
+    length. The supports are prescribed displacements that stay constant,
+    and the loading of the test is a prescribed displacement, or the lever
+    constraint of the ENF and MMB, that is incremented with the load factor:
+    a unit load factor is a unit displacement of the load point. All the
+    edges of the domains are free of other constraints.
+
     Parameters
     ----------
     kind : str
-        ``'DCB'``, ``'ENF'`` or ``'MMB'``.
+        ``'DCB'``, ``'ENF'`` or ``'MMB'``, case-insensitive.
     laminaprop : tuple
-        Ply properties ``(E11, E22, nu12, G12, G13, G23)``.
+        Ply properties ``(E11, E22, nu12, G12, G13, G23)``, moduli in
+        stress units.
     plyt : float
-        Ply thickness.
+        Ply thickness, length.
     stack : list
-        Ply angles of one arm, from its top face to its bottom face.
+        Ply angles of one arm, from its top face to its bottom face,
+        degrees; both arms have the same laminate.
     b : float
-        Width.
+        Width, length.
     a0 : float
-        Crack length, from the load line `x = 0`.
+        Crack length, from the load line `x = 0`, length.
     laws : list of :class:`.czm.BilinearLaw`
         Superposed laws of the cohesive interface.
     L : float, optional
-        Half-span (ENF, MMB).
+        Half-span (ENF, MMB), length. Required for the ENF and MMB;
+        default ``None``.
     c : float, optional
-        Lever length (MMB), from the saddle.
+        Lever length (MMB), from the saddle, length. Required for the MMB;
+        zero for the ENF, whatever is given. Default ``None``.
     x_end : float, optional
-        End of the model: ``2*L`` for the ENF and MMB, required for the DCB.
+        End of the model, length: by default ``2*L`` for the ENF and MMB;
+        required for the DCB.
     model : str, optional
-        Plate model of the domains, e.g. ``'plate_clpt_donnell'`` or
-        ``'plate_fsdt_donnell'``.
+        Plate model of the domains, e.g. ``'plate_clpt_donnell'`` (default)
+        or ``'plate_fsdt_donnell'``.
     nd : int, optional
-        Number of cohesive domains of each arm over ``L_coh``.
+        Number of cohesive domains of each arm over ``L_coh``. Default
+        ``2``.
     L_coh : float, optional
-        Length of the refined cohesive region from the crack tip. ``None``
-        for the whole bonded length.
+        Length of the refined cohesive region from the crack tip, limited
+        to the bonded length ``x_end - a0``. ``None``, the default, for the
+        whole bonded length.
     m_crack, m_coh, m_far, n : int, optional
         Terms along `x` of the cracked, cohesive and far domains, and along
-        `y` of all the domains.
+        `y` of all the domains. Defaults ``10``, ``15``, ``10`` and ``6``.
     nr_x_gauss : int or None, optional
         Gauss-Legendre points along `x` of each cohesive domain, by default
-        ``4*m_coh``; the far domain uses ``4*m_far``.
+        ``4*m_coh``; the far domain uses ``4*m_far`` and the contact over
+        the pre-crack ``4*m_crack``.
     nr_y_gauss : int, optional
-        Gauss-Legendre points along `y` of the interfaces.
+        Gauss-Legendre points along `y` of the interfaces. Default ``10``.
     k_contact : float or None, optional
-        Normal stiffness of the contact over the pre-crack, by default the
-        sum of the stiffnesses ``KI`` of the laws.
+        Normal stiffness of the contact over the pre-crack,
+        force/length**3, by default the sum of the stiffnesses ``KI`` of
+        the laws.
     mode_ratio : str, optional
-        See :mod:`panels.multidomain.connections.czm`.
+        ``'per-law'`` (default) or ``'summed'``, see
+        :func:`.czm.evaluate_laws`.
     lever : str, optional
         ``'mean'`` (default), the lever constraint on the mean deflections
         across the width, or ``'rigid'``, with the deflection also uniform
         along each loading line.
     u_hinge_z : float, optional
         Thickness coordinate, from the mid-plane of the lower arm, where
-        `u = 0` is imposed at its hinge.
+        `u = 0` is imposed at its hinge, length. Default ``0.``.
     fsdt_shear_correction : float or str, optional
-        Shear correction factor of the shear deformation theories.
+        Shear correction factor of the shear deformation theories, set as
+        ``fsdt_shear_correction`` of every :class:`.Shell`. Default
+        ``5/6``.
     dcb_bc : str, optional
-        DCB only: ``'hinge'`` (default), see the module notes, or
-        ``'symmetric'``, the reference DCB of D'Souza et al.: the far end
-        `x = x_{end}` of both arms clamped and the arms opened to `\pm
-        \delta/2` at `x = 0`.
+        DCB only: ``'hinge'`` (default), the lower arm held at `x = 0` and
+        the upper arm opened there, with zero slope at its far end, or
+        ``'symmetric'``: the far end `x = x_{end}` of both arms clamped and
+        the arms opened to `\pm \delta/2` at `x = 0`.
     far : str, optional
         Bond of the far domain, beyond ``L_coh``: ``'czm'`` (default), the
         cohesive law with ``4*m_far`` points along `x`, or ``'sb'``, the
@@ -143,9 +168,11 @@ def create_coupon(kind, laminaprop, plyt, stack, b, a0, laws, L=None, c=None,
     penalty_factor : float, optional
         With ``conn_method='penalty'``, factor on the penalties of
         :func:`.calc_kt_kr` (``'SSxcte'``) and of the default ``'SB'``.
+        Default ``1.``.
     contact_eps : float, optional
         Penetration over which the contact stiffness over the pre-crack is
-        phased in, see :func:`.czm.contact_traction`.
+        phased in, see :func:`.czm.contact_traction`, length. Default
+        ``1e-3``.
     plate_kernels : str, optional
         ``'cython'`` (default) or ``'blas'``, the kernels of the domains,
         see :class:`.MultiDomain`; ``'blas'`` gives the same results to the
@@ -154,11 +181,50 @@ def create_coupon(kind, laminaprop, plyt, stack, b, a0, laws, L=None, c=None,
     Returns
     -------
     md : :class:`.MultiDomain`
+        The assembly, with the domains of the lower arm followed by those
+        of the upper arm.
     info : dict
         ``'top'`` and ``'bot'`` (lists of domains along `x`), ``'x'`` (the
         boundaries of the domains), ``'cohesive'`` (the connections
         ``'CZM'`` of the bonded length), ``'kind'``, ``'a0'``, ``'L'``,
-        ``'c'``, ``'h'`` (thickness of one arm).
+        ``'c'``, ``'h'`` (thickness of one arm), ``'b'`` and ``'x_end'``.
+
+    Raises
+    ------
+    ValueError
+        When ``kind`` is not one of the three coupons, when ``L`` (ENF,
+        MMB), ``c`` (MMB) or ``x_end`` (DCB) is missing, or when a loading
+        line of the lever is outside the coupon.
+
+    Notes
+    -----
+    The boundaries of the domains are `x = 0`, `a_0`, `a_0 + k L_{coh}/n_d`
+    for `k = 1, \dots, n_d`, and `x_{end}`. The upper arm is ``p1`` of the
+    connections between the arms, on the positive side of the interface.
+
+    ENF and MMB: `w = u = 0` on the lower arm at `x = 0`, with `u` at the
+    thickness coordinate ``u_hinge_z``, and `w = 0` at `x = x_{end}`; `v =
+    0` at one point of the lower arm removes the rigid-body motion along
+    `y`. The rigid lever, hinged to the upper arm at `x = 0` and resting on
+    it at `x = L`, with its load point at the distance `c` beyond, is the
+    linear constraint, for small rotations,
+
+    .. math::
+
+        \frac{c}{L} \bar{w}^t(0) - \left(1 + \frac{c}{L}\right) \bar{w}^t(L)
+        = \lambda
+
+    with `\bar{w}^t` the mean deflection of the upper arm across the width
+    and `\lambda` the load factor, the displacement of the load point; `c =
+    0` for the ENF. With ``lever='rigid'``, `w` at `n_y - 1` points across
+    the width equals `w` at another one, along both lines, `n_y` being the
+    larger of ``n`` and 4.
+
+    DCB, ``dcb_bc='hinge'``: the supports of the lower arm at `x = 0` as
+    above, `w^t(0) = \lambda` on the upper arm and zero slope of the upper
+    arm at `x = x_{end}`, `\phi_x = 0` for the shear deformation theories.
+    ``dcb_bc='symmetric'``: `u = v = w = \phi_x = 0` at `x = x_{end}` on
+    both arms, `w^t(0) = \lambda/2` and `w^b(0) = -\lambda/2`.
 
     """
     kind = kind.upper()
@@ -298,14 +364,47 @@ def create_coupon(kind, laminaprop, plyt, stack, b, a0, laws, L=None, c=None,
 
 
 def crack_length(md, info, threshold=1.):
-    r"""Crack length from the load line: the largest `x` up to which all
-    the points of the cohesive interfaces across the width have every damage
-    variable at ``threshold`` or above, plus `a_0`
+    r"""Crack length of a coupon, from the load line
+
+    The crack tip is the last line of integration points of the cohesive
+    interfaces, along `x` from the initial crack tip, up to which all the
+    points across the width have every damage variable at ``threshold`` or
+    above, in the last converged state; the initial crack length while no
+    line has failed.
 
     With superposed laws that include bridging laws, the crack tip is where
     the crack-tip laws have failed, while the bridging laws still carry
     traction in the wake: give their indices in ``info['tip_laws']``
     (default: all laws).
+
+    Parameters
+    ----------
+    md : :class:`.MultiDomain`
+        Assembly of :func:`.create_coupon`.
+    info : dict
+        The dictionary of :func:`.create_coupon`, optionally with the key
+        ``'tip_laws'``, the list of the indices of the crack-tip laws in
+        ``laws``.
+    threshold : float, optional
+        Damage from which a law is taken as failed, dimensionless. Default
+        ``1.``.
+
+    Returns
+    -------
+    a : float
+        Crack length, length.
+
+    Notes
+    -----
+    With `d_{min}(x_k, y_l)` the smallest damage variable of the crack-tip
+    laws at a point, the line `x_k` has failed when `d_{min} \ge`
+    ``threshold`` at all its points across the width, and the crack length
+    is the coordinate `x_k` of the last line of the unbroken sequence of
+    failed lines that starts at `a_0`, or the end of a cohesive domain when
+    all its lines have failed. The resolution is therefore the spacing of
+    the Gauss-Legendre points along `x`. Interfaces not yet created by
+    ``md`` are skipped.
+
     """
     a = info['a0']
     tip = info.get('tip_laws')
@@ -332,24 +431,49 @@ def load_line_control_vector(md, info):
     r"""Control vector of the separation at the load line, in the reduced
     unknowns
 
-    The controlled quantity is `q = s_w \bar\Delta_w(0) + s_u
-    \bar\Delta_u(0)`, the mean opening and sliding across the width at the
-    load line `x = 0` (the faces of the arms in contact, see
-    :mod:`.czm`), weighted by their values `s_w`, `s_u` in the linear
-    solution for a unit load parameter, such that `q` grows from the start.
-    Returns ``psi`` with ``psi @ c_r`` the part of `q` that depends on the
-    reduced unknowns, see :meth:`.MultiDomain.get_Z`.
+    The controlled quantity `q` combines the mean opening and the mean
+    sliding of the arms across the width at the load line `x = 0`, between
+    the faces in contact, weighted by their values in the linear solution
+    for a unit load factor, such that `q` grows from the start. A linear
+    static analysis of ``md`` is run to find the weights.
+
+    Parameters
+    ----------
+    md : :class:`.MultiDomain`
+        Assembly of :func:`.create_coupon`.
+    info : dict
+        The dictionary of :func:`.create_coupon`.
+
+    Returns
+    -------
+    psi : np.ndarray
+        Control vector, with ``psi @ c_r`` the part of `q` that depends on
+        the reduced unknowns ``c_r``, see :meth:`.MultiDomain.get_Z`; one
+        entry per reduced unknown.
 
     Notes
     -----
+    `q = s_w \bar\Delta_w(0) + s_u \bar\Delta_u(0)`, with the mean opening
+    `\bar\Delta_w` and the mean sliding `\bar\Delta_u` of the separations
+    of :mod:`.czm` at the load line, and `s_w`, `s_u` their values in the
+    linear solution for `\lambda = 1`; a negative `s_w`, an
+    interpenetration of the arms in the linear analysis, which takes the
+    pre-crack as open, is replaced by zero.
+
     The crack opens and slides at the load line monotonically while it
     grows, also when the load and the load-point displacement decrease, so
     that `q` can control the analysis through the snap-backs of the
     load-displacement curve (indirect displacement control, de Borst
-    1987). The part `\lambda\,\partial q/\partial \lambda` of the
+    [1]_). The part `\lambda\,\partial q/\partial \lambda` of the
     prescribed displacement is left out of ``psi``; it decreases the
     controlled quantity where the load-point displacement decreases, so
     that ``psi @ c_r`` grows at least as fast as `q` there.
+
+    References
+    ----------
+    .. [1] de Borst, R., Computation of post-bifurcation and post-failure
+       behavior of strain-softening solids, Computers & Structures, 25(2),
+       211-224, 1987. https://doi.org/10.1016/0045-7949(87)90144-1
 
     """
     from panels.multidomain.connections import nullspace, kCsdt
@@ -390,39 +514,91 @@ def solve_coupon(md, info, delta_max, initialInc=0.05, maxInc=None,
     is updated at the converged increments only, see
     :meth:`.MultiDomain.get_on_converged`.
 
+    The history of the cohesive interfaces of ``md`` is reset before the
+    analysis.
+
     Parameters
     ----------
-    md, info
-        From :func:`.create_coupon`.
+    md : :class:`.MultiDomain`
+        Assembly of :func:`.create_coupon`.
+    info : dict
+        The dictionary of :func:`.create_coupon`.
     delta_max : float
         Final displacement of the load point (MMB, ENF: lever load point;
-        DCB: opening of the upper arm).
+        DCB: opening of the upper arm), length.
     initialInc, maxInc, minInc : float, optional
-        Increments of `\delta`.
+        Initial, maximum and minimum increments of `\delta`, length.
+        Defaults ``0.05``, ``initialInc`` and ``1e-6``.
     NL_method : str, optional
-        ``'NR'`` or an arc-length method of ``structsolve``.
+        ``'NR'`` (default) or an arc-length method of ``structsolve``; not
+        used with ``control='load-line'``.
+    NLgeom : bool, optional
+        Passed to ``structsolve.Analysis.static``: whether the geometric
+        non-linearity is included. Default ``True``.
+    relTOL : float, optional
+        Relative tolerance of convergence, the attribute ``relTOL`` of
+        ``structsolve.Analysis``. Default ``1e-9``.
+    maxNumIter : int, optional
+        Maximum number of iterations of an increment, the attribute
+        ``maxNumIter`` of ``structsolve.Analysis``. Default ``40``.
     record : callable, optional
         ``record(an, c, row)`` called after each converged increment with
-        the row of results.
+        the analysis, the Ritz constants of the assembly and the row of
+        results, a dictionary with the keys of ``res``. Default ``None``.
+    silent : bool, optional
+        Passed to ``structsolve.Analysis.static``. Default ``True``.
+    control : str, optional
+        ``'load'`` (default) or ``'load-line'``, see above.
+    a_stop : float or None, optional
+        With ``control='load-line'``, crack length at which the analysis
+        stops, length. Default ``None``, no such stop.
+    max_steps : int, optional
+        With ``control='load-line'``, number of converged increments after
+        which the analysis stops. Default ``2000``.
     reuse_kT : bool, optional
         Passed to :meth:`.MultiDomain.get_reduced_functions`: the load
         vector of the prescribed displacement uses the tangent stiffness
         matrix already assembled at the same configuration. Same results to
         the round-off, faster. Default ``False``.
-    **analysis_kw
+    **analysis_kw : object, optional
         Other attributes of ``structsolve.Analysis``, set before the
         analysis, e.g. ``linear_solver='dense_lu'`` or, with oneMKL,
-        ``'pardiso_lu'`` (``structsolve>=0.13.0``), the factorizations of
-        the tangent stiffness matrix of ``structsolve`` that are faster for
-        these coupons than the default ``'splu'``.
+        ``'pardiso_lu'``, the factorizations of the tangent stiffness
+        matrix of ``structsolve`` that are faster for these coupons than
+        the default ``'splu'``.
 
     Returns
     -------
     res : dict of np.ndarray
-        ``'delta'``, ``'P'`` (load: reaction of the incremented
-        prescriptions), ``'a'`` (crack length, :func:`.crack_length`),
-        ``'dissipated'``, ``'max_d'``.
+        One entry per converged increment: ``'delta'`` (displacement of
+        the load point, length), ``'P'`` (load: reaction of the incremented
+        prescriptions, force), ``'a'`` (crack length,
+        :func:`.crack_length`), ``'dissipated'`` (energy dissipated by all
+        the interfaces, force*length), ``'max_d'`` (largest damage
+        variable).
     an : ``structsolve.Analysis``
+        The analysis, after the run.
+
+    Raises
+    ------
+    ValueError
+        When ``control`` is neither ``'load'`` nor ``'load-line'``.
+
+    Notes
+    -----
+    The loading of the coupon is prescribed with the load factor, `\delta =
+    \lambda`, and the load `P` is the generalized reaction of the
+    incremented prescriptions, :meth:`.MultiDomain.reaction_pd`, the
+    quantity that does the work `P \, \mathrm{d}\delta`. With
+    ``control='load-line'`` the load factor is an unknown of each
+    increment, found such that the product of the control vector of
+    :func:`.load_line_control_vector` by the reduced unknowns grows by the
+    step of the increment: the separation at the load line grows
+    monotonically with the crack, while `\delta` and `P` may both decrease
+    in a snap-back. The damage thresholds of the interfaces are those of
+    the last converged increment during the iterations and change only
+    when an increment converges, such that the iterations that do not
+    converge leave no damage.
 
     """
     from structsolve import Analysis
