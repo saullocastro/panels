@@ -11,6 +11,7 @@ API reference
     plot_shell.rst
     models.rst
     bardell_api.rst
+    basis_tables_api.rst
     multidomain.rst
     multidomain_connections.rst
     multidomain_cylinder.rst

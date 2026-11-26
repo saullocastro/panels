@@ -43,6 +43,8 @@ from sympy.printing.str import StrPrinter
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
 sys.path.insert(0, HERE)
+sys.path.insert(0, REPO)
+from panels.dev.tabulate import keep_tables
 
 MODEL = os.path.basename(HERE)
 th = importlib.import_module(MODEL)
@@ -1237,7 +1239,7 @@ def generate(outdir=None):
                       (MODEL + '.pyx', ANALYTICAL)):
         with open(os.path.join(outdir, name), 'w', encoding='utf-8',
                   newline='\n') as fh:
-            fh.write(src)
+            fh.write(keep_tables(src))
         print('written', os.path.join(outdir, name))
 
 

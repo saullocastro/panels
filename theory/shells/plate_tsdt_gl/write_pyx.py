@@ -47,6 +47,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
 sys.path.insert(0, HERE)
 sys.path.insert(0, REPO)
+from panels.dev.tabulate import keep_tables
 
 import plate_tsdt_gl as th
 from panels.dev.matrixtools import pow2mult
@@ -1233,11 +1234,11 @@ def generate(outdir=None):
     outdir = outdir or os.path.join(REPO, 'panels', 'models')
     path = os.path.join(outdir, MODEL + '.pyx')
     with open(path, 'w', encoding='utf-8', newline='\n') as f:
-        f.write(analytical_module())
+        f.write(keep_tables(analytical_module()))
     print(MODEL, 'analytical written')
     path = os.path.join(outdir, MODEL + '_num.pyx')
     with open(path, 'w', encoding='utf-8', newline='\n') as f:
-        f.write(numerical_module() + '\n\n' + follower_block(MODEL))
+        f.write(keep_tables(numerical_module() + '\n\n' + follower_block(MODEL)))
     print(MODEL, 'numerical written')
 
 

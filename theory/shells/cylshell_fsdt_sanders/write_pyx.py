@@ -53,7 +53,7 @@ sys.path.insert(0, REPO)
 
 import cylshell_fsdt_sanders as th
 from panels.dev.matrixtools import pow2mult
-from panels.dev.tabulate import tabulate_basis
+from panels.dev.tabulate import keep_tables, tabulate_basis
 
 
 def _load(name, *path):
@@ -1955,12 +1955,12 @@ def generate(outdir=None):
     outdir = outdir or os.path.join(REPO, 'panels', 'models')
     path = os.path.join(outdir, MODEL + '.pyx')
     with open(path, 'w', encoding='utf-8', newline='\n') as f:
-        f.write(analytical_module())
+        f.write(keep_tables(analytical_module()))
     print(MODEL, 'analytical written')
     path = os.path.join(outdir, MODEL + '_num.pyx')
     with open(path, 'w', encoding='utf-8', newline='\n') as f:
-        f.write(numerical_module() + linear_numerical_kernels() + '\n\n'
-                + follower_block(MODEL))
+        f.write(keep_tables(numerical_module() + linear_numerical_kernels() + '\n\n'
+                + follower_block(MODEL)))
     print(MODEL, 'numerical written')
 
 

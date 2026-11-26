@@ -446,6 +446,7 @@ class Shell(object):
         'num_eigvalues', 'num_eigvalues_print',
         'out_num_cores', 'increments', 'results',
         'lam', 'matrices', 'fields', 'plot_mesh',
+        '_basis_tables',
         ]
 
     def __init__(self, a=None, b=None, r=None,
@@ -586,6 +587,9 @@ class Shell(object):
         self.rhos = None
         # the per-ply lists filled by _rebuild(), see _is_derived()
         self._derived_lists = {}
+        # the tables of the approximation functions kept by the kernels
+        # across calls, see panels.basis_tables
+        self._basis_tables = None
 
         # aeroelastic parameters for panel flutter
         self.flow = 'x'

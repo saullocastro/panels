@@ -28,6 +28,7 @@ import panels.modelDB as modelDB
 from panels.multidomain import connections
 from panels.multidomain.connections import nullspace
 from panels.multidomain.connections import czm
+from panels.multidomain import plate_blas
 
 
 def load(name, max_size=json_io.MAX_SIZE):
@@ -404,12 +405,35 @@ class MultiDomain(object):
     name : str, optional
         Name of the assembly, used by :meth:`.save`. Default
         ``'multidomain'``.
+    plate_kernels : str, optional
+        How the tangent stiffness matrices (:meth:`.calc_kC` and
+        :meth:`.calc_kG` with ``NLgeom=True`` and ``c``), the internal force
+        vector (:meth:`.calc_fint`) and the tangent-vector product
+        (:meth:`.calc_kTv`) of the domains are computed, kept in the
+        attribute ``plate_kernels``:
+
+        - ``'cython'`` (default): the numerical Cython kernels of the model
+          of each domain, through :meth:`.Shell.calc_kC`,
+          :meth:`.Shell.calc_kG`, :meth:`.Shell.calc_fint` and
+          :meth:`.Shell.calc_kTv`;
+        - ``'blas'``: for the domains of
+          :func:`.plate_blas.is_eligible`, models
+          ``'plate_clpt_donnell'`` and ``'plate_fsdt_donnell'`` with a
+          constant constitutive matrix over the whole domain, the
+          operators of :class:`.plate_blas.PlateOperators`, tabulated once
+          per domain and kept while the domain does not change, and
+          dense matrix products; the Cython kernels for the other domains
+          and calls. The results equal those of ``'cython'`` to the
+          round-off; faster for the cohesive coupons of
+          :mod:`.delamination`, where the plate kernels dominate. Not
+          stored by :meth:`.save`.
 
     Raises
     ------
     ValueError
         When ``conn_method`` or ``pd_method`` is not ``'penalty'`` or
-        ``'null-space'``.
+        ``'null-space'``, or ``plate_kernels`` is not ``'cython'`` or
+        ``'blas'``.
 
     Notes
     -----
@@ -528,13 +552,24 @@ class MultiDomain(object):
 
     """
     def __init__(self, panels, conn=None, conn_method='null-space',
-                 name='multidomain', pd_method='null-space'):
+                 name='multidomain', pd_method='null-space',
+                 plate_kernels='cython'):
         if conn_method not in ('penalty', 'null-space'):
             raise ValueError("conn_method must be 'penalty' or 'null-space', "
                              "got '{0}'".format(conn_method))
         if pd_method not in ('penalty', 'null-space'):
             raise ValueError("pd_method must be 'penalty' or 'null-space', "
                              "got '{0}'".format(pd_method))
+        if plate_kernels not in ('cython', 'blas'):
+            raise ValueError("plate_kernels must be 'cython' or 'blas', "
+                             "got '{0}'".format(plate_kernels))
+        self.plate_kernels = plate_kernels
+        #NOTE the operators of plate_kernels='blas', per position in
+        #     panels: (domain, PlateOperators), see _plate_operators()
+        self._plate_ops = {}
+        #NOTE incremented by commit_cohesive() and reset_cohesive(), see
+        #     get_reduced_functions(reuse_kT=True)
+        self._cohesive_version = 0
         # Initialize the assmbly obj with these values
         self.name = name
         self.conn = conn
@@ -583,7 +618,9 @@ class MultiDomain(object):
 
         The panels and the connections are saved with the assembly, see
         :mod:`panels.json_io`. The matrices, including the null-space basis
-        ``Z``, are not stored. The object is not modified.
+        ``Z``, are not stored, nor the option ``plate_kernels``, which does
+        not change the results: :func:`.load` returns an assembly with the
+        default ``'cython'``. The object is not modified.
 
         Parameters
         ----------
@@ -1387,7 +1424,7 @@ class MultiDomain(object):
         return c + c_p
 
 
-    def get_reduced_functions(self):
+    def get_reduced_functions(self, reuse_kT=False):
         r"""Functions of the reduced problem for ``structsolve.Analysis``
 
         The functions take and return quantities reduced to the independent
@@ -1430,6 +1467,22 @@ class MultiDomain(object):
         then: ``calc_fext`` raises an error when called with ``c`` and
         without ``lbd``; see :meth:`.linear_static` instead. The prescribed
         values used are those when this method is called.
+
+        Parameters
+        ----------
+        reuse_kT : bool, optional
+            With ``True``, the product ``K_T(c_full) @ c_p1`` of
+            ``calc_fext(c=c, lbd=lbd)`` is computed with the matrices of the
+            last calls of ``calc_kC`` and ``calc_kG`` with ``NLgeom=True``,
+            when both were made at exactly the same ``c_full``
+            (``np.array_equal``) and the history of the cohesive interfaces
+            has not changed since, :meth:`.commit_cohesive` and
+            :meth:`.reset_cohesive`, instead of a new :meth:`.calc_kTv`; it
+            is not used when a domain has follower pressure loads or with a
+            connection ``'SB_TSL'``, whose secant stiffness depends on the
+            attribute ``dmg_index``. The result equals that of
+            :meth:`.calc_kTv` to the round-off. Default ``False``, every
+            product with :meth:`.calc_kTv`.
 
         Returns
         -------
@@ -1491,9 +1544,24 @@ class MultiDomain(object):
 
         c_p0, c_p1 = self.get_cp()
         has_p1 = bool(np.any(c_p1))
+        #NOTE reuse_kT: the full-space kC and kG of the last calls with
+        #     NLgeom=True, with their configuration and cohesive history
+        last_k = {}
+        conn = self.conn if self.conn is not None else (self._conn_used or [])
+        reuse = (bool(reuse_kT) and has_p1
+                 and not any(p.has_follower_loads() for p in self.panels)
+                 and not any(ci.get('func') == 'SB_TSL' for ci in conn))
 
         def full(c_r, lbd):
             return Z @ c_r + c_p0 + lbd*c_p1
+
+        def reusable(cf):
+            for k in ('kC', 'kG'):
+                entry = last_k.get(k)
+                if (entry is None or entry[1] != self._cohesive_version
+                        or not np.array_equal(entry[0], cf)):
+                    return False
+            return True
 
         def calc_fext(inc=1., silent=True, c=None, lbd=None):
             if c is None:
@@ -1508,9 +1576,13 @@ class MultiDomain(object):
             cf = full(c, lbd)
             fext = self.calc_fext(inc=inc, silent=silent, c=cf)
             if has_p1:
-                #NOTE the product, without the assembly of [K_T]
-                fext = fext - inc*self.calc_kTv(cf, c_p1, silent=silent,
-                                                inc=lbd)
+                if reuse and reusable(cf):
+                    #NOTE K_T at this configuration is already assembled
+                    kTv = last_k['kC'][2] @ c_p1 + last_k['kG'][2] @ c_p1
+                else:
+                    #NOTE the product, without the assembly of [K_T]
+                    kTv = self.calc_kTv(cf, c_p1, silent=silent, inc=lbd)
+                fext = fext - inc*kTv
             return Z.T @ fext
 
         def calc_fint(c, inc=1., silent=True):
@@ -1519,11 +1591,19 @@ class MultiDomain(object):
         def calc_kC(c=None, NLgeom=False, inc=1., silent=True):
             c = None if c is None else full(c, inc)
             kC = self.calc_kC(c=c, NLgeom=NLgeom, inc=inc, silent=silent)
+            if reuse:
+                last_k.pop('kC', None)
+                if NLgeom and c is not None:
+                    last_k['kC'] = (c, self._cohesive_version, kC)
             return csr_matrix(Z.T @ kC @ Z)
 
         def calc_kG(c=None, NLgeom=False, inc=1., silent=True):
             c = None if c is None else full(c, inc)
             kG = self.calc_kG(c=c, NLgeom=NLgeom, silent=silent)
+            if reuse:
+                last_k.pop('kG', None)
+                if NLgeom and c is not None:
+                    last_k['kG'] = (c, self._cohesive_version, kG)
             return csr_matrix(Z.T @ kG @ Z)
 
         return calc_fext, calc_fint, calc_kC, calc_kG
@@ -3943,6 +4023,27 @@ class MultiDomain(object):
             func, pA.model, pB.model))
 
 
+    def _plate_operators(self, i, p):
+        r"""Operators of :mod:`.plate_blas` of the domain ``p``, at the
+        position ``i`` of ``panels``, or ``None``
+
+        ``None`` with ``plate_kernels='cython'`` or when the domain is not
+        :func:`.plate_blas.is_eligible`. The operators are built at the
+        first call and rebuilt when :func:`.plate_blas.operators_key` of the
+        domain changes or another domain takes the position ``i``.
+
+        """
+        if self.plate_kernels != 'blas' or not plate_blas.is_eligible(p):
+            return None
+        key = plate_blas.operators_key(p)
+        entry = self._plate_ops.get(i)
+        if entry is not None and entry[0] is p and entry[1].key == key:
+            return entry[1]
+        ops = plate_blas.PlateOperators(p)
+        self._plate_ops[i] = (p, ops)
+        return ops
+
+
     def calc_kC(self, conn=None, c=None, silent=True, finalize=True, inc=1.,
             NLgeom=False):
         r"""Calculate the constitutive stiffness matrix of the assembly
@@ -3955,7 +4056,10 @@ class MultiDomain(object):
         of the panels is added last. The penalty stiffnesses of the
         prescribed displacements are not included. The result is stored in
         the attribute ``kC``, and the matrix of the connections in
-        ``kC_conn``.
+        ``kC_conn``. With ``plate_kernels='blas'``, ``NLgeom=True`` and
+        ``c``, the matrices of the domains of
+        :func:`.plate_blas.is_eligible` come from
+        :meth:`.plate_blas.PlateOperators.kC`, with the same pattern.
 
         Parameters
         ----------
@@ -4025,9 +4129,21 @@ class MultiDomain(object):
             check_c(c, size)
 
         kC = 0.
-        for p in self.panels:
+        for i, p in enumerate(self.panels):
             if p.row_start is None or p.col_start is None:
                 raise ValueError('Shell attributes "row_start" and "col_start" must be defined!')
+            ops = None
+            if NLgeom and c is not None and self.plate_kernels == 'blas':
+                #NOTE as Shell.calc_kC(), which rebuilds the laminate
+                p._rebuild()
+                ops = self._plate_operators(i, p)
+            if ops is not None:
+                p._check_r()
+                F = plate_blas.constitutive_matrix(p, ops.clpt)
+                kCp = ops.kC(np.ascontiguousarray(c, dtype=DOUBLE), F, size)
+                p.matrices['kC'] = kCp
+                kC += kCp
+                continue
             # Calc Kc per panel (from the Shell class)
             kC += p.calc_kC(c=c, row0=p.row_start, col0=p.col_start, size=size,
                     silent=silent, finalize=False, NLgeom=NLgeom)
@@ -4125,6 +4241,7 @@ class MultiDomain(object):
         r"""Updates the damage history of the cohesive interfaces with the
         converged configuration ``c`` (Ritz constants of the assembly), see
         :meth:`.czm.CohesiveInterface.commit`"""
+        self._cohesive_version += 1
         for iface in self.cohesive_interfaces():
             iface.commit(c)
 
@@ -4132,6 +4249,7 @@ class MultiDomain(object):
     def reset_cohesive(self):
         r"""Pristine cohesive interfaces, see
         :meth:`.czm.CohesiveInterface.reset`"""
+        self._cohesive_version += 1
         for iface in self.cohesive_interfaces():
             iface.reset()
 
@@ -4162,7 +4280,10 @@ class MultiDomain(object):
         The matrices :meth:`.Shell.calc_kG` of the panels are assembled at
         their offsets ``row_start`` and ``col_start`` and symmetrized when
         ``finalize=True``. The connections do not contribute. The result is
-        stored in the attribute ``kG``.
+        stored in the attribute ``kG``. With ``plate_kernels='blas'``,
+        ``NLgeom=True`` and ``c``, the matrices of the domains of
+        :func:`.plate_blas.is_eligible` come from
+        :meth:`.plate_blas.PlateOperators.kG`, with the same pattern.
 
         Parameters
         ----------
@@ -4207,9 +4328,21 @@ class MultiDomain(object):
             check_c(c, size)
 
         kG = 0.
-        for p in self.panels:
+        for i, p in enumerate(self.panels):
             if p.row_start is None or p.col_start is None:
                 raise ValueError('Shell attributes "row_start" and "col_start" must be defined!')
+            ops = None
+            if NLgeom and c is not None and self.plate_kernels == 'blas':
+                #NOTE as Shell.calc_kG(), which rebuilds the laminate
+                p._rebuild()
+                ops = self._plate_operators(i, p)
+            if ops is not None:
+                p._check_r()
+                F = plate_blas.constitutive_matrix(p, ops.clpt)
+                kGp = ops.kG(np.ascontiguousarray(c, dtype=DOUBLE), F, size)
+                p.matrices['kG'] = kGp
+                kG += kGp
+                continue
             kG += p.calc_kG(c=c, row0=p.row_start, col0=p.col_start, size=size,
                             silent=silent, finalize=False, NLgeom=NLgeom)
         if finalize:
@@ -4388,7 +4521,9 @@ class MultiDomain(object):
         derivative of :meth:`.calc_fint` along ``v``. The product of each
         panel comes from :meth:`.Shell.calc_kTv`, whose cost is about that
         of :meth:`.Shell.calc_fint`, and the connections add
-        ``get_kC_conn(c=c) @ v``.
+        ``get_kC_conn(c=c) @ v``. With ``plate_kernels='blas'``, the
+        product of the domains of :func:`.plate_blas.is_eligible` comes from
+        :meth:`.plate_blas.PlateOperators.kTv`.
 
         Parameters
         ----------
@@ -4429,9 +4564,15 @@ class MultiDomain(object):
         check_c(c, size)
         check_c(v, size)
         kTv = np.zeros(size, dtype=DOUBLE)
-        for p in self.panels:
+        for i, p in enumerate(self.panels):
             if p.col_start is None:
                 raise ValueError('Shell attributes "col_start" must be defined!')
+            ops = self._plate_operators(i, p)
+            if ops is not None:
+                p._check_r()
+                F = plate_blas.constitutive_matrix(p, False)
+                kTv += ops.kTv(c, v, F, size)
+                continue
             kTv += p.calc_kTv(c, v, size=size, col0=p.col_start,
                               silent=silent, inc=inc)
         kTv += self.get_kC_conn(c=c) @ v
@@ -4449,7 +4590,9 @@ class MultiDomain(object):
         depends on the configuration, assembled at the offset ``col_start``
         of the panel, and of the product of the matrix of the connections,
         :meth:`.get_kC_conn`, by ``c``. :meth:`.MultiDomain.calc_kT` gives
-        its tangent stiffness matrix.
+        its tangent stiffness matrix. With ``plate_kernels='blas'``, the
+        vector of the domains of :func:`.plate_blas.is_eligible` comes from
+        :meth:`.plate_blas.PlateOperators.fint`.
 
         Parameters
         ----------
@@ -4494,9 +4637,17 @@ class MultiDomain(object):
         size = self.get_size()
         # fint = 0
         fint = np.zeros_like(c)
-        for p in self.panels:
+        for i, p in enumerate(self.panels):
             if p.col_start is None:
                 raise ValueError('Shell attributes "col_start" must be defined!')
+            ops = self._plate_operators(i, p)
+            if ops is not None:
+                p._check_r()
+                cc = np.ascontiguousarray(c, dtype=DOUBLE)
+                check_c(cc, size)
+                F = plate_blas.constitutive_matrix(p, ops.clpt)
+                fint += ops.fint(cc, F, size)
+                continue
             fint += p.calc_fint(c=c, size=size, col0=p.col_start, silent=silent,
                                 inc=inc)
         if kC_conn is None:
