@@ -76,8 +76,7 @@ Options for speed
 
 With the defaults, the plate kernels keep the tables of the approximation
 functions across the iterations, see :ref:`tabulation`, and evaluate the
-functions by Horner's rule, see :ref:`theory_func_bardell`: the results
-differ from those of panels 0.17.0 at round-off level only. Three options,
+functions by Horner's rule, see :ref:`theory_func_bardell`. Three options,
 off by default, give the same increments, the same Newton-Raphson
 iterations and the same loads, to the round-off, in less time; they matter
 for the coupons, whose tangent stiffness matrix is assembled and factorized
@@ -92,7 +91,7 @@ at every iteration:
   \boldsymbol{c}_{p1}`, from the tangent stiffness matrix already assembled
   at the same configuration;
 - ``solve_coupon(..., linear_solver='pardiso_lu')``, with oneMKL, or
-  ``'dense_lu'`` otherwise, both of ``structsolve>=0.13.0``: the
+  ``'dense_lu'`` otherwise, both of ``structsolve``: the
   factorization of the tangent stiffness matrix, forwarded to
   ``structsolve.Analysis``, see the `linear solvers of structsolve
   <https://saullocastro.github.io/structsolve/linear_solvers.html>`_.
