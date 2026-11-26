@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.18.0 (2026-11-26)
+## 0.18.1 (2026-11-26)
 
 ### Added: options for speed of the cohesive coupons
 
@@ -81,16 +81,36 @@ On by default; **results change at round-off level** with respect to 0.17.0.
   first call of `fkC_num(NLgeom=1)` + `fkG_num` + `calc_fint` of the
   coupon-sized domain above takes 14 % (`plate_clpt_donnell`) and 27 %
   (`plate_fsdt_donnell`) less time than with 0.17.0.
-- Tests `tests/test_bardell_horner.py` (Horner against the `pow()` form of
-  0.17.0, `tests/bardell_functions_pow_0.17.0.txt`, and exact arithmetic);
-  `test_kernel_references.py` now compares with 0.17.0 to `1e-12` of the
-  largest entry, and the second call with the first bit for bit.
+- Tests `tests/test_bardell_accuracy.py` (Horner against exact rational
+  arithmetic, and the vector functions against the scalar ones bit for
+  bit); `test_kernel_references.py` now compares with 0.17.0 to `1e-12`
+  of the largest entry, and the second call with the first bit for bit.
   Documentation in `bardell`, `tabulation`, `dev` and the Notes of
   `panels.bardell`; the notebook `coupon_speed_options` compares the
   defaults with 0.17.0, run in a separate process (helpers in
   `notebooks/coupon_speed_utils.py`).
 
-## 0.17.0 (2026-11-24)
+### Documentation
+
+- Docstrings completed (summary, `Parameters` with type, dimension, shape
+  and default, `Returns`, `Raises`, `Attributes`) in
+  `panels.multidomain.connections.czm` (`BilinearLaw`, `CohesiveInterface`
+  and the functions of the module), `panels.multidomain.delamination`
+  (`create_coupon`, `solve_coupon`, `crack_length`,
+  `load_line_control_vector`), `panels.multidomain.plate_blas`,
+  `panels.basis_tables`, the new methods of `MultiDomain` and the setters
+  `Shell.m` and `Shell.n`.
+- Theory, equations and citations moved from the summaries, the
+  `Parameters` and the comments to the `Notes` and `References` of the
+  same docstrings, in the library and in the tests; new `Notes` in
+  `PlateOperators`, `constitutive_matrix`, `nullspace.mean_row` and
+  `MultiDomain._linear_constraint_blocks`.
+- `panels.bardell` and the page `bardell`: why the functions are evaluated
+  by Horner's rule, with the error bound and the accuracy against exact
+  rational arithmetic.
+- The docstrings, the comments, the pages, the tests and the text of the
+  notebooks describe the present behaviour, without version numbers of
+  panels or structsolve.
 
 ### Added: mixed-mode multilinear cohesive interface `'CZM'` and delamination coupons
 

@@ -5,18 +5,18 @@ The connection ``'CZM'`` bonds the lower face of a domain ``p1`` (top) to the
 upper face of a domain ``p2`` (bottom) over their common area with a
 cohesive law, for every model of :mod:`panels.modelDB`: the classical
 laminated plate theory and the first- and third-order shear deformation
-theories, with the Donnell or the Sanders-Koiter kinematics. It replaces the
-mode I connection ``'SB_TSL'`` for mixed-mode loading:
+theories, with the Donnell or the Sanders-Koiter kinematics. It is the
+connection for mixed-mode loading, the connection ``'SB_TSL'`` being for
+mode I only:
 
 - the separations are the displacement jumps of the perfect bond ``'SB'``,
   :func:`.kCsdt._sb_components`, evaluated at the Gauss-Legendre points of
   the interface with :func:`.nullspace.pd_rows`, such that a pristine
   interface with an infinite stiffness is the bond ``'SB'``;
 - the law is a superposition of mixed-mode bilinear laws,
-  :class:`.BilinearLaw`, each one the law of Turon et al. (2018) [1]_ with a
-  mode-dependent penalty stiffness, the Benzeggagh-Kenane criterion with
-  its own exponent and its own damage variable, as proposed by Abdel-Monsef
-  et al. (2023) [2]_ for multilinear laws;
+  :class:`.BilinearLaw`, each one with a mode-dependent penalty stiffness,
+  the Benzeggagh-Kenane criterion with its own exponent and its own damage
+  variable, which together make a multilinear law;
 - the normal stiffness of each law is kept undamaged for a negative normal
   separation (contact);
 - the tangent stiffness is the consistent one, including the derivative of
@@ -27,6 +27,10 @@ mode I connection ``'SB_TSL'`` for mixed-mode loading:
 
 Notes
 -----
+Each bilinear law is the law of Turon et al. (2018) [1]_, and the laws are
+superposed as proposed by Abdel-Monsef et al. (2023) [2]_ for multilinear
+laws.
+
 With the separations `\Delta_u`, `\Delta_v` (tangential) and `\Delta_w`
 (normal) at a point, the shear norm `\Delta_{sh} = \sqrt{\Delta_u^2 +
 \Delta_v^2}` and the positive part `\langle \Delta_w \rangle`, a bilinear
@@ -118,6 +122,19 @@ from panels.multidomain.connections import nullspace, kCsdt
 class BilinearLaw(object):
     r"""Mixed-mode bilinear cohesive law with a mode-dependent stiffness
 
+    One law of a connection ``'CZM'``: the tractions grow linearly with the
+    separations up to the damage onset and then decrease linearly to zero
+    at failure, with the onset and the toughness interpolated between mode
+    I and shear by the Benzeggagh-Kenane criterion, and one damage variable.
+    The object holds the properties of the law only: the laws of an
+    interface are given as a list to :class:`.CohesiveInterface`, which
+    keeps their history and evaluates them with :func:`.evaluate_laws`. The
+    flags ``open_only``, ``slip_offset``, ``opening_driven`` and
+    ``wake_offset`` change the separations that drive the damage, not the
+    undamaged response. A :class:`UserWarning` is issued for ``eta < 1``,
+    and for a law with a shear stiffness and without shear strength that
+    is neither ``open_only`` nor ``opening_driven``.
+
     Parameters
     ----------
     GIc, GIIc : float
@@ -125,72 +142,135 @@ class BilinearLaw(object):
         force/length. ``GIIc`` may be zero for a law that represents a
         mechanism active in mode I only, e.g. fibre bridging, together with
         ``tauII = 0`` and an explicit ``KII``. Such a law fails at once
-        wherever the interface is closed and slides, since `B = 1` there and
-        its onset separation is zero; round-off sliding suffices, e.g. ahead
-        of the crack tip of a symmetric DCB. A small positive ``GIIc`` with
-        ``tauII`` from Eq. (1) avoids this (a warning is issued).
+        wherever the interface is closed and slides, its onset separation
+        being zero there; round-off sliding suffices, e.g. ahead of the
+        crack tip of a symmetric DCB. A small positive ``GIIc`` with the
+        ``tauII`` of :func:`.law_with_ratio` avoids this (a warning is
+        issued).
     tauI, tauII : float
         Strengths, the tractions at damage onset in pure mode, stress.
     KI : float
         Penalty stiffness in mode I, force/length**3.
     eta : float
-        Exponent of the Benzeggagh-Kenane criterion.
+        Exponent of the Benzeggagh-Kenane criterion, dimensionless.
     KII : float or None, optional
-        Penalty stiffness in shear. ``None`` for the value of Eq. (1) of
-        Turon et al. (2018), see the module notes.
+        Penalty stiffness in shear, force/length**3. ``None``, the default,
+        for ``KI*(GIc/GIIc)*(tauII/tauI)**2``, with which the damage does
+        not decrease when the mode ratio changes.
     name : str, optional
-        Label.
+        Label. Default ``''``.
     open_only : bool, optional
         If ``True``, the damage of the law grows only where the interface
         is open, `\Delta_w > 0`: a mechanism that needs an open crack, e.g.
         fibre bridging, is not damaged by the sliding of a closed interface
-        ahead of the crack tip, where `B = 1`. The thresholds are frozen
-        there, so that no energy is dissipated and the damage does not
-        decrease. Default ``False``, the law of Turon et al. (2018).
+        ahead of the crack tip. The thresholds are frozen there, so that no
+        energy is dissipated and the damage does not decrease. Default
+        ``False``.
     slip_offset : bool, optional
         Only with ``open_only=True``. If ``True``, the damage of the law is
-        driven by the slip gained since the point was last closed,
-        `\Delta_{sh} = |\boldsymbol{\Delta}_s - \boldsymbol{\Delta}_{s0}|`,
-        in `\Delta_{eq}` and `B`, with the offset `\boldsymbol{\Delta}_{s0}`
-        of :attr:`.CohesiveInterface.s0`: a point that slid while closed and
-        reopens starts at `B = 0`, instead of `B \approx 1` and `G_o
-        \approx 0` for a law without shear strength. The tractions keep the
+        driven by the opening and by the slip gained since the point was
+        last closed, the slip less the offset of
+        :attr:`.CohesiveInterface.s0`: a point that slid while closed and
+        reopens starts in mode I, instead of nearly in pure shear, where a
+        law without shear strength has no capacity. The tractions keep the
         total slip, so that the undamaged response is unchanged. Default
         ``False``.
     opening_driven : bool, optional
         If ``True``, the damage of the law is driven by the opening alone,
-        `\Delta_{eq} = \langle \Delta_w \rangle` and `B = 0`, with the onset
-        and the toughness of mode I, e.g. fibre bridging, which needs an
-        open crack and has no shear toughness: the sliding of a closed or
-        open interface neither damages the law nor changes its mode ratio,
-        and the damage does not grow while `\Delta_w \le 0`. Both traction
-        components keep the factor `1 - d` on the stiffnesses of the law,
-        so that the undamaged response is unchanged. The energy released by
-        the damage, `\int Y \mathrm{d}d` with `Y = (k_{sh} \Delta_{sh}^2 +
-        k_I \langle \Delta_w \rangle^2)/2`, then exceeds the `G_{Ic}` of the
-        bookkeeping of :meth:`.CohesiveInterface.commit` by the shear part,
-        `\int k_{sh} \Delta_{sh}^2/2 \, \mathrm{d}d`, unless the interface
-        does not slide or ``KII = 0``: with ``KII = 0`` the law carries a
-        normal traction only and dissipates exactly `G_{Ic}` for any path,
-        which a law with ``KII = 0`` and the per-law mode ratio does
-        without this flag. Default ``False``.
+        with the onset and the toughness of mode I, e.g. fibre bridging,
+        which needs an open crack and has no shear toughness: the sliding
+        of a closed or open interface neither damages the law nor changes
+        its mode ratio, and the damage does not grow while `\Delta_w \le
+        0`. Both traction components keep the factor `1 - d` on the
+        stiffnesses of the law, so that the undamaged response is
+        unchanged. With ``KII = 0`` the law carries a normal traction only.
+        Default ``False``.
     wake_offset : bool, optional
-        Only with ``open_only=True``. As ``slip_offset``, but the offset
-        `\boldsymbol{\Delta}_{s0}` of :attr:`.CohesiveInterface.s0w`
-        follows the slip of the point, open or closed, until all the laws
-        without ``wake_offset`` (the crack-tip laws) have failed there, `d
-        = 1`, and is fixed afterwards: the damage of the law is driven by
-        the opening and by the slip gained since the wake of the crack
-        reached the point, for a mechanism that exists in the wake only,
-        e.g. fibre bridging. The tractions keep the total slip. Default
-        ``False``.
+        Only with ``open_only=True``. As ``slip_offset``, but the offset,
+        :attr:`.CohesiveInterface.s0w`, follows the slip of the point, open
+        or closed, until all the laws without ``wake_offset`` (the
+        crack-tip laws) have failed there, `d = 1`, and is fixed
+        afterwards: the damage of the law is driven by the opening and by
+        the slip gained since the wake of the crack reached the point, for
+        a mechanism that exists in the wake only, e.g. fibre bridging. The
+        tractions keep the total slip. Default ``False``.
+
+    Attributes
+    ----------
+    GIc, GIIc, tauI, tauII, KI, eta, name
+        As given.
+    KII : float
+        Penalty stiffness in shear, given or computed, force/length**3.
+    GoI, GoII : float
+        Elastic energies at damage onset in mode I and in shear,
+        ``tauI**2/(2*KI)`` and ``tauII**2/(2*KII)``, the second one zero
+        for ``KII = 0``, force/length.
+    open_only, slip_offset, opening_driven, wake_offset : bool
+        As given.
 
     Raises
     ------
     ValueError
         When a toughness is not larger than the elastic energy at onset in
-        the same mode, which would require a snap-back of the law, or when
-        ``KII`` cannot be found from Eq. (1).
+        the same mode, which would require a snap-back of the law; when
+        ``KII`` is ``None`` and ``GIIc`` or ``tauII`` is zero; when
+        ``slip_offset`` or ``wake_offset`` is given without ``open_only``;
+        or when more than one of ``slip_offset``, ``opening_driven`` and
+        ``wake_offset`` is given.
+
+    Notes
+    -----
+    The law is the one of Turon et al. (2018) [1]_, with `k_I` = ``KI``,
+    `k_{sh}` = ``KII``, `\tau_{o,I}` = ``tauI``, `\tau_{o,II}` = ``tauII``
+    and `\eta_{BK}` = ``eta``. The energies at onset in pure mode are
+    `G_{oI} = \tau_{o,I}^2/(2 k_I)` and `G_{oII} = \tau_{o,II}^2/(2
+    k_{sh})`. At the mode ratio `B`, the separations at onset and at failure
+    are `\Delta_o = \sqrt{2 G_o(B)/k_B}` and `\Delta_f = 2 G_c(B)/(k_B
+    \Delta_o)`, such that `\Delta_f/\Delta_o = G_c/G_o`: the law softens
+    without a snap-back only for `G_{Ic} > G_{oI}` and `G_{IIc} > G_{oII}`,
+    which is checked.
+
+    With ``KII=None`` the shear stiffness is that of Eq. (1) of [1]_,
+
+    .. math::
+
+        k_{sh} = k_I \frac{G_{Ic}}{G_{IIc}} \left( \frac{\tau_{o,II}}
+            {\tau_{o,I}} \right)^2
+
+    which gives `G_{Ic}/G_{oI} = G_{IIc}/G_{oII}`: `\Delta_f/\Delta_o` then
+    does not depend on `B`, and the damage does not decrease when the mode
+    ratio changes, see :meth:`consistency_error`.
+
+    A law without shear strength and with `k_{sh} > 0` has `G_o = 0` at `B
+    = 1`, the mode ratio of a closed interface that slides: its onset
+    separation is zero there, and it fails without dissipating energy.
+    ``open_only`` freezes the threshold of the law where `\Delta_w \le 0`.
+
+    With ``slip_offset`` and ``wake_offset``, the shear norm of the
+    equivalent separation `\Delta_{eq}` and of `B` is `\Delta_{sh} =
+    |\boldsymbol{\Delta}_s - \boldsymbol{\Delta}_{s0}|`, with
+    `\boldsymbol{\Delta}_s = (\Delta_u, \Delta_v)` and the offset
+    `\boldsymbol{\Delta}_{s0}` of the interface: a point that slid while
+    closed and reopens starts at `B = 0`, instead of `B \approx 1` and `G_o
+    \approx 0` for a law without shear strength.
+
+    With ``opening_driven``, `\Delta_{eq} = \langle \Delta_w \rangle` and
+    `B = 0`. The energy released by the damage, `\int Y \mathrm{d}d` with
+    `Y = (k_{sh} \Delta_{sh}^2 + k_I \langle \Delta_w \rangle^2)/2`, then
+    exceeds the `G_{Ic}` of the bookkeeping of
+    :meth:`.CohesiveInterface.commit` by the shear part, `\int k_{sh}
+    \Delta_{sh}^2/2 \, \mathrm{d}d`, unless the interface does not slide or
+    `k_{sh} = 0`: with `k_{sh} = 0` the law dissipates exactly `G_{Ic}` for
+    any path, which a law with `k_{sh} = 0` and the per-law mode ratio does
+    without this flag.
+
+    References
+    ----------
+    .. [1] Turon, A., Gonzalez, E. V., Sarrado, C., Guillamet, G., Maimi,
+       P., Accurate simulation of delamination under mixed-mode loading
+       using a cohesive model with a mode-dependent penalty stiffness,
+       Composite Structures, 184, 506-511, 2018.
+       https://doi.org/10.1016/j.compstruct.2017.10.017
 
     """
     def __init__(self, GIc, GIIc, tauI, tauII, KI, eta, KII=None, name='',
@@ -257,34 +337,158 @@ class BilinearLaw(object):
                 + ')')
 
     def consistency_error(self):
-        r"""Relative violation of `G_{Ic}/G_{oI} = G_{IIc}/G_{oII}`, Eq. (1)
-        of Turon et al. (2018); zero for a law without shear toughness and
-        strength"""
+        r"""Relative error of the law in the condition on its stiffnesses
+
+        Measures how far the shear stiffness of the law is from the one
+        that ``KII=None`` gives, with which the damage does not decrease
+        when the mode ratio changes. :class:`.CohesiveInterface` warns
+        about the laws with an error above ``1e-6``.
+
+        Returns
+        -------
+        err : float
+            Relative error, dimensionless: zero, to the round-off, for a
+            law built with ``KII=None`` or by :func:`.law_with_ratio`, and
+            zero for a law without shear toughness whose elastic energy at
+            onset in shear ``GoII`` is zero; ``np.inf`` for a law with a
+            shear toughness and ``GoII = 0``.
+
+        Notes
+        -----
+        The condition is `G_{Ic}/G_{oI} = G_{IIc}/G_{oII}`, equivalent to
+        Eq. (1) of Turon et al. (2018) [1]_, and the error is
+
+        .. math::
+
+            e = \frac{\left| G_{Ic}/G_{oI} - G_{IIc}/G_{oII} \right|}
+                {G_{Ic}/G_{oI}}
+
+        References
+        ----------
+        .. [1] Turon, A., Gonzalez, E. V., Sarrado, C., Guillamet, G.,
+           Maimi, P., Accurate simulation of delamination under mixed-mode
+           loading using a cohesive model with a mode-dependent penalty
+           stiffness, Composite Structures, 184, 506-511, 2018.
+           https://doi.org/10.1016/j.compstruct.2017.10.017
+
+        """
         rI = self.GIc/self.GoI
         if self.GoII == 0.:
             return 0. if self.GIIc == 0. else np.inf
         return abs(rI - self.GIIc/self.GoII)/rI
 
     def Gc(self, B):
+        r"""Fracture toughness of the law at a mode ratio
+
+        Interpolates between the toughnesses ``GIc`` and ``GIIc``; used for
+        the dissipated energy of :meth:`.CohesiveInterface.commit`.
+
+        Parameters
+        ----------
+        B : float or np.ndarray
+            Mode ratio, from 0 (mode I) to 1 (shear), dimensionless.
+
+        Returns
+        -------
+        Gc : float or np.ndarray
+            Fracture toughness, force/length, with the shape of ``B``.
+
+        Notes
+        -----
+        Benzeggagh-Kenane form, `G_c(B) = G_{Ic} + (G_{IIc} - G_{Ic})
+        B^{\eta_{BK}}`.
+
+        """
         return self.GIc + (self.GIIc - self.GIc)*B**self.eta
 
     def Go(self, B):
+        r"""Elastic energy of the law at damage onset at a mode ratio
+
+        Interpolates between the energies at onset ``GoI`` and ``GoII`` as
+        :meth:`Gc` does between the toughnesses.
+
+        Parameters
+        ----------
+        B : float or np.ndarray
+            Mode ratio, from 0 (mode I) to 1 (shear), dimensionless.
+
+        Returns
+        -------
+        Go : float or np.ndarray
+            Energy at onset, force/length, with the shape of ``B``.
+
+        Notes
+        -----
+        `G_o(B) = G_{oI} + (G_{oII} - G_{oI}) B^{\eta_{BK}}`, with `G_{oI} =
+        \tau_{o,I}^2/(2 k_I)` and `G_{oII} = \tau_{o,II}^2/(2 k_{sh})`.
+
+        """
         return self.GoI + (self.GoII - self.GoI)*B**self.eta
 
 
 def law_with_ratio(GIc, GIIc, tauI, KI, eta, kappa, name='',
                    open_only=False, slip_offset=False, opening_driven=False,
                    shear_free=False, wake_offset=False):
-    r"""Bilinear law with the ratio of stiffnesses ``kappa`` and the shear
-    strength of Eq. (1) of Turon et al. (2018)
+    r"""Bilinear law with a given ratio of the shear to the normal stiffness
 
-    Returns the :class:`.BilinearLaw` with `k_{sh} = \kappa k_I` and
-    `\tau_{o,II} = \tau_{o,I} \sqrt{\kappa G_{IIc}/G_{Ic}}`, zero for
-    ``GIIc = 0``. Superposed laws built with the same ``kappa`` share the
-    equivalent separation and the mode ratio, see the module notes.
-    ``shear_free=True``, only with ``GIIc = 0``, gives `k_{sh} = 0`: a law
-    with a normal traction only, see ``opening_driven`` of
-    :class:`.BilinearLaw`.
+    Builds the :class:`.BilinearLaw` with the shear stiffness ``kappa*KI``
+    and the shear strength for which the damage does not decrease when the
+    mode ratio changes, zero for ``GIIc = 0``. Superposed laws built with
+    the same ``kappa`` share the equivalent separation and the mode ratio,
+    with ``mode_ratio='per-law'`` and ``'summed'`` alike.
+
+    Parameters
+    ----------
+    GIc, GIIc : float
+        Fracture toughnesses in mode I and in shear, force/length.
+    tauI : float
+        Strength in mode I, stress.
+    KI : float
+        Penalty stiffness in mode I, force/length**3.
+    eta : float
+        Exponent of the Benzeggagh-Kenane criterion, dimensionless.
+    kappa : float
+        Ratio of the shear to the normal penalty stiffness, dimensionless.
+    name : str, optional
+        Label. Default ``''``.
+    open_only, slip_offset, opening_driven, wake_offset : bool, optional
+        Flags of :class:`.BilinearLaw`. Default ``False``.
+    shear_free : bool, optional
+        If ``True``, only with ``GIIc = 0``, the shear stiffness is zero
+        instead of ``kappa*KI``: a law with a normal traction only, see
+        ``opening_driven`` of :class:`.BilinearLaw`. Default ``False``.
+
+    Returns
+    -------
+    law : :class:`.BilinearLaw`
+        The law.
+
+    Raises
+    ------
+    ValueError
+        When ``shear_free`` is given with ``GIIc`` different from zero, and
+        in the cases of :class:`.BilinearLaw`.
+
+    Notes
+    -----
+    With `k_{sh} = \kappa k_I`, Eq. (1) of Turon et al. (2018) [1]_ gives
+    the shear strength
+
+    .. math::
+
+        \tau_{o,II} = \tau_{o,I} \sqrt{\kappa \frac{G_{IIc}}{G_{Ic}}}
+
+    The equivalent separation and the mode ratio depend on the stiffnesses
+    through `k_{sh}/k_I` only, such that laws with the same `\kappa`, and
+    without ``shear_free``, have the same ones.
+
+    References
+    ----------
+    .. [1] Turon, A., Gonzalez, E. V., Sarrado, C., Guillamet, G., Maimi,
+       P., Accurate simulation of delamination under mixed-mode loading
+       using a cohesive model with a mode-dependent penalty stiffness,
+       Composite Structures, 184, 506-511, 2018.
+       https://doi.org/10.1016/j.compstruct.2017.10.017
 
     """
     tauII = tauI*np.sqrt(kappa*GIIc/GIc)
@@ -301,7 +505,28 @@ def law_with_ratio(GIc, GIIc, tauI, KI, eta, kappa, name='',
 
 
 def _dbeta(B, eta):
-    r"""Derivative of `B^\eta`, zero at `B = 0` for `\eta \ne 1`"""
+    r"""Derivative of the Benzeggagh-Kenane factor with respect to the mode
+    ratio
+
+    Parameters
+    ----------
+    B : np.ndarray
+        Mode ratios, dimensionless.
+    eta : float
+        Exponent of the Benzeggagh-Kenane criterion, dimensionless.
+
+    Returns
+    -------
+    out : np.ndarray
+        Derivatives, with the shape of ``B``.
+
+    Notes
+    -----
+    `\mathrm{d} B^\eta/\mathrm{d} B = \eta B^{\eta - 1}` for `B > 0`. At `B
+    = 0` the derivative is 1 for `\eta = 1` and zero for `\eta > 1`; for
+    `\eta < 1` it is unbounded and is taken as zero.
+
+    """
     out = np.zeros_like(B)
     pos = B > 0
     out[pos] = eta*B[pos]**(eta - 1.)
@@ -315,39 +540,129 @@ def evaluate_laws(laws, du, dv, dw, r_old, mode_ratio='per-law',
     r"""Tractions, tangent, thresholds and damage of superposed laws at
     many points
 
+    Evaluates every law at the given separations, starting from the
+    thresholds of the last converged state, and sums the tractions and the
+    tangents of the laws. The arguments are not modified: the history is
+    updated by the caller, see :meth:`.CohesiveInterface.commit`. The
+    normal stiffness of every law is kept undamaged for a negative normal
+    separation (contact).
+
     Parameters
     ----------
     laws : list of :class:`.BilinearLaw`
         The superposed laws.
     du, dv, dw : np.ndarray
-        Separations at the points, 1-D arrays of the same size.
+        Tangential and normal separations at the points, length, 1-D arrays
+        of the same size ``npts``.
     r_old : np.ndarray
-        Thresholds of the last converged state, shape ``(len(laws),
-        npts)``.
+        Thresholds of the last converged state, between 0 and 1,
+        dimensionless, shape ``(len(laws), npts)``.
     mode_ratio : str, optional
-        ``'per-law'`` (default) or ``'summed'``, see the module notes.
+        ``'per-law'`` (default), each law with the equivalent separation
+        and the mode ratio of its own stiffnesses, or ``'summed'``, all the
+        laws with those of the sums of the stiffnesses of the laws.
     tangent : bool, optional
-        Whether the tangent is computed.
+        Whether the tangent is computed. Default ``True``.
     s0 : np.ndarray or None, optional
         Slip offsets `(\Delta_{u0}, \Delta_{v0})` of the last converged
-        state, shape ``(2, npts)``, used by the laws with ``slip_offset``:
-        their `\Delta_{eq}` and `B` take the shear separations `\Delta_u -
-        \Delta_{u0}`, `\Delta_v - \Delta_{v0}`; the tractions keep `\Delta_u`,
-        `\Delta_v`. ``None`` for zero offsets.
+        state, length, shape ``(2, npts)``, used by the laws with
+        ``slip_offset``: their damage is driven by the shear separations
+        `\Delta_u - \Delta_{u0}`, `\Delta_v - \Delta_{v0}`; the tractions
+        keep `\Delta_u`, `\Delta_v`. ``None``, the default, for zero
+        offsets.
     s0_wake : np.ndarray or None, optional
         The same for the laws with ``wake_offset``, see
-        :attr:`.CohesiveInterface.s0w`.
+        :attr:`.CohesiveInterface.s0w`. Default ``None``.
 
     Returns
     -------
     tau : np.ndarray
-        Tractions, shape ``(3, npts)``, along `u`, `v`, `w`.
+        Tractions along `u`, `v`, `w`, stress, shape ``(3, npts)``.
     T : np.ndarray or None
-        Consistent tangent `\partial \tau_i/\partial \Delta_j`, shape ``(3,
-        3, npts)``, not symmetric where the damage grows.
+        Consistent tangent `\partial \tau_i/\partial \Delta_j`,
+        force/length**3, shape ``(3, 3, npts)``, not symmetric where the
+        damage grows; ``None`` with ``tangent=False``.
     r_new, d : np.ndarray
-        Thresholds and damage variables of the state, shape ``(len(laws),
-        npts)``.
+        Thresholds and damage variables of the state, dimensionless, shape
+        ``(len(laws), npts)``.
+
+    Raises
+    ------
+    ValueError
+        When ``mode_ratio`` is neither ``'per-law'`` nor ``'summed'``.
+
+    Notes
+    -----
+    For each law, with `S = \Delta_u^2 + \Delta_v^2`, `N = \langle \Delta_w
+    \rangle^2` and the stiffnesses `a = k_{sh}`, `b = k_I` of the law
+    (``'per-law'``) or their sums over the laws (``'summed'``), the
+    equivalent separation and the mode ratio of Turon et al. (2018) [1]_
+    are
+
+    .. math::
+
+        \Delta_{eq} = \frac{a S + b N}{\sqrt{a^2 S + b^2 N}}, \qquad
+        B = \frac{a S}{a S + b N}
+
+    both zero for zero `S` and `N`. `S` takes the separations less the
+    offsets for the laws with ``slip_offset`` or ``wake_offset``, and is
+    zero for the laws with ``opening_driven``. With the properties of the
+    law, `G_o(B)`, `G_c(B)` and `k_B = k_I (1 - B) + k_{sh} B` give the
+    separation at onset `\Delta_o = \sqrt{2 G_o/k_B}` and the ratio `\rho =
+    \Delta_f/\Delta_o = G_c/G_o`, and then the loading function, the
+    threshold and the damage
+
+    .. math::
+
+        H = \frac{\Delta_{eq}/\Delta_o - 1}{\rho - 1}, \qquad
+        r = \max(r_{old}, \min(\max(H, 0), 1)), \qquad
+        d = \frac{r \rho}{r \rho + 1 - r}
+
+    Where `G_o = 0`, i.e. `B = 1` for a law without shear strength, the law
+    has no capacity: `H = \infty` and `\rho` takes the value `G_{Ic}/G_{oI}`,
+    its limit for a law that satisfies `G_{Ic}/G_{oI} = G_{IIc}/G_{oII}`.
+    For a law with ``open_only``, `H = -\infty` where `\Delta_w \le 0`,
+    which keeps the threshold.
+
+    The tractions are the sums over the laws of
+
+    .. math::
+
+        \tau_u = (1 - d) k_{sh} \Delta_u, \qquad
+        \tau_v = (1 - d) k_{sh} \Delta_v, \qquad
+        \tau_w = (1 - d) k_I \langle \Delta_w \rangle - k_I \langle
+        -\Delta_w \rangle
+
+    and the tangent the sum of
+
+    .. math::
+
+        \frac{\partial \tau_i}{\partial \Delta_j} = (1 - d) k_i \delta_{ij}
+        - k_i \Delta_i \frac{\partial d}{\partial r} \frac{\partial H}
+        {\partial \Delta_j}, \qquad \frac{\partial d}{\partial r} =
+        \frac{\rho}{(r \rho + 1 - r)^2}
+
+    with `k_u = k_v = k_{sh}`, and `k_w = k_I`, `\Delta_w` for an opening.
+    For `\Delta_w \le 0` the normal term is the undamaged `k_I`: at
+    `\Delta_w = 0` the contact stiffness is taken, such that the tangent of
+    a pristine interface at zero separation is `k_I`. The second term
+    exists only where the law is loading, `H > r_{old}` and `0 < H < 1`,
+    and `\partial H/\partial \Delta_j` follows from the chain rule through
+    `\Delta_{eq}` and `B`, including `\partial \Delta_o/\partial B` and
+    `\partial \rho/\partial B`, with `\partial S/\partial \Delta_j = (2
+    \Delta_u, 2 \Delta_v, 0)` and `\partial N/\partial \Delta_j = (0, 0, 2
+    \langle \Delta_w \rangle)`. The derivative of `d` with respect to
+    `\rho` at a constant `r` is not included: it multiplies `\partial
+    \rho/\partial B`, which is zero for the laws that satisfy
+    `G_{Ic}/G_{oI} = G_{IIc}/G_{oII}`.
+
+    References
+    ----------
+    .. [1] Turon, A., Gonzalez, E. V., Sarrado, C., Guillamet, G., Maimi,
+       P., Accurate simulation of delamination under mixed-mode loading
+       using a cohesive model with a mode-dependent penalty stiffness,
+       Composite Structures, 184, 506-511, 2018.
+       https://doi.org/10.1016/j.compstruct.2017.10.017
 
     """
     du = np.asarray(du, dtype=DOUBLE)
@@ -486,14 +801,43 @@ def evaluate_laws(laws, du, dv, dw, r_old, mode_ratio='per-law',
 def contact_traction(dw, k, eps):
     r"""Normal traction and its derivative of a contact-only interface
 
-    `\tau_w = -k\, p(-\Delta_w)` with the smoothed ramp `p(x) = 0` for `x
-    \le 0`, `x^2/(2\epsilon)` for `0 < x < \epsilon` and `x - \epsilon/2`
-    beyond: no traction for an opening, the penalty `k` for a penetration
-    larger than `\epsilon`, and a continuous tangent, which keeps the
-    quadratic convergence of the Newton-Raphson iterations when points of
-    the interface close or open. A sharp switch makes the iterations
-    oscillate between the states of the points near `\Delta_w = 0`. The
-    traction differs from `k \Delta_w` by at most `k \epsilon/2`.
+    No traction for an opening, the penalty stiffness ``k`` for a
+    penetration larger than ``eps``, and a smooth transition in between,
+    such that the derivative is continuous.
+
+    Parameters
+    ----------
+    dw : float or np.ndarray
+        Normal separations, negative for a penetration, length.
+    k : float
+        Contact stiffness, force/length**3.
+    eps : float
+        Penetration over which the stiffness is phased in, length.
+
+    Returns
+    -------
+    tw : np.ndarray
+        Normal tractions, negative in compression, stress, with the shape
+        of ``dw``.
+    kw : np.ndarray
+        Derivatives of the tractions with respect to ``dw``,
+        force/length**3, with the shape of ``dw``.
+
+    Notes
+    -----
+    `\tau_w = -k\, p(-\Delta_w)` with the smoothed ramp
+
+    .. math::
+
+        p(x) = \begin{cases} 0 & x \le 0 \\ x^2/(2 \epsilon) & 0 < x <
+        \epsilon \\ x - \epsilon/2 & x \ge \epsilon \end{cases}
+
+    The continuous tangent `\partial \tau_w/\partial \Delta_w = k\, p'(
+    -\Delta_w)` keeps the quadratic convergence of the Newton-Raphson
+    iterations when points of the interface close or open. A sharp switch
+    makes the iterations oscillate between the states of the points near
+    `\Delta_w = 0`. The traction differs from `k \Delta_w` by at most `k
+    \epsilon/2`.
 
     """
     x = np.maximum(-np.asarray(dw, dtype=DOUBLE), 0.)
@@ -505,6 +849,18 @@ def contact_traction(dw, k, eps):
 
 class CohesiveInterface(object):
     r"""Cohesive interface of a ``'CZM'`` connection
+
+    Holds the operators that give the separations at the Gauss-Legendre
+    points of the common area of two domains, the laws and the damage
+    history of one connection, and computes the internal force vector, the
+    tangent and the secant stiffness matrices, the stored energy and the
+    resultants of the interface. The history changes only with
+    :meth:`commit` and :meth:`reset`. :class:`.MultiDomain` creates one
+    interface per connection ``'CZM'``, see
+    :meth:`.MultiDomain.cohesive_interfaces`. A :class:`UserWarning` is
+    issued for a law whose :meth:`.BilinearLaw.consistency_error` exceeds
+    ``1e-6``, and for ``mode_ratio='summed'`` with laws of different ratios
+    ``KII/KI``.
 
     Parameters
     ----------
@@ -518,17 +874,35 @@ class CohesiveInterface(object):
     nr_x_gauss, nr_y_gauss : int
         Gauss-Legendre points along `x` and `y`.
     size : int
-        Size of the assembly.
+        Size of the assembly, the number of its Ritz constants.
     mode_ratio : str, optional
-        ``'per-law'`` (default) or ``'summed'``, see the module notes.
+        ``'per-law'`` (default) or ``'summed'``, see
+        :func:`.evaluate_laws`.
     k_contact : float or None, optional
-        Normal stiffness of a contact-only interface (no laws).
+        Normal stiffness of a contact-only interface (no laws),
+        force/length**3. Default ``None``.
     contact_eps : float, optional
         Penetration over which the contact stiffness of a contact-only
         interface is phased in, see :func:`.contact_traction`, length.
+        Default ``1e-3``.
+
+    Raises
+    ------
+    ValueError
+        When the domains differ in ``x0``, ``y0``, ``a`` or ``b``, when
+        ``col_start`` of a domain is not defined, or when there are no laws
+        and no ``k_contact``.
 
     Attributes
     ----------
+    p_top, p_bot, laws, mode_ratio, k_contact, contact_eps
+        As given.
+    npts : int
+        Number of points, ``nr_y_gauss*nr_x_gauss``, ordered as
+        ``l*nr_x_gauss + k`` with ``k`` along `x` and ``l`` along `y`.
+    dofs : np.ndarray
+        Columns of the Ritz constants of ``p_top`` followed by those of
+        ``p_bot`` in the assembly.
     r : np.ndarray
         Damage thresholds of the last converged state, shape ``(len(laws),
         nr_y_gauss*nr_x_gauss)``.
@@ -596,9 +970,17 @@ class CohesiveInterface(object):
     = \Delta_f/\Delta_o = G_c/G_o`, and `\mathrm{d}d/\mathrm{d}r = \rho/(1 +
     r(\rho - 1))^2`, such that `Y \, \mathrm{d}d = G_o \rho \, \mathrm{d}r =
     G_c \, \mathrm{d}r`: the threshold `r` is the fraction of `G_c`
-    dissipated, as noted by Turon et al. (2018) after their Eq. (20). With
-    `\partial d/\partial B = 0` this holds for any path, the mode ratio
-    entering through `G_c(B)`, taken at the end of each increment.
+    dissipated, as noted by Turon et al. (2018) [1]_ after their Eq. (20).
+    With `\partial d/\partial B = 0` this holds for any path, the mode
+    ratio entering through `G_c(B)`, taken at the end of each increment.
+
+    References
+    ----------
+    .. [1] Turon, A., Gonzalez, E. V., Sarrado, C., Guillamet, G., Maimi,
+       P., Accurate simulation of delamination under mixed-mode loading
+       using a cohesive model with a mode-dependent penalty stiffness,
+       Composite Structures, 184, 506-511, 2018.
+       https://doi.org/10.1016/j.compstruct.2017.10.017
 
     """
     def __init__(self, p_top, p_bot, laws, nr_x_gauss, nr_y_gauss, size,
@@ -666,8 +1048,15 @@ class CohesiveInterface(object):
         self.reset()
 
     def reset(self):
-        r"""Pristine interface: thresholds and damage zero, nothing
-        dissipated"""
+        r"""Returns the interface to the pristine state
+
+        Sets the thresholds ``r``, the damage variables ``d``, the slip
+        offsets ``s0`` and ``s0w`` and the energy ``dissipated`` to zero.
+        Called by the constructor, and by
+        :meth:`.MultiDomain.reset_cohesive` for all the interfaces of an
+        assembly.
+
+        """
         self.r = np.zeros((len(self.laws), self.npts), dtype=DOUBLE)
         self.d = np.zeros_like(self.r)
         self.s0 = np.zeros((2, self.npts), dtype=DOUBLE)
@@ -675,13 +1064,69 @@ class CohesiveInterface(object):
         self.dissipated = 0.
 
     def separations(self, c):
-        r"""Separations `\Delta_u, \Delta_v, \Delta_w` at the points"""
+        r"""Separations at the points of the interface
+
+        The displacement jumps between the faces of the two domains in
+        contact at the Gauss-Legendre points, from the operators ``Bu``,
+        ``Bv`` and ``Bw``.
+
+        Parameters
+        ----------
+        c : np.ndarray
+            Ritz constants of the assembly, shape ``(size,)``.
+
+        Returns
+        -------
+        du, dv, dw : np.ndarray
+            Tangential separations along `x` and `y` and normal separation,
+            positive for an opening, length, shape ``(npts,)``.
+
+        Notes
+        -----
+        `\Delta_i = \boldsymbol{B}_i \boldsymbol{c}`, `i = u, v, w`, with
+        the displacement of the lower face of ``p_top`` less the one of the
+        upper face of ``p_bot``, see the notes of the class.
+
+        """
         return self.Bu @ c, self.Bv @ c, self.Bw @ c
 
     def state(self, c, tangent=True):
-        r"""Tractions, tangent, thresholds and damage at ``c`` from the last
-        converged state, see :func:`.evaluate_laws`; for a contact-only
-        interface, the normal contact traction of :func:`.contact_traction`"""
+        r"""Tractions, tangent, thresholds and damage at a configuration
+
+        Evaluates the laws at the separations of ``c``, starting from the
+        thresholds and the slip offsets of the last converged state, with
+        :func:`.evaluate_laws`; for a contact-only interface, the normal
+        traction of :func:`.contact_traction`. The history is not changed.
+
+        Parameters
+        ----------
+        c : np.ndarray
+            Ritz constants of the assembly, shape ``(size,)``.
+        tangent : bool, optional
+            Whether the tangent is computed. Default ``True``.
+
+        Returns
+        -------
+        tau : np.ndarray
+            Tractions along `u`, `v`, `w`, stress, shape ``(3, npts)``.
+        T : np.ndarray or None
+            Consistent tangent of the tractions with respect to the
+            separations, force/length**3, shape ``(3, 3, npts)``; ``None``
+            with ``tangent=False``.
+        r_new, d : np.ndarray
+            Thresholds and damage variables at ``c``, shape ``(len(laws),
+            npts)``; for a contact-only interface, shape ``(0, npts)``.
+
+        Notes
+        -----
+        The thresholds at ``c`` are `r = \max(r_{old}, \min(H, 1))`, with
+        `r_{old}` of the last converged state and the loading function `H`
+        of each law at ``c``: an iteration of the non-linear analysis does
+        not accumulate damage on the previous iterations. For a
+        contact-only interface only `\tau_w` and `\partial \tau_w/\partial
+        \Delta_w` are not zero.
+
+        """
         du, dv, dw = self.separations(c)
         if not self.laws:
             tau = np.zeros((3, self.npts))
@@ -699,15 +1144,61 @@ class CohesiveInterface(object):
                              s0_wake=self.s0w if self._wake_offset else None)
 
     def fint(self, c):
-        r"""Internal force vector of the interface at ``c``"""
+        r"""Internal force vector of the interface
+
+        The tractions of :meth:`state` integrated over the interface with
+        the separation operators; the history is not changed.
+
+        Parameters
+        ----------
+        c : np.ndarray
+            Ritz constants of the assembly, shape ``(size,)``.
+
+        Returns
+        -------
+        fint : np.ndarray
+            Internal forces of the interface at ``c``, with the history of
+            the last converged state, shape ``(size,)``.
+
+        Notes
+        -----
+        `\boldsymbol{F}^{coh} = \sum_i \boldsymbol{B}_i^\top \boldsymbol{W}
+        \boldsymbol{\tau}_i`, `i = u, v, w`, with the tractions of
+        :meth:`state` and `\boldsymbol{W}` the diagonal of ``weights``.
+
+        """
         tau, _, _, _ = self.state(c, tangent=False)
         w = self.weights
         return (self.Bu.T @ (w*tau[0]) + self.Bv.T @ (w*tau[1])
                 + self.Bw.T @ (w*tau[2]))
 
     def kT(self, c):
-        r"""Consistent tangent stiffness matrix of the interface at ``c``,
-        not symmetric where the damage grows"""
+        r"""Consistent tangent stiffness matrix of the interface
+
+        The derivative of :meth:`fint` with respect to the Ritz constants,
+        not symmetric where the damage grows.
+
+        Parameters
+        ----------
+        c : np.ndarray
+            Ritz constants of the assembly, shape ``(size,)``.
+
+        Returns
+        -------
+        kT : scipy.sparse.csr_matrix
+            Tangent stiffness matrix at ``c``, shape ``(size, size)``, with
+            entries only in the rows and columns of the two domains.
+
+        Notes
+        -----
+        `\boldsymbol{K}_T^{coh} = \sum_{i,j} \boldsymbol{B}_i^\top
+        \boldsymbol{W} \mathrm{diag}(\partial \tau_i/\partial \Delta_j)
+        \boldsymbol{B}_j`, `i, j = u, v, w`, with the tangent of
+        :meth:`state`. It is assembled as the matrix of the pristine
+        interface, computed once, plus the products over the points whose
+        tangent differs from the pristine one.
+
+        """
         _, T, _, _ = self.state(c, tangent=True)
         return self._assemble(T)
 
@@ -721,6 +1212,20 @@ class CohesiveInterface(object):
         contact, and treating the faces as bonded would glue a pre-crack
         shut. Use a non-linear analysis where contact matters.
 
+        Returns
+        -------
+        kC0 : scipy.sparse.csr_matrix
+            Secant stiffness matrix, shape ``(size, size)``.
+
+        Notes
+        -----
+        `\boldsymbol{K}_{C0}^{coh} = \sum_i \boldsymbol{B}_i^\top
+        \boldsymbol{W} \mathrm{diag}(k_i^{sec}) \boldsymbol{B}_i`, `i = u,
+        v, w`, with `k_u^{sec} = k_v^{sec} = \sum_\ell (1 - d_\ell)
+        k_{sh,\ell}` and `k_w^{sec} = \sum_\ell (1 - d_\ell) k_{I,\ell}`,
+        `d_\ell` being the damage of the law `\ell` at the last converged
+        state.
+
         """
         T = np.zeros((3, 3, self.npts))
         for i, law in enumerate(self.laws):
@@ -731,9 +1236,24 @@ class CohesiveInterface(object):
         return self._assemble(T)
 
     def _T0(self):
-        r"""Tangent of the pristine interface, the same for an opening and
-        for a closure: `\mathrm{diag}(k_{sh}, k_{sh}, k_I)` summed over the
-        laws, or the contact stiffness of a contact-only interface"""
+        r"""Tangent of the pristine interface at the points
+
+        The same for an opening and for a closure; zero for a contact-only
+        interface.
+
+        Returns
+        -------
+        T0 : np.ndarray
+            Tangent of the tractions with respect to the separations,
+            force/length**3, shape ``(3, 3, npts)``.
+
+        Notes
+        -----
+        `\mathrm{diag}(k_{sh}, k_{sh}, k_I)` summed over the laws, the
+        tangent of :func:`.evaluate_laws` for `d = 0` without damage
+        growth.
+
+        """
         T0 = np.zeros((3, 3, self.npts))
         if self.laws:
             T0[0, 0] = sum(l.KII for l in self.laws)
@@ -795,8 +1315,30 @@ class CohesiveInterface(object):
         return self._to_global(K)
 
     def kTv(self, c, v):
-        r"""Product of the consistent tangent at ``c`` by ``v``, without
-        assembling the tangent"""
+        r"""Product of the consistent tangent stiffness matrix by a vector
+
+        The product of :meth:`kT` at ``c`` by ``v``, without assembling the
+        matrix.
+
+        Parameters
+        ----------
+        c : np.ndarray
+            Ritz constants of the assembly, shape ``(size,)``.
+        v : np.ndarray
+            Vector, shape ``(size,)``.
+
+        Returns
+        -------
+        kTv : np.ndarray
+            Product, shape ``(size,)``.
+
+        Notes
+        -----
+        `\boldsymbol{K}_T^{coh} \boldsymbol{v} = \sum_i \boldsymbol{B}_i^\top
+        \boldsymbol{W} \sum_j (\partial \tau_i/\partial \Delta_j)
+        (\boldsymbol{B}_j \boldsymbol{v})`, `i, j = u, v, w`.
+
+        """
         _, T, _, _ = self.state(c, tangent=True)
         Bs = (self.Bu, self.Bv, self.Bw)
         dv = [B @ v for B in Bs]
@@ -809,8 +1351,27 @@ class CohesiveInterface(object):
         return out
 
     def _Gc_laws(self, c):
-        r"""`G_c(B)` of each law at the points, with the mode ratio of
-        ``mode_ratio``"""
+        r"""Fracture toughness of each law at the points
+
+        Parameters
+        ----------
+        c : np.ndarray
+            Ritz constants of the assembly, shape ``(size,)``.
+
+        Returns
+        -------
+        Gc : np.ndarray
+            Toughnesses at the mode ratios of ``c``, force/length, shape
+            ``(len(laws), npts)``.
+
+        Notes
+        -----
+        `G_c(B)` of :meth:`.BilinearLaw.Gc`, with the mode ratio `B = a
+        S/(a S + b N)` of :func:`.evaluate_laws` for the option
+        ``mode_ratio`` and the slip offsets of the interface, `B = 0` at
+        zero separation; `G_{Ic}` for the laws with ``opening_driven``.
+
+        """
         du, dv, dw = self.separations(c)
         S_tot = du*du + dv*dv
         S_rel = (du - self.s0[0])**2 + (dv - self.s0[1])**2
@@ -842,7 +1403,28 @@ class CohesiveInterface(object):
         separations at ``c``, after the thresholds are evaluated with the
         previous offsets, as in the iterations; for laws with
         ``wake_offset``, those of the points where a law without
-        ``wake_offset`` has not failed at ``c``.
+        ``wake_offset`` has not failed at ``c``. Nothing is done for a
+        contact-only interface.
+
+        Parameters
+        ----------
+        c : np.ndarray
+            Ritz constants of the assembly at a converged state, shape
+            ``(size,)``.
+
+        Notes
+        -----
+        The energy dissipated in the increment is
+
+        .. math::
+
+            \Delta D = \sum_g w_g \sum_\ell G_{c,\ell}(B_g) \left( r_{\ell,
+            g} - r_{\ell, g}^{old} \right)
+
+        over the points `g` with the weights `w_g` and the laws `\ell`,
+        with the toughness `G_c` at the mode ratio of ``c``, the end of the
+        increment: the threshold `r` of a law is the fraction of its `G_c`
+        already dissipated, see the notes of the class.
 
         """
         if not self.laws:
@@ -868,8 +1450,48 @@ class CohesiveInterface(object):
             self.s0w[1, follow] = dv[follow]
 
     def energy(self, c):
-        r"""Free energy stored in the interface at ``c`` with the damage of
-        the last converged state, Eqs. (3), (4) of Turon et al. (2018)"""
+        r"""Free energy stored in the interface
+
+        The elastic energy of the separations of ``c`` with the damage of
+        the last converged state, the contact energy of a negative normal
+        separation included.
+
+        Parameters
+        ----------
+        c : np.ndarray
+            Ritz constants of the assembly, shape ``(size,)``.
+
+        Returns
+        -------
+        energy : float
+            Stored energy, force*length.
+
+        Notes
+        -----
+        `\sum_g w_g \psi_g`, with the free energy per unit area of Eqs.
+        (3), (4) of Turon et al. (2018) [1]_, summed over the laws,
+
+        .. math::
+
+            \psi = \sum_\ell \left[ \frac{1}{2} (1 - d_\ell) \left(
+            k_{sh,\ell} \Delta_{sh}^2 + k_{I,\ell} \langle \Delta_w
+            \rangle^2 \right) + \frac{1}{2} k_{I,\ell} \langle -\Delta_w
+            \rangle^2 \right]
+
+        For a contact-only interface, `\psi = k \int_0^x p(s) \,
+        \mathrm{d}s` with `x = \langle -\Delta_w \rangle` and the ramp `p`
+        of :func:`.contact_traction`: `k x^3/(6 \epsilon)` for `x <
+        \epsilon` and `k (x^2/2 - \epsilon x/2 + \epsilon^2/6)` beyond.
+
+        References
+        ----------
+        .. [1] Turon, A., Gonzalez, E. V., Sarrado, C., Guillamet, G.,
+           Maimi, P., Accurate simulation of delamination under mixed-mode
+           loading using a cohesive model with a mode-dependent penalty
+           stiffness, Composite Structures, 184, 506-511, 2018.
+           https://doi.org/10.1016/j.compstruct.2017.10.017
+
+        """
         du, dv, dw = self.separations(c)
         S = du*du + dv*dv
         N = np.maximum(dw, 0.)**2
@@ -886,7 +1508,30 @@ class CohesiveInterface(object):
         return float(np.sum(self.weights*psi))
 
     def resultants(self, c):
-        r"""Resultants of the tractions on ``p_top`` at ``c``, along `x`,
-        `y`, `z`, with the sign of the force applied by ``p_bot``"""
+        r"""Resultants of the tractions of the interface
+
+        The tractions of :meth:`state` integrated over the area of the
+        interface; the history is not changed.
+
+        Parameters
+        ----------
+        c : np.ndarray
+            Ritz constants of the assembly, shape ``(size,)``.
+
+        Returns
+        -------
+        R : np.ndarray
+            Resultants of the tractions on ``p_top`` at ``c``, along `x`,
+            `y`, `z`, with the sign of the force applied by ``p_bot``,
+            force, shape ``(3,)``.
+
+        Notes
+        -----
+        `R_i = -\sum_g w_g \tau_{i,g}`, `i = u, v, w`, the tractions of
+        :meth:`state` integrated over the interface: a positive traction,
+        which opposes a positive separation, pulls ``p_top`` along the
+        negative axis.
+
+        """
         tau, _, _, _ = self.state(c, tangent=False)
         return -(tau @ self.weights)

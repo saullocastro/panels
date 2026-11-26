@@ -652,6 +652,22 @@ class Shell(object):
 
     @m.setter
     def m(self, value):
+        r"""Set the number of terms of the approximation functions along `x`
+
+        The value is stored and returned by the property; ``None`` is
+        accepted and stored as it is.
+
+        Parameters
+        ----------
+        value : int or None
+            Number of terms, at most ``30``.
+
+        Raises
+        ------
+        ValueError
+            When ``value`` is larger than ``30``.
+
+        """
         if value is not None and value > 30:
             raise ValueError('Bardell functions of the order 31 and above are not coded')
         self._m = value
@@ -668,6 +684,22 @@ class Shell(object):
 
     @n.setter
     def n(self, value):
+        r"""Set the number of terms of the approximation functions along `y`
+
+        The value is stored and returned by the property; ``None`` is
+        accepted and stored as it is.
+
+        Parameters
+        ----------
+        value : int or None
+            Number of terms, at most ``30``.
+
+        Raises
+        ------
+        ValueError
+            When ``value`` is larger than ``30``.
+
+        """
         if value is not None and value > 30:
             raise ValueError('Bardell functions of the order 31 and above are not coded')
         self._n = value

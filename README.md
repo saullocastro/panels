@@ -29,7 +29,7 @@ The structural matrices are solved with
 Citing this library
 ===================
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.18.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.18.1). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Documentation
@@ -138,7 +138,7 @@ History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
-* version 0.18.0 (2026-11-26)
+* version 0.18.1 (2026-11-26)
     - The tables of the approximation functions of all the numerically integrated kernels (`*_num`) are kept on each shell across calls, with the same results bit for bit, and the Bardell functions are evaluated with Horner's rule instead of `pow`, which changes the results at the round-off; the nonlinear analyses of the cohesive coupons were 1.34-1.35 times faster on a cluster node (Xeon E5-2640 v4)
     - New opt-in `MultiDomain(..., plate_kernels='blas')`: the nonlinear plate kernels of `plate_clpt_donnell` and `plate_fsdt_donnell` as matrix products, equal to the Cython kernels to the round-off
     - New opt-in `reuse_kT=True` of `get_reduced_functions` and `solve_coupon`, and `linear_solver` of `solve_coupon`, e.g. `'pardiso_lu'` of structsolve 0.13.0

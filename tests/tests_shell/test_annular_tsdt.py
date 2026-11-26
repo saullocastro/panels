@@ -160,7 +160,7 @@ def annulus(model, beta, outer, inner, nu=NU, m=10, n=12, **kwargs):
     return MultiDomain([p1, p2], conn)
 
 
-# Leissa (1969): annulus clamped outside, free inside, nu = 1/3
+# exact frequency equation: annulus clamped outside, free inside, nu = 1/3
 
 
 def _det(lam2, n, beta, nu=1/3):
@@ -203,7 +203,8 @@ def test_leissa_clamped_free_annulus(model):
     assert np.allclose(l2[:5], ref, rtol=1e-3)
 
 
-#: Yamaki (1958), Table 1, least k, (outer, inner, beta): k, nu = 0.3
+#: tabulated least k of the uniform compression, (outer, inner, beta): k,
+#: nu = 0.3 (source named in the module docstring)
 YAMAKI = {('C', 'C', 0.5): 12.15, ('S', 'S', 0.3): 4.75}
 
 
@@ -242,7 +243,8 @@ def test_irie1983_torsion(model):
     assert np.isclose(np.abs(eigvals).min(), 61.97, rtol=1e-2)
 
 
-#: Reddy (1984) TSDT, [0/90], a/h = 5, by E1/E2, as reproduced by Adim et al.
+#: TSDT frequencies of the literature, [0/90], a/h = 5, by E1/E2 (sources
+#: named in the module docstring)
 REDDY_TSDT = {10: 6.9887, 40: 9.0871}
 
 

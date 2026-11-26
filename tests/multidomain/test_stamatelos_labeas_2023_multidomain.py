@@ -476,9 +476,9 @@ def test_bonded_sublaminates_recover_the_laminate(func, order):
 
 
 def test_sb_old_hardcoded_penalty_was_far_too_soft():
-    """Up to panels 0.6.9 ``'SB'`` ignored :func:`.calc_kt_kr` and used
-    ``kt = 2e5``, a value in N/mm**3. In SI units the sub-laminates were
-    practically disconnected and the buckling load was 84 % too low"""
+    """``'SB'`` with ``kt = 2e5``, a value in N/mm**3, instead of the
+    stiffness of :func:`.calc_kt_kr`: in SI units the sub-laminates are
+    practically disconnected and the buckling load is 84 % too low"""
     ref = sb_monolithic()
     eigvals = sb_split('SB', 'top first', kt=2e5)
     assert eigvals[0]/ref[0] < 0.2
@@ -499,9 +499,10 @@ def test_sb_panels_must_share_the_area():
 def test_connection_order_and_repeated_calls():
     """``p1`` after ``p2`` in the assembly, and ``ycte1 != ycte2``
 
-    Up to panels 0.6.9 the coordinates were swapped inside the user's
-    dictionary, so every second call to :meth:`.MultiDomain.get_kC_conn`, for
-    instance ``calc_kC()`` followed by ``calc_kT()``, used them swapped back.
+    The dictionary of the user is not modified, and two consecutive calls
+    to :meth:`.MultiDomain.get_kC_conn`, as in ``calc_kC()`` followed by
+    ``calc_kT()``, give the matrix of the connection written with ``p1``
+    first.
 
     """
     skins, conn = strips(A_312, B_312, STACK_312, 2, 8, 6, 'y', 1.)

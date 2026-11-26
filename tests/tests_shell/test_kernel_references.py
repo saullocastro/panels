@@ -1,4 +1,4 @@
-r"""The numerical kernels of every model against the stored outputs of 0.17.0
+r"""The numerical kernels of every model against stored regression outputs
 
 The kernels ``fkC_num`` (with and without ``NLgeom``), ``fkG_num``,
 ``fkM_num``, ``fkAx_num``, ``fkAy_num``, ``calc_fint``, ``calc_kTv``,
@@ -6,9 +6,9 @@ The kernels ``fkC_num`` (with and without ``NLgeom``), ``fkG_num``,
 ``panels/models/<model>_num.pyx`` keep their tables of the approximation
 functions on the shell across calls, see :mod:`panels.basis_tables`. Their
 outputs, for a small shell of each model, with the full and a partial
-integration domain, see ``kernel_references.py``, are compared with those of
-the kernels of 0.17.0 (commit 25d1ecb), which filled the tables at every
-call, stored in ``kernel_references.npz``:
+integration domain, see ``kernel_references.py``, are compared with the
+regression values stored in ``kernel_references.npz``, computed by kernels
+that fill the tables at every call:
 
 1. at the first call, which fills the tables, the outputs agree with the
    references to ``1e-12`` of the largest absolute entry of each output,
@@ -17,9 +17,9 @@ call, stored in ``kernel_references.npz``:
 2. at the second call on the same shell, which reads the tables, the
    outputs are equal to those of the first call bit for bit.
 
-The references fix the values of the approximation functions of 0.17.0,
-which summed the monomials of Bardell's polynomials with ``pow()``; since
-then ``panels/core/src/bardell_functions.cpp`` evaluates them by Horner's
+The references were computed with the monomials of Bardell's polynomials
+summed with ``pow()``, whereas ``panels/core/src/bardell_functions.cpp``
+evaluates them by Horner's
 rule, which changes the outputs at round-off only (largest relative
 difference about ``1.3e-15``, of ``fkG_num``), hence the tolerance of item 1.
 
@@ -42,7 +42,7 @@ def references():
 @pytest.mark.parametrize('partial', [False, True])
 @pytest.mark.parametrize('model', kr.MODELS)
 def test_equal_to_references(model, partial, references):
-    """Outputs of the first call on a shell equal to those of 0.17.0 to
+    """Outputs of the first call on a shell equal to the references to
     ``1e-12`` of the largest entry; outputs of the second call equal to
     those of the first bit for bit"""
     s = kr.make_shell(model, partial=partial)

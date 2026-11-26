@@ -1,7 +1,7 @@
 """Snap-through of a hinged cylindrical shell traced with the Riks method
 
-Classical arc-length benchmark of Sabir and Lock [1]_, as given by Sze et al.
-[2]_, Sec. 3.8, Fig. 9a and Table 9a: a shallow cylindrical panel with the
+Classical arc-length benchmark of Sabir and Lock (1972), as given by Sze et
+al. (2004), Sec. 3.8, Fig. 9a and Table 9a: a shallow cylindrical panel with the
 straight edges hinged and the curved edges free, loaded by a point force at
 its center. The load-deflection curve has a limit point followed by
 snap-through, after which the load drops and increases again. Load control
@@ -15,6 +15,9 @@ Units: N, mm, MPa.
 
 Notes
 -----
+The benchmark was proposed in [1]_; the data and the reference results are
+those of [2]_.
+
 The model has 6 x 6 terms. The limit point is checked against Table 9a of
 [2]_ (ABAQUS S4R), whose largest load is ``P/P_{max} = 0.7421`` with
 ``P_{max} = 3000``, i.e. 2226.3 N, at the central deflection ``-W_C =

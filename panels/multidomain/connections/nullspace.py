@@ -746,6 +746,13 @@ def mean_row(p, comp, x, y, size, z=0.):
     row : scipy.sparse.csr_matrix
         Shape ``(1, size)``.
 
+    Notes
+    -----
+    With the rows `\boldsymbol{s}_k` of the component at the Gauss-Legendre
+    points of the line and the weights `w_k` of the interval `[-1, 1]`, the
+    row is `\frac{1}{2} \sum_k w_k \boldsymbol{s}_k`: the length of the line
+    of the mean cancels with the Jacobian of the natural coordinate.
+
     """
     B = pd_constraint_matrix(p, comp, x, y, size, z)
     if x is not None and y is not None:

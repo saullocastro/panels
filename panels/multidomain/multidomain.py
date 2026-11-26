@@ -953,6 +953,12 @@ class MultiDomain(object):
             and ``'label'``. Changing ``'value'`` changes the particular
             solutions only, see :meth:`.get_cp`.
 
+        Raises
+        ------
+        ValueError
+            When the panel of a term is not one of the panels of the
+            assembly.
+
         Notes
         -----
         The row of the constraint is `\sum_k \alpha_k \boldsymbol{s}_k`,
@@ -982,7 +988,17 @@ class MultiDomain(object):
 
 
     def _linear_constraint_blocks(self, size):
-        r"""Blocks of :meth:`.get_Z` of the linear constraints"""
+        r"""Blocks of :meth:`.get_Z` of the linear constraints
+
+        Notes
+        -----
+        One block per constraint, with the single row `\sum_k \alpha_k
+        \boldsymbol{s}_k` of size ``size``, where `\boldsymbol{s}_k` is the
+        row of :func:`.nullspace.mean_row` of the term `k`, such that the
+        constraint is `(\sum_k \alpha_k \boldsymbol{s}_k) \boldsymbol{c} =
+        q`.
+
+        """
         blocks = []
         for lc in self._linear_constraints:
             row = csr_matrix((1, size))
@@ -1046,6 +1062,13 @@ class MultiDomain(object):
         Z : scipy.sparse.csr_matrix
             Matrix with shape ``(size, size_r)``, with ``size_r`` the number
             of independent Ritz constants.
+
+        Raises
+        ------
+        NotImplementedError
+            When the assembly has linear constraints, see
+            :meth:`.add_linear_constraint`, and ``pd_method`` is not
+            ``'null-space'``.
 
         Notes
         -----
@@ -1458,7 +1481,7 @@ class MultiDomain(object):
           (calc_fext(inc, c=c_full) - inc*calc_kTv(c_full, c_p1, inc=lbd))``
           at the configuration of the load factor ``lbd``, the product being
           computed only when ``c_p1`` is not null, which ``structsolve``
-          0.7.0 or newer passes in the non-linear analyses. The product of
+          passes in the non-linear analyses. The product of
           :meth:`.calc_kTv` avoids the assembly of the tangent stiffness
           matrix.
 
@@ -1516,7 +1539,7 @@ class MultiDomain(object):
         and in the constraint of the arc-length methods, and `\lambda
         \partial \boldsymbol{R}_r/\partial \lambda` as a reference quantity of the
         convergence criteria, Crisfield's scaled criterion, the default of
-        ``structsolve`` 0.9.0, and the relative one, since under a prescribed
+        ``structsolve``, and the relative one, since under a prescribed
         displacement alone both `\boldsymbol{Z}^\top \boldsymbol{F}_{ext}` and `\boldsymbol{Z}^\top \boldsymbol{F}_{int}`
         vanish at equilibrium.
 
@@ -4239,16 +4262,36 @@ class MultiDomain(object):
 
     def commit_cohesive(self, c):
         r"""Updates the damage history of the cohesive interfaces with the
-        converged configuration ``c`` (Ritz constants of the assembly), see
-        :meth:`.czm.CohesiveInterface.commit`"""
+        converged configuration ``c``
+
+        Calls :meth:`.czm.CohesiveInterface.commit` of every interface of
+        :meth:`.cohesive_interfaces`. The matrices of the last calls of
+        ``calc_kC`` and ``calc_kG`` kept by the functions of
+        :meth:`.get_reduced_functions` with ``reuse_kT=True`` are not
+        reused afterwards.
+
+        Parameters
+        ----------
+        c : np.ndarray
+            Ritz constants of the assembly at the converged state, 1-D of
+            size :meth:`.get_size`.
+
+        """
         self._cohesive_version += 1
         for iface in self.cohesive_interfaces():
             iface.commit(c)
 
 
     def reset_cohesive(self):
-        r"""Pristine cohesive interfaces, see
-        :meth:`.czm.CohesiveInterface.reset`"""
+        r"""Pristine cohesive interfaces
+
+        Calls :meth:`.czm.CohesiveInterface.reset` of every interface of
+        :meth:`.cohesive_interfaces`, which removes their damage history.
+        The matrices of the last calls of ``calc_kC`` and ``calc_kG`` kept
+        by the functions of :meth:`.get_reduced_functions` with
+        ``reuse_kT=True`` are not reused afterwards.
+
+        """
         self._cohesive_version += 1
         for iface in self.cohesive_interfaces():
             iface.reset()
@@ -4263,6 +4306,19 @@ class MultiDomain(object):
         the Ritz constants of the assembly, see :meth:`.expand`, updates the
         history of the cohesive interfaces, :meth:`.commit_cohesive`, and
         then calls ``callback(an, c)`` when given, e.g. to record results.
+
+        Parameters
+        ----------
+        callback : callable or None, optional
+            Called as ``callback(an, c)`` after the history is updated, with
+            the analysis ``an`` and the Ritz constants of the assembly ``c``
+            of the converged state, 1-D of size :meth:`.get_size`. Default
+            ``None``, nothing else is called.
+
+        Returns
+        -------
+        on_converged : callable
+            The function ``f(an)``, which returns ``None``.
 
         """
         def on_converged(an):

@@ -8,9 +8,9 @@ to this file::
 
     python tests/tests_shell/kernel_references.py
 
-It was run with the commit 25d1ecb of ``main`` (the kernels of 0.17.0),
-whose kernels fill the tables of the functions at every call, see
-``test_kernel_references.py``.
+The stored file was computed by kernels that fill the tables of the
+functions at every call, with the approximation functions evaluated as
+sums of monomials with ``pow()``, see ``test_kernel_references.py``.
 
 """
 import os

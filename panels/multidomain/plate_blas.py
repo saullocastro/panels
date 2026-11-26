@@ -143,6 +143,10 @@ def _flags(p, fields):
 def is_eligible(p):
     r"""Whether the domain ``p`` can use :class:`PlateOperators`
 
+    The attributes of the domain are checked against the conditions listed
+    below, without building the operators. A domain for which
+    :meth:`.Shell.is_partial_domain` raises ``ValueError`` is not eligible.
+
     Parameters
     ----------
     p : :class:`.Shell`
@@ -190,9 +194,15 @@ def is_eligible(p):
 def operators_key(p):
     r"""Everything the tabulated operators of the domain ``p`` depend on
 
+    The key is stored in the attribute ``key`` of :class:`PlateOperators`
+    when the operators are built; operators whose key differs from the
+    current key of the domain must be built again.
+
     Parameters
     ----------
     p : :class:`.Shell`
+        A domain of the model ``'plate_clpt_donnell'`` or
+        ``'plate_fsdt_donnell'``, with ``row_start`` set.
 
     Returns
     -------
@@ -238,6 +248,17 @@ class PlateOperators(object):
     ------
     ValueError
         When the model of ``p`` is not one of :data:`MODELS`.
+
+    Notes
+    -----
+    For each field `f` of the model, the operator `\boldsymbol{D}_f` of
+    shape ``(k_f, npts, m*n)`` holds, for each of the `k_f` generalized
+    derivatives of the field and each integration point `p`, the products
+    `f_i(\xi_p) g_j(\eta_p)` of the approximation functions, or of their
+    derivatives scaled by `2/a` and `2/b` per derivative, in the column
+    ``j*m + i`` of the term `(i, j)`. The points are the tensor product of
+    the ``nx`` and ``ny`` Gauss-Legendre points, `\eta` varying fastest,
+    with the weights `w_p = w_{\xi} w_{\eta} ab/4`.
 
     """
     def __init__(self, p):
@@ -310,7 +331,16 @@ class PlateOperators(object):
         return np.asarray(c[self.row0:self.row0 + self.ndof], dtype=float)
 
     def _derivatives(self, cl):
-        r"""``d`` of shape ``(npts, nd)`` of the local constants ``cl``"""
+        r"""``d`` of shape ``(npts, nd)`` of the local constants ``cl``
+
+        Notes
+        -----
+        `\boldsymbol{d}_p = \boldsymbol{D}_p \boldsymbol{c}`, the
+        generalized derivatives of the displacement fields at each
+        integration point, computed field by field with the constants of
+        the field.
+
+        """
         d = np.empty((self.npts, self.nd))
         for fi, ks in enumerate(self.fder):
             cf = cl[fi::self.DOF]
@@ -318,7 +348,16 @@ class PlateOperators(object):
         return d
 
     def _transpose(self, g):
-        r"""``D^T g`` for ``g`` of shape ``(npts, nd)``, local vector"""
+        r"""``D^T g`` for ``g`` of shape ``(npts, nd)``, local vector
+
+        Notes
+        -----
+        `\sum_p \boldsymbol{D}_p^\top \boldsymbol{g}_p`, computed field by
+        field: the entries of a field receive the product of the transpose
+        of its operator by the entries of `\boldsymbol{g}_p` of its
+        derivatives.
+
+        """
         out = np.empty(self.ndof)
         for fi, ks in enumerate(self.fder):
             A = self.Df[fi].reshape(-1, self.nmn)
@@ -326,7 +365,19 @@ class PlateOperators(object):
         return out
 
     def _state(self, d):
-        r"""``B`` (npts, ne, nd), linear and non-linear strains"""
+        r"""``B`` (npts, ne, nd), linear and non-linear strains
+
+        Notes
+        -----
+        From the generalized derivatives ``d`` at the points:
+        `\boldsymbol{\varepsilon}_L`, linear in ``d``;
+        `\boldsymbol{\varepsilon}_{NL} = (\tfrac{1}{2} w_{,x}^2,
+        \tfrac{1}{2} w_{,y}^2, w_{,x} w_{,y}, 0, \dots)`; and
+        `\boldsymbol{B}_p` such that `\delta \boldsymbol{\varepsilon}_p =
+        \boldsymbol{B}_p \delta \boldsymbol{d}_p`, constant apart from the
+        entries `w_{,x}` and `w_{,y}` in the rows of the membrane strains.
+
+        """
         npts = self.npts
         wx, wy = d[:, _WX], d[:, _WY]
         if self.clpt:
@@ -365,7 +416,25 @@ class PlateOperators(object):
 
     def _H(self, d, F, part):
         r"""Weighted per-point matrices ``(npts, nd, nd)`` of ``part``,
-        ``'kC'``, ``'kG'`` or ``'kT'``"""
+        ``'kC'``, ``'kG'`` or ``'kT'``
+
+        Notes
+        -----
+        `\boldsymbol{H}_p = w_p (\boldsymbol{B}_p^\top \boldsymbol{F}
+        \boldsymbol{B}_p + \boldsymbol{G}_p)`, where `\boldsymbol{G}_p`
+        holds the membrane stresses `N_{xx}, N_{xy}, N_{yy}`, the first
+        three rows of `\boldsymbol{F}` times the strains, in the rows and
+        columns of `w_{,x}, w_{,y}`:
+
+        - ``'kC'``: `\boldsymbol{B}_p^\top \boldsymbol{F} \boldsymbol{B}_p`
+          and `\boldsymbol{G}_p` of the stresses of
+          `\boldsymbol{\varepsilon}_{NL,p}`;
+        - ``'kG'``: `\boldsymbol{G}_p` of the stresses of
+          `\boldsymbol{\varepsilon}_{L,p}` only;
+        - ``'kT'``: `\boldsymbol{B}_p^\top \boldsymbol{F} \boldsymbol{B}_p`
+          and `\boldsymbol{G}_p` of the stresses of the total strains.
+
+        """
         B, eL, eNL = self._state(d)
         H = np.zeros((self.npts, self.nd, self.nd))
         if part in ('kC', 'kT'):
@@ -384,7 +453,19 @@ class PlateOperators(object):
         return H*self.w[:, None, None]
 
     def _dense(self, H):
-        r"""Local dense matrix ``D^T H D``, by blocks of fields"""
+        r"""Local dense matrix ``D^T H D``, by blocks of fields
+
+        Notes
+        -----
+        The block of the fields `f, g` is `\boldsymbol{K}_{fg} =
+        \boldsymbol{D}_f^\top (\boldsymbol{H}_{fg} \boldsymbol{D}_g)`, with
+        `\boldsymbol{H}_{fg}` the rows of the derivatives of `f` and the
+        columns of those of `g` of the per-point matrices. Only the blocks
+        with `g \ge f` are computed, `\boldsymbol{K}_{gf} =
+        \boldsymbol{K}_{fg}^\top` for a symmetric `\boldsymbol{H}`, and
+        the blocks with a null `\boldsymbol{H}_{fg}` are skipped.
+
+        """
         nf, nmn, DOF = len(self.fields), self.nmn, self.DOF
         K = np.zeros((self.ndof, self.ndof))
         for f in range(nf):
@@ -428,6 +509,14 @@ class PlateOperators(object):
             kernels: the caller symmetrizes it, e.g. with
             ``structsolve.sparseutils.finalize_symmetric_matrix``.
 
+        Notes
+        -----
+        `\boldsymbol{D}^\top \boldsymbol{H} \boldsymbol{D}` with the blocks
+        `w_p (\boldsymbol{B}_p^\top \boldsymbol{F} \boldsymbol{B}_p +
+        \boldsymbol{G}_p)` of `\boldsymbol{H}`, where `\boldsymbol{G}_p`
+        holds the membrane stresses of the non-linear strains
+        `\boldsymbol{\varepsilon}_{NL,p}` at ``c``.
+
         """
         H = self._H(self._derivatives(self._local(c)), F, 'kC')
         K = self._dense(H).ravel()
@@ -440,13 +529,32 @@ class PlateOperators(object):
         As ``fkG_num`` of the numerical kernels of the model, without
         constant membrane stresses.
 
-        Parameters and pattern as :meth:`kC`; only the entries of `w` with
-        `w` are returned.
+        The pattern is that of :meth:`kC`, restricted to the entries of `w`
+        with `w`, the only ones returned.
+
+        Parameters
+        ----------
+        c : np.ndarray
+            Ritz constants of the assembly, 1-D of size ``size``.
+        F : np.ndarray
+            Constitutive matrix ``(ne, ne)`` of the domain, see
+            :func:`constitutive_matrix`.
+        size : int
+            Size of the assembly.
 
         Returns
         -------
         kG : scipy.sparse.coo_matrix
             Shape ``(size, size)``.
+
+        Notes
+        -----
+        `\boldsymbol{D}^\top \boldsymbol{H} \boldsymbol{D}` with the blocks
+        `w_p \boldsymbol{G}_p` of `\boldsymbol{H}`, where `\boldsymbol{G}_p`
+        holds the membrane stresses `N_{xx}, N_{xy}, N_{yy}` of the linear
+        strains `\boldsymbol{\varepsilon}_{L,p}` at ``c`` in the rows and
+        columns of `w_{,x}, w_{,y}`; it is homogeneous of degree one in
+        ``c``.
 
         """
         H = self._H(self._derivatives(self._local(c)), F, 'kG')
@@ -459,12 +567,27 @@ class PlateOperators(object):
 
         As ``calc_fint`` of the numerical kernels of the model.
 
-        Parameters as :meth:`kC`.
+        Parameters
+        ----------
+        c : np.ndarray
+            Ritz constants of the assembly, 1-D of size ``size``.
+        F : np.ndarray
+            Constitutive matrix ``(ne, ne)`` of the domain, see
+            :func:`constitutive_matrix`.
+        size : int
+            Size of the assembly.
 
         Returns
         -------
         fint : np.ndarray
             1-D of size ``size``, null outside the domain.
+
+        Notes
+        -----
+        `\boldsymbol{F}_{int} = \sum_p w_p \boldsymbol{D}_p^\top
+        \boldsymbol{B}_p^\top \boldsymbol{\sigma}_p`, with the stresses
+        `\boldsymbol{\sigma}_p = \boldsymbol{F} (\boldsymbol{\varepsilon}_{L,p}
+        + \boldsymbol{\varepsilon}_{NL,p})` at ``c``.
 
         """
         d = self._derivatives(self._local(c))
@@ -486,13 +609,25 @@ class PlateOperators(object):
         c, v : np.ndarray
             Ritz constants of the assembly and the vector, 1-D of size
             ``size``.
-        F, size
-            As :meth:`kC`.
+        F : np.ndarray
+            Constitutive matrix ``(ne, ne)`` of the domain, see
+            :func:`constitutive_matrix`.
+        size : int
+            Size of the assembly.
 
         Returns
         -------
         kTv : np.ndarray
             1-D of size ``size``, null outside the domain.
+
+        Notes
+        -----
+        `\boldsymbol{K}_T \boldsymbol{v} = \boldsymbol{D}^\top
+        (\boldsymbol{H}_T (\boldsymbol{D} \boldsymbol{v}))`, where the
+        blocks of `\boldsymbol{H}_T` are `w_p (\boldsymbol{B}_p^\top
+        \boldsymbol{F} \boldsymbol{B}_p + \boldsymbol{G}_p)` with
+        `\boldsymbol{G}_p` of the membrane stresses of the total strains at
+        ``c``; the matrix `\boldsymbol{K}_T` is not formed.
 
         """
         H = self._H(self._derivatives(self._local(c)), F, 'kT')
@@ -505,6 +640,10 @@ class PlateOperators(object):
 
 def constitutive_matrix(p, symmetric_blocks):
     r"""Constant constitutive matrix of the domain as the kernels read it
+
+    The matrix of the domain is copied; with ``symmetric_blocks=True`` the
+    entries below the diagonal of the blocks ``A``, ``B`` and ``D`` are
+    replaced by those above it, and every other entry is set to zero.
 
     Parameters
     ----------
@@ -519,6 +658,18 @@ def constitutive_matrix(p, symmetric_blocks):
     -------
     F : np.ndarray
         Shape ``(6, 6)`` (CLPT) or ``(8, 8)`` (FSDT).
+
+    Notes
+    -----
+    `\boldsymbol{F}` relates the generalized strains to the stress
+    resultants, `\boldsymbol{\sigma} = \boldsymbol{F}
+    \boldsymbol{\varepsilon}`, with the membrane, coupling and bending
+    blocks `\boldsymbol{A}`, `\boldsymbol{B}` and `\boldsymbol{D}` in its
+    first six rows and columns. With ``symmetric_blocks=True`` each of
+    these blocks is `\boldsymbol{X}_u + \boldsymbol{X}_s^\top`, with
+    `\boldsymbol{X}_u` its upper triangle and `\boldsymbol{X}_s` its
+    strictly upper triangle, and the block `\boldsymbol{B}` is placed in
+    both off-diagonal positions.
 
     """
     F, _, _ = p._get_ABDnxny(None, None, None)

@@ -378,8 +378,8 @@ def test_save_load(tmp_path):
 
 
 def test_load_ABD_of_older_versions(tmp_path):
-    r"""The files of panels < 0.13.9 store the constitutive matrix as
-    ``ABD``, it is read and discarded, being that of the laminate"""
+    r"""The constitutive matrix stored in a file as ``ABD`` is read and
+    discarded, being that of the laminate"""
     s = _shell('plate_clpt_donnell')
     s.name = str(tmp_path / 'old')
     s.save()

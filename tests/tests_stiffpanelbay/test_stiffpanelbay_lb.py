@@ -90,10 +90,9 @@ def test_unstiffened_bay_matches_single_shell():
 def test_panel_edge_at_one_meter(b, edges):
     """A panel edge at ``y = 1.0`` is a coordinate like any other
 
-    Up to panels 0.6.9 ``y2 = +1`` was also the sentinel meaning "full
-    domain", so the panel ending at ``y = 1.0`` was integrated over the whole
-    bay and its skin was counted more than once: the buckling load of the
-    unit-width bay was 4.9 % too low.
+    The panel ending at ``y = 1.0`` is integrated up to that edge only, and
+    not over the whole bay, which would count its skin more than once and
+    give a buckling load of the unit-width bay 4.9 % too low.
 
     """
     m = n = 10

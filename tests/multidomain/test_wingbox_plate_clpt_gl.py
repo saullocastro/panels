@@ -6,7 +6,7 @@ solution under the dead tip force is the same with ``plate_clpt_gl``,
 ``test_wingbox_follower_tip_force_one_increment`` the nonlinear static
 solution under the follower tip force of 25 N against it. The module
 also provides the model of the wing box of Elalfy, De Breuker and Castro
-[1]_ under a follower tip force, :func:`wingbox`, and the tip
+(preprint) under a follower tip force, :func:`wingbox`, and the tip
 z-displacement of their Abaqus result (S4R, static Riks), ``ABAQUS_FIG6``,
 the upper panel of Fig. 6 (p. 10) of the preprint, read from the vector
 paths of the figure, about +-1 mm, for other modules.
@@ -27,6 +27,11 @@ without imperfection.
 
 The linear tip deflection, identical for ``plate_clpt_donnell``, is
 453.52 mm at 500 N (22.68 mm at 25 N, the dead load).
+
+Notes
+-----
+The geometry, the material, the load and the Abaqus result are those of
+the preprint [1]_.
 
 References
 ----------

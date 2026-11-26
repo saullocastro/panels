@@ -160,7 +160,8 @@ The available models, which are selected with ``Shell.model``, are:
   shells, total-Lagrangian FSDT: the Green-Lagrange membrane strains of
   ``'plate_fsdt_gl'`` and ``'cylshell_fsdt_gl'``, and the curvatures and
   transverse shear strains of the second-order director of the moderate
-  rotation theory [6]_, [7]_, cubic in the derivatives of the displacements
+  rotation theory of Schmidt and Reddy (1988) and Palmerio et al. (1990),
+  cubic in the derivatives of the displacements
   and rotations, 5 DOFs ``u, v, w, phix, phiy``; the linear part is that of
   ``'plate_fsdt_donnell'`` and ``'cylshell_fsdt_sanders'``, and the fields
   ``phiy`` of the cylinder are the rotation of the normal ``phiy + v/r``.
