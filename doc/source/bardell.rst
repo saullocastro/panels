@@ -63,10 +63,10 @@ Against the exact value, computed in rational arithmetic, the error
 relative to the largest absolute value of each term grows by a factor of
 about 2.5 per term, from one unit round-off for the first terms to about
 `7 \times 10^{-7}` for `P_{29}`, `4 \times 10^{-7}` for `P_{29}'` and
-`7 \times 10^{-8}` for `P_{29}''`. Up to panels 0.17.0 the monomials were
-summed with ``pow()`` and coefficients printed with 15 significant digits,
-with errors up to `1.6 \times 10^{-5}`. The matrices and vectors therefore
-differ from those of 0.17.0 at round-off level, more with more terms, e.g.
+`7 \times 10^{-8}` for `P_{29}''`. The same monomials summed with
+``pow()`` and coefficients printed with 15 significant digits have errors
+up to `1.6 \times 10^{-5}`. The matrices and vectors computed with the two
+evaluations therefore differ at round-off level, more with more terms, e.g.
 by about `10^{-15}` of the largest entry for `m = 3`, `n = 4` and up to
 `10^{-9}` for `m = 24`, `n = 4`.
 

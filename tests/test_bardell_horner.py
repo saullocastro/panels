@@ -2,9 +2,10 @@ r"""Accuracy of the evaluation of Bardell's functions by Horner's rule
 
 The C++ functions of ``panels/core/src/bardell_functions.cpp`` evaluate each
 polynomial by Horner's rule, in `\xi` or in `\xi^2`, with correctly rounded
-coefficients. Up to panels 0.17.0 they summed the monomials with ``pow()``
-and coefficients printed with 15 significant digits. Both are compared here
-against the exact value: the exact rational coefficients of the definition
+coefficients. The monomial form, summed with ``pow()`` and with
+coefficients printed with 15 significant digits, is stored as C expressions
+in ``bardell_functions_pow_0.17.0.txt``. Both are compared here against the
+exact value: the exact rational coefficients of the definition
 evaluated in rational arithmetic (:class:`fractions.Fraction`) at the same
 double-precision `\xi`, then rounded.
 """
@@ -65,8 +66,9 @@ def eval_exact(a, xi):
 
 
 def pow_form_expressions():
-    """C expressions of ``f``, ``fp`` and ``fpp`` of panels 0.17.0, stored in
-    ``bardell_functions_pow_0.17.0.txt``, as ``{(nder, i): expression}`` with
+    """C expressions of ``f``, ``fp`` and ``fpp`` in the monomial form with
+    ``pow()``, stored in ``bardell_functions_pow_0.17.0.txt``, as ``{(nder,
+    i): expression}`` with
     ``pow(xi, k)`` written ``xi**k``"""
     path = os.path.join(os.path.dirname(__file__),
                         'bardell_functions_pow_0.17.0.txt')
@@ -84,8 +86,9 @@ def pow_form_expressions():
 
 
 def eval_pow_form(code, xi):
-    """Evaluation of panels 0.17.0: Python applies the same floating-point
-    operations in the same order as the compiled C++, ``xi**k`` calling the
+    """Evaluation of the monomial form: Python applies the same
+    floating-point operations in the same order as the compiled C++
+    expression, ``xi**k`` calling the
     C ``pow()``"""
     return eval(code, {'xi': xi, 'xi1t': 1., 'xi1r': 1., 'xi2t': 1.,
                        'xi2r': 1.})
@@ -95,7 +98,7 @@ def test_horner_at_least_as_accurate_as_pow_form():
     r"""Errors against the exact value at 401 points of `-1 \le \xi \le 1`,
     for every term ``i`` and derivative: the compiled Horner evaluation has
     a maximum absolute error not larger than that of the evaluation of
-    panels 0.17.0 with ``pow()``, or not larger than one unit round-off
+    the monomial form with ``pow()``, or not larger than one unit round-off
     times `\sum_k |a_k|`, the scale of the round-off of any evaluation of
     the monomial form; and not larger than twice that scale, well within
     the bound `\gamma_{2n} \sum_k |a_k|` of Horner's rule. Over all the

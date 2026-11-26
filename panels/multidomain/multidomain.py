@@ -1539,7 +1539,7 @@ class MultiDomain(object):
         and in the constraint of the arc-length methods, and `\lambda
         \partial \boldsymbol{R}_r/\partial \lambda` as a reference quantity of the
         convergence criteria, Crisfield's scaled criterion, the default of
-        ``structsolve`` 0.9.0, and the relative one, since under a prescribed
+        ``structsolve``, and the relative one, since under a prescribed
         displacement alone both `\boldsymbol{Z}^\top \boldsymbol{F}_{ext}` and `\boldsymbol{Z}^\top \boldsymbol{F}_{int}`
         vanish at equilibrium.
 

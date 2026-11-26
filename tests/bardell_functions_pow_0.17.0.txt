@@ -1,6 +1,6 @@
-# Scalar functions f, fp and fpp of panels/core/src/bardell_functions.cpp of
-# panels 0.17.0 (monomials with pow()), unit boundary flags; one line per
-# term: <function> <term> <C expression>
+# Scalar functions f, fp and fpp of Bardell as sums of monomials with pow(),
+# coefficients printed with 15 significant digits, unit boundary flags; one
+# line per term: <function> <term> <C expression>
 f 0 xi1t*(0.25*pow(xi, 3) - 0.75*xi + 0.5)
 f 1 xi1r*(0.125*pow(xi, 3) - 0.125*pow(xi, 2) - 0.125*xi + 0.125)
 f 2 xi2t*(-0.25*pow(xi, 3) + 0.75*xi + 0.5)

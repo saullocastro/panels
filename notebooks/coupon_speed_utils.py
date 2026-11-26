@@ -1,9 +1,10 @@
 r"""Helpers of the notebook ``coupon_speed_options``
 
-The functions run with the defaults of panels 0.17.0 as well, such that the
-same code measures this version and 0.17.0. Run as a script, they use the
-``panels`` found first on ``sys.path``, e.g. a checkout of 0.17.0 given by
-``PYTHONPATH``, and print the results as JSON on the last line::
+The options ``plate_kernels`` and ``reuse_kT`` are passed only when
+requested, such that the same code measures any checkout of ``panels``. Run
+as a script, the functions use the ``panels`` found first on ``sys.path``,
+e.g. a checkout given by ``PYTHONPATH``, and print the results as JSON on
+the last line::
 
     python coupon_speed_utils.py domain <model> <out.npz> [repeat]
     python coupon_speed_utils.py dcb
