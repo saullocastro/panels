@@ -68,9 +68,6 @@ References
    pp. 687-700. https://doi.org/10.1016/0020-7462(90)90007-V
 
 """
-import os
-import sys
-
 import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
@@ -78,8 +75,6 @@ from structsolve import Analysis
 
 from panels.shell import Shell
 from panels.models import fsdt_tsdt_field
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_plate_clpt_gl import elastica
 from test_fsdt_tsdt_gl import set_flags, panel, euler_ratio
 

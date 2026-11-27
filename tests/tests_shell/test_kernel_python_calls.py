@@ -31,9 +31,6 @@ integrands being rational in `x`: they are compared with the numerical
 kernels at the same points.
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from structsolve.sparseutils import finalize_symmetric_matrix

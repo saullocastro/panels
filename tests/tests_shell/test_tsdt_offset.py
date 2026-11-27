@@ -8,9 +8,6 @@ thickness, and the natural frequencies of a free homogeneous plate must not
 depend on the choice of the reference surface.
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 from numpy.polynomial.legendre import leggauss
 import pytest

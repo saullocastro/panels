@@ -39,9 +39,6 @@ References
    79(1), 21-70, 1990. https://doi.org/10.1016/0045-7825(90)90094-3
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from scipy.sparse import coo_matrix, csr_matrix, diags

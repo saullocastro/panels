@@ -16,9 +16,6 @@ With prescribed displacements imposed exactly, the reduced
 (\boldsymbol{F}_{ext} - \boldsymbol{K}_T \boldsymbol{c}_{p1})`.
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 

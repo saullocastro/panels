@@ -4,9 +4,6 @@ A bay split into panels without stiffeners has the buckling loads of a
 single shell, also with a panel edge at ``y = 1.0``; a blade stiffener at
 mid-width raises the buckling load more than three times.
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from structsolve import lb

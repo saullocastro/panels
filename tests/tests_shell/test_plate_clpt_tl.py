@@ -37,9 +37,6 @@ deformed mid-surface:
     \kappa_{xy} = -2 \boldsymbol{a} \cdot \boldsymbol{u}_{,xy}
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation

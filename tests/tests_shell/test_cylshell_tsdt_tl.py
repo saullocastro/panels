@@ -83,21 +83,17 @@ References
    https://doi.org/10.1016/j.finel.2003.11.001
 
 """
-import os
-import sys
-
 import numpy as np
 import pytest
 
 from panels.multidomain.connections import nullspace
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)
-sys.path.insert(0, os.path.join(HERE, '..', 'multidomain'))
 from test_fsdt_tsdt_gl import panel, euler_ratio, roof_path, limit_and_minimum
 from test_fsdt_tl import cylinder_rigid_rotation
 from test_plate_tsdt_tl import check_tangent
-import test_annular_cylinder as tac
+# NOTE tests/ is on sys.path when pytest imports tests/conftest.py, such
+#      that the folders of tests/ import as namespace packages
+from multidomain import test_annular_cylinder as tac
 
 MODEL = 'cylshell_tsdt_tl'
 STRAINS = ('exx', 'eyy', 'gxy', 'kxx', 'kyy', 'kxy', 'kxx3', 'kyy3', 'kxy3',

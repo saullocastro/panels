@@ -46,9 +46,6 @@ References
    1099-1114, 1984. https://doi.org/10.1016/0045-7949(84)90154-8
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from scipy.sparse import csr_matrix

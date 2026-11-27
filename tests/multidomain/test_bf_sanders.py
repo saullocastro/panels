@@ -5,9 +5,6 @@ panel about `x`, `\omega = w_{,y} - v/r` for the Sanders-Koiter kinematics
 and `\omega = w_{,y}` for flat plates and the Donnell kinematics, see
 :mod:`panels.multidomain.connections.kCBFycte`.
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from structsolve.sparseutils import finalize_symmetric_matrix

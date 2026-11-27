@@ -5,9 +5,6 @@ smallest number of Gauss-Legendre points that integrates exactly the
 integrands of degree `4 \max(m - 1, 3)` of the internal force vector and of
 the tangent stiffness matrix, unless a value is assigned.
 """
-import sys
-sys.path.append('../..')
-
 import io
 
 import numpy as np

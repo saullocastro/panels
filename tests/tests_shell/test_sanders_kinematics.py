@@ -53,9 +53,6 @@ References
 .. [5] Batdorf, S. B., NACA TR 874, 1947, and NASA SP-8007-2020/REV 2, Sec.
    4.1.1.1.
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from scipy.linalg import eigh

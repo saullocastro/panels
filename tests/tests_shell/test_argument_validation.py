@@ -9,9 +9,6 @@ divide by ``r`` and ``r*r``, so an unset radius silently becomes ``inf``.
 
 These tests pin the validation, not the values, of the matrices.
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 

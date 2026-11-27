@@ -53,9 +53,6 @@ References
 .. [6] Leissa, A. W., "The free vibration of rectangular plates", J. Sound
    Vib., 31, 257-293, 1973 (classical plate theory).
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from scipy.linalg import eigh

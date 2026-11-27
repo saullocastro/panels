@@ -70,9 +70,6 @@ References
    Design 40, 1551-1569. https://doi.org/10.1016/j.finel.2003.11.001
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from scipy.optimize import fsolve

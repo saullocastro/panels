@@ -21,9 +21,6 @@ the edge `y_2 =` constant of ``p2``
 The null space of the penalty matrix is compared with the basis of the
 null-space method in ``test_null_space.py``.
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from scipy.linalg import eigh

@@ -10,9 +10,6 @@ the null-space method, and the pre-buckling state reaches `u` = ``pd`` at
 `x = a` of every domain.
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 
 from panels.multidomain import (cylinder_compression_lb_Nxx_from_static,

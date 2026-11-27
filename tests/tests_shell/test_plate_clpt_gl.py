@@ -34,9 +34,6 @@ The membrane strains of the model are
     \gamma_{xy} = u_{,y} + v_{,x} + u_{,x} u_{,y} + v_{,x} v_{,y} + w_{,x} w_{,y}
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from scipy.integrate import solve_ivp

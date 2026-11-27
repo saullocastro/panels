@@ -12,9 +12,6 @@ Besides the converged deflection, the test checks that the Newton-Raphson
 iterations converge quadratically, which only happens when the tangent
 stiffness matrix is the exact derivative of the internal force vector.
 """
-import sys
-sys.path.append('../..')
-
 import pytest
 import numpy as np
 from structsolve import solve

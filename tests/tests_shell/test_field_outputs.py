@@ -38,9 +38,6 @@ References
    https://doi.org/10.1201/b12409
 
 """
-import sys
-sys.path.append('../../..')
-
 import pytest
 import numpy as np
 

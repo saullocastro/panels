@@ -34,9 +34,6 @@ References
    https://doi.org/10.3390/computation11060110
 
 """
-import os
-import sys
-
 import numpy as np
 import pytest
 from numpy.polynomial.legendre import leggauss
@@ -48,10 +45,10 @@ from panels.multidomain import MultiDomain
 from panels.multidomain.connections import calc_kt_kr
 from structsolve import lb
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                '..', 'tests_stiffpanelbay'))
-import test_stamatelos_labeas_2023 as spb
-from test_stamatelos_labeas_2023 import (PAPER, LAMINATES, PLY_T,
+# NOTE tests/ is on sys.path when pytest imports tests/conftest.py, such
+#      that the folders of tests/ import as namespace packages
+import tests_stiffpanelbay.test_stamatelos_labeas_2023 as spb
+from tests_stiffpanelbay.test_stamatelos_labeas_2023 import (PAPER, LAMINATES, PLY_T,
         LAMINAPROP_311, A_311, B_311, LAMINAPROP_312, STACK_312, T_312, A_312,
         B_312, H_321, A_322, B_322, N_STIFF_322, STIFF_STACK_322)
 

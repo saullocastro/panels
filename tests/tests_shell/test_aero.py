@@ -48,9 +48,6 @@ References
    Structures 69 (2005) 55-63. https://doi.org/10.1016/j.compstruct.2004.04.018
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 
 from structsolve import freq, lb

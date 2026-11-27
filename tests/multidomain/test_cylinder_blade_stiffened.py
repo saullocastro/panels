@@ -135,9 +135,6 @@ References
    1966, pp. 134-140. https://doi.org/10.2514/3.3396
 
 """
-import sys
-sys.path.append('../..')
-
 import pytest
 import numpy as np
 from structsolve import lb

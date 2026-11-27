@@ -6,9 +6,6 @@ a point constraint, the aerodynamic matrices ``calc_kA`` and ``calc_cA``,
 field outputs independent of the radius of a plate and of the number of
 cores, and saving and loading a shell.
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 

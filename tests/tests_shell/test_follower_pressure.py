@@ -23,9 +23,6 @@ complete (``'quadratic'``) area vectors:
 6. the rigid rotation of a ring under a hoop prestress, a zero-energy mode
    only with the follower load stiffness (Sanders kinematics).
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from scipy.special import roots_legendre

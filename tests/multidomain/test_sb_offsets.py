@@ -15,9 +15,6 @@ The connections ``'SB'`` and ``'SB_TSL'`` connect the lower face of ``p1``,
   faces in contact, evaluated from the fields of both panels
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from scipy.special import roots_legendre

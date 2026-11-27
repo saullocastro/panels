@@ -7,9 +7,6 @@ the laminate, `\int \rho \, dz / h` = ``lam.intrho/lam.h``, as the numerical
 ``plyt``, ``laminaprop`` and ``rho`` at every rebuild.
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 

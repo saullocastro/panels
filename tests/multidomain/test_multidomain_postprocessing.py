@@ -17,9 +17,6 @@ under a pressure, against the closed-form solutions of these cases:
   connection function.
 
 """
-import sys
-sys.path.append('../..')
-
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt

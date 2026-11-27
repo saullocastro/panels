@@ -5,9 +5,6 @@ limits ``x1``, ``x2``, ``y1`` and ``y2`` of the shell, add up to those of
 the full domain, for the numerically integrated kernels and for
 ``Shell.calc_kC``, ``calc_kG`` and ``calc_kM``.
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 

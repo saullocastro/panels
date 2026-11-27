@@ -7,9 +7,6 @@ independent integration of `\rho (u(z)^2 + v(z)^2 + w^2)` ply by ply, with
 the cubic term of the TSDT is `-c_1 [(z - d)^3 + d^3] (\phi + w_{,x})`.
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 from numpy.polynomial.legendre import leggauss
 import pytest
