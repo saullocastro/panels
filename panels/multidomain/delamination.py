@@ -530,8 +530,12 @@ def solve_coupon(md, info, delta_max, initialInc=0.05, maxInc=None,
         Initial, maximum and minimum increments of `\delta`, length.
         Defaults ``0.05``, ``initialInc`` and ``1e-6``.
     NL_method : str, optional
-        ``'NR'`` (default) or an arc-length method of ``structsolve``; not
-        used with ``control='load-line'``.
+        ``'NR'`` (default), ``'stabilized_NR'``, the Newton-Raphson method
+        with viscous stabilization of the increments where it fails, or an
+        arc-length method of ``structsolve``; not used with
+        ``control='load-line'``. The ``'damped'`` states that
+        ``'stabilized_NR'`` accepts when the correction to the equilibrium
+        fails are not equilibria, and they also update the cohesive history.
     NLgeom : bool, optional
         Passed to ``structsolve.Analysis.static``: whether the geometric
         non-linearity is included. Default ``True``.

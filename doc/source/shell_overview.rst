@@ -360,10 +360,54 @@ The methods above have the signatures expected by the solvers of
 - frequency: ``freq(kC, kM)``, with an optional prestress `\boldsymbol{K}_G`;
 - panel flutter: ``freq(kC + kG + kA, kM)``, see :ref:`aeroelasticity`;
 - non-linear static: :class:`structsolve.Analysis` with ``calc_fext``,
-  ``calc_fint``, ``calc_kC`` and ``calc_kG``, with the Newton-Raphson or
-  the arc-length methods;
+  ``calc_fint``, ``calc_kC`` and ``calc_kG``, with the Newton-Raphson
+  method, the stabilized Newton-Raphson method or the arc-length methods;
 - follower pressures, in all the analyses above, see
   :ref:`follower_pressure`.
+
+.. _stabilized_nr_postbuckling:
+
+Post-buckling with the stabilized Newton-Raphson method
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Deep in the post-buckling regime, the equilibrium path of a buckle pattern
+may end at a limit point beyond which the skin must jump to another pattern,
+e.g. with more half-waves along the load. Under load control,
+``Analysis.NL_method = 'NR'`` fails at every increment beyond such a point,
+cuts the increments down to ``Analysis.minInc`` and stops, while the
+arc-length methods follow the path of the first pattern back through the
+limit point. With ``Analysis.NL_method = 'stabilized_NR'`` of structsolve,
+the increments are kept under load control; an increment where the
+Newton-Raphson iterations fail is solved with viscous forces proportional to
+the change of the Ritz constants since the last accepted state, scaled by
+``Analysis.stabilization_factor``, and the damped state is then corrected
+by the Newton-Raphson iterations without viscous forces. The same methods of
+:class:`.Shell` are passed to :class:`structsolve.Analysis`; nothing else
+changes in the model:
+
+.. code-block:: python
+
+    from structsolve import Analysis
+
+    an = Analysis(s.calc_fext, s.calc_fint, s.calc_kC, s.calc_kG)
+    an.NL_method = 'stabilized_NR'
+    an.stabilization_factor = 1.e-5  # the default
+    increments, cs = an.static(NLgeom=True)
+    an.stabilization_status  # 'undamped', 'corrected' or 'damped'
+
+``Analysis.stabilization_status`` tells for each accepted state whether it
+is an equilibrium, ``'undamped'`` or ``'corrected'``, or a damped state
+accepted because the correction failed, ``'damped'``, which is not an
+equilibrium and whose relative residual is in ``Analysis.damped_residuals``.
+The states found after a jump depend on the stabilization factor and on the
+increments, and their stability is not checked. The test
+``tests/tests_shell/test_stabilized_nr_mode_jump.py`` and the notebook
+``ex_stabilized_newton_raphson`` show the case of a simply supported plate,
+``a/b = 1.3``, under uniaxial compression, whose one-half-wave pattern ends
+at a limit point at about 2.6 times the critical load of a long plate and
+jumps to two half-waves: ``'NR'`` stops there, and ``'stabilized_NR'``
+reaches the final load with one ``'corrected'`` state and ``'undamped'``
+states otherwise.
 
 
 Results
