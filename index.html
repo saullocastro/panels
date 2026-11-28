@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Semi-analytical methods for plates, shells and stiffened panels - panels &#8212; panels 0.18.2 documentation</title>
+    <title>Semi-analytical methods for plates, shells and stiffened panels - panels &#8212; panels 0.18.3 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=29ae757a"></script>
+    <script src="_static/documentation_options.js?v=8dd6f163"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -49,7 +49,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.2" />
+  <meta name="docsearch:version" content="0.18.3" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -117,7 +117,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.2 documentation</p>
+    <p class="title logo__title">panels 0.18.3 documentation</p>
   
 </a></div>
     
@@ -337,6 +337,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_arc_length.html">
     Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_stabilized_newton_raphson.html">
+    Mode jump of a compressed plate with the stabilized Newton-Raphson method
   </a>
 </li>
 
@@ -1112,6 +1119,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_stabilized_newton_raphson.html">
+    Mode jump of a compressed plate with the stabilized Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="notebooks/ex_follower_pressure.html">
     Follower (hydrostatic) pressure
   </a>
@@ -1670,6 +1684,9 @@ a tangent stiffness matrix that is the exact derivative of the internal force
 vector, using:</p>
 <ul>
 <li><p>the Newton-Raphson method</p></li>
+<li><p>the Newton-Raphson method with viscous stabilization of the increments
+where it fails, able to pass mode jumps of the post-buckling under load
+control</p></li>
 <li><p>the arc-length methods of Riks and Crisfield, able to trace limit points
 and snap-through</p></li>
 </ul>
@@ -1781,6 +1798,7 @@ together is described in the user guide, starting with
 <li class="toctree-l1"><a class="reference internal" href="notebooks/ex_flutter.html">Panel flutter analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/ex_newton_raphson.html">Non-linear static analysis with the Newton-Raphson method</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/ex_arc_length.html">Non-linear static analysis with the arc-length methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/ex_stabilized_newton_raphson.html">Mode jump of a compressed plate with the stabilized Newton-Raphson method</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/ex_follower_pressure.html">Follower (hydrostatic) pressure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/ex_prescribed_displacements.html">Prescribed displacements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/ex_face_clamp.html">Clamped and face-clamped edges</a></li>
@@ -1933,14 +1951,14 @@ the WebAssembly wheel published on PyPI is installed with <code class="docutils 
 </section>
 <section id="citing-this-library">
 <h2>Citing this library<a class="headerlink" href="#citing-this-library" title="Link to this heading">#</a></h2>
-<p>Saullo G. P. Castro, Nathan D’Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.18.2). Zenodo. DOI: <a class="reference external" href="https://doi.org/10.5281/zenodo.2541522">https://doi.org/10.5281/zenodo.2541522</a>.</p>
+<p>Saullo G. P. Castro, Nathan D’Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.18.3). Zenodo. DOI: <a class="reference external" href="https://doi.org/10.5281/zenodo.2541522">https://doi.org/10.5281/zenodo.2541522</a>.</p>
 <p>In BibTeX:</p>
 <div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span class="nc">@misc</span><span class="p">{</span><span class="nl">castro_panels</span><span class="p">,</span>
 <span class="w">  </span><span class="na">author</span><span class="w">    </span><span class="p">=</span><span class="w"> </span><span class="s">{Castro, Saullo G. P. and D'Souza, Nathan}</span><span class="p">,</span>
 <span class="w">  </span><span class="na">title</span><span class="w">     </span><span class="p">=</span><span class="w"> </span><span class="s">{Semi-analytical methods for plates, shells and stiffened</span>
 <span class="s">               panels}</span><span class="p">,</span>
 <span class="w">  </span><span class="na">year</span><span class="w">      </span><span class="p">=</span><span class="w"> </span><span class="s">{2026}</span><span class="p">,</span>
-<span class="w">  </span><span class="na">version</span><span class="w">   </span><span class="p">=</span><span class="w"> </span><span class="s">{0.18.2}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">version</span><span class="w">   </span><span class="p">=</span><span class="w"> </span><span class="s">{0.18.3}</span><span class="p">,</span>
 <span class="w">  </span><span class="na">publisher</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Zenodo}</span><span class="p">,</span>
 <span class="w">  </span><span class="na">doi</span><span class="w">       </span><span class="p">=</span><span class="w"> </span><span class="s">{10.5281/zenodo.2541522}</span><span class="p">,</span>
 <span class="w">  </span><span class="na">url</span><span class="w">       </span><span class="p">=</span><span class="w"> </span><span class="s">{https://doi.org/10.5281/zenodo.2541522}</span>

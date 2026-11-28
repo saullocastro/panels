@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Changelog &#8212; panels 0.18.2 documentation</title>
+    <title>Changelog &#8212; panels 0.18.3 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=29ae757a"></script>
+    <script src="_static/documentation_options.js?v=8dd6f163"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -50,7 +50,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.2" />
+  <meta name="docsearch:version" content="0.18.3" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -118,7 +118,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.2 documentation</p>
+    <p class="title logo__title">panels 0.18.3 documentation</p>
   
 </a></div>
     
@@ -338,6 +338,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_arc_length.html">
     Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_stabilized_newton_raphson.html">
+    Mode jump of a compressed plate with the stabilized Newton-Raphson method
   </a>
 </li>
 
@@ -1111,6 +1118,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_stabilized_newton_raphson.html">
+    Mode jump of a compressed plate with the stabilized Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="notebooks/ex_follower_pressure.html">
     Follower (hydrostatic) pressure
   </a>
@@ -1696,7 +1710,28 @@
 <a class="reference external" href="https://github.com/saullocastro/panels/blob/main/CHANGELOG.md">repository</a>:</p>
 <div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Changelog</span>
 
-<span class="gu">## 0.18.2 (2026-11-28)</span>
+<span class="gu">## 0.18.3 (2026-11-28)</span>
+
+<span class="gu">### Added: a case of the stabilized Newton-Raphson method of structsolve</span>
+
+<span class="k">-</span><span class="w"> </span>Mode jump of a simply supported plate, <span class="sb">`a/b = 1.3`</span>, under uniaxial
+  compression, with the in-plane displacement normal to the edges
+  restrained: the one-half-wave pattern ends at a limit point at the load
+  factor 0.654 (2.6 times <span class="sb">`4 pi^2 D/b^2`</span>), where
+  <span class="sb">`structsolve.Analysis(NL_method='NR')`</span> cuts the increments down to
+  <span class="sb">`minInc`</span> and stops; <span class="sb">`NL_method='stabilized_NR'`</span> of structsolve 0.14.0
+  passes it with one <span class="sb">`'corrected'`</span> state and reaches the final load with
+  two half-waves, every accepted state being an equilibrium.
+<span class="k">-</span><span class="w"> </span>Test <span class="sb">`tests/tests_shell/test_stabilized_nr_mode_jump.py`</span> (also the linear
+  buckling of the plate against the closed form), notebook
+  <span class="sb">`ex_stabilized_newton_raphson`</span> (verification of the equilibrium of the
+  accepted states and of the path before the jump, sensitivity to
+  <span class="sb">`stabilization_factor`</span>, a finer model), section "Post-buckling with the
+  stabilized Newton-Raphson method" of the page <span class="sb">`shell_overview`</span>; the
+  stabilized method is listed with the non-linear methods in the README,
+  the page <span class="sb">`index`</span> and the docstring of <span class="sb">`solve_coupon`</span>.
+<span class="k">-</span><span class="w"> </span>Requires <span class="sb">`structsolve&gt;=0.14.0`</span> (<span class="sb">`pyproject.toml`</span>, <span class="sb">`requirements.txt`</span>),
+  the release on PyPI with <span class="sb">`NL_method='stabilized_NR'`</span>.
 
 <span class="gu">### Added: options for speed of the cohesive coupons</span>
 

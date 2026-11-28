@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Plates and cylindrical shells &#8212; panels 0.18.2 documentation</title>
+    <title>Plates and cylindrical shells &#8212; panels 0.18.3 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=29ae757a"></script>
+    <script src="_static/documentation_options.js?v=8dd6f163"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -52,7 +52,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.2" />
+  <meta name="docsearch:version" content="0.18.3" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -120,7 +120,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.2 documentation</p>
+    <p class="title logo__title">panels 0.18.3 documentation</p>
   
 </a></div>
     
@@ -340,6 +340,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_arc_length.html">
     Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="notebooks/ex_stabilized_newton_raphson.html">
+    Mode jump of a compressed plate with the stabilized Newton-Raphson method
   </a>
 </li>
 
@@ -1108,6 +1115,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="notebooks/ex_arc_length.html">
     Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="notebooks/ex_stabilized_newton_raphson.html">
+    Mode jump of a compressed plate with the stabilized Newton-Raphson method
   </a>
 </li>
 
@@ -2075,11 +2089,50 @@ resultants <code class="docutils literal notranslate"><span class="pre">Nxx</spa
 <li><p>frequency: <code class="docutils literal notranslate"><span class="pre">freq(kC,</span> <span class="pre">kM)</span></code>, with an optional prestress <span class="math notranslate nohighlight">\(\boldsymbol{K}_G\)</span>;</p></li>
 <li><p>panel flutter: <code class="docutils literal notranslate"><span class="pre">freq(kC</span> <span class="pre">+</span> <span class="pre">kG</span> <span class="pre">+</span> <span class="pre">kA,</span> <span class="pre">kM)</span></code>, see <a class="reference internal" href="aeroelasticity.html#aeroelasticity"><span class="std std-ref">Panel flutter with the piston theory</span></a>;</p></li>
 <li><p>non-linear static: <code class="xref py py-class docutils literal notranslate"><span class="pre">structsolve.Analysis</span></code> with <code class="docutils literal notranslate"><span class="pre">calc_fext</span></code>,
-<code class="docutils literal notranslate"><span class="pre">calc_fint</span></code>, <code class="docutils literal notranslate"><span class="pre">calc_kC</span></code> and <code class="docutils literal notranslate"><span class="pre">calc_kG</span></code>, with the Newton-Raphson or
-the arc-length methods;</p></li>
+<code class="docutils literal notranslate"><span class="pre">calc_fint</span></code>, <code class="docutils literal notranslate"><span class="pre">calc_kC</span></code> and <code class="docutils literal notranslate"><span class="pre">calc_kG</span></code>, with the Newton-Raphson
+method, the stabilized Newton-Raphson method or the arc-length methods;</p></li>
 <li><p>follower pressures, in all the analyses above, see
 <a class="reference internal" href="follower_pressure.html#follower-pressure"><span class="std std-ref">Follower pressure loads: theory</span></a>.</p></li>
 </ul>
+<section id="post-buckling-with-the-stabilized-newton-raphson-method">
+<span id="stabilized-nr-postbuckling"></span><h3>Post-buckling with the stabilized Newton-Raphson method<a class="headerlink" href="#post-buckling-with-the-stabilized-newton-raphson-method" title="Link to this heading">#</a></h3>
+<p>Deep in the post-buckling regime, the equilibrium path of a buckle pattern
+may end at a limit point beyond which the skin must jump to another pattern,
+e.g. with more half-waves along the load. Under load control,
+<code class="docutils literal notranslate"><span class="pre">Analysis.NL_method</span> <span class="pre">=</span> <span class="pre">'NR'</span></code> fails at every increment beyond such a point,
+cuts the increments down to <code class="docutils literal notranslate"><span class="pre">Analysis.minInc</span></code> and stops, while the
+arc-length methods follow the path of the first pattern back through the
+limit point. With <code class="docutils literal notranslate"><span class="pre">Analysis.NL_method</span> <span class="pre">=</span> <span class="pre">'stabilized_NR'</span></code> of structsolve,
+the increments are kept under load control; an increment where the
+Newton-Raphson iterations fail is solved with viscous forces proportional to
+the change of the Ritz constants since the last accepted state, scaled by
+<code class="docutils literal notranslate"><span class="pre">Analysis.stabilization_factor</span></code>, and the damped state is then corrected
+by the Newton-Raphson iterations without viscous forces. The same methods of
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code> are passed to <code class="xref py py-class docutils literal notranslate"><span class="pre">structsolve.Analysis</span></code>; nothing else
+changes in the model:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">structsolve</span><span class="w"> </span><span class="kn">import</span> <span class="n">Analysis</span>
+
+<span class="n">an</span> <span class="o">=</span> <span class="n">Analysis</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">calc_fext</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">calc_fint</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">calc_kG</span><span class="p">)</span>
+<span class="n">an</span><span class="o">.</span><span class="n">NL_method</span> <span class="o">=</span> <span class="s1">'stabilized_NR'</span>
+<span class="n">an</span><span class="o">.</span><span class="n">stabilization_factor</span> <span class="o">=</span> <span class="mf">1.e-5</span>  <span class="c1"># the default</span>
+<span class="n">increments</span><span class="p">,</span> <span class="n">cs</span> <span class="o">=</span> <span class="n">an</span><span class="o">.</span><span class="n">static</span><span class="p">(</span><span class="n">NLgeom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">an</span><span class="o">.</span><span class="n">stabilization_status</span>  <span class="c1"># 'undamped', 'corrected' or 'damped'</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Analysis.stabilization_status</span></code> tells for each accepted state whether it
+is an equilibrium, <code class="docutils literal notranslate"><span class="pre">'undamped'</span></code> or <code class="docutils literal notranslate"><span class="pre">'corrected'</span></code>, or a damped state
+accepted because the correction failed, <code class="docutils literal notranslate"><span class="pre">'damped'</span></code>, which is not an
+equilibrium and whose relative residual is in <code class="docutils literal notranslate"><span class="pre">Analysis.damped_residuals</span></code>.
+The states found after a jump depend on the stabilization factor and on the
+increments, and their stability is not checked. The test
+<code class="docutils literal notranslate"><span class="pre">tests/tests_shell/test_stabilized_nr_mode_jump.py</span></code> and the notebook
+<code class="docutils literal notranslate"><span class="pre">ex_stabilized_newton_raphson</span></code> show the case of a simply supported plate,
+<code class="docutils literal notranslate"><span class="pre">a/b</span> <span class="pre">=</span> <span class="pre">1.3</span></code>, under uniaxial compression, whose one-half-wave pattern ends
+at a limit point at about 2.6 times the critical load of a long plate and
+jumps to two half-waves: <code class="docutils literal notranslate"><span class="pre">'NR'</span></code> stops there, and <code class="docutils literal notranslate"><span class="pre">'stabilized_NR'</span></code>
+reaches the final load with one <code class="docutils literal notranslate"><span class="pre">'corrected'</span></code> state and <code class="docutils literal notranslate"><span class="pre">'undamped'</span></code>
+states otherwise.</p>
+</section>
 </section>
 <section id="results">
 <h2>Results<a class="headerlink" href="#results" title="Link to this heading">#</a></h2>
@@ -2142,7 +2195,10 @@ with <code class="xref py py-meth docutils literal notranslate"><span class="pre
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-choose-a-model">How to choose a model</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inputs">Inputs</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matrices-and-vectors">Matrices and vectors</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#analyses">Analyses</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#analyses">Analyses</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#post-buckling-with-the-stabilized-newton-raphson-method">Post-buckling with the stabilized Newton-Raphson method</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#results">Results</a></li>
 </ul>
   </nav></div>

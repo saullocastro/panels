@@ -23,6 +23,9 @@ you can run:
   vector, using:
 
   - the Newton-Raphson method
+  - the Newton-Raphson method with viscous stabilization of the increments
+    where it fails, able to pass mode jumps of the post-buckling under load
+    control
   - the arc-length methods of Riks and Crisfield, able to trace limit points
     and snap-through
 
@@ -141,6 +144,7 @@ User guide
     notebooks/ex_flutter.nblink
     notebooks/ex_newton_raphson.nblink
     notebooks/ex_arc_length.nblink
+    notebooks/ex_stabilized_newton_raphson.nblink
     notebooks/ex_follower_pressure.nblink
     notebooks/ex_prescribed_displacements.nblink
     notebooks/ex_face_clamp.nblink
@@ -264,7 +268,7 @@ License
 Citing this library
 -------------------
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.18.2). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.18.3). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 In BibTeX:
 
@@ -275,7 +279,7 @@ In BibTeX:
       title     = {Semi-analytical methods for plates, shells and stiffened
                    panels},
       year      = {2026},
-      version   = {0.18.2},
+      version   = {0.18.3},
       publisher = {Zenodo},
       doi       = {10.5281/zenodo.2541522},
       url       = {https://doi.org/10.5281/zenodo.2541522}
