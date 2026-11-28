@@ -15,9 +15,6 @@ space of `\boldsymbol{B}`, see :mod:`panels.multidomain.connections.nullspace`:
   the approximation, without any penalty constant
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from scipy.linalg import eigh

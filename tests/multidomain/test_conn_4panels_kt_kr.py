@@ -7,9 +7,6 @@ penalties of :func:`.calc_kt_kr`, assembled from the block functions of
 that of the same panel modelled with a single domain within 1 %.
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 from scipy.sparse import csr_matrix
 

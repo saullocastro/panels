@@ -36,9 +36,6 @@ References
    geometric nonlinear analysis of shells", Finite Elements in Analysis and
    Design 40 (2004) 1551-1569. https://doi.org/10.1016/j.finel.2003.11.001
 """
-import sys
-sys.path.append('../..')
-
 import pytest
 import numpy as np
 from structsolve import Analysis

@@ -10,9 +10,6 @@ removes them before solving, whereas ``scipy.sparse.linalg.spsolve`` of the
 full system fails, see :class:`.MultiDomain`.
 
 """
-import sys
-sys.path.append('../..')
-
 import warnings
 
 import numpy as np

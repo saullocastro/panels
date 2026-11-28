@@ -21,9 +21,6 @@ References
 .. [2] Pagano, N. J., "Exact solutions for rectangular bidirectional
    composites and sandwich plates", J. Compos. Mater., 4, 20-34, 1970.
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from scipy.special import roots_legendre

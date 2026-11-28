@@ -71,9 +71,6 @@ References
    23, 1972, pp. 795-804. https://doi.org/10.1007/BF01602645
 
 """
-import os
-import sys
-
 import numpy as np
 import pytest
 from scipy.integrate import solve_ivp
@@ -81,8 +78,6 @@ from scipy.optimize import brentq
 from structsolve import Analysis
 
 from panels.shell import Shell
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_plate_clpt_gl import elastica
 from test_fsdt_tsdt_gl import set_flags
 from test_fsdt_tl import plate_rigid_rotation

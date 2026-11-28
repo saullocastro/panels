@@ -80,9 +80,6 @@ References
    493-499, 2005. https://doi.org/10.1115/1.1934513
 .. [5] NASA/SP-8007-2020/REV 2, Eqs. (19)-(22).
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from scipy.linalg import eig

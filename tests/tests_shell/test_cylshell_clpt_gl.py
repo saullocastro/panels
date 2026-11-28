@@ -76,9 +76,6 @@ References
    4.1.1.1.
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from scipy.sparse import csr_matrix

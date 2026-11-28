@@ -20,9 +20,6 @@ is that of its reference surface, `r_1 - d^t = r_2 + d^b`. With the Donnell
 kinematics the term `v/r` is neglected.
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 

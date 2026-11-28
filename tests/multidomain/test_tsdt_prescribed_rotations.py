@@ -35,9 +35,6 @@ With the offset `d` and the thickness `h` of the panel,
 `\theta = \phi`.
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 

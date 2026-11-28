@@ -20,9 +20,6 @@ of :meth:`.Shell.calc_fint`. The checks, for all 9 models, are those of
    quadratically.
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 from scipy.linalg import eigh
 import pytest

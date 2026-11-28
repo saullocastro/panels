@@ -10,9 +10,6 @@ r"""Stiffness properties of the 1D flange of :class:`.BladeStiff1D`
   `S_1 = 0` for a symmetric flange.
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from structsolve.sparseutils import finalize_symmetric_matrix

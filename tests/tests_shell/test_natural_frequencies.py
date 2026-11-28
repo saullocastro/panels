@@ -41,9 +41,6 @@ References
    https://ntrs.nasa.gov/citations/19700009156
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 from structsolve import freq
 

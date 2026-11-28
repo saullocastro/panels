@@ -71,16 +71,11 @@ References
    Eng., 8, 103-117, 2016, Table 3.
 
 """
-import os
-import sys
-
 import numpy as np
 import pytest
 
 from panels import modelDB
 from panels.shell import Shell
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_annular_tsdt import (A, D, E, H, NU, RHO, REDDY_TSDT, YAMAKI,
                                annulus, exact_lambda2, set_edge)
 from test_annular_fsdt import _fit, _rotated_fields

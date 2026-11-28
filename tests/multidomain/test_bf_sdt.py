@@ -7,9 +7,6 @@ TSDT) on the rotations `\phi_y` and `\phi_x`, see
 :mod:`panels.multidomain.connections.kCBFycte` and
 :mod:`panels.multidomain.connections.kCBFxcte`.
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from scipy.linalg import eigh

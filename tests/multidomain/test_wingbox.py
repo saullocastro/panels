@@ -44,9 +44,6 @@ References
    University of Technology.
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 

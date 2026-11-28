@@ -29,10 +29,7 @@ stiffness, constant or one matrix per integration point, is the attribute
 """
 import io
 import json
-import sys
 import zipfile
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from structsolve import lb, solve

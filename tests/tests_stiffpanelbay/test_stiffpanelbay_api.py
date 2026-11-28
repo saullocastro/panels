@@ -8,9 +8,6 @@ aerodynamic matrices ``calc_kA`` and ``calc_cA`` against those of a single
 shell over the bay; the effect of the stiffeners on the buckling load and on
 the mass; field outputs, plots, and saving and loading a bay.
 """
-import sys
-sys.path.append('../..')
-
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt

@@ -28,10 +28,6 @@ References
 .. [3] Sanders, J. L., "An improved first-approximation theory for thin
    shells", NASA TR R-24, 1959.
 """
-import os
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from scipy.linalg import eigh
@@ -43,8 +39,6 @@ from panels import modelDB
 from panels.shell import Shell
 from panels.models.fsdt_tsdt_field import fg, strain_names
 from panels.multidomain import MultiDomain
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_sanders_kinematics import (E, NU, RHO, LEISSA, RIGID_BODY_MOTIONS,
         make_panel, modal_amplitude, batdorf_panel)
 

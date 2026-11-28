@@ -39,9 +39,6 @@ References
    2nd ed., McGraw-Hill, New York, 1959.
 
 """
-import sys
-sys.path.append('../..')
-
 import matplotlib
 matplotlib.use('Agg')
 import numpy as np

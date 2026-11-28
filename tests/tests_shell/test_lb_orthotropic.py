@@ -48,9 +48,6 @@ References
    https://ntrs.nasa.gov/citations/19930091945
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from structsolve import lb

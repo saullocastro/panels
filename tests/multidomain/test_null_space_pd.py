@@ -19,9 +19,6 @@ with the connections, `\boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r + \bolds
   name the panels, the prescriptions and the flags involved
 
 """
-import sys
-sys.path.append('../..')
-
 import io
 
 import numpy as np

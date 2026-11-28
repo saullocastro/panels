@@ -5,9 +5,6 @@ the configuration ``c`` to :meth:`.Shell.calc_fext`, and adds the
 unsymmetric load stiffness :meth:`.Shell.calc_kCfollower` after the
 symmetrization of the assembled matrices, see :meth:`.MultiDomain.calc_kC`.
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from structsolve import Analysis

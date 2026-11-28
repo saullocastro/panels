@@ -18,9 +18,6 @@ vanishes at the buckling load of :func:`.tstiff2d_1stiff_compression`,
 their Fig. 7 analysis.
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 

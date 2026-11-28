@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.18.1 (2026-11-26)
+## 0.18.2 (2026-11-28)
 
 ### Added: options for speed of the cohesive coupons
 
@@ -111,6 +111,30 @@ On by default; **results change at round-off level** with respect to 0.17.0.
 - The docstrings, the comments, the pages, the tests and the text of the
   notebooks describe the present behaviour, without version numbers of
   panels or structsolve.
+- The notebooks were executed again with the present code and their stored
+  outputs replaced where they had changed. The runs of the mixed-mode
+  coupons (`mmb_camanho2003_as4peek`, `mmb_ratcliffe2014_im78552`,
+  `krueger2012_mmb_benchmark`, `mmb_tijs2022_as4dpekk`,
+  `mmb_cho2025_glassepoxy`, `mmb_gong2017_t700qy9511`,
+  `mmb_raimondo2021_im78552`) are now all made by the notebooks
+  (`MMB_RERUN=1`); under control of the load-line separation and after the
+  peaks the increments differ, and the peak loads and run ends quoted in
+  the text follow the new runs (e.g. Krueger (2012), MMB 80% with FSDT arms:
+  695.6 instead of 702.1 N). Their run tables give the machine and the run
+  time, without the version of panels, and the notebooks that printed the
+  versions of panels and composites no longer do.
+- Text corrected to the outputs: `ex_face_clamp` (the penalty model of the
+  face clamp gives the deflection of the null-space model, not its axial
+  displacement), `abramovich2009_blade_panels` and
+  `lanzi2003_torsion_cylinder` (no warning of the null-space elimination);
+  new outputs of `cohesive_zone_verification`.
+- The tests import the installed `panels`: no `sys.path.append('../..')`
+  or other change of `sys.path` in `tests/`;
+  `tests/tests_shell/test_cylshell_tsdt_tl.py` and
+  `tests/multidomain/test_stamatelos_labeas_2023_multidomain.py` import the
+  test modules of other folders as `multidomain.test_annular_cylinder` and
+  `tests_stiffpanelbay.test_stamatelos_labeas_2023`. The notebooks
+  `stamatelos_labeas_2023*` no longer append the repository to `sys.path`.
 
 ### Added: mixed-mode multilinear cohesive interface `'CZM'` and delamination coupons
 

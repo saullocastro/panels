@@ -16,9 +16,6 @@ The main check is a directional Taylor test::
 which falls proportionally to h for a consistent tangent and plateaus for an
 inconsistent one.
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 from scipy.linalg import eigh
 import pytest

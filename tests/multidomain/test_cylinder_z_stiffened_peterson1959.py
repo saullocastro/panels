@@ -45,9 +45,6 @@ References
    Stringers", NASA Memo 2-12-59L, 1959.
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from numpy import pi

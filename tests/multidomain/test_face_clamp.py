@@ -79,9 +79,6 @@ References
    shells", 2nd ed., McGraw-Hill, New York, 1959.
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from structsolve import solve

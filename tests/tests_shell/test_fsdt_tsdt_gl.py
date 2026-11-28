@@ -72,9 +72,6 @@ References
    https://doi.org/10.1016/j.finel.2003.11.001
 
 """
-import os
-import sys
-
 import numpy as np
 import pytest
 from scipy.sparse import csr_matrix
@@ -83,8 +80,6 @@ from structsolve import Analysis, lb, solve
 
 from panels.shell import Shell
 from panels.models import fsdt_tsdt_field
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_plate_clpt_gl import elastica
 
 LINEAR = {'plate_fsdt_gl': 'plate_fsdt_donnell',

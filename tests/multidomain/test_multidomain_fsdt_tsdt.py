@@ -48,9 +48,6 @@ References
    arXiv:1312.4032.
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from scipy.linalg import eigh

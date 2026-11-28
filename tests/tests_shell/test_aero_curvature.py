@@ -18,9 +18,6 @@ References
 .. [1] Krumhaar, H., "The accuracy of linear piston theory when applied to
    cylindrical shells", AIAA J., 1(6), 1448-1449, 1963.
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from scipy.special import hankel2

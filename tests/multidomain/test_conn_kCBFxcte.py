@@ -7,9 +7,6 @@ conditions along `x` = constant), must give the same first linear buckling
 eigenvalue within 1 %.
 
 """
-import sys
-sys.path.append('../..')
-
 import pytest
 import numpy as np
 from structsolve import lb, static

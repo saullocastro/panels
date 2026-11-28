@@ -17,9 +17,6 @@ kinematics, see :mod:`panels.multidomain.connections.skin_base`:
   are the blocks of :func:`.skin_base.fkCSB`
 
 """
-import sys
-sys.path.append('../..')
-
 import warnings
 
 import numpy as np

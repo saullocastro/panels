@@ -4,9 +4,6 @@ Plots of displacement, strain and resultant fields, the options of the
 function, the restored fields of the shell after plotting, and the errors
 raised for an invalid field name or axes.
 """
-import sys
-sys.path.append('../..')
-
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt

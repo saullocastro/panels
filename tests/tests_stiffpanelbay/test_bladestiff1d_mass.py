@@ -8,9 +8,6 @@ This checks the coupling terms `-d_f` of the kernel ``fkMf`` (Eq. (26) of
 Castro et al. (2016) has `-2 d_f`), and the thickness `h_b` of the base
 entering `d_f` and `k_{mf44}`.
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from structsolve.sparseutils import finalize_symmetric_matrix

@@ -28,9 +28,6 @@ References
    https://doi.org/10.3390/computation11060110
 
 """
-import sys
-sys.path.append('../..')
-
 import numpy as np
 import pytest
 from numpy.polynomial.legendre import leggauss
