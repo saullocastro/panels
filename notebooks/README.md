@@ -86,9 +86,9 @@ and LEFM (ASTM D6671); the digitised curves of the literature are in
 
 The runs of these notebooks are made by the notebooks themselves, with
 `MMB_RERUN=1` in the environment (`MMB_TESTS` selects some of them, e.g.
-`MMB50_clpt`), or converted from runs of the same model made outside them,
-with `mmb_utils.convert_study_run`; the run table of each notebook gives the
-commit of `panels`, the machine and the run time of each run.
+`MMB50_clpt`); `mmb_utils.convert_study_run` converts runs of the same model
+made outside them. The run table of each notebook gives the machine and the
+run time of each run.
 
 ## Penalty and null-space connections
 
