@@ -15,7 +15,7 @@ Semi-analytical methods for plates, shells and stiffened panels
 - Linear buckling
 - Vibration, with or without pre-stress
 - Panel flutter using the piston theory
-- Geometrically non-linear static analyses (postbuckling) using the Newton-Raphson method or the arc-length methods of Riks and Crisfield, with the product of the tangent stiffness matrix by a vector available without assembly
+- Geometrically non-linear static analyses (postbuckling) using the Newton-Raphson method, the stabilized Newton-Raphson method, which passes mode jumps under load control, or the arc-length methods of Riks and Crisfield, with the product of the tangent stiffness matrix by a vector available without assembly
 - Dead or follower (hydrostatic) pressure loads, with the unsymmetric load stiffness of the follower pressure
 - Multi-domain assemblies of plates, cylindrical shells, cylinders, stiffened panels, with the domains connected exactly with the null-space method, the default, or by penalty stiffnesses. Debonding defects or cohesive zone can be simulated
 - Prescribed displacements and rotations imposed exactly with the null-space method, the default, `MultiDomain(..., pd_method='null-space')`, for displacement control in linear static, linear buckling and geometrically non-linear (Newton-Raphson, Riks, Crisfield) analyses, with the reaction forces; or by penalty stiffnesses
@@ -29,7 +29,7 @@ The structural matrices are solved with
 Citing this library
 ===================
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.18.2). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.18.3). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Documentation
@@ -138,12 +138,13 @@ History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
-* version 0.18.2 (2026-11-28)
+* version 0.18.3 (2026-11-28)
     - The tables of the approximation functions of all the numerically integrated kernels (`*_num`) are kept on each shell across calls, with the same results bit for bit, and the Bardell functions are evaluated with Horner's rule instead of `pow`, which changes the results at the round-off; the nonlinear analyses of the cohesive coupons were 1.34-1.35 times faster on a cluster node (Xeon E5-2640 v4)
     - New opt-in `MultiDomain(..., plate_kernels='blas')`: the nonlinear plate kernels of `plate_clpt_donnell` and `plate_fsdt_donnell` as matrix products, equal to the Cython kernels to the round-off
     - New opt-in `reuse_kT=True` of `get_reduced_functions` and `solve_coupon`, and `linear_solver` of `solve_coupon`, e.g. `'pardiso_lu'` of structsolve 0.13.0
     - The notebooks were executed again with the present code, the runs of the mixed-mode coupons made again by the notebooks, and the tests import the installed `panels` without changing `sys.path`
-    - Requires `structsolve>=0.13.0`
+    - New case of the stabilized Newton-Raphson method of structsolve 0.14.0, `NL_method='stabilized_NR'`: mode jump of a compressed plate from one to two half-waves, which `'NR'` cannot pass under load control (test `tests/tests_shell/test_stabilized_nr_mode_jump.py`, notebook `ex_stabilized_newton_raphson`, section of the documentation page `shell_overview`)
+    - Requires `structsolve>=0.14.0`
 * version 0.17.0 (2026-11-24)
     - New connection `'CZM'`, a mixed-mode multilinear cohesive interface: a superposition of bilinear laws with a mode-dependent penalty stiffness, each with its own Benzeggagh-Kenane exponent and damage, with contact and a consistent tangent, for the CLPT, FSDT and TSDT models; the history is updated with the converged states through `structsolve.Analysis.on_converged`
     - New `MultiDomain.add_linear_constraint`, linear constraints between panels imposed exactly with the null-space method, and `panels.multidomain.delamination`, DCB, ENF and MMB coupons with the lever of the MMB apparatus as a linear constraint

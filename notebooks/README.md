@@ -18,7 +18,7 @@ run times state how they were measured.
 The notebooks `ex_*.ipynb` show the analyses of `panels` with the code of
 its tests, defined and called in the notebook, such that each notebook runs
 on its own; each code cell names the test file it is taken from. They run
-`panels` at each execution, in less than a minute each.
+`panels` at each execution, in less than a minute each, except where stated.
 
 | File | Content |
 |---|---|
@@ -28,6 +28,7 @@ on its own; each code cell names the test file it is taken from. They run
 | `ex_flutter.ipynb` | Panel flutter with the piston theory |
 | `ex_newton_raphson.ipynb` | Non-linear static analysis with the Newton-Raphson method, consistency of the tangent stiffness matrix |
 | `ex_arc_length.ipynb` | Arc-length methods, snap-through of a hinged cylindrical panel |
+| `ex_stabilized_newton_raphson.ipynb` | Stabilized Newton-Raphson method, `NL_method='stabilized_NR'` of structsolve: mode jump of a compressed plate from one to two half-waves; about 4 min with its finer model |
 | `ex_follower_pressure.ipynb` | Follower (hydrostatic) pressure: linear buckling, non-linear analyses, kinetic criterion |
 | `ex_prescribed_displacements.ipynb` | Prescribed displacements imposed by a `MultiDomain` |
 | `ex_face_clamp.ipynb` | Clamped and face-clamped edges |
