@@ -1,6 +1,27 @@
 # Changelog
 
-## 0.18.2 (2026-11-28)
+## 0.18.3 (2026-11-28)
+
+### Added: a case of the stabilized Newton-Raphson method of structsolve
+
+- Mode jump of a simply supported plate, `a/b = 1.3`, under uniaxial
+  compression, with the in-plane displacement normal to the edges
+  restrained: the one-half-wave pattern ends at a limit point at the load
+  factor 0.654 (2.6 times `4 pi^2 D/b^2`), where
+  `structsolve.Analysis(NL_method='NR')` cuts the increments down to
+  `minInc` and stops; `NL_method='stabilized_NR'` of structsolve 0.14.0
+  passes it with one `'corrected'` state and reaches the final load with
+  two half-waves, every accepted state being an equilibrium.
+- Test `tests/tests_shell/test_stabilized_nr_mode_jump.py` (also the linear
+  buckling of the plate against the closed form), notebook
+  `ex_stabilized_newton_raphson` (verification of the equilibrium of the
+  accepted states and of the path before the jump, sensitivity to
+  `stabilization_factor`, a finer model), section "Post-buckling with the
+  stabilized Newton-Raphson method" of the page `shell_overview`; the
+  stabilized method is listed with the non-linear methods in the README,
+  the page `index` and the docstring of `solve_coupon`.
+- Requires `structsolve>=0.14.0` (`pyproject.toml`, `requirements.txt`),
+  the release on PyPI with `NL_method='stabilized_NR'`.
 
 ### Added: options for speed of the cohesive coupons
 
