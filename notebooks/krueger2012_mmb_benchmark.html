@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>MMB benchmark of Krueger (2012), NASA/CR-2012-217562 and NASA/CR-2012-217588 &#8212; panels 0.18.1 documentation</title>
+    <title>MMB benchmark of Krueger (2012), NASA/CR-2012-217562 and NASA/CR-2012-217588 &#8212; panels 0.18.2 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=1e56ff10"></script>
+    <script src="../_static/documentation_options.js?v=29ae757a"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -53,7 +53,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.1" />
+  <meta name="docsearch:version" content="0.18.2" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.1 documentation</p>
+    <p class="title logo__title">panels 0.18.2 documentation</p>
   
 </a></div>
     
@@ -1868,7 +1868,7 @@ coupon ends at the supports.</p>
 <li><p>FSDT arms: seven cohesive domains over 30 mm (4.29 mm each), <span class="math notranslate nohighlight">\(m\)</span> = 25 terms, 108 Gauss points per domain (25 per mm), sized with the fast decay rate of the opening of shear-deformable arms, 4.5 mm<span class="math notranslate nohighlight">\(^{-1}\)</span>.</p></li>
 </ul>
 <p><strong>Solver</strong> (<code class="docutils literal notranslate"><span class="pre">solve_coupon</span></code>): Newton-Raphson, displacement increments of 0.1 mm (the largest; cut automatically down to <span class="math notranslate nohighlight">\(10^{-5}\)</span> mm), relative tolerance <span class="math notranslate nohighlight">\(10^{-9}\)</span>; at 80% control of the separation at the load line (<code class="docutils literal notranslate"><span class="pre">control='load-line'</span></code>) up to a crack length of 50 mm, which follows the snap-back after the peak. The last displacement is twice the displacement at the LEFM peak. The peak loads are taken before the crack reaches the saddle, <span class="math notranslate nohighlight">\(a &lt; L\)</span>. These are the settings of
-the runs reported in the study of the mixed-mode model; the runs were made four at a time, one thread each, on a laptop shared with other runs, and the table at the end gives their run times and the computer.</p>
+the runs reported in the study of the mixed-mode model. The runs were made with this notebook (<code class="docutils literal notranslate"><span class="pre">MMB_RERUN=1</span></code>) on a node of a computing cluster, eight at a time with one thread each, and the table at the end gives their run times and the computer.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
@@ -2081,8 +2081,8 @@ display(Markdown(mu.peaks_table(rows, ref='LEFM (ASTM D6671)')))
 </tr>
 <tr class="row-odd"><td><p>MMB80</p></td>
 <td><p>panels FSDT</p></td>
-<td><p>702.1</p></td>
-<td><p>-3.8%</p></td>
+<td><p>695.6</p></td>
+<td><p>-4.7%</p></td>
 </tr>
 <tr class="row-even"><td><p>MMB80</p></td>
 <td><p>panels CLPT</p></td>
@@ -2128,12 +2128,12 @@ plt.show()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>info = ['| run | status | increments | last crack length (mm) | size | run time (min) | panels | machine |',
-        '|---|---|---|---|---|---|---|---|']
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>info = ['| run | status | increments | last crack length (mm) | size | run time (min) | machine |',
+        '|---|---|---|---|---|---|---|']
 for name, res in runs.items():
-    info.append('| {0} | {1} | {2} | {3:.1f} | {4} | {5:.1f} | {6} ({7}) | {8} |'.format(
+    info.append('| {0} | {1} | {2} | {3:.1f} | {4} | {5:.1f} | {6} |'.format(
         name, res['status'], len(res['delta']), res['a'][-1], res['size'], res['time']/60,
-        res['panels_version'], res['panels_commit'][:7], res['machine']))
+        res['machine']))
 display(Markdown('\n'.join(info)))
 </pre></div>
 </div>
@@ -2150,7 +2150,6 @@ display(Markdown('\n'.join(info)))
 <th class="head"><p>last crack length (mm)</p></th>
 <th class="head"><p>size</p></th>
 <th class="head"><p>run time (min)</p></th>
-<th class="head"><p>panels</p></th>
 <th class="head"><p>machine</p></th>
 </tr>
 </thead>
@@ -2160,60 +2159,54 @@ display(Markdown('\n'.join(info)))
 <td><p>149</p></td>
 <td><p>36.1</p></td>
 <td><p>7800</p></td>
-<td><p>72.5</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
+<td><p>71.2</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>MMB20_clpt</p></td>
 <td><p>finished</p></td>
 <td><p>35</p></td>
 <td><p>47.9</p></td>
 <td><p>2280</p></td>
-<td><p>7.2</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
+<td><p>6.2</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>MMB50_fsdt</p></td>
 <td><p>stopped at delta = 1.3193</p></td>
 <td><p>20</p></td>
 <td><p>25.4</p></td>
 <td><p>7800</p></td>
-<td><p>15.1</p></td>
-<td><p>0.16.0 (cb23e30)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
+<td><p>20.6</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>MMB50_clpt</p></td>
 <td><p>finished</p></td>
 <td><p>40</p></td>
 <td><p>52.4</p></td>
 <td><p>2280</p></td>
-<td><p>4.9</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
+<td><p>7.8</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>MMB80_fsdt</p></td>
 <td><p>finished</p></td>
-<td><p>237</p></td>
+<td><p>222</p></td>
 <td><p>50.0</p></td>
 <td><p>7800</p></td>
-<td><p>106.4</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
+<td><p>104.5</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>MMB80_clpt</p></td>
 <td><p>finished</p></td>
 <td><p>98</p></td>
 <td><p>50.2</p></td>
 <td><p>2280</p></td>
-<td><p>10.1</p></td>
-<td><p>0.16.0 (cb23e30)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
+<td><p>16.5</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 </tbody>
 </table>
@@ -2224,10 +2217,10 @@ processors, Windows 11</p></td>
 <section id="Discussion">
 <h2>Discussion<a class="headerlink" href="#Discussion" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p><strong>panels and the VCCT benchmark.</strong> The FSDT peak loads are 3.2% (20%), 4.8% (50%) and 6.5% (80%) below the ABAQUS benchmark and 3.3, 2.3 and 3.7% below the ANSYS benchmark, which differ from each other by up to 3% (2.9% at 80%). The CLPT peak loads are 2.3, 2.7 and <span class="math notranslate nohighlight">\(-2.1\)</span>% from the ABAQUS benchmark and 2.3, 5.4 and 0.9% from the ANSYS benchmark. After the critical point, both models follow the benchmark curves, read by eye, as far as they run (the FSDT run at 50% stops at the onset of
+<li><p><strong>panels and the VCCT benchmark.</strong> The FSDT peak loads are 3.2% (20%), 4.8% (50%) and 7.4% (80%) below the ABAQUS benchmark and 3.3, 2.3 and 4.6% below the ANSYS benchmark, which differ from each other by up to 3% (2.9% at 80%). The CLPT peak loads are 2.3, 2.7 and <span class="math notranslate nohighlight">\(-2.1\)</span>% from the ABAQUS benchmark and 2.3, 5.4 and 0.9% from the ANSYS benchmark. After the critical point, both models follow the benchmark curves, read by eye, as far as they run (the FSDT run at 50% stops at the onset of
 propagation); the initial stiffness of the FSDT model matches the benchmark and LEFM, the CLPT model is stiffer.</p></li>
-<li><p><strong>panels and LEFM.</strong> The FSDT peaks are 1.8, 3.8 and 3.8% below LEFM, a cohesive process zone ahead of the tip lowering the peak in the mixed-mode cases as in <a class="reference internal" href="mmb_camanho2003_as4peek.html"><span class="doc">mmb_camanho2003_as4peek</span></a>; LEFM and the VCCT benchmark, which have no process zone, agree within 3%. The strengths, chosen because the benchmark has none, therefore affect the comparison, the more so at 80%, where the process zone is longest.</p></li>
-<li><p><strong>CLPT and FSDT arms.</strong> The CLPT arms give peak loads 5.7, 7.9 and 4.8% above the FSDT arms, as for the tests of the same material in <a class="reference internal" href="mmb_ratcliffe2014_im78552.html"><span class="doc">mmb_ratcliffe2014_im78552</span></a>: the arms are thick (<span class="math notranslate nohighlight">\(h\)</span> = 2.25 mm) and CLPT neglects their transverse shear.</p></li>
+<li><p><strong>panels and LEFM.</strong> The FSDT peaks are 1.8, 3.8 and 4.7% below LEFM, a cohesive process zone ahead of the tip lowering the peak in the mixed-mode cases as in <a class="reference internal" href="mmb_camanho2003_as4peek.html"><span class="doc">mmb_camanho2003_as4peek</span></a>; LEFM and the VCCT benchmark, which have no process zone, agree within 3%. The strengths, chosen because the benchmark has none, therefore affect the comparison, the more so at 80%, where the process zone is longest.</p></li>
+<li><p><strong>CLPT and FSDT arms.</strong> The CLPT arms give peak loads 5.7, 7.9 and 5.8% above the FSDT arms, as for the tests of the same material in <a class="reference internal" href="mmb_ratcliffe2014_im78552.html"><span class="doc">mmb_ratcliffe2014_im78552</span></a>: the arms are thick (<span class="math notranslate nohighlight">\(h\)</span> = 2.25 mm) and CLPT neglects their transverse shear.</p></li>
 <li><p><strong>Robustness.</strong> With FSDT arms under control of the load-point displacement, the MMB at 20% slows down after the peak to increments of <span class="math notranslate nohighlight">\(10^{-5}\)</span> mm and stops at <span class="math notranslate nohighlight">\(a\)</span> = 36.1 mm; the MMB at 50% stops just after the peak, at the onset of propagation (<span class="math notranslate nohighlight">\(a \approx a_0\)</span>), so its peak is a lower bound. The MMB at 80% passes the snap-back with the control of the separation at the load line, in both theories.</p></li>
 </ul>
 </section>

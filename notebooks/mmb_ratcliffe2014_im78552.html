@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Mixed-mode delamination of IM7/8552: MMB tests of Ratcliffe and Johnston, DCB of Murri and ENF of O’Brien et al. &#8212; panels 0.18.1 documentation</title>
+    <title>Mixed-mode delamination of IM7/8552: MMB tests of Ratcliffe and Johnston, DCB of Murri and ENF of O’Brien et al. &#8212; panels 0.18.2 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=1e56ff10"></script>
+    <script src="../_static/documentation_options.js?v=29ae757a"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -53,7 +53,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.1" />
+  <meta name="docsearch:version" content="0.18.2" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.1 documentation</p>
+    <p class="title logo__title">panels 0.18.2 documentation</p>
   
 </a></div>
     
@@ -1864,7 +1864,7 @@ load line.</p>
 model).</p></li>
 </ul>
 <p>Solver (<code class="docutils literal notranslate"><span class="pre">solve_coupon</span></code>): Newton-Raphson, displacement increments of 0.1 mm (the largest; cut automatically down to <span class="math notranslate nohighlight">\(10^{-5}\)</span> mm), relative tolerance <span class="math notranslate nohighlight">\(10^{-9}\)</span>; for the MMB at 80% and the ENF (both theories), control of the separation at the load line (<code class="docutils literal notranslate"><span class="pre">control='load-line'</span></code>) up to a crack length of 50 mm, which follows the snap-back after the peak. The last displacement is twice the displacement at the LEFM peak. The peak loads are taken before the crack reaches the saddle,
-<span class="math notranslate nohighlight">\(a &lt; L\)</span>. These are the settings of the runs reported in the study of the mixed-mode model; the runs were made four at a time, one thread each, on a laptop shared with other runs, and the table at the end gives their run times and the computer. The stored result of the ENF with FSDT arms is the run of the study’s driver with the same commit, inputs and settings (<code class="docutils literal notranslate"><span class="pre">ENF_a25.4_fsdt_fsdtrule_loadline_cb23e30_20261123_225507</span></code>), converted with <code class="docutils literal notranslate"><span class="pre">mmb_utils.convert_study_run</span></code>, which checks them.</p>
+<span class="math notranslate nohighlight">\(a &lt; L\)</span>. These are the settings of the runs reported in the study of the mixed-mode model. The runs were made with this notebook (<code class="docutils literal notranslate"><span class="pre">MMB_RERUN=1</span></code>) on a node of a computing cluster, eight at a time with one thread each, and the table at the end gives their run times and the computer.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -2043,13 +2043,13 @@ display(Markdown(mu.peaks_table(rows, ref='LEFM (ASTM D6671)')))
 </tr>
 <tr class="row-odd"><td><p>MMB80</p></td>
 <td><p>panels FSDT</p></td>
-<td><p>657.9</p></td>
-<td><p>-2.3%</p></td>
+<td><p>658.5</p></td>
+<td><p>-2.2%</p></td>
 </tr>
 <tr class="row-even"><td><p>MMB80</p></td>
 <td><p>panels CLPT</p></td>
-<td><p>681.4</p></td>
-<td><p>+1.2%</p></td>
+<td><p>677.0</p></td>
+<td><p>+0.5%</p></td>
 </tr>
 <tr class="row-odd"><td><p>ENF</p></td>
 <td><p>LEFM (ASTM D6671)</p></td>
@@ -2110,12 +2110,12 @@ plt.show()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>info = ['| run | status | increments | last crack length (mm) | size | run time (min) | panels | machine |',
-        '|---|---|---|---|---|---|---|---|']
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>info = ['| run | status | increments | last crack length (mm) | size | run time (min) | machine |',
+        '|---|---|---|---|---|---|---|']
 for name, res in runs.items():
-    info.append('| {0} | {1} | {2} | {3:.1f} | {4} | {5:.1f} | {6} ({7}) | {8} |'.format(
+    info.append('| {0} | {1} | {2} | {3:.1f} | {4} | {5:.1f} | {6} |'.format(
         name, res['status'], len(res['delta']), res['a'][-1], res['size'], res['time']/60,
-        res['panels_version'], res['panels_commit'][:7], res['machine']))
+        res['machine']))
 display(Markdown('\n'.join(info)))
 </pre></div>
 </div>
@@ -2132,7 +2132,6 @@ display(Markdown('\n'.join(info)))
 <th class="head"><p>last crack length (mm)</p></th>
 <th class="head"><p>size</p></th>
 <th class="head"><p>run time (min)</p></th>
-<th class="head"><p>panels</p></th>
 <th class="head"><p>machine</p></th>
 </tr>
 </thead>
@@ -2142,100 +2141,90 @@ display(Markdown('\n'.join(info)))
 <td><p>58</p></td>
 <td><p>57.2</p></td>
 <td><p>7800</p></td>
-<td><p>30.2</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
+<td><p>25.5</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>DCB_clpt</p></td>
 <td><p>finished</p></td>
 <td><p>51</p></td>
 <td><p>75.9</p></td>
 <td><p>3504</p></td>
-<td><p>4.9</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
+<td><p>6.4</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>MMB20_fsdt</p></td>
 <td><p>stopped at delta = 2.6212</p></td>
 <td><p>92</p></td>
 <td><p>39.3</p></td>
 <td><p>7800</p></td>
-<td><p>34.6</p></td>
-<td><p>0.16.0 (cb23e30)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
+<td><p>36.0</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>MMB20_clpt</p></td>
 <td><p>finished</p></td>
 <td><p>34</p></td>
 <td><p>48.2</p></td>
 <td><p>3504</p></td>
-<td><p>4.2</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
+<td><p>4.9</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>MMB50_fsdt</p></td>
-<td><p>stopped at delta = 1.4695</p></td>
-<td><p>101</p></td>
-<td><p>35.0</p></td>
+<td><p>stopped at delta = 1.3750</p></td>
+<td><p>15</p></td>
+<td><p>29.7</p></td>
 <td><p>7800</p></td>
-<td><p>59.5</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
+<td><p>19.5</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>MMB50_clpt</p></td>
 <td><p>finished</p></td>
 <td><p>30</p></td>
 <td><p>53.0</p></td>
 <td><p>3504</p></td>
-<td><p>4.2</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
+<td><p>4.9</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>MMB80_fsdt</p></td>
 <td><p>finished</p></td>
-<td><p>150</p></td>
+<td><p>136</p></td>
 <td><p>50.1</p></td>
 <td><p>5840</p></td>
-<td><p>34.0</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
+<td><p>27.5</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>MMB80_clpt</p></td>
 <td><p>finished</p></td>
-<td><p>114</p></td>
+<td><p>83</p></td>
 <td><p>50.1</p></td>
 <td><p>3504</p></td>
-<td><p>12.1</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
+<td><p>12.2</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>ENF_fsdt</p></td>
-<td><p>stopped at delta = 1.5131638724360688</p></td>
+<td><p>finished</p></td>
 <td><p>76</p></td>
 <td><p>50.2</p></td>
 <td><p>7800</p></td>
-<td><p>23.9</p></td>
-<td><p>0.16.0 (560129f)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
+<td><p>31.6</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>ENF_clpt</p></td>
 <td><p>finished</p></td>
 <td><p>67</p></td>
 <td><p>50.2</p></td>
 <td><p>3504</p></td>
-<td><p>4.2</p></td>
-<td><p>0.16.0 (cb23e30)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
+<td><p>10.0</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 </tbody>
 </table>
@@ -2246,8 +2235,8 @@ processors, Windows 11</p></td>
 <section id="Discussion">
 <h2>Discussion<a class="headerlink" href="#Discussion" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p><strong>panels and LEFM.</strong> With the same inputs, the FSDT peak loads are within 2.4% of the corrected beam theory: +0.9% (DCB), <span class="math notranslate nohighlight">\(-1.4\)</span>, <span class="math notranslate nohighlight">\(-2.4\)</span> and <span class="math notranslate nohighlight">\(-2.3\)</span>% (MMB 20, 50 and 80%) and <span class="math notranslate nohighlight">\(-2.1\)</span>% (ENF; CLPT <span class="math notranslate nohighlight">\(-2.0\)</span>%). The LEFM peak of the DCB uses the dimensions measured by Murri (2013); with the nominal dimensions of the model it is 90.1 N, 1.4% above the FSDT peak.</p></li>
-<li><p><strong>CLPT and FSDT arms.</strong> The CLPT arms give peak loads 4.3% (DCB), 7.0% (MMB 20%), 4.9% (MMB 50%) and 3.6% (MMB 80%) above the FSDT arms, and the same peak for the ENF (1450.3 against 1449.5 N), more than for the thinner AS4/PEEK arms of <a class="reference internal" href="mmb_camanho2003_as4peek.html"><span class="doc">mmb_camanho2003_as4peek</span></a> (3.1, 1.8, 1.0 and 0.7%): the arms are thicker here (<span class="math notranslate nohighlight">\(h\)</span> = 2.29 against 1.56 mm, with <span class="math notranslate nohighlight">\(E_{11}/G_{13}\)</span> = 31) and the transverse shear that CLPT neglects matters more.</p></li>
+<li><p><strong>panels and LEFM.</strong> With the same inputs, the FSDT peak loads are within 2.4% of the corrected beam theory: +0.9% (DCB), <span class="math notranslate nohighlight">\(-1.4\)</span>, <span class="math notranslate nohighlight">\(-2.4\)</span> and <span class="math notranslate nohighlight">\(-2.2\)</span>% (MMB 20, 50 and 80%) and <span class="math notranslate nohighlight">\(-2.1\)</span>% (ENF; CLPT <span class="math notranslate nohighlight">\(-2.0\)</span>%). The LEFM peak of the DCB uses the dimensions measured by Murri (2013); with the nominal dimensions of the model it is 90.1 N, 1.4% above the FSDT peak.</p></li>
+<li><p><strong>CLPT and FSDT arms.</strong> The CLPT arms give peak loads 4.3% (DCB), 7.0% (MMB 20%), 4.9% (MMB 50%) and 2.8% (MMB 80%) above the FSDT arms, and the same peak for the ENF (1450.3 against 1449.5 N), more than for the thinner AS4/PEEK arms of <a class="reference internal" href="mmb_camanho2003_as4peek.html"><span class="doc">mmb_camanho2003_as4peek</span></a> (3.1, 1.8, 1.0 and 0.9%): the arms are thicker here (<span class="math notranslate nohighlight">\(h\)</span> = 2.29 against 1.56 mm, with <span class="math notranslate nohighlight">\(E_{11}/G_{13}\)</span> = 31) and the transverse shear that CLPT neglects matters more.</p></li>
 <li><p><strong>Tests.</strong> The peak loads of the three MMB tests lie 16% (20%), 5.5% (50%) and 21% (80%) below LEFM and both <code class="docutils literal notranslate"><span class="pre">panels</span></code> models, and their secant stiffness at the peak, 48, 180 and 264 N/mm, is 34-42% below the initial stiffness of LEFM (82.5, 272.5 and 451.3 N/mm): the tests are much more compliant than any of the models. A cause on the side of the tests is likely but could not be resolved: the elastic constants are a substitute, the crack lengths of the precracked specimens (50 and 80%) are
 not published, the lever weight is unknown, and the displacement may include the compliance of the machine. The toughnesses come from other test series (Murri 2013; O’Brien et al. 2010). No input was adjusted to reduce these differences.</p></li>
 <li><p><strong>Robustness.</strong> With FSDT arms under control of the load-point displacement, the DCB and the MMB at 20 and 50% slow down after the peak to increments of <span class="math notranslate nohighlight">\(10^{-5}\)</span> mm, the load falling at a nearly constant displacement as rows of integration points fail one after the other, and stop when the increment would fall below the minimum (status in the table above); the peaks are reached. The MMB at 80% passes the snap-back with the control of the separation at the load line. The ENF has

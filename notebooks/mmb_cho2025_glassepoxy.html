@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Mixed-mode delamination of glass/epoxy with fibre bridging: DCB, ENF and MMB tests of Cho et al. &#8212; panels 0.18.1 documentation</title>
+    <title>Mixed-mode delamination of glass/epoxy with fibre bridging: DCB, ENF and MMB tests of Cho et al. &#8212; panels 0.18.2 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=1e56ff10"></script>
+    <script src="../_static/documentation_options.js?v=29ae757a"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -53,7 +53,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.1" />
+  <meta name="docsearch:version" content="0.18.2" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.1 documentation</p>
+    <p class="title logo__title">panels 0.18.2 documentation</p>
   
 </a></div>
     
@@ -1913,25 +1913,12 @@ arm zero at the far end.</p>
 <p>Discretisation, as in the study of the mixed-mode model (rules in <code class="docutils literal notranslate"><span class="pre">mmb_utils.discretisation</span></code>): <span class="math notranslate nohighlight">\(m = \min(25, \lceil 1.25\,r L_{dom}\rceil)\)</span> terms along <span class="math notranslate nohighlight">\(x\)</span> in each cohesive domain, with <span class="math notranslate nohighlight">\(r\)</span> the largest decay rate of the opening and the sliding of the arms (for FSDT arms also the fast decay of Timoshenko arms); 25 Gauss points per mm along <span class="math notranslate nohighlight">\(x\)</span> in the cohesive domains, i.e. 18-27 per cohesive zone length <span class="math notranslate nohighlight">\(l_{cz} = 0.88 E_{22} G_{Ic}/\tau_I^2\)</span> = 0.92 mm; 6 across the
 width; <span class="math notranslate nohighlight">\(n = 4\)</span> terms across the width; 10 terms along <span class="math notranslate nohighlight">\(x\)</span> in the cracked and far domains.</p>
 <p>Solver (<code class="docutils literal notranslate"><span class="pre">solve_coupon</span></code>): Newton-Raphson, displacement increments of 0.1 mm (the largest; cut automatically down to <span class="math notranslate nohighlight">\(10^{-5}\)</span> mm), relative tolerance <span class="math notranslate nohighlight">\(10^{-9}\)</span>, control of the load-point displacement; for the MMB at 40% with FSDT arms, control of the separation at the load line (<code class="docutils literal notranslate"><span class="pre">control='load-line'</span></code>), because under displacement control this run stalled after the peak. The peak loads are taken before the crack reaches the saddle, <span class="math notranslate nohighlight">\(a &lt; L\)</span>.</p>
-<p><strong>Stored results.</strong> The results files were converted (<code class="docutils literal notranslate"><span class="pre">mmb_utils.convert_study_run</span></code>) from the runs of the study of the mixed-mode model listed in <code class="docutils literal notranslate"><span class="pre">STUDY_RUNS</span></code>, which were made with the same inputs and settings and with <code class="docutils literal notranslate"><span class="pre">panels</span></code> commit ec104c0, whose library code is that of this version (the later commits change only tests and requirements); the conversion checks the laws, the specimen, the coupon arguments, the solver settings and the size of the model built here. The table at the end
-gives the run times and the computers: the laptop runs shared the computer with other runs of the study, so their times are only indicative; the hpc12 runs had four threads on a node of the guest queue.</p>
+<p><strong>Stored results.</strong> The runs were made with this notebook (<code class="docutils literal notranslate"><span class="pre">MMB_RERUN=1</span></code>) on a node of a computing cluster, eight at a time with one thread each; the table at the end gives their run times and the computer.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>STUDY_RUNS = {
-    'DCB_clpt': 'DCB_a50_clpt_case4_tri_20261123_073145',
-    'DCB_fsdt': 'DCB_a50_fsdt_case4_tri_K1e5_20261123_082210',
-    'ENF_clpt': 'ENF_a30_clpt_case4_bil_20261123_133324',
-    'ENF_fsdt': 'ENF_a30_fsdt_case4_bil_20261123_150035',
-    'MMB20_clpt': 'MMB20_a25_clpt_case4_tri_20261123_080639',
-    'MMB20_fsdt': 'MMB20_a25_fsdt_case4_tri_K1e5_20261123_091832',
-    'MMB40_clpt': 'MMB40_a25_clpt_case4_tri_20261123_080639',
-    'MMB40_fsdt': 'MMB40_a25_fsdt_case4_tri_K1e5_loadline_20261123_110200',
-    'MMB60_clpt': 'MMB60_a25_clpt_case4_tri_20261123_081639',
-    'MMB60_fsdt': 'MMB60_a25_fsdt_case4_tri_K1e5_20261123_095119',
-}
-nd, gauss_per_mm = 7, 25.
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>nd, gauss_per_mm = 7, 25.
 
 
 def laws_of(key, model):
@@ -2167,7 +2154,7 @@ display(Markdown(mu.peaks_table(rows, ref='Tests, mean')))
 </tr>
 <tr class="row-odd"><td><p>MMB40</p></td>
 <td><p>panels FSDT</p></td>
-<td><p>207.7</p></td>
+<td><p>207.6</p></td>
 <td><p>+5.2%</p></td>
 </tr>
 <tr class="row-even"><td><p>MMB40</p></td>
@@ -2332,12 +2319,11 @@ plt.show()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>info = ['| run | status | increments | size | run time (min) | panels | machine | study run |',
-        '|---|---|---|---|---|---|---|---|']
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>info = ['| run | status | increments | size | run time (min) | machine |',
+        '|---|---|---|---|---|---|']
 for name, res in runs.items():
-    info.append('| {0} | {1} | {2} | {3} | {4:.1f} | {5} ({6}) | {7} | {8} |'.format(
-        name, res['status'], len(res['delta']), res['size'], res['time']/60, res['panels_version'],
-        res['panels_commit'][:7], res['machine'], res.get('source', '-')))
+    info.append('| {0} | {1} | {2} | {3} | {4:.1f} | {5} |'.format(
+        name, res['status'], len(res['delta']), res['size'], res['time']/60, res['machine']))
 display(Markdown('\n'.join(info)))
 </pre></div>
 </div>
@@ -2353,111 +2339,89 @@ display(Markdown('\n'.join(info)))
 <th class="head"><p>increments</p></th>
 <th class="head"><p>size</p></th>
 <th class="head"><p>run time (min)</p></th>
-<th class="head"><p>panels</p></th>
 <th class="head"><p>machine</p></th>
-<th class="head"><p>study run</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>DCB_fsdt</p></td>
-<td><p>stopped at delta = 7.526145434407929</p></td>
+<td><p>stopped at delta = 7.5261</p></td>
 <td><p>93</p></td>
 <td><p>7800</p></td>
-<td><p>56.3</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11; shared with other runs</p></td>
-<td><p>DCB_a50_fsdt_case4_tri_K1e5_20261123_082210</p></td>
+<td><p>23.8</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>DCB_clpt</p></td>
 <td><p>finished</p></td>
 <td><p>163</p></td>
 <td><p>4680</p></td>
-<td><p>30.3</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11; shared with other runs</p></td>
-<td><p>DCB_a50_clpt_case4_tri_20261123_073145</p></td>
+<td><p>36.3</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>ENF_fsdt</p></td>
-<td><p>stopped at delta = 4.059167480468751</p></td>
+<td><p>stopped at delta = 4.0592</p></td>
 <td><p>49</p></td>
 <td><p>7400</p></td>
-<td><p>18.8</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>Intel(R) Xeon(R) Gold 6130 CPU &#64; 2.10GHz, hpc12 node
-n12-144, 4 threads, Linux</p></td>
-<td><p>ENF_a30_fsdt_case4_bil_20261123_150035</p></td>
+<td><p>15.1</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>ENF_clpt</p></td>
-<td><p>stopped at delta = 3.9912231445312516</p></td>
+<td><p>stopped at delta = 3.9912</p></td>
 <td><p>46</p></td>
 <td><p>4272</p></td>
-<td><p>15.7</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>Intel(R) Xeon(R) Gold 6130 CPU &#64; 2.10GHz, hpc12 node
-n12-141, 4 threads, Linux</p></td>
-<td><p>ENF_a30_clpt_case4_bil_20261123_133324</p></td>
+<td><p>10.4</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>MMB20_fsdt</p></td>
-<td><p>finished</p></td>
-<td><p>155</p></td>
+<td><p>stopped at delta = 6.8951</p></td>
+<td><p>227</p></td>
 <td><p>7400</p></td>
-<td><p>56.5</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11; shared with other runs</p></td>
-<td><p>MMB20_a25_fsdt_case4_tri_K1e5_20261123_091832</p></td>
+<td><p>69.5</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>MMB20_clpt</p></td>
 <td><p>finished</p></td>
 <td><p>70</p></td>
 <td><p>4440</p></td>
-<td><p>10.0</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11; shared with other runs</p></td>
-<td><p>MMB20_a25_clpt_case4_tri_20261123_080639</p></td>
+<td><p>10.1</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>MMB40_fsdt</p></td>
 <td><p>finished</p></td>
-<td><p>433</p></td>
+<td><p>369</p></td>
 <td><p>7400</p></td>
-<td><p>214.6</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>Intel(R) Xeon(R) Gold 6130 CPU &#64; 2.10GHz, hpc12 node
-n12-134, 4 threads, Linux</p></td>
-<td><p>MMB40_a25_fsdt_case4_tri_K1e5_loadline_20261123_110200</p></td>
+<td><p>158.0</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>MMB40_clpt</p></td>
 <td><p>finished</p></td>
 <td><p>70</p></td>
 <td><p>4440</p></td>
-<td><p>15.5</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11; shared with other runs</p></td>
-<td><p>MMB40_a25_clpt_case4_tri_20261123_080639</p></td>
+<td><p>16.1</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>MMB60_fsdt</p></td>
-<td><p>stopped at delta = 4.927203739726018</p></td>
-<td><p>93</p></td>
+<td><p>stopped at delta = 5.0598</p></td>
+<td><p>74</p></td>
 <td><p>7400</p></td>
-<td><p>30.3</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11; shared with other runs</p></td>
-<td><p>MMB60_a25_fsdt_case4_tri_K1e5_20261123_095119</p></td>
+<td><p>24.7</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>MMB60_clpt</p></td>
 <td><p>finished</p></td>
 <td><p>172</p></td>
 <td><p>4440</p></td>
-<td><p>61.7</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11; shared with other runs</p></td>
-<td><p>MMB60_a25_clpt_case4_tri_20261123_081639</p></td>
+<td><p>38.5</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 </tbody>
 </table>
@@ -2475,7 +2439,7 @@ study, is within 1%).</p></li>
 <li><p><strong>Published toughnesses.</strong> The mixed-mode toughnesses of Cho et al. (Table 7, p. 8), to which their exponent <span class="math notranslate nohighlight">\(\eta\)</span> is fitted, are 12-26% above the toughness that ASTM D6671 gives from their own peak loads (Fig. 18) and measured compliances, independently of <span class="math notranslate nohighlight">\(h\)</span>; this accounts for part of the excess of the MMB peaks.</p></li>
 <li><p><strong>After the peak.</strong> The bridging law of <code class="docutils literal notranslate"><span class="pre">panels</span></code>, driven by the opening and without shear stiffness, keeps the full mode I bridging toughness at every mode ratio. At <span class="math notranslate nohighlight">\(\delta\)</span> = 6 mm it overpredicts the load of the MMB tests at 40 and 60% by 40-60%, more than the FE analyses of Cho et al., whose mixed-mode law scales the bridging branch through the Benzeggagh-Kenane criterion. In these tests the bridging fades as the mode II share grows, which a bridging law identified in mode I cannot
 know.</p></li>
-<li><p><strong>Robustness.</strong> The FSDT DCB stops at <span class="math notranslate nohighlight">\(\delta\)</span> = 7.53 mm and the FSDT MMB at 60% at <span class="math notranslate nohighlight">\(\delta\)</span> = 4.93 mm, after the peak, when the increments are cut below the minimum (the curves are shown up to there); the FSDT MMB at 40% was run under control of the load-line separation for this reason. The ENF runs stop at the peak (<span class="math notranslate nohighlight">\(\delta\)</span> = 3.99 mm CLPT, 4.06 mm FSDT), where the crack grows unstably. Load-line control is not defined for the DCB.</p></li>
+<li><p><strong>Robustness.</strong> The FSDT DCB stops at <span class="math notranslate nohighlight">\(\delta\)</span> = 7.53 mm, the FSDT MMB at 20% at <span class="math notranslate nohighlight">\(\delta\)</span> = 6.90 mm and at 60% at <span class="math notranslate nohighlight">\(\delta\)</span> = 5.06 mm, after the peak, when the increments are cut below the minimum (the curves are shown up to there); the FSDT MMB at 40% was run under control of the load-line separation for this reason. The ENF runs stop at the peak (<span class="math notranslate nohighlight">\(\delta\)</span> = 3.99 mm CLPT, 4.06 mm FSDT), where the crack grows unstably. Load-line control is not defined for the DCB.</p></li>
 <li><p><strong>Lever weight.</strong> Not published and not modelled. With ASTM D6671-22 Eqs. 17-18, levers of 8-9 N, as in other MMB rigs, would lower the measured critical loads by 0.5-2.7%.</p></li>
 </ul>
 </section>

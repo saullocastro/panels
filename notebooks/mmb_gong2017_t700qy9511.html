@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Mixed-mode delamination with large-scale fibre bridging at a 45//-45 interface: MMB tests of T700/QY9511 &#8212; panels 0.18.1 documentation</title>
+    <title>Mixed-mode delamination with large-scale fibre bridging at a 45//-45 interface: MMB tests of T700/QY9511 &#8212; panels 0.18.2 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=1e56ff10"></script>
+    <script src="../_static/documentation_options.js?v=29ae757a"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -53,7 +53,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.1" />
+  <meta name="docsearch:version" content="0.18.2" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.1 documentation</p>
+    <p class="title logo__title">panels 0.18.2 documentation</p>
   
 </a></div>
     
@@ -1834,26 +1834,12 @@ for key in tests:
 <p>Discretisation, as in the study of the mixed-mode model (rules in <code class="docutils literal notranslate"><span class="pre">mmb_utils.discretisation</span></code>): <span class="math notranslate nohighlight">\(m = \min(25, \lceil 1.25\,r L_{dom}\rceil)\)</span> terms along <span class="math notranslate nohighlight">\(x\)</span> in each cohesive domain of 4.29 mm, with <span class="math notranslate nohighlight">\(r\)</span> the largest decay rate of the opening and the sliding of the arms (for FSDT arms also the fast decay of Timoshenko arms): 6 for CLPT, 23 for FSDT; 25 Gauss points per mm along <span class="math notranslate nohighlight">\(x\)</span> (108 per domain), about 18 per cohesive zone length
 <span class="math notranslate nohighlight">\(l_{cz} = 0.88 E_{22} G_{Ic}/\tau_I^2\)</span> = 0.73 mm of the crack-tip law halves; 6 across the width; <span class="math notranslate nohighlight">\(n = 4\)</span> terms across the width; 10 terms along <span class="math notranslate nohighlight">\(x\)</span> in the cracked and far domains. In the study, 12 and 20 terms in the CLPT cohesive domains changed the curve by 0.1 N, and <span class="math notranslate nohighlight">\(n\)</span> = 8 the load by -0.4%.</p>
 <p>Solver (<code class="docutils literal notranslate"><span class="pre">solve_coupon</span></code>): Newton-Raphson, displacement increments of 0.1 mm (the largest; cut automatically down to <span class="math notranslate nohighlight">\(10^{-5}\)</span> mm), relative tolerance <span class="math notranslate nohighlight">\(10^{-9}\)</span>, control of the load-point displacement. The compared load is the largest load before the crack reaches <span class="math notranslate nohighlight">\(a = L - 3h\)</span>, where the tests were stopped.</p>
-<p><strong>Stored results.</strong> The CLPT runs were made with this notebook on a laptop, with one thread each and up to three runs at a time (<code class="docutils literal notranslate"><span class="pre">MMB_RERUN=1</span></code>); their peak loads equal those of the study runs. The FSDT results were converted (<code class="docutils literal notranslate"><span class="pre">mmb_utils.convert_study_run</span></code>) from the study runs listed in <code class="docutils literal notranslate"><span class="pre">STUDY_RUNS</span></code>, made with the same inputs and settings and with <code class="docutils literal notranslate"><span class="pre">panels</span></code> commit ec104c0, whose library code is that of this version; the conversion checks the laws, the specimen, the coupon arguments, the
-solver settings and the size of the model built here. The FSDT runs shared the laptop with other runs of the study, so their times are only indicative.</p>
+<p><strong>Stored results.</strong> The runs were made with this notebook (<code class="docutils literal notranslate"><span class="pre">MMB_RERUN=1</span></code>) on a node of a computing cluster, eight at a time with one thread each; the table at the end gives their run times and the computer.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>STUDY_RUNS = {
-    'MMB25_fsdt': 'MMB25_a36.48_fsdt_case4_mlDCB_v2_20261123_090432',
-    'MMB40_fsdt': 'MMB40_a35.7_fsdt_case4_mlDCB_v2_20261123_090432',
-    'MMB50_fsdt': 'MMB50_a35.69_fsdt_case4_mlDCB_v2_20261123_093242',
-    'MMB60_fsdt': 'MMB60_a38.7_fsdt_case4_mlDCB_v2_20261123_093507',
-    'MMB75_fsdt': 'MMB75_a35_fsdt_case4_mlDCB_v2_20261123_095247',
-    # CLPT, rerun here; the study runs, for comparison
-    'MMB25_clpt': 'MMB25_a36.48_clpt_case4_mlDCB_v2_20261123_085533',
-    'MMB40_clpt': 'MMB40_a35.7_clpt_case4_mlDCB_v2_20261123_085622',
-    'MMB50_clpt': 'MMB50_a35.69_clpt_case4_mlDCB_v2_20261123_085533',
-    'MMB60_clpt': 'MMB60_a38.7_clpt_case4_mlDCB_v2_20261123_085638',
-    'MMB75_clpt': 'MMB75_a35_clpt_case4_mlDCB_v2_20261123_085727',
-}
-nd, L_coh, gauss_per_mm = 7, 30., 25.
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>nd, L_coh, gauss_per_mm = 7, 30., 25.
 
 
 def inputs_of(key, model):
@@ -2179,12 +2165,11 @@ plt.show()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>info = ['| run | status | increments | size | run time (min) | panels | machine | study run |',
-        '|---|---|---|---|---|---|---|---|']
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>info = ['| run | status | increments | size | run time (min) | machine |',
+        '|---|---|---|---|---|---|']
 for name, res in runs.items():
-    info.append('| {0} | {1} | {2} | {3} | {4:.1f} | {5} ({6}) | {7} | {8} |'.format(
-        name, res['status'], len(res['delta']), res['size'], res['time']/60, res['panels_version'],
-        res['panels_commit'][:7], res['machine'], res.get('source', '-')))
+    info.append('| {0} | {1} | {2} | {3} | {4:.1f} | {5} |'.format(
+        name, res['status'], len(res['delta']), res['size'], res['time']/60, res['machine']))
 display(Markdown('\n'.join(info)))
 </pre></div>
 </div>
@@ -2200,9 +2185,7 @@ display(Markdown('\n'.join(info)))
 <th class="head"><p>increments</p></th>
 <th class="head"><p>size</p></th>
 <th class="head"><p>run time (min)</p></th>
-<th class="head"><p>panels</p></th>
 <th class="head"><p>machine</p></th>
-<th class="head"><p>study run</p></th>
 </tr>
 </thead>
 <tbody>
@@ -2210,116 +2193,81 @@ display(Markdown('\n'.join(info)))
 <td><p>finished</p></td>
 <td><p>100</p></td>
 <td><p>7240</p></td>
-<td><p>30.6</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11; shared with other runs</p></td>
-<td><p>MMB25_a36.48_fsdt_case4_mlDCB_v2_20261123_090432</p></td>
+<td><p>29.2</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>MMB25_clpt</p></td>
 <td><p>finished</p></td>
 <td><p>100</p></td>
 <td><p>1488</p></td>
-<td><p>1.1</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
-<td><ul class="simple">
-<li></li>
-</ul>
-</td>
+<td><p>1.3</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>MMB40_fsdt</p></td>
 <td><p>finished</p></td>
 <td><p>80</p></td>
 <td><p>7240</p></td>
-<td><p>28.1</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11; shared with other runs</p></td>
-<td><p>MMB40_a35.7_fsdt_case4_mlDCB_v2_20261123_090432</p></td>
+<td><p>27.1</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>MMB40_clpt</p></td>
 <td><p>finished</p></td>
 <td><p>80</p></td>
 <td><p>1488</p></td>
-<td><p>1.2</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
-<td><ul class="simple">
-<li></li>
-</ul>
-</td>
+<td><p>1.4</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>MMB50_fsdt</p></td>
 <td><p>finished</p></td>
 <td><p>60</p></td>
 <td><p>7240</p></td>
-<td><p>20.1</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11; shared with other runs</p></td>
-<td><p>MMB50_a35.69_fsdt_case4_mlDCB_v2_20261123_093242</p></td>
+<td><p>18.9</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>MMB50_clpt</p></td>
 <td><p>finished</p></td>
 <td><p>60</p></td>
 <td><p>1488</p></td>
-<td><p>0.8</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
-<td><ul class="simple">
-<li></li>
-</ul>
-</td>
+<td><p>1.0</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>MMB60_fsdt</p></td>
 <td><p>finished</p></td>
 <td><p>57</p></td>
 <td><p>7240</p></td>
-<td><p>19.6</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11; shared with other runs</p></td>
-<td><p>MMB60_a38.7_fsdt_case4_mlDCB_v2_20261123_093507</p></td>
+<td><p>18.8</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>MMB60_clpt</p></td>
 <td><p>finished</p></td>
 <td><p>57</p></td>
 <td><p>1488</p></td>
-<td><p>0.8</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
-<td><ul class="simple">
-<li></li>
-</ul>
-</td>
+<td><p>0.9</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>MMB75_fsdt</p></td>
 <td><p>finished</p></td>
 <td><p>50</p></td>
 <td><p>7240</p></td>
-<td><p>17.9</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11; shared with other runs</p></td>
-<td><p>MMB75_a35_fsdt_case4_mlDCB_v2_20261123_095247</p></td>
+<td><p>17.5</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>MMB75_clpt</p></td>
 <td><p>finished</p></td>
 <td><p>50</p></td>
 <td><p>1488</p></td>
-<td><p>0.8</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical
-processors, Windows 11</p></td>
-<td><ul class="simple">
-<li></li>
-</ul>
-</td>
+<td><p>1.0</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 </tbody>
 </table>

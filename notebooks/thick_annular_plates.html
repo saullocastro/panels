@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Thick annular plates: shear deformation theories against exact and Ritz solutions &#8212; panels 0.18.1 documentation</title>
+    <title>Thick annular plates: shear deformation theories against exact and Ritz solutions &#8212; panels 0.18.2 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=1e56ff10"></script>
+    <script src="../_static/documentation_options.js?v=29ae757a"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -53,7 +53,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.1" />
+  <meta name="docsearch:version" content="0.18.2" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.1 documentation</p>
+    <p class="title logo__title">panels 0.18.2 documentation</p>
   
 </a></div>
     
@@ -1702,7 +1702,7 @@
 <li><p>Dozio [3]: Ritz natural frequencies of annuli with the FSDT and the shear correction factor <span class="math notranslate nohighlight">\(5/6\)</span>.</p></li>
 </ol>
 <p>Section 1 shows, for [1], the buckling torques with the shear correction factor 1, which reproduces the paper, beside those with the default of panels, <code class="docutils literal notranslate"><span class="pre">fsdt_shear_correction</span> <span class="pre">=</span> <span class="pre">'rohwer'</span></code>.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -1715,7 +1715,6 @@ import panels
 from panels.shell import Shell
 from panels.multidomain import MultiDomain
 
-print('panels', panels.__version__)
 T_START = time.time()
 
 
@@ -1734,14 +1733,6 @@ def rel(value, ref):
     return 100.*(value - ref)/ref
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-panels 0.15.0
-</pre></div></div>
 </div>
 <section id="Model">
 <h2>Model<a class="headerlink" href="#Model" title="Link to this heading">#</a></h2>
@@ -2328,7 +2319,7 @@ the same mode at 40.720. The lists of the 3-D Ritz solutions reprinted in [3], T
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-total run time: 47.5 min
+total run time: 36.6 min
 </pre></div></div>
 </div>
 </section>

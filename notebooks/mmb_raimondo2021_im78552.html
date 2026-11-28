@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Mixed-mode delamination of IM7/8552: DCB and MMB tests of Raimondo et al. &#8212; panels 0.18.1 documentation</title>
+    <title>Mixed-mode delamination of IM7/8552: DCB and MMB tests of Raimondo et al. &#8212; panels 0.18.2 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=1e56ff10"></script>
+    <script src="../_static/documentation_options.js?v=29ae757a"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -53,7 +53,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.1" />
+  <meta name="docsearch:version" content="0.18.2" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.1 documentation</p>
+    <p class="title logo__title">panels 0.18.2 documentation</p>
   
 </a></div>
     
@@ -1808,7 +1808,7 @@ a0 = 29.82 / 29.94 mm; used: 29.8 mm
 </section>
 <section id="Reference-data">
 <h2>Reference data<a class="headerlink" href="#Reference-data" title="Link to this heading">#</a></h2>
-<p>Raimondo et al. (2021) give no table of peak loads; the curves are digitised from the raster figures (reading error about $:nbsphinx-math:<a href="#id1"><span class="problematic" id="id2">`</span></a>pm`$1.5 pixel, 0.01-0.03 mm and 0.3-1.1 N; where curves overlap only the top one is visible, so the records have gaps):</p>
+<p>Raimondo et al. (2021) give no table of peak loads; the curves are digitised from the raster figures (reading error about <span class="math notranslate nohighlight">\(\pm 1.5\)</span> pixel, 0.01-0.03 mm and 0.3-1.1 N; where curves overlap only the top one is visible, so the records have gaps):</p>
 <ul class="simple">
 <li><p>tests: DCB Fig. 9(a), p. 9; MMB 20% Fig. 14(a), p. 11; MMB 50% Fig. 18(a), p. 12; three specimens each. In the MMB at 50% the load rises again after about 3.5 mm, when the crack passes the saddle;</p></li>
 <li><p>VCCT analyses without R-curve: Figs. 28, 30 and 32, pp. 16-17 (the MMB analyses include the lever weight as an equivalent force and moment, p. 15); and the analytical DCB curve of Fig. 28, used above.</p></li>
@@ -1885,21 +1885,12 @@ the load line, where the slope of the upper arm is zero.</p>
 <p>Discretisation, as in the study of the mixed-mode model (rules in <code class="docutils literal notranslate"><span class="pre">mmb_utils.discretisation</span></code>): <span class="math notranslate nohighlight">\(m = \min(25, \lceil 1.25\,r L_{dom}\rceil)\)</span> terms along <span class="math notranslate nohighlight">\(x\)</span> in each cohesive domain (24-25), with <span class="math notranslate nohighlight">\(r\)</span> the largest decay rate of the opening and the sliding of the arms (for FSDT arms also the fast decay of Timoshenko arms); 25 Gauss points per mm along <span class="math notranslate nohighlight">\(x\)</span>, about 12 per cohesive zone length <span class="math notranslate nohighlight">\(l_{cz} = 0.88 E_{22} G_{Ic}/\tau_I^2\)</span> = 0.46 mm; 6 across the width;
 <span class="math notranslate nohighlight">\(n = 4\)</span> terms across the width; 10 terms along <span class="math notranslate nohighlight">\(x\)</span> in the cracked and far domains.</p>
 <p>Solver (<code class="docutils literal notranslate"><span class="pre">solve_coupon</span></code>): Newton-Raphson, displacement increments of 0.1 mm (the largest; cut automatically down to <span class="math notranslate nohighlight">\(10^{-5}\)</span> mm), relative tolerance <span class="math notranslate nohighlight">\(10^{-9}\)</span>, control of the load-point displacement; for the MMB at 50% with CLPT arms, control of the separation at the load line (<code class="docutils literal notranslate"><span class="pre">control='load-line'</span></code>), which follows the snap-back after the peak, up to a crack length of 52 mm.</p>
-<p><strong>Stored results.</strong> The results files were converted (<code class="docutils literal notranslate"><span class="pre">mmb_utils.convert_study_run</span></code>) from the runs of the study of the mixed-mode model listed in <code class="docutils literal notranslate"><span class="pre">STUDY_RUNS</span></code>, which were made with the same inputs and settings and with <code class="docutils literal notranslate"><span class="pre">panels</span></code> commit ec104c0, whose library code is that of this version; the conversion checks the laws, the specimen, the coupon arguments, the solver settings and the size of the model built here. The runs shared a laptop with other runs of the study, so their times are only
-indicative.</p>
+<p><strong>Stored results.</strong> The runs were made with this notebook (<code class="docutils literal notranslate"><span class="pre">MMB_RERUN=1</span></code>) on a node of a computing cluster, eight at a time with one thread each; the table at the end gives their run times and the computer.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>STUDY_RUNS = {
-    'DCB_clpt': 'DCB_a29.8_clpt_case4c_20261123_091558',
-    'DCB_fsdt': 'DCB_a29.8_fsdt_case4c_20261123_100041',
-    'MMB20_clpt': 'MMB20_a25_clpt_case4c_20261123_073215',
-    'MMB20_fsdt': 'MMB20_a25_fsdt_case4c_20261123_074203',
-    'MMB50_clpt': 'MMB50_a25_clpt_case4c_loadline_20261123_081811',
-    'MMB50_fsdt': 'MMB50_a25_fsdt_case4c_20261123_075538',
-}
-nd, gauss_per_mm = 7, 25.
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>nd, gauss_per_mm = 7, 25.
 
 
 def inputs_of(key, model):
@@ -1969,7 +1960,7 @@ DCB_clpt: peak 76.3 N without the shift, 76.3 N in the frame of the tests
 MMB20_fsdt: peak 67.3 N without the shift, 56.9 N in the frame of the tests
 MMB20_clpt: peak 69.1 N without the shift, 58.7 N in the frame of the tests
 MMB50_fsdt: peak 192.0 N without the shift, 173.7 N in the frame of the tests
-MMB50_clpt: peak 198.8 N without the shift, 180.5 N in the frame of the tests
+MMB50_clpt: peak 198.9 N without the shift, 180.5 N in the frame of the tests
 </pre></div></div>
 </div>
 <p>Peak loads (first maximum, <span class="math notranslate nohighlight">\(\delta\)</span> &lt; 5 mm): tests, the VCCT analyses of Raimondo et al. (2021), LEFM and <code class="docutils literal notranslate"><span class="pre">panels</span></code>, in the frame of the tests; the differences are to the mean of the tests.</p>
@@ -2250,12 +2241,11 @@ plt.show()
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>info = ['| run | status | last crack length (mm) | increments | size | run time (min) | panels | machine | study run |',
-        '|---|---|---|---|---|---|---|---|---|']
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>info = ['| run | status | last crack length (mm) | increments | size | run time (min) | machine |',
+        '|---|---|---|---|---|---|---|']
 for name, res in runs.items():
-    info.append('| {0} | {1} | {2:.1f} | {3} | {4} | {5:.1f} | {6} ({7}) | {8} | {9} |'.format(
-        name, res['status'], res['a'][-1], len(res['delta']), res['size'], res['time']/60, res['panels_version'],
-        res['panels_commit'][:7], res['machine'], res.get('source', '-')))
+    info.append('| {0} | {1} | {2:.1f} | {3} | {4} | {5:.1f} | {6} |'.format(
+        name, res['status'], res['a'][-1], len(res['delta']), res['size'], res['time']/60, res['machine']))
 display(Markdown('\n'.join(info)))
 </pre></div>
 </div>
@@ -2272,83 +2262,63 @@ display(Markdown('\n'.join(info)))
 <th class="head"><p>increments</p></th>
 <th class="head"><p>size</p></th>
 <th class="head"><p>run time (min)</p></th>
-<th class="head"><p>panels</p></th>
 <th class="head"><p>machine</p></th>
-<th class="head"><p>study run</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>DCB_fsdt</p></td>
-<td><p>stopped at delta = 1.868457653473641</p></td>
+<td><p>stopped at delta = 1.8685</p></td>
 <td><p>31.1</p></td>
 <td><p>36</p></td>
 <td><p>7800</p></td>
-<td><p>22.1</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16
-logical processors, Windows 11; shared with other
-runs</p></td>
-<td><p>DCB_a29.8_fsdt_case4c_20261123_100041</p></td>
+<td><p>19.1</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>DCB_clpt</p></td>
 <td><p>finished</p></td>
 <td><p>64.3</p></td>
 <td><p>145</p></td>
 <td><p>4512</p></td>
-<td><p>30.6</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16
-logical processors, Windows 11; shared with other
-runs</p></td>
-<td><p>DCB_a29.8_clpt_case4c_20261123_091558</p></td>
+<td><p>34.1</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>MMB20_fsdt</p></td>
-<td><p>stopped at delta = 3.3178276904296893</p></td>
+<td><p>stopped at delta = 3.3178</p></td>
 <td><p>26.2</p></td>
 <td><p>41</p></td>
 <td><p>7400</p></td>
-<td><p>23.2</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16
-logical processors, Windows 11; shared with other
-runs</p></td>
-<td><p>MMB20_a25_fsdt_case4c_20261123_074203</p></td>
+<td><p>19.0</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>MMB20_clpt</p></td>
 <td><p>finished</p></td>
 <td><p>54.1</p></td>
 <td><p>104</p></td>
 <td><p>4440</p></td>
-<td><p>23.3</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16
-logical processors, Windows 11; shared with other
-runs</p></td>
-<td><p>MMB20_a25_clpt_case4c_20261123_073215</p></td>
+<td><p>28.5</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>MMB50_fsdt</p></td>
-<td><p>stopped at delta = 2.4607940269338378</p></td>
+<td><p>stopped at delta = 2.4608</p></td>
 <td><p>25.0</p></td>
 <td><p>35</p></td>
 <td><p>7400</p></td>
-<td><p>22.5</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16
-logical processors, Windows 11; shared with other
-runs</p></td>
-<td><p>MMB50_a25_fsdt_case4c_20261123_075538</p></td>
+<td><p>17.4</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>MMB50_clpt</p></td>
-<td><p>stopped at delta = 4.516670550765734</p></td>
-<td><p>52.0</p></td>
-<td><p>266</p></td>
+<td><p>finished</p></td>
+<td><p>52.1</p></td>
+<td><p>168</p></td>
 <td><p>4440</p></td>
-<td><p>93.2</p></td>
-<td><p>0.16.0 (ec104c0)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16
-logical processors, Windows 11; shared with other
-runs</p></td>
-<td><p>MMB50_a25_clpt_case4c_loadline_20261123_081811</p></td>
+<td><p>50.7</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors,
+Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 </tbody>
 </table>

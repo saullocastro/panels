@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971) &#8212; panels 0.18.1 documentation</title>
+    <title>Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971) &#8212; panels 0.18.2 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=1e56ff10"></script>
+    <script src="../_static/documentation_options.js?v=29ae757a"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -53,7 +53,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.1" />
+  <meta name="docsearch:version" content="0.18.2" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.1 documentation</p>
+    <p class="title logo__title">panels 0.18.2 documentation</p>
   
 </a></div>
     
@@ -1697,7 +1697,7 @@
 <h1>Buckling of clamped-free annular plates compressed on the outer edge (Majumdar 1971)<a class="headerlink" href="#Buckling-of-clamped-free-annular-plates-compressed-on-the-outer-edge-(Majumdar-1971)" title="Link to this heading">#</a></h1>
 <p>Majumdar [1] studied, in theory and in tests on aluminium plates, the buckling of an annular plate clamped on the outer edge, free on the inner edge and compressed by a uniform radial force on the outer edge. Unlike the annulus compressed on both edges (Yamaki [2]), whose membrane state is uniform, the free inner edge gives the non-uniform state of Lamé, and the mode changes from axisymmetric to waves along the circumference as the hole grows. This notebook computes the buckling loads with
 <code class="docutils literal notranslate"><span class="pre">annular_clpt_donnell</span></code> of panels, the pre-buckling state coming from a linear static case, and compares them with the experiments of [1], Fig. 2.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -1712,7 +1712,6 @@ from panels.shell import Shell
 from panels.multidomain import MultiDomain
 
 %matplotlib inline
-print('panels', panels.__version__)
 T_START = time.time()
 
 
@@ -1731,14 +1730,6 @@ def rel(value, ref):
     return 100.*(value - ref)/ref
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-panels 0.15.0
-</pre></div></div>
 </div>
 <section id="1.-Specimens-and-load-parameter">
 <h2>1. Specimens and load parameter<a class="headerlink" href="#1.-Specimens-and-load-parameter" title="Link to this heading">#</a></h2>
@@ -2058,7 +2049,7 @@ experiments therefore support the computed trend of the load and the change of m
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-total run time: 4.7 min
+total run time: 4.3 min
 </pre></div></div>
 </div>
 </section>

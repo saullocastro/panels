@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Mixed-mode delamination of AS4D/PEKK-FC with fibre bridging: DCB and MMB tests of Tijs et al. &#8212; panels 0.18.1 documentation</title>
+    <title>Mixed-mode delamination of AS4D/PEKK-FC with fibre bridging: DCB and MMB tests of Tijs et al. &#8212; panels 0.18.2 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=1e56ff10"></script>
+    <script src="../_static/documentation_options.js?v=29ae757a"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -53,7 +53,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.1" />
+  <meta name="docsearch:version" content="0.18.2" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.1 documentation</p>
+    <p class="title logo__title">panels 0.18.2 documentation</p>
   
 </a></div>
     
@@ -2793,11 +2793,10 @@ display(Markdown('\n'.join(rows)))
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>info = ['| run | status | increments | size | run time (min) | panels | machine |', '|---|---|---|---|---|---|---|']
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>info = ['| run | status | increments | size | run time (min) | machine |', '|---|---|---|---|---|---|']
 for name, res in runs.items():
-    info.append('| {0} | {1} | {2} | {3} | {4:.1f} | {5} ({6}) | {7} |'.format(
-        name, res['status'], len(res['delta']), res['size'], res['time']/60, res['panels_version'],
-        res['panels_commit'][:7], res['machine']))
+    info.append('| {0} | {1} | {2} | {3} | {4:.1f} | {5} |'.format(
+        name, res['status'], len(res['delta']), res['size'], res['time']/60, res['machine']))
 display(Markdown('\n'.join(info)))
 </pre></div>
 </div>
@@ -2813,7 +2812,6 @@ display(Markdown('\n'.join(info)))
 <th class="head"><p>increments</p></th>
 <th class="head"><p>size</p></th>
 <th class="head"><p>run time (min)</p></th>
-<th class="head"><p>panels</p></th>
 <th class="head"><p>machine</p></th>
 </tr>
 </thead>
@@ -2822,91 +2820,81 @@ display(Markdown('\n'.join(info)))
 <td><p>stopped at delta = 10.8220</p></td>
 <td><p>147</p></td>
 <td><p>7800</p></td>
-<td><p>119.0</p></td>
-<td><p>0.16.0 ()</p></td>
-<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 64 logical processors,
-Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
+<td><p>84.5</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>DCB48_clpt_multilinear</p></td>
 <td><p>finished</p></td>
 <td><p>119</p></td>
 <td><p>4176</p></td>
-<td><p>17.0</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical processors,
-Windows 11</p></td>
+<td><p>23.3</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>DCB48_fsdt_bilinear</p></td>
 <td><p>stopped at delta = 9.7808</p></td>
 <td><p>166</p></td>
 <td><p>2800</p></td>
-<td><p>19.4</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical processors,
-Windows 11</p></td>
+<td><p>18.4</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>DCB48_clpt_bilinear</p></td>
 <td><p>finished</p></td>
 <td><p>119</p></td>
 <td><p>1488</p></td>
-<td><p>3.8</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical processors,
-Windows 11</p></td>
+<td><p>6.0</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>DCB40_fsdt_multilinear</p></td>
 <td><p>finished</p></td>
 <td><p>125</p></td>
 <td><p>7800</p></td>
-<td><p>106.7</p></td>
-<td><p>0.16.0 ()</p></td>
-<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 64 logical processors,
-Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
+<td><p>74.9</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>DCB40_clpt_multilinear</p></td>
 <td><p>finished</p></td>
 <td><p>85</p></td>
 <td><p>4176</p></td>
-<td><p>13.4</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical processors,
-Windows 11</p></td>
+<td><p>17.6</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>MMB50_fsdt_multilinear</p></td>
 <td><p>finished</p></td>
 <td><p>105</p></td>
 <td><p>7800</p></td>
-<td><p>76.8</p></td>
-<td><p>0.16.0 ()</p></td>
-<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 64 logical processors,
-Linux 3.10.0-1160.119.1.el7.x86_64</p></td>
+<td><p>58.4</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>MMB50_clpt_multilinear</p></td>
 <td><p>finished</p></td>
 <td><p>105</p></td>
 <td><p>4176</p></td>
-<td><p>14.5</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical processors,
-Windows 11</p></td>
+<td><p>19.2</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-even"><td><p>MMB50_fsdt_bilinear</p></td>
 <td><p>finished</p></td>
-<td><p>151</p></td>
+<td><p>282</p></td>
 <td><p>2800</p></td>
-<td><p>17.7</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical processors,
-Windows 11</p></td>
+<td><p>35.5</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 <tr class="row-odd"><td><p>MMB50_clpt_bilinear</p></td>
 <td><p>finished</p></td>
 <td><p>105</p></td>
 <td><p>1488</p></td>
-<td><p>3.6</p></td>
-<td><p>0.16.0 (439b8fb)</p></td>
-<td><p>AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics, 16 logical processors,
-Windows 11</p></td>
+<td><p>5.3</p></td>
+<td><p>Intel(R) Xeon(R) Gold 5218 CPU &#64; 2.30GHz, 8 logical processors, Linux
+3.10.0-1160.119.1.el7.x86_64</p></td>
 </tr>
 </tbody>
 </table>

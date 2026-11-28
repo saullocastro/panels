@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Changelog &#8212; panels 0.18.1 documentation</title>
+    <title>Changelog &#8212; panels 0.18.2 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="_static/documentation_options.js?v=1e56ff10"></script>
+    <script src="_static/documentation_options.js?v=29ae757a"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -50,7 +50,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.1" />
+  <meta name="docsearch:version" content="0.18.2" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -118,7 +118,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.1 documentation</p>
+    <p class="title logo__title">panels 0.18.2 documentation</p>
   
 </a></div>
     
@@ -1696,7 +1696,7 @@
 <a class="reference external" href="https://github.com/saullocastro/panels/blob/main/CHANGELOG.md">repository</a>:</p>
 <div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Changelog</span>
 
-<span class="gu">## 0.18.1 (2026-11-26)</span>
+<span class="gu">## 0.18.2 (2026-11-28)</span>
 
 <span class="gu">### Added: options for speed of the cohesive coupons</span>
 
@@ -1807,6 +1807,30 @@ On by default; <span class="gs">**results change at round-off level**</span> wit
 <span class="k">-</span><span class="w"> </span>The docstrings, the comments, the pages, the tests and the text of the
   notebooks describe the present behaviour, without version numbers of
   panels or structsolve.
+<span class="k">-</span><span class="w"> </span>The notebooks were executed again with the present code and their stored
+  outputs replaced where they had changed. The runs of the mixed-mode
+  coupons (<span class="sb">`mmb_camanho2003_as4peek`</span>, <span class="sb">`mmb_ratcliffe2014_im78552`</span>,
+  <span class="sb">`krueger2012_mmb_benchmark`</span>, <span class="sb">`mmb_tijs2022_as4dpekk`</span>,
+  <span class="sb">`mmb_cho2025_glassepoxy`</span>, <span class="sb">`mmb_gong2017_t700qy9511`</span>,
+  <span class="sb">`mmb_raimondo2021_im78552`</span>) are now all made by the notebooks
+  (<span class="sb">`MMB_RERUN=1`</span>); under control of the load-line separation and after the
+  peaks the increments differ, and the peak loads and run ends quoted in
+  the text follow the new runs (e.g. Krueger (2012), MMB 80% with FSDT arms:
+  695.6 instead of 702.1 N). Their run tables give the machine and the run
+  time, without the version of panels, and the notebooks that printed the
+  versions of panels and composites no longer do.
+<span class="k">-</span><span class="w"> </span>Text corrected to the outputs: <span class="sb">`ex_face_clamp`</span> (the penalty model of the
+  face clamp gives the deflection of the null-space model, not its axial
+  displacement), <span class="sb">`abramovich2009_blade_panels`</span> and
+  <span class="sb">`lanzi2003_torsion_cylinder`</span> (no warning of the null-space elimination);
+  new outputs of <span class="sb">`cohesive_zone_verification`</span>.
+<span class="k">-</span><span class="w"> </span>The tests import the installed <span class="sb">`panels`</span>: no <span class="sb">`sys.path.append('../..')`</span>
+  or other change of <span class="sb">`sys.path`</span> in <span class="sb">`tests/`</span>;
+  <span class="sb">`tests/tests_shell/test_cylshell_tsdt_tl.py`</span> and
+  <span class="sb">`tests/multidomain/test_stamatelos_labeas_2023_multidomain.py`</span> import the
+  test modules of other folders as <span class="sb">`multidomain.test_annular_cylinder`</span> and
+  <span class="sb">`tests_stiffpanelbay.test_stamatelos_labeas_2023`</span>. The notebooks
+  <span class="sb">`stamatelos_labeas_2023*`</span> no longer append the repository to <span class="sb">`sys.path`</span>.
 
 <span class="gu">### Added: mixed-mode multilinear cohesive interface `'CZM'` and delamination coupons</span>
 

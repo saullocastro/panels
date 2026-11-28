@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003) &#8212; panels 0.18.1 documentation</title>
+    <title>Axial and torsional buckling of a CFRP cylinder with L-shaped stringers (Lanzi, Bisagni and Cordisco 2003) &#8212; panels 0.18.2 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=1e56ff10"></script>
+    <script src="../_static/documentation_options.js?v=29ae757a"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -53,7 +53,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.1" />
+  <meta name="docsearch:version" content="0.18.2" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.1 documentation</p>
+    <p class="title logo__title">panels 0.18.2 documentation</p>
   
 </a></div>
     
@@ -1711,7 +1711,7 @@ shells is described in [2-4].</p>
 <li><p>Castro, S. G. P., and Donadon, M. V., “Assembly of semi-analytical models to address linear buckling and vibration of stiffened composite panels with debonding defect”, Composite Structures, 160, 232-247, 2017. <a class="reference external" href="https://doi.org/10.1016/j.compstruct.2016.10.026">https://doi.org/10.1016/j.compstruct.2016.10.026</a></p></li>
 </ol>
 <p>The analyses take about 110 minutes on one core; the notebook is stored with the outputs of its last execution.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -1727,19 +1727,9 @@ import posicoss_utils as pu
 from posicoss_utils import print_table, rel
 
 %matplotlib inline
-print('panels', panels.__version__,
-      '| composites', composites.__version__)
 T_START = time.time()
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-panels 0.15.0 | composites 0.10.3
-</pre></div></div>
 </div>
 <section id="1.-Data-of-the-shell">
 <h2>1. Data of the shell<a class="headerlink" href="#1.-Data-of-the-shell" title="Link to this heading">#</a></h2>
@@ -1993,24 +1983,22 @@ for load in ('axial', 'torsion'):
 axial
                                m  n (bay)  Ritz constants  first buckling (kN)             change %  stiffness (kN/mm)    s
 --------------------------------  -------  --------------  -------------------  -------------------  -----------------  ---
-                              14       16           14112               314.96                                  270.92   28
-                              18       20           19872               256.88               -18.44             270.83   46
-                              22       24           26400               244.47                -4.83             270.81  112
-                              26       26           32448               241.42                -1.25             270.80  291
-                              30       28           38880               240.80                -0.26             270.80  930
-26 (strips 5, feet and blades 8)       26           37440               241.40  -0.006 vs same m, n             270.80  401
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 7.4e-07 and the largest redundant one 1.5e-10, see the parameter &#34;tol&#34;
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 7.4e-07 and the largest redundant one 1.5e-10, see the parameter &#34;tol&#34;
+                              14       16           14112               314.96                                  270.92   38
+                              18       20           19872               256.88               -18.44             270.83   55
+                              22       24           26400               244.47                -4.83             270.81  127
+                              26       26           32448               241.42                -1.25             270.80  302
+                              30       28           38880               240.80                -0.26             270.80  977
+26 (strips 5, feet and blades 8)       26           37440               241.40  -0.006 vs same m, n             270.80  309
 
 torsion
                                m  n (bay)  Ritz constants  first buckling (kNm)             change %  stiffness (kNm/degree)    s
 --------------------------------  -------  --------------  --------------------  -------------------  ----------------------  ---
-                              14       16           14112                 17.65                                       178.65   17
-                              18       20           19872                 17.65                -0.01                  178.59   43
-                              22       24           26400                 17.65                -0.00                  178.57   94
-                              26       26           32448                 17.65                -0.00                  178.56  177
-                              30       28           38880                 17.65                -0.00                  178.56  358
-26 (strips 5, feet and blades 8)       26           37440                 17.65  -0.000 vs same m, n                  178.56  206
+                              14       16           14112                 17.65                                       178.65   16
+                              18       20           19872                 17.65                -0.01                  178.59   37
+                              22       24           26400                 17.65                -0.00                  178.57   90
+                              26       26           32448                 17.65                -0.00                  178.56  170
+                              30       28           38880                 17.65                -0.00                  178.56  353
+26 (strips 5, feet and blades 8)       26           37440                 17.65  -0.000 vs same m, n                  178.56  193
 </pre></div></div>
 </div>
 </section>
@@ -2046,8 +2034,6 @@ print_table(rows, ['quantity', 'panels', 'Lanzi et al. (2003)', 'difference %'])
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 7.4e-07 and the largest redundant one 1.5e-10, see the parameter &#34;tol&#34;
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 7.4e-07 and the largest redundant one 1.5e-10, see the parameter &#34;tol&#34;
 configuration A, m = 30, n = 28
                                      quantity  panels  Lanzi et al. (2003)  difference %
 ---------------------------------------------  ------  -------------------  ------------
@@ -2189,8 +2175,7 @@ foot and blade on the skin mid-surface       244.8      +1.4                    
 <section id="8.-Discussion">
 <h2>8. Discussion<a class="headerlink" href="#8.-Discussion" title="Link to this heading">#</a></h2>
 <p><strong>Convergence.</strong> The first buckling load under axial compression needs many terms along the axis, because the buckles are short and gather near the lower end (Section 6); it changes by 0.26 % from <span class="math notranslate nohighlight">\(m =
-26\)</span> to <span class="math notranslate nohighlight">\(m = 30\)</span>. The first buckling torque and both pre-buckling stiffnesses change by less than 0.01 % over the whole study, and more terms across the strips, the feet and the blades change the loads by 0.006 % or less. The warnings printed during the study come from the null-space elimination of the constraints, among them redundant ones (the supports of the feet at the ends repeat those of the skin, to which the feet are bonded): the gap between the smallest independent pivot (7.4e-7)
-and the largest redundant one (1.5e-10) is narrower than usual but still of more than three orders of magnitude, and the loads of all meshes follow the same convergence.</p>
+26\)</span> to <span class="math notranslate nohighlight">\(m = 30\)</span>. The first buckling torque and both pre-buckling stiffnesses change by less than 0.01 % over the whole study, and more terms across the strips, the feet and the blades change the loads by 0.006 % or less. The null-space elimination of the constraints removes redundant ones (the supports of the feet at the ends repeat those of the skin, to which the feet are bonded) without a warning, and the loads of all meshes follow the same convergence.</p>
 <p><strong>Axial compression.</strong> The first buckling load, 240.8 kN, is 13.1 % above the 213 kN of [1], Table 2. The pre-buckling stiffness, 270.8 kN/mm, is 26 % above the 215 kN/mm of the same table, while it agrees within 1.0 % with the membrane stiffness of the nominal cross-section, 268.0 kN/mm. The shortening at first buckling, 240.8/270.8 = 0.89 mm, is close to that of the first peak of the curves of [1], Fig. 2 (about 0.9 to 1.0 mm): the skin buckles at about the same strain, and the difference of
 the loads follows mostly that of the stiffnesses. The first mode has short buckles in all bays, alternating from bay to bay, near the lower end, where the slope is free as in the finite element model of [1]; the four first eigenvalues are equal within 0.01 %. With the lower end clamped, as the specimens in the test rig, the load rises by 4.7 %, and with the reinforcement [45/-45/45] printed in [1] it falls by 4.5 %, to 230.6 kN (Section 7).</p>
 <p><strong>Torsion.</strong> The first buckling torque, 17.65 kNm (17.77 kNm in the other sense), is 31 % above the 13.5 kNm of [1], Tables 3 and 4, and close to the 17.1 kNm that [1] gives for configuration B, with the ring. None of the data examined in Section 7 changes it by more than 0.5 %. The first mode has one inclined buckle across the height of each bay, all bays in phase, as the “ideal diagonal lines” from one corner of each bay to the other that [1] describes for the post-buckling of configuration A
@@ -2219,7 +2204,7 @@ buckling loads of the table.</p></li>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-total run time: 109 min
+total run time: 98 min
 </pre></div></div>
 </div>
 </section>

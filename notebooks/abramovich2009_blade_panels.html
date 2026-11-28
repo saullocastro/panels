@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009) &#8212; panels 0.18.1 documentation</title>
+    <title>First buckling of blade-stiffened CFRP curved panels under axial compression (Abramovich and Weller 2009) &#8212; panels 0.18.2 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
 
-    <script src="../_static/documentation_options.js?v=1e56ff10"></script>
+    <script src="../_static/documentation_options.js?v=29ae757a"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -53,7 +53,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.18.1" />
+  <meta name="docsearch:version" content="0.18.2" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">panels 0.18.1 documentation</p>
+    <p class="title logo__title">panels 0.18.2 documentation</p>
   
 </a></div>
     
@@ -1706,7 +1706,7 @@ tests of [1, 2].</p>
 <li><p>Castro, S. G. P., and Donadon, M. V., “Assembly of semi-analytical models to address linear buckling and vibration of stiffened composite panels with debonding defect”, Composite Structures, 160, 232-247, 2017. <a class="reference external" href="https://doi.org/10.1016/j.compstruct.2016.10.026">https://doi.org/10.1016/j.compstruct.2016.10.026</a></p></li>
 </ol>
 <p>The analyses take about 95 minutes on one core; the notebook is stored with the outputs of its last execution.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -1722,19 +1722,9 @@ import posicoss_utils as pu
 from posicoss_utils import print_table, rel
 
 %matplotlib inline
-print('panels', panels.__version__,
-      '| composites', composites.__version__)
 T_START = time.time()
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-panels 0.15.0 | composites 0.10.3
-</pre></div></div>
 </div>
 <section id="1.-Data-of-the-panels">
 <h2>1. Data of the panels<a class="headerlink" href="#1.-Data-of-the-panels" title="Link to this heading">#</a></h2>
@@ -2003,42 +1993,36 @@ for g in GROUPS:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 7.4e-06 and the largest redundant one 8.7e-10, see the parameter &#34;tol&#34;
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 7.4e-06 and the largest redundant one 8.7e-10, see the parameter &#34;tol&#34;
 
 group A (PSC1, PSC2, PSC4)
                     m  n (widest bay)  Ritz constants  first buckling (kN)             change %  stiffness (kN/mm)    s
 ---------------------  --------------  --------------  -------------------  -------------------  -----------------  ---
-                   12               8           11160               116.52                                   136.9    9
-                   16              10           15360               101.20               -13.15              136.8   20
-                   20              12           19800                97.11                -4.04              136.8   50
-                   24              12           23760                96.84                -0.28              136.8  102
-                   28              14           28560                96.84                -0.00              136.8  275
-24 (feet 6, blades 8)              12           33120                96.84  -0.002 vs same m, n              136.8  538
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 6.9e-06 and the largest redundant one 8.7e-10, see the parameter &#34;tol&#34;
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 6.9e-06 and the largest redundant one 8.7e-10, see the parameter &#34;tol&#34;
+                   12               8           11160               116.52                                   136.9    7
+                   16              10           15360               101.20               -13.15              136.8   18
+                   20              12           19800                97.11                -4.04              136.8   49
+                   24              12           23760                96.84                -0.28              136.8  128
+                   28              14           28560                96.84                -0.00              136.8  190
+24 (feet 6, blades 8)              12           33120                96.84  -0.002 vs same m, n              136.8  530
 
 group B (PSC3, PSC5, PSC6)
                     m  n (widest bay)  Ritz constants  first buckling (kN)             change %  stiffness (kN/mm)    s
 ---------------------  --------------  --------------  -------------------  -------------------  -----------------  ---
-                   12               8           11160               108.60                                   127.1    7
+                   12               8           11160               108.60                                   127.1    8
                    16              10           15360                94.37               -13.11              127.1   18
-                   20              12           19800                90.56                -4.03              127.1   48
-                   24              12           23760                90.32                -0.28              127.1  122
-                   28              14           28560                90.31                -0.00              127.1  274
-24 (feet 6, blades 8)              12           33120                90.31  -0.002 vs same m, n              127.1  641
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 6.9e-06 and the largest redundant one 8.7e-10, see the parameter &#34;tol&#34;
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 6.9e-06 and the largest redundant one 8.7e-10, see the parameter &#34;tol&#34;
+                   20              12           19800                90.56                -4.03              127.1   50
+                   24              12           23760                90.32                -0.28              127.1  127
+                   28              14           28560                90.31                -0.00              127.1  196
+24 (feet 6, blades 8)              12           33120                90.31  -0.002 vs same m, n              127.1  553
 
 group C (PSC7, PSC8, PSC9)
                     m  n (widest bay)  Ritz constants  first buckling (kN)             change %  stiffness (kN/mm)    s
 ---------------------  --------------  --------------  -------------------  -------------------  -----------------  ---
-                   12               8           13392               170.73                                   152.4   11
-                   16              10           18432               152.60               -10.62              152.3   26
-                   20              12           23760               147.48                -3.35              152.3   66
-                   24              12           28512               146.25                -0.84              152.2  120
-                   28              14           34272               146.23                -0.01              152.2  334
-24 (feet 6, blades 8)              12           39744               146.24  -0.008 vs same m, n              152.2  738
+                   12               8           13392               170.73                                   152.4    9
+                   16              10           18432               152.60               -10.62              152.3   21
+                   20              12           23760               147.48                -3.35              152.3   67
+                   24              12           28512               146.25                -0.84              152.2  146
+                   28              14           34272               146.23                -0.01              152.2  269
+24 (feet 6, blades 8)              12           39744               146.24  -0.008 vs same m, n              152.2  679
 </pre></div></div>
 </div>
 </section>
@@ -2149,18 +2133,6 @@ print_table(rows, ['group', 'ply drops', 'first buckling (kN)', 'change %',
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 7.4e-06 and the largest redundant one 8.7e-10, see the parameter &#34;tol&#34;
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 7.4e-06 and the largest redundant one 8.7e-10, see the parameter &#34;tol&#34;
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 7.4e-06 and the largest redundant one 8.7e-10, see the parameter &#34;tol&#34;
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 7.4e-06 and the largest redundant one 8.7e-10, see the parameter &#34;tol&#34;
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 6.9e-06 and the largest redundant one 8.7e-10, see the parameter &#34;tol&#34;
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 6.9e-06 and the largest redundant one 8.7e-10, see the parameter &#34;tol&#34;
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 6.9e-06 and the largest redundant one 8.7e-10, see the parameter &#34;tol&#34;
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 6.9e-06 and the largest redundant one 8.7e-10, see the parameter &#34;tol&#34;
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 6.9e-06 and the largest redundant one 8.7e-10, see the parameter &#34;tol&#34;
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 6.9e-06 and the largest redundant one 8.7e-10, see the parameter &#34;tol&#34;
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 6.9e-06 and the largest redundant one 8.7e-10, see the parameter &#34;tol&#34;
-WARNING: Null-space method: the rank of the constraints is not well defined, the smallest independent pivot is 6.9e-06 and the largest redundant one 8.7e-10, see the parameter &#34;tol&#34;
 m = 28, n = 14
 group                     ply drops  first buckling (kN)  change %  MSC/NASTRAN [2] (kN)  difference %
 -----  ----------------------------  -------------------  --------  --------------------  ------------
@@ -2221,8 +2193,7 @@ foot and blade on the skin mid-surface                 98.6      +1.8
 </section>
 <section id="8.-Discussion">
 <h2>8. Discussion<a class="headerlink" href="#8.-Discussion" title="Link to this heading">#</a></h2>
-<p><strong>Convergence.</strong> The first buckling load of the three groups changes by less than 0.02 % from <span class="math notranslate nohighlight">\(m = 24\)</span> to <span class="math notranslate nohighlight">\(m = 28\)</span>, and by 0.01 % or less with more terms across the feet and the blades (Section 4). The warnings printed during the study come from the null-space elimination of the constraints, among them redundant ones (the supports of the feet at the loaded ends repeat those of the skin, to which the feet are bonded): the gap between the smallest independent pivot (6.9e-6 or 7.4e-6)
-and the largest redundant one (8.7e-10) is narrower than usual but still of nearly four orders of magnitude, and the loads of all meshes follow the same convergence.</p>
+<p><strong>Convergence.</strong> The first buckling load of the three groups changes by less than 0.02 % from <span class="math notranslate nohighlight">\(m = 24\)</span> to <span class="math notranslate nohighlight">\(m = 28\)</span>, and by 0.01 % or less with more terms across the feet and the blades (Section 4). The null-space elimination of the constraints removes redundant ones (the supports of the feet at the loaded ends repeat those of the skin, to which the feet are bonded) without a warning, and the loads of all meshes follow the same convergence.</p>
 <p><strong>Finite element model of [2].</strong> The loads of the model agree with the MSC/NASTRAN first buckling loads of [2] within +1.5 % (group B) to +5.3 % (group A). Both are linear analyses of the perfect panels with the nominal data; [2] does not describe its mesh, its boundary conditions or its model of the feet. Both models give the same trends: the 15 mm blades lower the load, by 3 % in [2] and 7 % here, and the sixth blade raises it, by 51 % in [2] and 51 % here.</p>
 <p><strong>The other implementation.</strong> The bfsccylinder implementation of this case (<code class="docutils literal notranslate"><span class="pre">abramovich2003_stiffened_panels</span></code>) gives 98.9, 92.4 and 150.0 kN for groups A, B and C, 2.1 % to 2.5 % above the loads here. Its blade stands on the mid-surface of the skin; with that choice (Section 7, group A) this model gives 98.6 kN, 0.3 % below it. The two implementations agree.</p>
 <p><strong>Ply drops of the feet.</strong> Which plies end at the steps of the feet is not given in [1] or [2], and the three schemes of Section 7 change the load by up to 5.6 %: 91.9 to 96.9 kN for group A, 85.3 to 90.9 kN for group B and 139.8 to 146.2 kN for group C, that is -0.1 % to +5.4 %, -4.2 % to +2.1 % and +0.6 % to +5.2 % against MSC/NASTRAN. This range is the uncertainty of the model due to the unknown ply drops; the data of the papers do not select one of the schemes, and all of them agree with [2]
@@ -2244,7 +2215,7 @@ bays are 136 mm wide instead of 76 mm and the load drops by 49 %, which is why t
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-total run time: 94 min
+total run time: 80 min
 </pre></div></div>
 </div>
 </section>
